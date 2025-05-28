@@ -367,5 +367,64 @@ public class MongoConfig {
 
         db.createCollection("images", options);
     }
+    
+    
+    public void create_transactionsCollection(MongoDatabase db) {
+    if (db.getCollection("transactions") != null) {
+        db.getCollection("transactions").drop();
+    }
+
+    Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": [ "cooperation_id", "userId", "amount", "payment_method", "status", "created_at", "is_refunded"],
+        "properties": {
+            
+            "cooperationId": {
+                "bsonType": "string"
+            },
+            "userId": {
+                "bsonType": "string"
+            
+            "amount": {
+                "bsonType": "double",
+                "minimum": 0
+            },
+            "payMethod": {
+                "bsonType": "string",
+                "enum": ["QRCode", "Transfer"]
+            },
+            "status": {
+                "bsonType": "string",
+                "enum": ["Pending", "Completed", "Failed", "Refunded"]
+            },
+            "reference": {
+                "bsonType": ["string", "null"]
+            },
+            "description": {
+                "bsonType": ["string", "null"]
+            },
+            "createdDate": {
+                "bsonType": "date"
+            },
+            "completedDate": {
+                "bsonType": ["date", "null"]
+            },
+            "isRefunded": {
+                "bsonType": "bool"
+            }
+        }
+    }
+    """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+            .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+            .validationOptions(validationOptions);
+
+    db.createCollection("transactions", options);
+}
+
 
 }

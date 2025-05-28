@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.repository.Query;
 public interface UserRepository extends MongoRepository<User, String> {
 
     Optional<User> findByEmail(String email);
-
+    Optional<User> findById(String id);
     boolean existsByEmail(String email);
 
     @Query("{ 'roleId': ?0, '_id': { $ne: ?1 } }")
