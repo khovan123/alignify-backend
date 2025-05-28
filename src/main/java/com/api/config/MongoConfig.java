@@ -101,7 +101,8 @@ public class MongoConfig {
               "bsonType": "date"
             },
             "gender": {
-              "bsonType": "bool"
+              "bsonType": "string",
+              "enum" : ["MALE", "FEMALE", "LGBT", "NONE"]                               
             },
             "bio": {
               "bsonType": "string"
@@ -351,9 +352,6 @@ public class MongoConfig {
               "bsonType": "object",
               "required": ["imageUrl"],                                                                                                                                      
               "properties": {
-                "_id": {
-                  "bsonType": "objectId",
-                },
                 "imageUrl": {
                   "bsonType": "string",
                 },
@@ -429,6 +427,33 @@ public class MongoConfig {
                     .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
             collection.createIndex(indexKeys, indexOptions);
         }
+    }
+
+    public void create_gendersCollection(MongoDatabase db) {
+        if (db.getCollection("genders") != null) {
+            db.getCollection("genders").drop();
+        }
+        Document jsonSchema = Document.parse("""
+        {
+              "bsonType": "object",
+              "required": ["genderName"],                                                                                                                                      
+              "properties": {      
+                "genderName": {
+                  "bsonType": "string",
+                },
+                "createAt": {
+                  "bsonType": "date"
+                }   
+              }
+        }
+        """);
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("genders", options);
     }
 
 }
