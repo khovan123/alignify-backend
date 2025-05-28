@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class MongoConfig {
@@ -20,8 +19,6 @@ public class MongoConfig {
     private RoleRepository roleRepository;
     @Autowired
     private CategoryRepository categoryRepository;
-    @Value("${spring.data.mongodb.database}")
-    private String databaseName;
 
     @PostConstruct
     public void init() {
@@ -369,65 +366,6 @@ public class MongoConfig {
                 .validationOptions(validationOptions);
 
         db.createCollection("images", options);
-    }
-
-    public void create_otpsCollection(MongoDatabase db) {
-        if (db.getCollection("otps") != null) {
-            db.getCollection("otps").drop();
-        }
-        Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["otpCode","email"],                                                                                                                                      
-              "properties": {
-                "email": {
-                  "bsonType": "string",
-                },
-                "otpCode": {
-                  "bsonType": "string",
-                  "pattern": "^[A-Z0-9]{6}$",          
-                },            
-                "requestCount" :{
-                  "bsonType": "int",
-                },  
-                "attemptCount" :{
-                  "bsonType": "int",
-                },                                          
-                "createdAt": {
-                  "bsonType": "date"
-                }   
-              }
-        }
-        """);
-        ValidationOptions validationOptions = new ValidationOptions()
-                .validator(new Document("$jsonSchema", jsonSchema));
-
-        CreateCollectionOptions options = new CreateCollectionOptions()
-                .validationOptions(validationOptions);
-
-        db.createCollection("otps", options);
-    }
-
-    @PostConstruct
-    public void initIndexes() {
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = database.getCollection("otps");
-
-        boolean ttlIndexExists = false;
-        for (Document index : collection.listIndexes()) {
-            if ("createdAt_ttl".equals(index.getString("name"))) {
-                ttlIndexExists = true;
-                break;
-            }
-        }
-
-        if (!ttlIndexExists) {
-            Document indexKeys = new Document("createdAt", 1);
-            IndexOptions indexOptions = new IndexOptions()
-                    .name("createdAt_ttl")
-                    .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
-            collection.createIndex(indexKeys, indexOptions);
-        }
     }
 
 }
