@@ -31,6 +31,43 @@ public class AuthController {
     private AdminRepository adminRepository;
     @Autowired
     private GalleryRepository galleryRepository;
+    @Autowired
+    private AuthService authService;
+
+    @PostMapping("/request-otp")
+    public ResponseEntity<?> requestOtp(@RequestParam String email) {
+        try {
+            return ResponseEntity.status(200).body(Map.of(
+                    "message", authService.generateOtp(email)
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "Opssss! Something went wrong."
+            ));
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
+        try {
+            boolean isValid = authService.verifyOtp(email, otp);
+            if (isValid) {
+                return ResponseEntity.status(200).body(Map.of("message", "OTP verified successfully"));
+            } else {
+                return ResponseEntity.status(400).body(Map.of("error", "Wrong OTP code."));
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("error", "Opssss! Something went wrong."));
+        }
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
