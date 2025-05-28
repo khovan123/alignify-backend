@@ -34,7 +34,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/request-otp")
+    @GetMapping("/request-otp")
     public ResponseEntity<?> requestOtp(@RequestParam String email) {
         try {
             return ResponseEntity.status(200).body(Map.of(
@@ -144,7 +144,7 @@ public class AuthController {
                 "token", JwtUtil.createToken(existing.get())));
     }
 
-    @PostMapping("/change-password")
+    @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChange passwordRequest, HttpServletRequest request) {
         DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
         String userId = decodeJWT.getSubject();
@@ -183,11 +183,22 @@ public class AuthController {
     }
 
     @PostMapping("/recovery-password")
-    public ResponseEntity<?> sendEmail(@RequestBody Mail email) {
-        String resetURL = JwtUtil.createURLResetPassword(email.getEmail());
+    public ResponseEntity<?> sendEmail(@RequestParam String email) {
+        if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Invalid email."
+            ));
+        }
+        Optional<User> user = userRepository.findByEmail(email);
+        if (!user.isPresent()) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Email is not exists."
+            ));
+        }
+        String resetURL = JwtUtil.createURLResetPassword(email);
         String subject = "Reset your password";
         String message = "Click this url: " + resetURL + " to reset your password.";
-        emailService.sendSimpleEmail(email.getEmail(), subject, message);
+        emailService.sendSimpleEmail(email, subject, message);
         return ResponseEntity.status(200).body(Map.of(
                 "message", "Recovery email sent."
         ));
@@ -195,9 +206,9 @@ public class AuthController {
 
     @PostMapping("/reset-password/{token}")
     public ResponseEntity<?> resetPassword(@PathVariable("token") String token, @RequestBody PasswordReset passwordReset) {
-        DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
-        User user;
         try {
+            User user;
+            DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
             user = userRepository.findByEmail(decodeJWT.getSubject()).get();
             if (!passwordReset.getPassword().equalsIgnoreCase(passwordReset.getPasswordConfirm())) {
                 return ResponseEntity.status(400).body(Map.of(
