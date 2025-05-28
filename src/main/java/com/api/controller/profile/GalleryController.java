@@ -35,52 +35,62 @@ public class GalleryController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getGallery(@PathVariable("id") String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "30") int pageSize) {
-        DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
-        String userId = decodeJWT.getSubject();
-        User user;
-        try {
-            user = userRepository.findById(id).get();
-        } catch (Exception e) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (!userOpt.isPresent()) {
             return ResponseEntity.status(404).body(Map.of(
                     "error", "Profile not found."
             ));
         }
+        User user = userOpt.get();
         if (!user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
             return ResponseEntity.status(404).body(Map.of(
                     "error", "Gallery not found."
             ));
         }
-        if (!influencerProfileRepository.isPublic(userId) && !Helper.isOwner(id, request)) {
+        Optional<Influencer> influencerOpt = influencerProfileRepository.findById(id);
+        if (!influencerOpt.isPresent()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Profile not found."
+            ));
+        }
+
+        if (!influencerOpt.get().isPublic() && !Helper.isOwner(id, request)) {
             return ResponseEntity.status(404).body(Map.of(
                     "error", "Profile is private."
             ));
         }
+        Optional<Gallery> galleryOpt = galleryRepository.findById(id);
+        if (!galleryOpt.isPresent()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Profile is private."
+            ));
+        }
+        Gallery gallery = galleryOpt.get();
         try {
-            Optional<Gallery> galleryOpt = galleryRepository.findById(id);
-            if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty() && galleryOpt.get().getImages() != null) {
+            if (!gallery.getImages().isEmpty() && galleryOpt.get().getImages() != null) {
                 List<String> imageIds = galleryOpt.get().getImages();
                 List<Image> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(pageNumber, pageSize)).stream()
                         .sorted(Comparator.comparing(Image::getCreateAt).reversed())
                         .limit(pageSize)
                         .collect(Collectors.toList());
-                if (!images.isEmpty()) {
-                    return ResponseEntity.status(200).body(Map.of(
-                            "data", Map.of(
-                                    "gallery", images,
-                                    "pageNumber", pageNumber,
-                                    "pageSize", pageSize)
-                    ));
-                }
+                return ResponseEntity.status(200).body(Map.of(
+                        "galleryId", id,
+                        "images", images,
+                        "pageNumber", pageNumber,
+                        "pageSize", pageSize
+                )
+                );
+            } else {
+                return ResponseEntity.status(200).body(Map.of(
+                        "galleryId", id,
+                        "images", new ArrayList<>()
+                ));
             }
-
         } catch (Exception e) {
             return ResponseEntity.status(404).body(Map.of(
                     "error", e.getMessage()
             ));
         }
-        return ResponseEntity.status(404).body(Map.of(
-                "error", "Profile is private."
-        ));
     }
 
     @PostMapping("/{id}")
@@ -113,11 +123,49 @@ public class GalleryController {
     }
 
     @DeleteMapping("/{id}/image/{imageId}")
-    public ResponseEntity<?> deleteImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId) {
-        System.out.println("hello");
-        return ResponseEntity.status(200).body(Map.of(
-                "id", id,
-                "imageId", imageId
+    public ResponseEntity<?> deleteImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId, HttpServletRequest request) {
+        if (!Helper.isOwner(id, request)) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "Access is denied"
+            ));
+        }
+        Optional<Image> imageOpt = imageRepository.findById(imageId);
+        if (!imageOpt.isPresent()) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "Image not found"
+            ));
+        }
+        imageRepository.delete(imageOpt.get());
+        return ResponseEntity.status(204).body(Map.of(
+                "message","Delete image successful"
         ));
+    }
+
+    @GetMapping("/{id}/image/{imageId}")
+    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId) {
+        Influencer influencer;
+        try {
+            influencer = influencerProfileRepository.findById(id).get();
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Image not found."
+            ));
+        }
+        if (!influencer.isPublic()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Access is denied."
+            ));
+        }
+
+        Optional<Image> imageOpt = imageRepository.findById(imageId);
+        if (imageOpt.isPresent()) {
+            return ResponseEntity.status(200).body(Map.of(
+                    "image", imageOpt.get()
+            ));
+        } else {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Image not found."
+            ));
+        }
     }
 }
