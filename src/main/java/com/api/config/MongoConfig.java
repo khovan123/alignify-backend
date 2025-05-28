@@ -34,6 +34,7 @@ public class MongoConfig {
         this.create_adminsCollection(db);
         this.create_galleriesCollection(db);
         this.create_imagesCollection(db);
+        this.create_otpsCollection(db);
     }
 
     public void create_usersCollection(MongoDatabase db) {
