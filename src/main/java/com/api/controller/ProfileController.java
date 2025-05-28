@@ -134,7 +134,7 @@ public class ProfileController {
         ));
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable("id") String id, @RequestBody Influencer newProfile, HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
             return ResponseEntity.status(403).body(Map.of(
