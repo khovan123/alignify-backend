@@ -16,6 +16,7 @@ public class Gallery {
     private Date createAt;
 
     public Gallery() {
+        this.images = new ArrayList<>();
     }
 
     public Gallery(String galleryId, List<String> images, Date createAt) {

@@ -52,7 +52,7 @@ public class ProfileController {
                     Influencer profile = profileOtp.get();
                     map.put("rating", profile.getRating());
                     map.put("avatarUrl", profile.getAvatarUrl());
-                    map.put("isPublic", profile.isIsPublic());
+                    map.put("isPublic", profile.isPublic());
                     map.put("followerIds", profile.getFollowerIds());
                 }
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
@@ -97,10 +97,10 @@ public class ProfileController {
                     map.put("category", categories);
                 }
                 map.put("role", roleOpt.getRoleName());
-                map.put("gender", profile.getGenderId());
-                map.put("isPublic", profile.isIsPublic());
+                map.put("gender", profile.getGender());
+                map.put("isPublic", profile.isPublic());
                 map.put("followerIds", profile.getFollowerIds());
-                if (profile.isIsPublic() || Helper.isOwner(id, request)) {
+                if (profile.isPublic() || Helper.isOwner(id, request)) {
                     map.put("socialMediaLink", profile.getSocialMediaLinks());
                     map.put("DoB", profile.getDoB());
                     map.put("location", user.getLocation());
@@ -157,7 +157,7 @@ public class ProfileController {
             profile.setBio(newProfile.getBio());
         }
 
-        if (newProfile.getAvatarUrl() != null && !newProfile.getAvatarUrl().isEmpty()) {
+        if (newProfile.getAvatarUrl() != null) {
             profile.setAvatarUrl(newProfile.getAvatarUrl());
         }
 
@@ -165,8 +165,8 @@ public class ProfileController {
             profile.setDoB(newProfile.getDoB());
         }
 
-        if (newProfile.getGenderId() != null && !newProfile.getGenderId().isEmpty()) {
-            profile.setGenderId(newProfile.getGenderId());
+        if (newProfile.getGender() != null) {
+            profile.setGender(newProfile.getGender().toUpperCase());
         }
 
         if (newProfile.getCategoryIds() != null) {
@@ -200,6 +200,21 @@ public class ProfileController {
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of(
                 "message", "Profile updated."
+        ));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteAccount(@PathVariable("id") String id, HttpServletRequest request) {
+        if (!Helper.isOwner(id, request)) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "Access is denied"
+            ));
+        }
+        User user = userRepository.findById(id).get();
+        user.setIsActive(false);
+        userRepository.save(user);
+        return ResponseEntity.status(204).body(Map.of(
+                "message", "Delete account successful"
         ));
     }
 
