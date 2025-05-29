@@ -122,15 +122,14 @@ public class AuthService {
 
     public ResponseEntity<?> loginAccount(User user) {
         Optional<User> existing = userRepository.findByEmail(user.getEmail());
-        if (existing.isEmpty() || !JwtUtil.isCorrectPassword(existing.get().getPassword(), user.getPassword())) {
+        if (!existing.isPresent() || !JwtUtil.isCorrectPassword(existing.get().getPassword(), user.getPassword())) {
             return ResponseEntity.status(401).body(Map.of(
                     "error", "Invalid credentials"
             ));
         }
-
         return ResponseEntity.status(200).body(Map.of(
                 "token", JwtUtil.createToken(existing.get()),
-                "id", user.getUserId()
+                "id", existing.get().getUserId()
         ));
     }
 
