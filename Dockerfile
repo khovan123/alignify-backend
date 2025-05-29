@@ -3,6 +3,6 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-alpine
-COPY --from=build /target/*.jar demo.jar
+COPY --from=build /target/*.jar alignify-backend-1.0.0.jar
 EXPOSE 8080
-ENTRYPOINT [ "java","-jar" ,"demo.jar"]
+ENTRYPOINT [ "java","-jar" ,"alignify-backend-1.0.0.jar"]
