@@ -16,11 +16,12 @@ public class User {
     private String location;
     private String roleId;
     private boolean isActive;
-    
+
     @CreatedDate
     private Date createAt;
 
     public User() {
+        this.location = "NA";
         this.isActive = true;
     }
 
