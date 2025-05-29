@@ -1,3 +1,4 @@
+
 package com.api.config;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,28 +25,28 @@ public class VNPayConfig {
     public static String vnp_HashSecret = "52VG8DZDY4KR8URB58VVR7JQ0JH1FE8O"; // Thay bằng hash secret
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; // URL thanh toán VNPAY
     public static String vnp_Returnurl = "https://www.youtube.com/watch?v=Vghgs27EXRM&t=430s";
-    //public static String ordertype = "170000";
-    public static int amount = 10000 * 100;
+    public static String ordertype = "other";
+    public static long amount = 10000 * 100;
     public static String bankcode = "";
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
-//    public static String md5(String message) {
-//        String digest = null;
-//        try {
-//            MessageDigest md = MessageDigest.getInstance("MD5");
-//            byte[] hash = md.digest(message.getBytes("UTF-8"));
-//            StringBuilder sb = new StringBuilder(2 * hash.length);
-//            for (byte b : hash) {
-//                sb.append(String.format("%02x", b & 0xff));
-//            }
-//            digest = sb.toString();
-//        } catch (UnsupportedEncodingException ex) {
-//            digest = "";
-//        } catch (NoSuchAlgorithmException ex) {
-//            digest = "";
-//        }
-//        return digest;
-//    }
+    public static String md5(String message) {
+        String digest = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] hash = md.digest(message.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder(2 * hash.length);
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            digest = sb.toString();
+        } catch (UnsupportedEncodingException ex) {
+            digest = "";
+        } catch (NoSuchAlgorithmException ex) {
+            digest = "";
+        }
+        return digest;
+    }
 
     public static String Sha256(String message) {
         String digest = null;
