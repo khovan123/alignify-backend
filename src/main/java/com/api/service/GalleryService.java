@@ -14,6 +14,8 @@ import com.api.repository.RoleRepository;
 import com.api.repository.UserRepository;
 import com.api.util.Helper;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,12 +23,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class GalleryService {
@@ -45,6 +50,10 @@ public class GalleryService {
     private GalleryRepository galleryRepository;
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private Cloudinary cloudinary;
+    @Value("${cloudinary.upload-preset}")
+    private String uploadPreset;
 
     public ResponseEntity<?> getGalleryById(String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "30") int pageSize) {
@@ -106,7 +115,7 @@ public class GalleryService {
         }
     }
 
-    public ResponseEntity<?> saveImageUrlIntoGalleryById(String id, Image image, HttpServletRequest request) {
+    public ResponseEntity<?> saveImageUrlIntoGalleryById(String id, MultipartFile file, HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
             return ResponseEntity.status(403).body(Map.of(
                     "error", "Access is denied."
@@ -125,12 +134,24 @@ public class GalleryService {
             }
         }
 
-        Image savedImage = imageRepository.save(image);
+       String imageUrl = null;
+        try {
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("upload_preset", uploadPreset));
+            imageUrl = (String) uploadResult.get("secure_url");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Upload failed: " + e.getMessage()));
+        }
+        if (imageUrl == null) {
+            return ResponseEntity.status(500).body(Map.of("error", "Upload failed"));
+        }
+        Image image = new Image(imageUrl);
+        image = imageRepository.save(image);
 
-        gallery.getImages().add(savedImage.getImageId());
+        gallery.getImages().add(image.getImageId());
         galleryRepository.save(gallery);
-        return ResponseEntity.status(200).body(Map.of(
-                "message", "Gallery updated."
+        return ResponseEntity.status(201).body(Map.of(
+                "image", image
         ));
     }
 
