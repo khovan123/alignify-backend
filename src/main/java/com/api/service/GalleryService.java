@@ -1,21 +1,35 @@
 package com.api.service;
 
 import com.api.config.EnvConfig;
-import com.api.model.*;
-import com.api.repository.*;
+import com.api.model.Gallery;
+import com.api.model.Image;
+import com.api.model.Influencer;
+import com.api.model.User;
+import com.api.repository.BrandRepository;
+import com.api.repository.CategoryRepository;
+import com.api.repository.GalleryRepository;
+import com.api.repository.ImageRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.repository.RoleRepository;
+import com.api.repository.UserRepository;
 import com.api.util.Helper;
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +49,7 @@ public class GalleryService {
     @Autowired
     private GalleryRepository galleryRepository;
     @Autowired
-    private GalleryImageRepository imageRepository;
+    private ImageRepository imageRepository;
     @Autowired
     private Cloudinary cloudinary;
     @Value("${cloudinary.upload-preset}")
@@ -77,8 +91,8 @@ public class GalleryService {
         try {
             if (!gallery.getImages().isEmpty() && galleryOpt.get().getImages() != null) {
                 List<String> imageIds = galleryOpt.get().getImages();
-                List<GalleryImage> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(pageNumber, pageSize)).stream()
-                        .sorted(Comparator.comparing(GalleryImage::getCreateAt).reversed())
+                List<Image> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(pageNumber, pageSize)).stream()
+                        .sorted(Comparator.comparing(Image::getCreateAt).reversed())
                         .limit(pageSize)
                         .collect(Collectors.toList());
                 return ResponseEntity.status(200).body(Map.of(
@@ -131,7 +145,7 @@ public class GalleryService {
         if (imageUrl == null) {
             return ResponseEntity.status(500).body(Map.of("error", "Upload failed"));
         }
-        GalleryImage image = new GalleryImage(imageUrl);
+        Image image = new Image(imageUrl);
         image = imageRepository.save(image);
 
         gallery.getImages().add(image.getImageId());
@@ -147,7 +161,7 @@ public class GalleryService {
                     "error", "Access is denied"
             ));
         }
-        Optional<GalleryImage> imageOpt = imageRepository.findById(imageId);
+        Optional<Image> imageOpt = imageRepository.findById(imageId);
         if (!imageOpt.isPresent()) {
             return ResponseEntity.status(403).body(Map.of(
                     "error", "Image not found"
@@ -174,7 +188,7 @@ public class GalleryService {
             ));
         }
 
-        Optional<GalleryImage> imageOpt = imageRepository.findById(imageId);
+        Optional<Image> imageOpt = imageRepository.findById(imageId);
         if (imageOpt.isPresent()) {
             return ResponseEntity.status(200).body(Map.of(
                     "image", imageOpt.get()

@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "/api/v1/profile")
@@ -33,11 +32,6 @@ public class ProfileController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable("id") String id, HttpServletRequest request) {
         return profileService.deleteAccountById(id, request);
-    }
-
-    @PostMapping("/avatar/{id}")
-    public ResponseEntity<?> changeAvatar(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
-        return profileService.saveAvatarUrlById(id, file, request);
     }
 
 }

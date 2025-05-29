@@ -21,6 +21,7 @@ public class GalleryController {
         return galleryService.getGalleryById(id, request, pageNumber, pageSize);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/{id}")
     public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         return galleryService.saveImageUrlIntoGalleryById(id, file, request);
