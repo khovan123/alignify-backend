@@ -37,32 +37,31 @@ public class TransactionController {
     private VNPayConfig vnpayConfig;
 
     @GetMapping("/create")
-public ResponseEntity<?> createPayment() throws UnsupportedEncodingException {
+    public ResponseEntity<?> createPayment() throws UnsupportedEncodingException {
         System.out.println("trans");
         String vnp_TxnRef = VNPayConfig.getRandomNumber(8);
-//        String vnp_IpAddr = VNPayConfig.getIpAddress(req);
+        String vnp_IpAddr = "127.0.0.1";
         String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
 
-        int amount = VNPayConfig.amount;
+        long amount = VNPayConfig.amount;
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", VNPayConfig.vnp_Version);
         vnp_Params.put("vnp_Command", VNPayConfig.vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(amount));
         vnp_Params.put("vnp_BankCode", "NCB");
-        vnp_Params.put("vnp_CurrCode", "VND");
-        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan:" + vnp_TxnRef);
-        vnp_Params.put("vnp_locale", "vn");
-        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_Returnurl);
-        String locate = null;
-
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
-
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        vnp_Params.put("vnp_CurrCode", "VND");
+        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+                vnp_Params.put("vnp_Locale", "vn");
+        vnp_Params.put("vnp_OrderInfo", "Thanh toan:" + vnp_TxnRef);
+        vnp_Params.put("vnp_OrderType", VNPayConfig.ordertype);
+        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_Returnurl);
+
         cld.add(Calendar.MINUTE, 15);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         //Add Params of 2.1.0 Version
@@ -96,26 +95,27 @@ public ResponseEntity<?> createPayment() throws UnsupportedEncodingException {
         String vnp_SecureHash = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VNPayConfig.vnp_PayUrl + "?" + queryUrl;
-        
+
         PaymentResDTO paymentResDTO = new PaymentResDTO();
         paymentResDTO.setStatus("OK");
         paymentResDTO.setMessage("Successfully");
         paymentResDTO.setURL(paymentUrl);
         return ResponseEntity.status(HttpStatus.OK).body(paymentResDTO);
-}
+    }
+
     @GetMapping("/payment_info")
     public ResponseEntity<?> transaction(
-         @RequestParam(value ="vnp_Amount") String amount,
-         @RequestParam(value ="vnp_BankCode") String bankCode,      
-         @RequestParam(value ="vnp_OrderInfo") String order,      
-         @RequestParam(value ="vnp_ResponseCode") String responseCode     
-                ) {
+            @RequestParam(value = "vnp_Amount") String amount,
+            @RequestParam(value = "vnp_BankCode") String bankCode,
+            @RequestParam(value = "vnp_OrderInfo") String order,
+            @RequestParam(value = "vnp_ResponseCode") String responseCode
+    ) {
         TransactionStatusDTO transactionStatusDTO = new TransactionStatusDTO();
-        if(responseCode.equals("00")){
+        if (responseCode.equals("00")) {
             transactionStatusDTO.setStatus("OK");
             transactionStatusDTO.setMessage("Successfully");
             transactionStatusDTO.setData("");
-        } else{
+        } else {
             transactionStatusDTO.setStatus("No");
             transactionStatusDTO.setMessage("Failed");
             transactionStatusDTO.setData("");
