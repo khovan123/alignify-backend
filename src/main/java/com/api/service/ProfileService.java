@@ -259,7 +259,7 @@ public class ProfileService {
             brandRepository.save(brand);
         }
         return ResponseEntity.status(201).body(Map.of(
-                "message", "Change avatar successful"
+                "avatarUrl", imageUrl
         ));
     }
 }
