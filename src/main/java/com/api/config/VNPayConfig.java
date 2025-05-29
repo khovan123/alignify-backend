@@ -1,14 +1,25 @@
-package com.api.config;
-
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 @Configuration
 public class VNPayConfig {
 
+    // Các trường đã có...
     @Value("${payment.vnPay.url}")
     private String vnp_PayUrl;
 
@@ -43,9 +54,9 @@ public class VNPayConfig {
         vnpParams.put("vnp_Version", vnp_Version);
         vnpParams.put("vnp_Command", vnp_Command);
         vnpParams.put("vnp_TmnCode", vnp_TmnCode);
-        vnpParams.put("vnp_Amount", String.valueOf((long)(amount * 100))); // VNP yêu cầu nhân 100
+        vnpParams.put("vnp_Amount", String.valueOf((long)(amount * 100))); // nhân 100
         vnpParams.put("vnp_CurrCode", "VND");
-        vnpParams.put("vnp_TxnRef", transactionId); // Mã giao dịch của bạn
+        vnpParams.put("vnp_TxnRef", transactionId);
         vnpParams.put("vnp_OrderInfo", "Thanh toán đơn hàng: " + transactionId);
         vnpParams.put("vnp_OrderType", orderType);
         vnpParams.put("vnp_Locale", "vn");
@@ -62,5 +73,45 @@ public class VNPayConfig {
 
     public String getSecretKey() {
         return secretKey;
+    }
+
+    // 🔐 Tạo secure hash
+    public String generateSecureHash(Map<String, String> params) throws Exception {
+        List<String> sortedKeys = new ArrayList<>(params.keySet());
+        Collections.sort(sortedKeys);
+
+        StringBuilder sb = new StringBuilder();
+        for (String key : sortedKeys) {
+            String value = params.get(key);
+            if ((value != null) && (value.length() > 0)) {
+                sb.append(key).append('=').append(value);
+                if (!key.equals(sortedKeys.get(sortedKeys.size() - 1))) {
+                    sb.append('&');
+                }
+            }
+        }
+
+        Mac sha512_HMAC = Mac.getInstance("HmacSHA512");
+        SecretKeySpec secret_key = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+        sha512_HMAC.init(secret_key);
+
+        byte[] hashBytes = sha512_HMAC.doFinal(sb.toString().getBytes(StandardCharsets.UTF_8));
+        StringBuilder hash = new StringBuilder();
+        for (byte b : hashBytes) {
+            hash.append(String.format("%02x", b));
+        }
+        return hash.toString();
+    }
+
+    // 🔗 Tạo URL thanh toán hoàn chỉnh
+    public String generatePaymentUrl(double amount, String transactionId) throws Exception {
+        Map<String, String> params = buildVNPayParams(amount, transactionId);
+
+        String secureHash = generateSecureHash(params);
+        params.put("vnp_SecureHash", secureHash);
+
+        return vnp_PayUrl + "?" + params.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+                .collect(Collectors.joining("&"));
     }
 }
