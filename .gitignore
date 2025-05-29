@@ -1,7 +1,6 @@
 HELP.md
 
 ### Maven ###
-target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -66,7 +65,6 @@ Thumbs.db
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
