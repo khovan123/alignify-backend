@@ -17,6 +17,10 @@ public class Image {
     public Image() {
     }
 
+    public Image(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public Image(String imageId, String imageUrl, Date createAt) {
         this.imageId = imageId;
         this.imageUrl = imageUrl;
