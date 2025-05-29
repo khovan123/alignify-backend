@@ -1,0 +1,202 @@
+package com.api.service;
+
+import com.api.config.EnvConfig;
+import com.api.model.Gallery;
+import com.api.model.Image;
+import com.api.model.Influencer;
+import com.api.model.User;
+import com.api.repository.BrandRepository;
+import com.api.repository.CategoryRepository;
+import com.api.repository.GalleryRepository;
+import com.api.repository.ImageRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.repository.RoleRepository;
+import com.api.repository.UserRepository;
+import com.api.util.Helper;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+@Service
+public class GalleryService {
+
+    @Autowired
+    private InfluencerRepository influencerProfileRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private BrandRepository brandRepository;
+    @Autowired
+    private GalleryRepository galleryRepository;
+    @Autowired
+    private ImageRepository imageRepository;
+    @Autowired
+    private Cloudinary cloudinary;
+    @Value("${cloudinary.upload-preset}")
+    private String uploadPreset;
+
+    public ResponseEntity<?> getGalleryById(String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "30") int pageSize) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (!userOpt.isPresent()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Profile not found."
+            ));
+        }
+        User user = userOpt.get();
+        if (!user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Gallery not found."
+            ));
+        }
+        Optional<Influencer> influencerOpt = influencerProfileRepository.findById(id);
+        if (!influencerOpt.isPresent()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Profile not found."
+            ));
+        }
+
+        if (!influencerOpt.get().isPublic() && !Helper.isOwner(id, request)) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Profile is private."
+            ));
+        }
+        Optional<Gallery> galleryOpt = galleryRepository.findById(id);
+        if (!galleryOpt.isPresent()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Profile is private."
+            ));
+        }
+        Gallery gallery = galleryOpt.get();
+        try {
+            if (!gallery.getImages().isEmpty() && galleryOpt.get().getImages() != null) {
+                List<String> imageIds = galleryOpt.get().getImages();
+                List<Image> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(pageNumber, pageSize)).stream()
+                        .sorted(Comparator.comparing(Image::getCreateAt).reversed())
+                        .limit(pageSize)
+                        .collect(Collectors.toList());
+                return ResponseEntity.status(200).body(Map.of(
+                        "galleryId", id,
+                        "images", images,
+                        "pageNumber", pageNumber,
+                        "pageSize", pageSize
+                )
+                );
+            } else {
+                return ResponseEntity.status(200).body(Map.of(
+                        "galleryId", id,
+                        "images", new ArrayList<>()
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+    public ResponseEntity<?> saveImageUrlIntoGalleryById(String id, MultipartFile file, HttpServletRequest request) {
+        if (!Helper.isOwner(id, request)) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "Access is denied."
+            ));
+        }
+        Optional<Gallery> galleryOtp = galleryRepository.findById(id);
+        Gallery gallery;
+        if (!galleryOtp.isPresent()) {
+            gallery = new Gallery();
+            gallery.setGalleryId(id);
+            gallery.setImages(new ArrayList<>());
+        } else {
+            gallery = galleryOtp.get();
+            if (gallery.getImages() == null) {
+                gallery.setImages(new ArrayList<>());
+            }
+        }
+
+       String imageUrl = null;
+        try {
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("upload_preset", uploadPreset));
+            imageUrl = (String) uploadResult.get("secure_url");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Upload failed: " + e.getMessage()));
+        }
+        if (imageUrl == null) {
+            return ResponseEntity.status(500).body(Map.of("error", "Upload failed"));
+        }
+        Image image = new Image(imageUrl);
+        image = imageRepository.save(image);
+
+        gallery.getImages().add(image.getImageId());
+        galleryRepository.save(gallery);
+        return ResponseEntity.status(201).body(Map.of(
+                "image", image
+        ));
+    }
+
+    public ResponseEntity<?> deleteImageByImageId(String id, String imageId, HttpServletRequest request) {
+        if (!Helper.isOwner(id, request)) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "Access is denied"
+            ));
+        }
+        Optional<Image> imageOpt = imageRepository.findById(imageId);
+        if (!imageOpt.isPresent()) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "Image not found"
+            ));
+        }
+        imageRepository.delete(imageOpt.get());
+        return ResponseEntity.status(204).body(Map.of(
+                "message", "Delete image successful"
+        ));
+    }
+
+    public ResponseEntity<?> getImageByImageId(String id, String imageId) {
+        Influencer influencer;
+        try {
+            influencer = influencerProfileRepository.findById(id).get();
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Image not found."
+            ));
+        }
+        if (!influencer.isPublic()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Access is denied."
+            ));
+        }
+
+        Optional<Image> imageOpt = imageRepository.findById(imageId);
+        if (imageOpt.isPresent()) {
+            return ResponseEntity.status(200).body(Map.of(
+                    "image", imageOpt.get()
+            ));
+        } else {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Image not found."
+            ));
+        }
+    }
+}
