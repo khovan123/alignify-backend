@@ -5,8 +5,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "galleryImages")
-public class GalleryImage {
+@Document(collection = "images")
+public class Image {
 
     @Id
     private String imageId;
@@ -14,14 +14,14 @@ public class GalleryImage {
     @CreatedDate
     private Date createAt;
 
-    public GalleryImage() {
+    public Image() {
     }
 
-    public GalleryImage(String imageUrl) {
+    public Image(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
-    public GalleryImage(String imageId, String imageUrl, Date createAt) {
+    public Image(String imageId, String imageUrl, Date createAt) {
         this.imageId = imageId;
         this.imageUrl = imageUrl;
         this.createAt = createAt;
