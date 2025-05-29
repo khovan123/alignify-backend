@@ -12,7 +12,7 @@
     <artifactId>alignify-backend</artifactId>
     <version>1.0.0</version>
     <name>alignify-backend</name>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <description>Project with Spring Boot</description>
     <url/>
     <licenses>
@@ -73,15 +73,6 @@
         <artifactId>cloudinary-http44</artifactId>
         <version>1.38.0</version>
     </dependency>
-        <!--        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>-->
     </dependencies>
 
     <build>
