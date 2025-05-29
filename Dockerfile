@@ -1,11 +1,13 @@
+# Build stage
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /alignify-backend
 COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
+# Package stage
 FROM eclipse-temurin:21-jre
 WORKDIR /alignify-backend
-COPY --from=build /target/*.jar alignify-backend-1.0.0.jar
+COPY --from=build /alignify-backend/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT [ "java","-jar" ,"alignify-backend-1.0.0.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
