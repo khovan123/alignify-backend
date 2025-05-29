@@ -1,16 +1,28 @@
 package com.api.controller;
 
 import com.api.config.VNPayConfig;
+import com.api.dto.PaymentResDTO;
+import com.api.dto.TransactionStatusDTO;
 import com.api.model.Transaction;
 import com.api.service.TransactionService;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.TimeZone;
+import com.google.gson.JsonObject;
+import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
+import org.eclipse.angus.mail.iap.Response;
+import org.eclipse.angus.mail.imap.ACL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,56 +36,90 @@ public class TransactionController {
     @Autowired
     private VNPayConfig vnpayConfig;
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createPayment(@RequestBody Map<String, Object> request) {
-        try {
-            String userId = (String) request.get("userId");
-            double amount = Double.parseDouble(request.get("amount").toString());
+    @GetMapping("/create")
+public ResponseEntity<?> createPayment() throws UnsupportedEncodingException {
+        System.out.println("trans");
+        String vnp_TxnRef = VNPayConfig.getRandomNumber(8);
+//        String vnp_IpAddr = VNPayConfig.getIpAddress(req);
+        String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
 
-            String transactionId = UUID.randomUUID().toString();
+        int amount = VNPayConfig.amount;
+        Map<String, String> vnp_Params = new HashMap<>();
+        vnp_Params.put("vnp_Version", VNPayConfig.vnp_Version);
+        vnp_Params.put("vnp_Command", VNPayConfig.vnp_Command);
+        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+        vnp_Params.put("vnp_Amount", String.valueOf(amount));
+        vnp_Params.put("vnp_BankCode", "NCB");
+        vnp_Params.put("vnp_CurrCode", "VND");
+        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+        vnp_Params.put("vnp_OrderInfo", "Thanh toan:" + vnp_TxnRef);
+        vnp_Params.put("vnp_locale", "vn");
+        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_Returnurl);
+        String locate = null;
 
-            // Lưu transaction
-            Transaction transaction = new Transaction();
-            transaction.setTransactionId(transactionId);
-            transaction.setUserId(userId);
-            transaction.setAmount(amount);
-            transaction.setStatus("pending");
-            transaction.setCreatedDate(new Date());
-            transactionService.createTransaction(transaction);
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
 
-            // Tạo tham số cho VNPay
-            Map<String, String> vnpParams = vnpayConfig.buildVNPayParams(amount, transactionId);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String vnp_CreateDate = formatter.format(cld.getTime());
 
-            // ✅ Tạo SecureHash
-            String secureHash = vnpayConfig.generateSecureHash(vnpParams);
-            vnpParams.put("vnp_SecureHash", secureHash);
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        cld.add(Calendar.MINUTE, 15);
+        String vnp_ExpireDate = formatter.format(cld.getTime());
+        //Add Params of 2.1.0 Version
+        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
-            // ✅ Tạo URL thanh toán hoàn chỉnh
-            StringBuilder paymentUrl = new StringBuilder(vnpayConfig.getVnp_PayUrl());
-            paymentUrl.append("?");
-            for (Map.Entry<String, String> entry : vnpParams.entrySet()) {
-                paymentUrl.append(entry.getKey())
-                        .append("=")
-                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
-                        .append("&");
+        //Build data to hash and querystring
+        List fieldNames = new ArrayList(vnp_Params.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
+        Iterator itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = (String) itr.next();
+            String fieldValue = (String) vnp_Params.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                //Build hash data
+                hashData.append(fieldName);
+                hashData.append('=');
+                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                //Build query
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                query.append('=');
+                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                if (itr.hasNext()) {
+                    query.append('&');
+                    hashData.append('&');
+                }
             }
-            paymentUrl.deleteCharAt(paymentUrl.length() - 1); // Xóa dấu & cuối
-
-            return ResponseEntity.ok(Map.of("paymentUrl", paymentUrl.toString()));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
         }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getTransactionsByUserId(@PathVariable("id") String userId) {
-        try {
-            List<Transaction> transactions = transactionService.viewTransactionsByUserId(userId);
-            return ResponseEntity.ok(Map.of("data", transactions));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Unable to fetch transactions"));
+        String queryUrl = query.toString();
+        String vnp_SecureHash = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        String paymentUrl = VNPayConfig.vnp_PayUrl + "?" + queryUrl;
+        
+        PaymentResDTO paymentResDTO = new PaymentResDTO();
+        paymentResDTO.setStatus("OK");
+        paymentResDTO.setMessage("Successfully");
+        paymentResDTO.setURL(paymentUrl);
+        return ResponseEntity.status(HttpStatus.OK).body(paymentResDTO);
+}
+    @GetMapping("/payment_info")
+    public ResponseEntity<?> transaction(
+         @RequestParam(value ="vnp_Amount") String amount,
+         @RequestParam(value ="vnp_BankCode") String bankCode,      
+         @RequestParam(value ="vnp_OrderInfo") String order,      
+         @RequestParam(value ="vnp_ResponseCode") String responseCode     
+                ) {
+        TransactionStatusDTO transactionStatusDTO = new TransactionStatusDTO();
+        if(responseCode.equals("00")){
+            transactionStatusDTO.setStatus("OK");
+            transactionStatusDTO.setMessage("Successfully");
+            transactionStatusDTO.setData("");
+        } else{
+            transactionStatusDTO.setStatus("No");
+            transactionStatusDTO.setMessage("Failed");
+            transactionStatusDTO.setData("");
         }
+        return ResponseEntity.status(200).body(transactionStatusDTO);
     }
 }
