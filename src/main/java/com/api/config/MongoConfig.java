@@ -33,7 +33,7 @@ public class MongoConfig {
 //        this.create_categoriesCollection(db);
         this.create_adminsCollection(db);
         this.create_galleriesCollection(db);
-        this.create_imagesCollection(db);
+        this.create_galleryImagesCollection(db);
         this.create_otpsCollection(db);
     }
 
@@ -343,9 +343,9 @@ public class MongoConfig {
         db.createCollection("galleries", options);
     }
 
-    public void create_imagesCollection(MongoDatabase db) {
-        if (db.getCollection("images") != null) {
-            db.getCollection("images").drop();
+    public void create_galleryImagesCollection(MongoDatabase db) {
+        if (db.getCollection("galleryImages") != null) {
+            db.getCollection("galleryImages").drop();
         }
         Document jsonSchema = Document.parse("""
         {
@@ -367,7 +367,7 @@ public class MongoConfig {
         CreateCollectionOptions options = new CreateCollectionOptions()
                 .validationOptions(validationOptions);
 
-        db.createCollection("images", options);
+        db.createCollection("galleryImages", options);
     }
 
     public void create_otpsCollection(MongoDatabase db) {
