@@ -5,15 +5,20 @@ import com.api.model.*;
 import com.api.repository.*;
 import com.api.util.*;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProfileService {
@@ -31,7 +36,11 @@ public class ProfileService {
     @Autowired
     private GalleryRepository galleryRepository;
     @Autowired
-    private ImageRepository imageRepository;
+    private GalleryImageRepository imageRepository;
+    @Autowired
+    private Cloudinary cloudinary;
+    @Value("${cloudinary.upload-preset}")
+    private String uploadPreset;
 
     public ResponseEntity<?> getAllProfileByRoleId(String roleId, HttpServletRequest request) {
         DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
@@ -106,8 +115,8 @@ public class ProfileService {
                     Optional<Gallery> galleryOpt = galleryRepository.findById(id);
                     if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty() && galleryOpt.get().getImages() != null) {
                         List<String> imageIds = galleryOpt.get().getImages();
-                        List<Image> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
-                                .sorted(Comparator.comparing(Image::getCreateAt).reversed())
+                        List<GalleryImage> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
+                                .sorted(Comparator.comparing(GalleryImage::getCreateAt).reversed())
                                 .limit(9)
                                 .collect(Collectors.toList());
                         if (!images.isEmpty()) {
@@ -212,6 +221,45 @@ public class ProfileService {
         userRepository.save(user);
         return ResponseEntity.status(204).body(Map.of(
                 "message", "Delete account successful"
+        ));
+    }
+
+    public ResponseEntity<?> saveAvatarUrlById(String id, MultipartFile file, HttpServletRequest request) {
+        if (!Helper.isOwner(id, request)) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "error", "Access is denied."
+            ));
+        }
+        Optional<User> userOpt = userRepository.findById(id);
+        if (!userOpt.isPresent()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "error", "Not found"
+            ));
+        }
+        String imageUrl = null;
+        try {
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("upload_preset", uploadPreset));
+            imageUrl = (String) uploadResult.get("secure_url");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Change avatar failed: " + e.getMessage()));
+        }
+        if (imageUrl == null) {
+            return ResponseEntity.status(500).body(Map.of("error", "Change avatar failed"));
+        }
+        if (userOpt.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Optional<Influencer> influencerOpt = influencerProfileRepository.findById(id);
+            Influencer influencer = influencerOpt.get();
+            influencer.setAvatarUrl(imageUrl);
+            influencerProfileRepository.save(influencer);
+        } else if (userOpt.get().getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
+            Optional<Brand> brandOpt = brandRepository.findById(id);
+            Brand brand = brandOpt.get();
+            brand.setAvatarUrl(imageUrl);
+            brandRepository.save(brand);
+        }
+        return ResponseEntity.status(201).body(Map.of(
+                "message", "Change avatar successful"
         ));
     }
 }
