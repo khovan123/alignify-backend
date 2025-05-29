@@ -1,1 +1,2 @@
 com\api\config\WebConfig.class
+com\api\config\SwaggerConfig.class
