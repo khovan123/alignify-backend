@@ -1,86 +1,215 @@
 package com.api.service;
 
-import com.api.model.Otp;
-import com.api.repository.OtpRepository;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import com.api.config.EnvConfig;
+import com.api.dto.*;
+import com.api.model.*;
+import com.api.repository.*;
+import com.api.util.JwtUtil;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.UUID;
+import org.springframework.http.ResponseEntity;
 
 @Service
 public class AuthService {
 
     @Autowired
-    private EmailService emailSerivce;
-
+    private UserRepository userRepository;
     @Autowired
-    private OtpRepository otpRepository;
+    private InfluencerRepository influencerRepository;
+    @Autowired
+    private BrandRepository brandRepository;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private AdminRepository adminRepository;
+    @Autowired
+    private GalleryRepository galleryRepository;
+    @Autowired
+    private EmailService emailSerivce;
+    @Autowired
+    private OtpService otpService;
 
-    public String generateOtp(String email) {
-        Optional<Otp> existingOtp = otpRepository.findByEmail(email);
-        if (existingOtp.isPresent()) {
-            Otp otp = existingOtp.get();
-            otpRepository.delete(otp);
-            if (otp.getRequestCount() >= 5 && otp.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(30))) {
-                throw new RuntimeException("Too many OTP requests. Please try again after 1 hour.");
-            }
-            if (otp.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(30))) {
-                otp.setRequestCount(otp.getRequestCount() + 1);
+    public ResponseEntity<?> sendOtpCode(String email) {
+        try {
+            emailSerivce.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
+        return ResponseEntity.status(201).body(Map.of());
+    }
+
+    public ResponseEntity<?> verifyOtpCode(String email, String otp) {
+        try {
+            boolean isValid = otpService.verifyOtp(email, otp);
+            if (isValid) {
+                return ResponseEntity.status(200).body(Map.of("message", "OTP verified successfully"));
             } else {
-                otp.setRequestCount(1);
-                otp.setCreatedAt(LocalDateTime.now());
+                return ResponseEntity.status(400).body(Map.of("error", "Wrong OTP code."));
             }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", e.getMessage()
+            ));
         }
-
-        String otpCode;
-        boolean isUnique;
-        int maxAttempts = 10;
-        do {
-            otpCode = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6).toUpperCase();
-            isUnique = !otpRepository.findByEmailAndOtpCode(email, otpCode).isPresent();
-        } while (!isUnique && maxAttempts-- > 0);
-
-        if (!isUnique) {
-            throw new RuntimeException("Unable to generate unique OTP after " + maxAttempts + " attempts");
-        }
-
-        Otp newOtp;
-
-        if (!existingOtp.isPresent()) {
-            newOtp = new Otp(email, otpCode);
-        } else {
-            newOtp = new Otp(email, otpCode, existingOtp.get().getRequestCount(), existingOtp.get().getCreatedAt());
-        }
-
-        otpRepository.save(newOtp);
-        sendEmail(email, otpCode);
-
-        return "OTP sent to " + email;
     }
 
-    private void sendEmail(String email, String otp) {
-        emailSerivce.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otp + ". It is valid for 3 minutes.");
-    }
-
-    public boolean verifyOtp(String email, String otpCode) {
-        Optional<Otp> otpOptional = otpRepository.findByEmail(email);
-        if (otpOptional.isPresent()) {
-            Otp otp = otpOptional.get();
-            if (otp.getOtpCode().equalsIgnoreCase(otpCode.toUpperCase())) {
-                otpRepository.delete(otp);
-                return true;
-            } else {
-                if (otp.getAttemptCount() >= 5) {
-                    otpRepository.delete(otp);
-                    throw new RuntimeException("Too many OTP requests. Please try again after 1 hour.");
-                }
-                otp.setAttemptCount(otp.getAttemptCount() + 1);
-                otpRepository.save(otp);
+    public ResponseEntity<?> registerAccount(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Email exists"
+            ));
+        }
+        user.setPassword(JwtUtil.hashPassword(user.getPassword()));
+        Optional<Role> role = roleRepository.findById(user.getRoleId());
+        if (role.isPresent()) {
+            user = userRepository.save(user);
+            if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
+                Influencer influencer = new Influencer();
+                influencer.setUserId(user.getUserId());
+                influencer.setCreateAt(user.getCreateAt());
+                Gallery gallery = new Gallery();
+                gallery.setGalleryId(user.getUserId());
+                gallery.setCreateAt(user.getCreateAt());
+                influencerRepository.save(influencer);
+                galleryRepository.save(gallery);
+            } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
+                Brand brand = new Brand();
+                brand.setUserId(user.getUserId());
+                brand.setCreateAt(user.getCreateAt());
+                brandRepository.save(brand);
+            } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
+                userRepository.deleteById(user.getUserId());
+                return ResponseEntity.status(403).body(Map.of(
+                        "error", "Access is denied."
+                ));
             }
         } else {
-            throw new RuntimeException("Your OTP is expired.");
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "Invalid role."
+            ));
         }
-        return false;
+
+        return ResponseEntity.status(201).body(Map.of(
+                "message", "Registration successful"
+        ));
     }
+
+    public ResponseEntity<?> registerAdmin(Admin admin) {
+        if (adminRepository.existsByEmail(admin.getEmail())) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Email exists"
+            ));
+        }
+        admin.setPassword(JwtUtil.hashPassword(admin.getPassword()));
+        try {
+            adminRepository.save(admin);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
+        return ResponseEntity.status(201).body(Map.of(
+                "message", "Registration successful"
+        ));
+    }
+
+    public ResponseEntity<?> loginAccount(User user) {
+        Optional<User> existing = userRepository.findByEmail(user.getEmail());
+        if (existing.isEmpty() || !JwtUtil.isCorrectPassword(existing.get().getPassword(), user.getPassword())) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "error", "Invalid credentials"
+            ));
+        }
+
+        return ResponseEntity.status(200).body(Map.of(
+                "token", JwtUtil.createToken(existing.get())));
+    }
+
+    public ResponseEntity<?> changeUserPassword(PasswordChange passwordRequest, HttpServletRequest request) {
+        DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
+        String userId = decodeJWT.getSubject();
+        User user;
+        try {
+            user = userRepository.findById(userId).get();
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "UNAUTHORIZED"
+            ));
+        }
+
+        if (!JwtUtil.isCorrectPassword(user.getPassword(), passwordRequest.getOldPassword())) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "PASSWORD_WRONG"
+            ));
+        }
+
+        if (!passwordRequest.getNewPassword().equalsIgnoreCase(passwordRequest.getPasswordConfirm())) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "CONFIRM_PASSWORD_WRONG"
+            ));
+        }
+
+        if (passwordRequest.getNewPassword().equalsIgnoreCase(passwordRequest.getOldPassword())) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "DOUBLE_PASSWORD"
+            ));
+        }
+
+        user.setPassword(JwtUtil.hashPassword(passwordRequest.getNewPassword()));
+
+        return ResponseEntity.status(200).body(Map.of(
+                "message", "Password changed."
+        ));
+    }
+
+    public ResponseEntity<?> recoveryPasswordByEndpoint(String email) {
+        if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Invalid email."
+            ));
+        }
+        Optional<User> user = userRepository.findByEmail(email);
+        if (!user.isPresent()) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Email is not exists."
+            ));
+        }
+        String resetURL = JwtUtil.createURLResetPassword(email);
+        String subject = "Reset your password";
+        String message = "Click this url: " + resetURL + " to reset your password.";
+        emailService.sendSimpleEmail(email, subject, message);
+        return ResponseEntity.status(200).body(Map.of(
+                "message", "Recovery email sent."
+        ));
+    }
+
+    public ResponseEntity<?> resetPasswordByToken(String token, PasswordReset passwordReset) {
+        try {
+            User user;
+            DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
+            user = userRepository.findByEmail(decodeJWT.getSubject()).get();
+            if (!passwordReset.getPassword().equalsIgnoreCase(passwordReset.getPasswordConfirm())) {
+                return ResponseEntity.status(400).body(Map.of(
+                        "error", "Confirm password wrong."
+                ));
+            }
+            user.setPassword(JwtUtil.hashPassword(passwordReset.getPassword()));
+            userRepository.save(user);
+            return ResponseEntity.status(200).body(Map.of(
+                    "message", "Password reset successful."
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Invalid token."
+            ));
+        }
+    }
+
 }
