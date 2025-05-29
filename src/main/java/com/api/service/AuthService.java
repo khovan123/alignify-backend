@@ -129,7 +129,9 @@ public class AuthService {
         }
 
         return ResponseEntity.status(200).body(Map.of(
-                "token", JwtUtil.createToken(existing.get())));
+                "token", JwtUtil.createToken(existing.get()),
+                "id", existing.get().getUserId()
+        ));
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChange passwordRequest, HttpServletRequest request) {
