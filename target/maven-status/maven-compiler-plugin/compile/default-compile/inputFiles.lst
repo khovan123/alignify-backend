@@ -1,6 +1,7 @@
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\CloudinaryConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\EnvConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\MongoConfig.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\SwaggerConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\WebConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\AuthController.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\CommonController.java
@@ -21,8 +22,8 @@ D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\User.jav
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\AdminRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\BrandRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\CategoryRepository.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\GalleryImageRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\GalleryRepository.java
-D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\ImageRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\InfluencerRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\OtpRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\RoleRepository.java
