@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "/api/v1/profile/gallery")
@@ -20,9 +21,10 @@ public class GalleryController {
         return galleryService.getGalleryById(id, request, pageNumber, pageSize);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/{id}")
-    public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestBody Image image, HttpServletRequest request) {
-        return galleryService.saveImageUrlIntoGalleryById(id, image, request);
+    public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        return galleryService.saveImageUrlIntoGalleryById(id, file, request);
     }
 
     @DeleteMapping("/{id}/image/{imageId}")
