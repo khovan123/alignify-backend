@@ -14,6 +14,12 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+ 
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestParam("code") String authCode, HttpServletRequest request) {
+        return authService.loginViaGoogle(authCode, request);
+    }
 
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestParam("code") String authCode, HttpServletRequest request) {
