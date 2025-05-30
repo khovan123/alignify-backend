@@ -10,6 +10,7 @@ D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\Pro
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordChange.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordReset.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\exception\JWTExceptionHandler.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\AccountVerified.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Admin.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Brand.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Category.java
@@ -19,6 +20,7 @@ D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Influenc
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Otp.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Role.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\User.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\AccountVerifiedRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\AdminRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\BrandRepository.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\repository\CategoryRepository.java

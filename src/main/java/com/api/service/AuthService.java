@@ -38,7 +38,8 @@ public class AuthService {
     private GalleryRepository galleryRepository;
     @Autowired
     private OtpService otpService;
-
+    @Autowired
+    private AccountVerifiedRepository accountVerifiedRepository;
     @Value("${spring.google.client-id}")
     private String clientId;
     @Value("${spring.google.secret-key}")
@@ -104,6 +105,7 @@ public class AuthService {
         try {
             boolean isValid = otpService.verifyOtp(email, otp);
             if (isValid) {
+                accountVerifiedRepository.save(new AccountVerified(email));
                 return ResponseEntity.status(200).body(Map.of("message", "OTP verified successfully"));
             } else {
                 return ResponseEntity.status(400).body(Map.of("error", "Wrong OTP code."));
@@ -119,6 +121,11 @@ public class AuthService {
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity.status(400).body(Map.of(
                     "error", "Email exists"
+            ));
+        }
+        if (!accountVerifiedRepository.existsByEmail(clientId)) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Please verify your email"
             ));
         }
         user.setPassword(JwtUtil.hashPassword(user.getPassword()));
