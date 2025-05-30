@@ -6,9 +6,16 @@ import com.api.model.*;
 import com.api.repository.*;
 import com.api.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.http.ResponseEntity;
 
@@ -33,6 +40,56 @@ public class AuthService {
     private EmailService emailSerivce;
     @Autowired
     private OtpService otpService;
+
+    @Value("${spring.google.client-id}")
+    private String clientId;
+    @Value("${spring.google.secret-key}")
+    private String secretId;
+
+    public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
+        if (request.getHeader("X-Requested-With") == null) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", "Missing headers"
+            ));
+        }
+        try {
+            GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
+                    new NetHttpTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    "https://oauth2.googleapis.com/token",
+                    clientId,
+                    secretId,
+                    authCode,
+                    "postmessage"
+            ).execute();
+
+            GoogleIdToken idToken = tokenResponse.parseIdToken();
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+
+            User user;
+            if (!userRepository.existsByEmail(email)) {
+                user = new User();
+                user.setEmail(email);
+                user.setName(name);
+                user.setRoleId(EnvConfig.INFLUENCER_ROLE_ID);
+                user.setPassword(JwtUtil.hashPassword(email));
+                user = userRepository.save(user);
+            } else {
+                user = userRepository.findByEmail(email).get();
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "token", JwtUtil.createToken(user),
+                    "id", user.getUserId()
+            ));
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
+    }
 
     public ResponseEntity<?> sendOtpCode(String email) {
         try {
