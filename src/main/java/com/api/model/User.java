@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.util.*;
+import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,14 +18,14 @@ public class User {
     private boolean isActive;
 
     @CreatedDate
-    private Date createAt;
+    private LocalDateTime createdAt;
 
     public User() {
         this.location = "NA";
         this.isActive = true;
     }
 
-    public User(String userId, String name, String email, String password, String location, String roleId, boolean isActive, Date createAt) {
+    public User(String userId, String name, String email, String password, String location, String roleId, boolean isActive, LocalDateTime createdAt) {
         this.userId = userId;
         this.name = name;
         this.email = email;
@@ -33,7 +33,7 @@ public class User {
         this.location = location;
         this.roleId = roleId;
         this.isActive = isActive;
-        this.createAt = createAt;
+        this.createdAt = createdAt;
     }
 
     public String getUserId() {
@@ -92,12 +92,12 @@ public class User {
         this.isActive = isActive;
     }
 
-    public Date getCreateAt() {
-        return createAt;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreateAt(Date createAt) {
-        this.createAt = createAt;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
 }
