@@ -1,6 +1,5 @@
 package com.api.controller.profile;
 
-import com.api.model.*;
 import com.api.service.GalleryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ public class GalleryController {
     }
 
     @GetMapping("/{id}/image/{imageId}")
-    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId) {
-        return galleryService.getImageByImageId(id, imageId);
+    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId, HttpServletRequest request) {
+        return galleryService.getImageByImageId(id, imageId, request);
     }
 }

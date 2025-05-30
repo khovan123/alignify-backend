@@ -1,18 +1,18 @@
 package com.api.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "otpVerifications")
+@Document(collection = "accountVerifieds")
 public class AccountVerified {
 
     @Id
     private String verification_id;
     private String email;
     @CreatedDate
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     public AccountVerified() {
     }
@@ -21,7 +21,7 @@ public class AccountVerified {
         this.email = email;
     }
 
-    public AccountVerified(String verification_id, String email, LocalDate createdAt) {
+    public AccountVerified(String verification_id, String email, LocalDateTime createdAt) {
         this.verification_id = verification_id;
         this.email = email;
         this.createdAt = createdAt;
@@ -43,11 +43,11 @@ public class AccountVerified {
         this.email = email;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
