@@ -13,7 +13,7 @@ public class Influencer {
     private String avatarUrl;
     private String backgroundUrl;
     private Date DoB;
-    private String genderId;
+    private String gender;
     private String bio;
     private Map<String, String> socialMediaLinks;
     private double rating;
@@ -29,14 +29,15 @@ public class Influencer {
         this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.isPublic = true;
+        this.gender = "NONE";
     }
 
-    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String genderId, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds, boolean isPublic, Date createAt) {
+    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds, boolean isPublic, Date createAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
         this.DoB = DoB;
-        this.genderId = genderId;
+        this.gender = gender;
         this.bio = bio;
         this.socialMediaLinks = socialMediaLinks;
         this.rating = rating;
@@ -78,12 +79,12 @@ public class Influencer {
         this.DoB = DoB;
     }
 
-    public String getGenderId() {
-        return genderId;
+    public String getGender() {
+        return gender;
     }
 
-    public void setGenderId(String genderId) {
-        this.genderId = genderId;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getBio() {
@@ -126,11 +127,11 @@ public class Influencer {
         this.followerIds = followerIds;
     }
 
-    public boolean isIsPublic() {
+    public boolean isPublic() {
         return isPublic;
     }
 
-    public void setIsPublic(boolean isPublic) {
+    public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
 

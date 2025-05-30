@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class MongoConfig {
@@ -33,7 +34,8 @@ public class MongoConfig {
 //        this.create_categoriesCollection(db);
         this.create_adminsCollection(db);
         this.create_galleriesCollection(db);
-        this.create_imagesCollection(db);
+        this.create_galleryImagesCollection(db);
+        this.create_otpsCollection(db);
         this.create_otpsCollection(db);
     }
 
@@ -101,7 +103,8 @@ public class MongoConfig {
               "bsonType": "date"
             },
             "gender": {
-              "bsonType": "bool"
+              "bsonType": "string",
+              "enum" : ["MALE", "FEMALE", "LGBT", "NONE"]                               
             },
             "bio": {
               "bsonType": "string"
@@ -342,18 +345,15 @@ public class MongoConfig {
         db.createCollection("galleries", options);
     }
 
-    public void create_imagesCollection(MongoDatabase db) {
-        if (db.getCollection("images") != null) {
-            db.getCollection("images").drop();
+    public void create_galleryImagesCollection(MongoDatabase db) {
+        if (db.getCollection("galleryImages") != null) {
+            db.getCollection("galleryImages").drop();
         }
         Document jsonSchema = Document.parse("""
         {
               "bsonType": "object",
               "required": ["imageUrl"],                                                                                                                                      
               "properties": {
-                "_id": {
-                  "bsonType": "objectId",
-                },
                 "imageUrl": {
                   "bsonType": "string",
                 },
@@ -369,7 +369,7 @@ public class MongoConfig {
         CreateCollectionOptions options = new CreateCollectionOptions()
                 .validationOptions(validationOptions);
 
-        db.createCollection("images", options);
+        db.createCollection("galleryImages", options);
     }
 
     public void create_otpsCollection(MongoDatabase db) {
@@ -429,6 +429,33 @@ public class MongoConfig {
                     .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
             collection.createIndex(indexKeys, indexOptions);
         }
+    }
+
+    public void create_gendersCollection(MongoDatabase db) {
+        if (db.getCollection("genders") != null) {
+            db.getCollection("genders").drop();
+        }
+        Document jsonSchema = Document.parse("""
+        {
+              "bsonType": "object",
+              "required": ["genderName"],                                                                                                                                      
+              "properties": {      
+                "genderName": {
+                  "bsonType": "string",
+                },
+                "createAt": {
+                  "bsonType": "date"
+                }   
+              }
+        }
+        """);
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("genders", options);
     }
 
 }
