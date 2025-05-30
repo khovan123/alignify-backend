@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class MongoConfig {
@@ -431,19 +430,19 @@ public class MongoConfig {
         }
     }
 
-    public void create_gendersCollection(MongoDatabase db) {
-        if (db.getCollection("genders") != null) {
-            db.getCollection("genders").drop();
+    public void create_OTPVerificationsCollection(MongoDatabase db) {
+        if (db.getCollection("OTPVerifications") != null) {
+            db.getCollection("OTPVerifications").drop();
         }
         Document jsonSchema = Document.parse("""
         {
               "bsonType": "object",
-              "required": ["genderName"],                                                                                                                                      
+              "required": ["email"],                                                                                                                                      
               "properties": {      
-                "genderName": {
-                  "bsonType": "string",
+                "email": {
+                  "bsonType": "string"
                 },
-                "createAt": {
+                "createdAt": {
                   "bsonType": "date"
                 }   
               }
@@ -455,7 +454,7 @@ public class MongoConfig {
         CreateCollectionOptions options = new CreateCollectionOptions()
                 .validationOptions(validationOptions);
 
-        db.createCollection("genders", options);
+        db.createCollection("OTPVerifications", options);
     }
 
 }
