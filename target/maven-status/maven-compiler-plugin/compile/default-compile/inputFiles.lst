@@ -7,6 +7,7 @@ D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\Aut
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\CommonController.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\profile\GalleryController.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\ProfileController.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\ApiResponse.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordChange.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordReset.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\exception\JWTExceptionHandler.java
