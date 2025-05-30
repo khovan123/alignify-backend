@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -15,17 +16,17 @@ public class Brand {
     private String bio;
     private Map<String, String> contacts;
     private Map<String, String> socialMediaLinks;
-    private Date establishDate;
+    private LocalDateTime establishDate;
 
     @CreatedDate
-    private Date createAt;
+    private LocalDateTime createdAt;
 
     public Brand() {
         this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
     }
 
-    public Brand(String userId, String avatarUrl, String backgroundUrl, String bio, Map<String, String> contacts, Map<String, String> socialMediaLinks, Date establishDate, Date createAt) {
+    public Brand(String userId, String avatarUrl, String backgroundUrl, String bio, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate, LocalDateTime createdAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
@@ -33,7 +34,7 @@ public class Brand {
         this.contacts = contacts;
         this.socialMediaLinks = socialMediaLinks;
         this.establishDate = establishDate;
-        this.createAt = createAt;
+        this.createdAt = createdAt;
     }
 
     public String getUserId() {
@@ -84,20 +85,20 @@ public class Brand {
         this.socialMediaLinks = socialMediaLinks;
     }
 
-    public Date getEstablishDate() {
+    public LocalDateTime getEstablishDate() {
         return establishDate;
     }
 
-    public void setEstablishDate(Date establishDate) {
+    public void setEstablishDate(LocalDateTime establishDate) {
         this.establishDate = establishDate;
     }
 
-    public Date getCreateAt() {
-        return createAt;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreateAt(Date createAt) {
-        this.createAt = createAt;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
 }
