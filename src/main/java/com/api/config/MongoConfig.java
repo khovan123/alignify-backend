@@ -25,7 +25,7 @@ public class MongoConfig {
 
     @PostConstruct
     public void init() {
-        MongoDatabase db = mongoClient.getDatabase("influencerApp");
+        MongoDatabase db = mongoClient.getDatabase(databaseName);
         this.create_usersCollection(db);
         this.create_influencersCollection(db);
         this.create_brandsCollection(db);
@@ -35,6 +35,7 @@ public class MongoConfig {
         this.create_galleriesCollection(db);
         this.create_galleryImagesCollection(db);
         this.create_otpsCollection(db);
+        this.create_accountVerifiedsCollection(db);
     }
 
     public void create_usersCollection(MongoDatabase db) {
@@ -67,7 +68,7 @@ public class MongoConfig {
                 "isActive": {
                   "bsonType": "bool"
                 },
-                "createAt": {
+                "createdAt": {
                   "bsonType": "date"
                 }                                            
               }
@@ -131,7 +132,7 @@ public class MongoConfig {
             "isPublic": {
               "bsonType": "bool"
             },
-            "createAt": {
+            "createdAt": {
               "bsonType": "date"
             }   
           }
@@ -256,7 +257,7 @@ public class MongoConfig {
                 "establishDate": {
                   "bsonType": "date",
                 },
-                "createAt": {
+                "createdAt": {
                   "bsonType": "date"
                 }   
               }
@@ -295,7 +296,7 @@ public class MongoConfig {
                 "roleId": {
                   "bsonType": "string"
                 },
-                "createAt": {
+                "createdAt": {
                   "bsonType": "date"
                 }                                            
               }
@@ -328,7 +329,7 @@ public class MongoConfig {
                     "bsonType": "string"
                   }
                 },
-                "createAt": {
+                "createdAt": {
                   "bsonType": "date"
                 }   
               }
@@ -355,7 +356,7 @@ public class MongoConfig {
                 "imageUrl": {
                   "bsonType": "string",
                 },
-                "createAt": {
+                "createdAt": {
                   "bsonType": "date"
                 }   
               }
@@ -429,19 +430,19 @@ public class MongoConfig {
         }
     }
 
-    public void create_gendersCollection(MongoDatabase db) {
-        if (db.getCollection("genders") != null) {
-            db.getCollection("genders").drop();
+    public void create_accountVerifiedsCollection(MongoDatabase db) {
+        if (db.getCollection("accountVerifieds") != null) {
+            db.getCollection("accountVerifieds").drop();
         }
         Document jsonSchema = Document.parse("""
         {
               "bsonType": "object",
-              "required": ["genderName"],                                                                                                                                      
+              "required": ["email"],                                                                                                                                      
               "properties": {      
-                "genderName": {
-                  "bsonType": "string",
+                "email": {
+                  "bsonType": "string"
                 },
-                "createAt": {
+                "createdAt": {
                   "bsonType": "date"
                 }   
               }
@@ -453,7 +454,7 @@ public class MongoConfig {
         CreateCollectionOptions options = new CreateCollectionOptions()
                 .validationOptions(validationOptions);
 
-        db.createCollection("genders", options);
+        db.createCollection("accountVerifieds", options);
     }
 
 }
