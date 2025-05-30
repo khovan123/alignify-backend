@@ -12,9 +12,6 @@ import org.springframework.stereotype.Service;
 public class OtpService {
 
     @Autowired
-    private EmailService emailSerivce;
-
-    @Autowired
     private OtpRepository otpRepository;
 
     public String generateOtp(String email) {
