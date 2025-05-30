@@ -2,6 +2,7 @@ HELP.md
 
 ### Maven ###
 /target/classes/application.properties
+/target/classes/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -72,6 +73,7 @@ Thumbs.db
 *.zip
 *.tar.gz
 *.rar
+*.json
 
 # Test reports and coverage
 /test-output/

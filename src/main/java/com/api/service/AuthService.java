@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.http.ResponseEntity;
 
@@ -40,6 +41,11 @@ public class AuthService {
     @Autowired
     private OtpService otpService;
 
+    @Value("${spring.google.client-id}")
+    private String clientId;
+    @Value("${spring.google.secret-key}")
+    private String secretId;
+
     public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
         if (request.getHeader("X-Requested-With") == null) {
             return ResponseEntity.status(400).body(Map.of(
@@ -51,8 +57,8 @@ public class AuthService {
                     new NetHttpTransport(),
                     JacksonFactory.getDefaultInstance(),
                     "https://oauth2.googleapis.com/token",
-                    "136808391187-o5vdain002hlpj62998pfs58ko3qa0sh.apps.googleusercontent.com",
-                    "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",
+                    clientId,
+                    secretId,
                     authCode,
                     "postmessage"
             ).execute();
