@@ -37,8 +37,6 @@ public class AuthService {
     @Autowired
     private GalleryRepository galleryRepository;
     @Autowired
-    private EmailService emailSerivce;
-    @Autowired
     private OtpService otpService;
 
     @Value("${spring.google.client-id}")
@@ -93,7 +91,7 @@ public class AuthService {
 
     public ResponseEntity<?> sendOtpCode(String email) {
         try {
-            emailSerivce.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
+            emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(Map.of(
                     "error", e.getMessage()
