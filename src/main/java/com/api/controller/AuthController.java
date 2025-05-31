@@ -20,7 +20,7 @@ public class AuthController {
         return authService.loginViaGoogle(authCode, request);
     }
 
-    @GetMapping("/request-otp")
+    @PostMapping("/request-otp")
     public ResponseEntity<?> requestOtp(@RequestParam("email") String email, HttpServletRequest request) {
         return authService.sendOtpCode(email, request);
     }
