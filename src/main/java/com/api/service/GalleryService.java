@@ -11,9 +11,10 @@ import com.api.repository.GalleryRepository;
 import com.api.repository.ImageRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.RoleRepository;
-import com.api.repository.UserRepository;
 import com.api.util.Helper;
+import com.cloudinary.Cloudinary;
 import jakarta.servlet.http.HttpServletRequest;
+import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,11 +28,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import com.api.repository.IUserRepository;
 
 @Service
 public class GalleryService {
@@ -39,7 +40,7 @@ public class GalleryService {
     @Autowired
     private InfluencerRepository influencerProfileRepository;
     @Autowired
-    private UserRepository userRepository;
+    private IUserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
     @Autowired

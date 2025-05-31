@@ -18,8 +18,8 @@ import com.paypal.api.payments.RedirectUrls;
 import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
-import com.api.config.PaypalPaymentIntent;
-import com.api.config.PaypalPaymentMethod;
+import com.api.enumeration.PaypalPaymentIntent;
+import com.api.enumeration.PaypalPaymentMethod;
 
 @Service
 public class PaypalService {
