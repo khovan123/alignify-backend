@@ -21,7 +21,7 @@ public class ProfileService {
     @Autowired
     private InfluencerRepository influencerProfileRepository;
     @Autowired
-    private UserRepository userRepository;
+    private IUserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
     @Autowired

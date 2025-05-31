@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
-import com.api.config.PaypalPaymentIntent;
-import com.api.config.PaypalPaymentMethod;
+import com.api.enumeration.PaypalPaymentIntent;
+import com.api.enumeration.PaypalPaymentMethod;
 import com.api.service.PaypalService;
 import com.api.util.Utils;
 

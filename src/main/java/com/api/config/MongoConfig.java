@@ -205,7 +205,7 @@ public class MongoConfig {
 
         if (categoryRepository.count() == 0) {
             categoryRepository.saveAll(List.of(
-                    new Category("th�?i trang"),
+                    new Category("th�?i trang"),
                     new Category("mỹ phẩm"),
                     new Category("công nghệ"),
                     new Category("nghệ thuật"),
@@ -218,7 +218,7 @@ public class MongoConfig {
                     new Category("handmade"),
                     new Category("phong tục và văn hóa"),
                     new Category("khởi nghiệp"),
-                    new Category("kĩ năng m�?m"),
+                    new Category("kĩ năng m�?m"),
                     new Category("mẹ và bé")
             ));
         }
@@ -369,14 +369,13 @@ public class MongoConfig {
 
         db.createCollection("images", options);
     }
-    
-    
-    public void create_transactionsCollection(MongoDatabase db) {
-    if (db.getCollection("transactions") != null) {
-        db.getCollection("transactions").drop();
-    }
 
-    Document jsonSchema = Document.parse("""
+    public void create_transactionsCollection(MongoDatabase db) {
+        if (db.getCollection("transactions") != null) {
+            db.getCollection("transactions").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
     {
         "bsonType": "object",
         "required": [ "cooperation_id", "userId", "amount", "payment_method", "status", "created_at", "is_refunded"],
@@ -419,15 +418,14 @@ public class MongoConfig {
     }
     """);
 
-    ValidationOptions validationOptions = new ValidationOptions()
-            .validator(new Document("$jsonSchema", jsonSchema));
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
 
-    CreateCollectionOptions options = new CreateCollectionOptions()
-            .validationOptions(validationOptions);
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
 
-    db.createCollection("transactions", options);
-}
-
+        db.createCollection("transactions", options);
+    }
 
     public void create_otpsCollection(MongoDatabase db) {
         if (db.getCollection("otps") != null) {
@@ -514,13 +512,13 @@ public class MongoConfig {
 
         db.createCollection("genders", options);
     }
-    
-    public void create_subscriptionsCollection(MongoDatabase db) {
-    if (db.getCollection("subscriptions") != null) {
-        db.getCollection("subscriptions").drop();
-    }
 
-    Document jsonSchema = Document.parse("""
+    public void create_subscriptionsCollection(MongoDatabase db) {
+        if (db.getCollection("subscriptions") != null) {
+            db.getCollection("subscriptions").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
     {
         "bsonType": "object",
         "required": ["name", "description", "price", "currency", "roleId"],
@@ -545,14 +543,123 @@ public class MongoConfig {
     }
     """);
 
-    ValidationOptions validationOptions = new ValidationOptions()
-            .validator(new Document("$jsonSchema", jsonSchema));
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
 
-    CreateCollectionOptions options = new CreateCollectionOptions()
-            .validationOptions(validationOptions);
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
 
-    db.createCollection("subscriptions", options);
-}
+        db.createCollection("subscriptions", options);
+    }
 
+    public void create_userSubscriptionsCollection(MongoDatabase db) {
+        if (db.getCollection("userSubscriptions") != null) {
+            db.getCollection("userSubscriptions").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["userSubscriptonId", "userId", "subscriptionId", "status", "start_date", "end_date", "create_at"],
+        "properties": {
+            "userSubscriptonId": {
+                "bsonType": "string"
+            },
+            "userId": {
+                "bsonType": "string"
+            },
+            "subscriptionId": {
+                "bsonType": "string"
+            },
+            "status": {
+                "bsonType": "string"
+            },
+            "start_date": {
+                "bsonType": "date"
+            },
+            "end_date": {
+                "bsonType": "date"
+            },
+            "create_at": {
+                "bsonType": "date"
+            },
+            "update_at": {
+                "bsonType": "date"
+            }
+        }
+    }
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("userSubscriptions", options);
+    }
+
+    public void create_subscriptionTransactionsCollection(MongoDatabase db) {
+        if (db.getCollection("subscriptionTransactions") != null) {
+            db.getCollection("subscriptionTransactions").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["transactionId", "userSubscriptionId", "userId", "amount", "currency", "status", "payment_method", "transaction_reference", "created_at", "is_refunded"],
+        "properties": {
+            "transactionId": {
+                "bsonType": "string"
+            },
+            "userSubscriptionId": {
+                "bsonType": "string"
+            },
+            "userId": {
+                "bsonType": "string"
+            },
+            "amount": {
+                "bsonType": "double",
+                "minimum": 0
+            },
+            "currency": {
+                "bsonType": "string",
+                "enum": ["USD", "EUR", "VND", "JPY"]  // Bạn thay bằng enum thực tế của Currency
+            },
+            "status": {
+                "bsonType": "string",
+                "enum": ["Pending", "Completed", "Failed", "Refunded"]  // Thay theo enum Status
+            },
+            "payment_method": {
+                "bsonType": "string",
+                "enum": ["CreditCard", "Paypal", "BankTransfer"]  // Thay theo enum Payment_method
+            },
+            "transaction_reference": {
+                "bsonType": "string"
+            },
+            "description": {
+                "bsonType": ["string", "null"]
+            },
+            "created_at": {
+                "bsonType": "date"
+            },
+            "completed_at": {
+                "bsonType": ["date", "null"]
+            },
+            "is_refunded": {
+                "bsonType": "bool"
+            }
+        }
+    }
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("subscriptionTransactions", options);
+    }
 
 }
