@@ -133,9 +133,9 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> updateProfileById(String id, @RequestBody Influencer newProfile, HttpServletRequest request) {
-        if (!Helper.isOwner(id, request)) {
-            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-        }
+//        if (!Helper.isOwner(id, request)) {
+//            return ApiResponse.sendError(403, "REALLLLL: Access denied: Insufficient permissions", request.getRequestURI());
+//        }
 
         Optional<Influencer> influencerOpt = influencerRepository.findById(id);
         if (!influencerOpt.isPresent()) {
