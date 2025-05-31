@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id;
 public class Subscription {
 
     @Id
-    private String id, name, description;
+    private String subscriptionId, name, description;
     private double price;
     private String currency,roleId;
 
@@ -13,8 +13,8 @@ public class Subscription {
     }
 
     
-    public Subscription(String id, String name, String description, double price, String currency, String roleId) {
-        this.id = id;
+    public Subscription(String subscriptionId, String name, String description, double price, String currency, String roleId) {
+        this.subscriptionId = subscriptionId;
         this.name = name;
         this.description = description;
         this.price = price;
@@ -23,11 +23,11 @@ public class Subscription {
     }
 
     public String getId() {
-        return id;
+        return subscriptionId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 
     public String getName() {

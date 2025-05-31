@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 public class AuthService {
 
     @Autowired
-    private UserRepository userRepository;
+    private IUserRepository userRepository;
     @Autowired
     private InfluencerRepository influencerRepository;
     @Autowired

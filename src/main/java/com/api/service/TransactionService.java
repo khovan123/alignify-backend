@@ -8,11 +8,11 @@ import com.api.config.EnvConfig;
 import com.api.model.Transaction;
 import com.api.model.User;
 import com.api.repository.TransactionRepository;
-import com.api.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.api.repository.IUserRepository;
 
 @Service
 public class TransactionService {
@@ -20,7 +20,7 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
     @Autowired
-    private UserRepository userRepository;
+    private IUserRepository userRepository;
     
     public Transaction createTransaction(Transaction transaction) {
         return transactionRepository.save(transaction);
