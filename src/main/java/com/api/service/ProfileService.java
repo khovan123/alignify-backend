@@ -1,25 +1,30 @@
 package com.api.service;
 
 import com.api.config.EnvConfig;
+import com.api.dto.ApiResponse;
 import com.api.model.*;
 import com.api.repository.*;
 import com.api.util.*;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProfileService {
 
     @Autowired
-    private InfluencerRepository influencerProfileRepository;
+    private InfluencerRepository influencerRepository;
     @Autowired
     private IUserRepository userRepository;
     @Autowired
@@ -31,23 +36,25 @@ public class ProfileService {
     @Autowired
     private GalleryRepository galleryRepository;
     @Autowired
-    private ImageRepository imageRepository;
+    private GalleryImageRepository imageRepository;
+    @Autowired
+    private Cloudinary cloudinary;
+    @Value("${cloudinary.upload-preset}")
+    private String uploadPreset;
 
     public ResponseEntity<?> getAllProfileByRoleId(String roleId, HttpServletRequest request) {
         DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
         String userId = decodeJWT.getSubject();
         List<Map<String, Object>> userList = new ArrayList<>();
         if (roleId.equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
-            return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied."
-            ));
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
         userRepository.findByRoleIdAndUserIdNot(roleId, userId).forEach(user -> {
             Map<String, Object> map = new HashMap<>();
             map.put("name", user.getName());
             map.put("id", user.getUserId());
             if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
-                Optional<Influencer> profileOtp = influencerProfileRepository.findById(user.getUserId());
+                Optional<Influencer> profileOtp = influencerRepository.findById(user.getUserId());
                 if (profileOtp.isPresent()) {
                     Influencer profile = profileOtp.get();
                     map.put("rating", profile.getRating());
@@ -64,28 +71,22 @@ public class ProfileService {
             }
             userList.add(map);
         });
-
-        return ResponseEntity.status(200).body(Map.of(
-                "data", Map.of("profile", userList)
-        ));
+        return ApiResponse.sendSuccess(200, "Response successfully", userList, request.getRequestURI());
     }
 
     public ResponseEntity<?> getProfileById(String id, HttpServletRequest request) {
-        User user;
-        try {
-            user = userRepository.findById(id).get();
-        } catch (Exception e) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile not found."
-            ));
+        Optional<User> userOpt = userRepository.findById(id);
+        if (!userOpt.isPresent()) {
+            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
+        User user = userOpt.get();
         Role roleOpt = roleRepository.findById(user.getRoleId()).get();
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
         map.put("name", user.getName());
         map.put("email", user.getEmail());
         if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
-            Optional<Influencer> profileOtp = influencerProfileRepository.findById(user.getUserId());
+            Optional<Influencer> profileOtp = influencerRepository.findById(user.getUserId());
             if (profileOtp.isPresent()) {
                 Influencer profile = profileOtp.get();
                 map.put("bio", profile.getBio());
@@ -106,8 +107,8 @@ public class ProfileService {
                     Optional<Gallery> galleryOpt = galleryRepository.findById(id);
                     if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty() && galleryOpt.get().getImages() != null) {
                         List<String> imageIds = galleryOpt.get().getImages();
-                        List<Image> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
-                                .sorted(Comparator.comparing(Image::getCreateAt).reversed())
+                        List<GalleryImage> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
+                                .sorted(Comparator.comparing(GalleryImage::getCreatedAt).reversed())
                                 .limit(9)
                                 .collect(Collectors.toList());
                         if (!images.isEmpty()) {
@@ -128,28 +129,20 @@ public class ProfileService {
                 map.put("location", user.getLocation());
             }
         }
-        return ResponseEntity.status(200).body(Map.of(
-                "data", Map.of("profile", map)
-        ));
+        return ApiResponse.sendSuccess(200, "Response successfully", map, request.getRequestURI());
     }
 
     public ResponseEntity<?> updateProfileById(String id, @RequestBody Influencer newProfile, HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
-            return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied. You do not have permission to view this directory or page using the credentials that you supplied."
-            ));
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
 
-        Influencer influencerProfile;
-        try {
-            influencerProfile = influencerProfileRepository.findById(id).get();
-        } catch (Exception e) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile not found."
-            ));
+        Optional<Influencer> influencerOpt = influencerRepository.findById(id);
+        if (!influencerOpt.isPresent()) {
+            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
 
-        Influencer profile = influencerProfile;
+        Influencer profile = influencerOpt.get();
 
         if (newProfile.getBio() != null) {
             profile.setBio(newProfile.getBio());
@@ -189,29 +182,54 @@ public class ProfileService {
         }
 
         try {
-            influencerProfileRepository.save(profile);
+            influencerRepository.save(profile);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of(
-                    "error", e.getMessage()
-            ));
+            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of(
-                "message", "Profile updated."
-        ));
+        return ApiResponse.sendSuccess(200, "Update successfully", profile, id);
     }
 
     public ResponseEntity<?> deleteAccountById(String id, HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
-            return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied"
-            ));
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
         User user = userRepository.findById(id).get();
         user.setIsActive(false);
         userRepository.save(user);
-        return ResponseEntity.status(204).body(Map.of(
-                "message", "Delete account successful"
-        ));
+        return ApiResponse.sendSuccess(204, null, null, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> saveAvatarUrlById(String id, MultipartFile file, HttpServletRequest request) {
+        if (!Helper.isOwner(id, request)) {
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
+        }
+        Optional<User> userOpt = userRepository.findById(id);
+        if (!userOpt.isPresent()) {
+            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
+        }
+        String imageUrl = null;
+        try {
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("upload_preset", uploadPreset));
+            imageUrl = (String) uploadResult.get("secure_url");
+        } catch (IOException e) {
+            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
+        }
+        if (imageUrl == null) {
+            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
+        }
+        if (userOpt.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Optional<Influencer> influencerOpt = influencerRepository.findById(id);
+            Influencer influencer = influencerOpt.get();
+            influencer.setAvatarUrl(imageUrl);
+            influencerRepository.save(influencer);
+        } else if (userOpt.get().getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
+            Optional<Brand> brandOpt = brandRepository.findById(id);
+            Brand brand = brandOpt.get();
+            brand.setAvatarUrl(imageUrl);
+            brandRepository.save(brand);
+        }
+        return ApiResponse.sendSuccess(200, "Change avatar successfully", imageUrl, request.getRequestURI());
     }
 }

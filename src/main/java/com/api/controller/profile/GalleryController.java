@@ -1,6 +1,5 @@
 package com.api.controller.profile;
 
-import com.api.model.*;
 import com.api.service.GalleryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ public class GalleryController {
         return galleryService.getGalleryById(id, request, pageNumber, pageSize);
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/{id}")
     public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         return galleryService.saveImageUrlIntoGalleryById(id, file, request);
@@ -33,7 +31,7 @@ public class GalleryController {
     }
 
     @GetMapping("/{id}/image/{imageId}")
-    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId) {
-        return galleryService.getImageByImageId(id, imageId);
+    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId, HttpServletRequest request) {
+        return galleryService.getImageByImageId(id, imageId, request);
     }
 }

@@ -1,21 +1,5 @@
 package com.api.service;
 
-import com.api.config.EnvConfig;
-import com.api.model.Gallery;
-import com.api.model.Image;
-import com.api.model.Influencer;
-import com.api.model.User;
-import com.api.repository.BrandRepository;
-import com.api.repository.CategoryRepository;
-import com.api.repository.GalleryRepository;
-import com.api.repository.ImageRepository;
-import com.api.repository.InfluencerRepository;
-import com.api.repository.RoleRepository;
-import com.api.util.Helper;
-import com.cloudinary.Cloudinary;
-import jakarta.servlet.http.HttpServletRequest;
-import com.cloudinary.utils.ObjectUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,16 +7,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import com.api.repository.IUserRepository;
+
+import com.api.dto.ApiResponse;
+import com.api.model.Gallery;
+import com.api.model.GalleryImage;
+import com.api.model.Influencer;
+import com.api.repository.GalleryImageRepository;
+import com.api.repository.GalleryRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.util.Helper;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class GalleryService {
@@ -40,17 +35,9 @@ public class GalleryService {
     @Autowired
     private InfluencerRepository influencerProfileRepository;
     @Autowired
-    private IUserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private BrandRepository brandRepository;
-    @Autowired
     private GalleryRepository galleryRepository;
     @Autowired
-    private ImageRepository imageRepository;
+    private GalleryImageRepository imageRepository;
     @Autowired
     private Cloudinary cloudinary;
     @Value("${cloudinary.upload-preset}")
@@ -58,69 +45,33 @@ public class GalleryService {
 
     public ResponseEntity<?> getGalleryById(String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "30") int pageSize) {
-        Optional<User> userOpt = userRepository.findById(id);
-        if (!userOpt.isPresent()) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile not found."
-            ));
-        }
-        User user = userOpt.get();
-        if (!user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Gallery not found."
-            ));
-        }
         Optional<Influencer> influencerOpt = influencerProfileRepository.findById(id);
-        if (!influencerOpt.isPresent()) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile not found."
-            ));
-        }
-
         if (!influencerOpt.get().isPublic() && !Helper.isOwner(id, request)) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile is private."
-            ));
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
         Optional<Gallery> galleryOpt = galleryRepository.findById(id);
         if (!galleryOpt.isPresent()) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile is private."
-            ));
+            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
-        Gallery gallery = galleryOpt.get();
         try {
-            if (!gallery.getImages().isEmpty() && galleryOpt.get().getImages() != null) {
-                List<String> imageIds = galleryOpt.get().getImages();
-                List<Image> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(pageNumber, pageSize)).stream()
-                        .sorted(Comparator.comparing(Image::getCreateAt).reversed())
-                        .limit(pageSize)
-                        .collect(Collectors.toList());
-                return ResponseEntity.status(200).body(Map.of(
-                        "galleryId", id,
-                        "images", images,
-                        "pageNumber", pageNumber,
-                        "pageSize", pageSize
-                )
-                );
-            } else {
-                return ResponseEntity.status(200).body(Map.of(
-                        "galleryId", id,
-                        "images", new ArrayList<>()
-                ));
-            }
+            List<String> imageIds = galleryOpt.get().getImages();
+            List<GalleryImage> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(pageNumber, pageSize)).stream()
+                    .sorted(Comparator.comparing(GalleryImage::getCreatedAt).reversed())
+                    .limit(pageSize)
+                    .collect(Collectors.toList());
+            return ApiResponse.sendSuccess(200, "", Map.of(
+                    "galleryId", id,
+                    "images", images
+            ), request.getRequestURI()
+            );
         } catch (Exception e) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", e.getMessage()
-            ));
+            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
         }
     }
 
     public ResponseEntity<?> saveImageUrlIntoGalleryById(String id, MultipartFile file, HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
-            return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied."
-            ));
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
         Optional<Gallery> galleryOtp = galleryRepository.findById(id);
         Gallery gallery;
@@ -135,69 +86,61 @@ public class GalleryService {
             }
         }
 
-       String imageUrl = null;
+        String imageUrl = null;
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap("upload_preset", uploadPreset));
             imageUrl = (String) uploadResult.get("secure_url");
         } catch (IOException e) {
-            return ResponseEntity.status(500).body(Map.of("error", "Upload failed: " + e.getMessage()));
+            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
         }
         if (imageUrl == null) {
-            return ResponseEntity.status(500).body(Map.of("error", "Upload failed"));
+            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
         }
-        Image image = new Image(imageUrl);
+        GalleryImage image = new GalleryImage(imageUrl);
         image = imageRepository.save(image);
 
         gallery.getImages().add(image.getImageId());
         galleryRepository.save(gallery);
-        return ResponseEntity.status(201).body(Map.of(
+
+        return ApiResponse.sendSuccess(200, "", Map.of(
+                "galleryId", id,
                 "image", image
-        ));
+        ), request.getRequestURI()
+        );
     }
 
     public ResponseEntity<?> deleteImageByImageId(String id, String imageId, HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
-            return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied"
-            ));
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
-        Optional<Image> imageOpt = imageRepository.findById(imageId);
+        Optional<GalleryImage> imageOpt = imageRepository.findById(imageId);
         if (!imageOpt.isPresent()) {
-            return ResponseEntity.status(403).body(Map.of(
-                    "error", "Image not found"
-            ));
+            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
         imageRepository.delete(imageOpt.get());
-        return ResponseEntity.status(204).body(Map.of(
-                "message", "Delete image successful"
-        ));
+        return ApiResponse.sendSuccess(204, null, null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getImageByImageId(String id, String imageId) {
-        Influencer influencer;
-        try {
-            influencer = influencerProfileRepository.findById(id).get();
-        } catch (Exception e) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Image not found."
-            ));
-        }
-        if (!influencer.isPublic()) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Access is denied."
-            ));
+    public ResponseEntity<?> getImageByImageId(String id, String imageId, HttpServletRequest request) {
+        Optional<Influencer> influencer = influencerProfileRepository.findById(id);
+        if (!influencer.isPresent()) {
+            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
 
-        Optional<Image> imageOpt = imageRepository.findById(imageId);
+        if (!influencer.get().isPublic()) {
+            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
+        }
+
+        Optional<GalleryImage> imageOpt = imageRepository.findById(imageId);
         if (imageOpt.isPresent()) {
-            return ResponseEntity.status(200).body(Map.of(
+            return ApiResponse.sendSuccess(200, "", Map.of(
+                    "galleryId", id,
                     "image", imageOpt.get()
-            ));
+            ), request.getRequestURI()
+            );
         } else {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Image not found."
-            ));
+            return ApiResponse.sendError(404, imageId + " does not exist", request.getRequestURI());
         }
     }
 }
