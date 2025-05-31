@@ -205,7 +205,7 @@ public class MongoConfig {
 
         if (categoryRepository.count() == 0) {
             categoryRepository.saveAll(List.of(
-                    new Category("thời trang"),
+                    new Category("th�?i trang"),
                     new Category("mỹ phẩm"),
                     new Category("công nghệ"),
                     new Category("nghệ thuật"),
@@ -218,7 +218,7 @@ public class MongoConfig {
                     new Category("handmade"),
                     new Category("phong tục và văn hóa"),
                     new Category("khởi nghiệp"),
-                    new Category("kĩ năng mềm"),
+                    new Category("kĩ năng m�?m"),
                     new Category("mẹ và bé")
             ));
         }
@@ -514,5 +514,45 @@ public class MongoConfig {
 
         db.createCollection("genders", options);
     }
+    
+    public void create_subscriptionsCollection(MongoDatabase db) {
+    if (db.getCollection("subscriptions") != null) {
+        db.getCollection("subscriptions").drop();
+    }
+
+    Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["name", "description", "price", "currency", "roleId"],
+        "properties": {
+            "name": {
+                "bsonType": "string"
+            },
+            "description": {
+                "bsonType": "string"
+            },
+            "price": {
+                "bsonType": "double",
+                "minimum": 0
+            },
+            "currency": {
+                "bsonType": "string"
+            },
+            "roleId": {
+                "bsonType": "string"
+            }
+        }
+    }
+    """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+            .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+            .validationOptions(validationOptions);
+
+    db.createCollection("subscriptions", options);
+}
+
 
 }
