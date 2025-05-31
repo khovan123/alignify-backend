@@ -1,7 +1,8 @@
 package com.api.controller;
 
+import com.api.dto.ApiResponse;
 import com.api.repository.*;
-import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,17 +19,13 @@ public class CommonController {
     private CategoryRepository categoryRepository;
 
     @GetMapping("/role")
-    public ResponseEntity<?> getAllRole() {
-        return ResponseEntity.status(200).body(Map.of(
-                "roles", roleRepository.findAll()
-        ));
+    public ResponseEntity<?> getAllRole(HttpServletRequest request) {
+        return ApiResponse.sendSuccess(200, "Roles", roleRepository.findAll(), request.getRequestURI());
     }
 
     @GetMapping("/category")
-    public ResponseEntity<?> getAllCategory() {
-        return ResponseEntity.status(200).body(Map.of(
-                "categories", categoryRepository.findAll()
-        ));
+    public ResponseEntity<?> getAllCategory(HttpServletRequest request) {
+        return ApiResponse.sendSuccess(200, "Categories", categoryRepository.findAll(), request.getRequestURI());
     }
 
 }
