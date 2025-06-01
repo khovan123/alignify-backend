@@ -456,5 +456,55 @@ public class MongoConfig {
 
         db.createCollection("accountVerifieds", options);
     }
+    
+    public void create_contentPostingsCollection(MongoDatabase db) {
+    if (db.getCollection("contentPostings") != null) {
+        db.getCollection("contentPostings").drop();
+    }
+
+    Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["influencerID", "content", "categoryId", "timeStamp", "isPublic", "like"],
+        "properties": {
+            "contentId": {
+                "bsonType": "string"
+            },
+            "influencerID": {
+                "bsonType": "string"
+            },
+            "content": {
+                "bsonType": "string"
+            },
+            "imageUrl": {
+                "bsonType": "string"
+            },
+            "categoryId": {
+                "bsonType": "string"
+            },
+            "timeStamp": {
+                "bsonType": "date"
+            },
+            "isPublic": {
+                "bsonType": "bool"
+            },
+            "commentId": {
+                "bsonType": "string"
+            },
+            "like": {
+                "bsonType": "int"
+            }
+        }
+    }
+    """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+            .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+            .validationOptions(validationOptions);
+
+    db.createCollection("contentPostings", options);
+}
 
 }
