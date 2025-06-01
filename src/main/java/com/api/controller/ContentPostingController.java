@@ -35,16 +35,22 @@ public class ContentPostingController {
     public ResponseEntity<?> getPostsByUserId(@PathVariable String userId, HttpServletRequest request) {
         return contentPostingSer.getContentPostingById(userId, request);
     }
-    
-    @PutMapping("/{contentId}")
-    public ResponseEntity<?> updatePost(@PathVariable String contentId, 
-                                        @RequestBody ContentPosting contentPosting,
-                                        HttpServletRequest request){
-        return contentPostingSer.updateContentPosting(contentId, contentPosting, request);
+
+    @PutMapping("/{contentId}/{userId}")
+    public ResponseEntity<?> updatePost(@PathVariable String contentId,
+            @PathVariable String userId,
+            @RequestBody ContentPosting contentPosting,
+            HttpServletRequest request) {
+        return contentPostingSer.updateContentPosting(contentId, userId, contentPosting, request);
     }
-    
-    @DeleteMapping("/{contentId}")
-    public ResponseEntity<?> deletePost(@PathVariable String contentId, HttpServletRequest request){
-        return contentPostingSer.deleteContentPosting(contentId, request);
+
+    @DeleteMapping("/{contentId}/{userId}")
+    public ResponseEntity<?> deletePost(
+            @PathVariable String contentId,
+            @PathVariable String userId,
+            HttpServletRequest request) {
+
+        return contentPostingSer.deleteContentPosting(contentId, userId, request);
     }
+
 }
