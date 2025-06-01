@@ -10,6 +10,7 @@ D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\Pro
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\ApiResponse.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordChange.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordReset.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\exception\GlobalExceptionHandler.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\exception\JWTExceptionHandler.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\middleware\AuthorizationInterceptor.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\AccountVerified.java
