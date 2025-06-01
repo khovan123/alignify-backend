@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.*;
@@ -22,7 +23,7 @@ public class Influencer {
     private boolean isPublic;
 
     @CreatedDate
-    private Date createAt;
+    private LocalDateTime createdAt;
 
     public Influencer() {
         this.rating = 0.0;
@@ -32,7 +33,7 @@ public class Influencer {
         this.gender = "NONE";
     }
 
-    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds, boolean isPublic, Date createAt) {
+    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds, boolean isPublic, LocalDateTime createdAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
@@ -44,7 +45,7 @@ public class Influencer {
         this.categoryIds = categoryIds;
         this.followerIds = followerIds;
         this.isPublic = isPublic;
-        this.createAt = createAt;
+        this.createdAt = createdAt;
     }
 
     public String getUserId() {
@@ -135,12 +136,20 @@ public class Influencer {
         this.isPublic = isPublic;
     }
 
-    public Date getCreateAt() {
-        return createAt;
+    public boolean isIsPublic() {
+        return isPublic;
     }
 
-    public void setCreateAt(Date createAt) {
-        this.createAt = createAt;
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
 }
