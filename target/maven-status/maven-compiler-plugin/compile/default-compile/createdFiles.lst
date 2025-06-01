@@ -31,6 +31,7 @@ com\api\model\Category.class
 com\api\service\OtpService.class
 com\api\util\JwtUtil.class
 com\api\controller\CommonController.class
+com\api\middleware\AuthorizationInterceptor.class
 com\api\dto\PasswordChange.class
 com\api\controller\AuthController.class
 com\api\model\Admin.class
