@@ -1,6 +1,7 @@
 package com.api.model;
 
 import java.time.LocalDateTime;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -19,7 +20,8 @@ public class Otp {
     private int requestCount;
 
     private int attemptCount;
-
+    
+    @CreatedDate
     private LocalDateTime createdAt;
 
     public Otp() {

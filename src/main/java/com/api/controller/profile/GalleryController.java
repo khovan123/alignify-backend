@@ -1,11 +1,11 @@
 package com.api.controller.profile;
 
-import com.api.model.*;
 import com.api.service.GalleryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "/api/v1/profile/gallery")
@@ -21,8 +21,8 @@ public class GalleryController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestBody Image image, HttpServletRequest request) {
-        return galleryService.saveImageUrlIntoGalleryById(id, image, request);
+    public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        return galleryService.saveImageUrlIntoGalleryById(id, file, request);
     }
 
     @DeleteMapping("/{id}/image/{imageId}")
@@ -31,7 +31,7 @@ public class GalleryController {
     }
 
     @GetMapping("/{id}/image/{imageId}")
-    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId) {
-        return galleryService.getImageByImageId(id, imageId);
+    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId, HttpServletRequest request) {
+        return galleryService.getImageByImageId(id, imageId, request);
     }
 }
