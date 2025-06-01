@@ -6,9 +6,16 @@ import com.api.model.*;
 import com.api.repository.*;
 import com.api.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.http.ResponseEntity;
 
@@ -30,41 +37,99 @@ public class AuthService {
     @Autowired
     private GalleryRepository galleryRepository;
     @Autowired
-    private EmailService emailSerivce;
+    private UserRepository userRepository;
+    @Autowired
+    private InfluencerRepository influencerRepository;
+    @Autowired
+    private BrandRepository brandRepository;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private AdminRepository adminRepository;
+    @Autowired
+    private GalleryRepository galleryRepository;
     @Autowired
     private OtpService otpService;
+    @Autowired
+    private AccountVerifiedRepository accountVerifiedRepository;
+    @Value("${spring.google.client-id}")
+    private String clientId;
+    @Value("${spring.google.secret-key}")
+    private String secretId;
 
-    public ResponseEntity<?> sendOtpCode(String email) {
-        try {
-            emailSerivce.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", e.getMessage()
-            ));
+    public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
+        if (request.getHeader("X-Requested-With") == null) {
+            return ApiResponse.sendError(400, "Missing required header field: X-Requested-With", request.getRequestURI());
         }
-        return ResponseEntity.status(201).body(Map.of());
+        try {
+            GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
+                    new NetHttpTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    "https://oauth2.googleapis.com/token",
+                    clientId,
+                    secretId,
+                    authCode,
+                    "postmessage"
+            ).execute();
+
+            GoogleIdToken idToken = tokenResponse.parseIdToken();
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+
+            User user;
+            if (!userRepository.existsByEmail(email)) {
+                user = new User();
+                user.setEmail(email);
+                user.setName(name);
+                user.setRoleId(EnvConfig.INFLUENCER_ROLE_ID);
+                user.setPassword(JwtUtil.hashPassword(email));
+                user = userRepository.save(user);
+            } else {
+                user = userRepository.findByEmail(email).get();
+            }
+            return ApiResponse.sendSuccess(200, "Login successful",
+                    Map.of(
+                            "token", JwtUtil.createToken(user),
+                            "id", user.getUserId()
+                    ),
+                    request.getRequestURI());
+        } catch (IOException e) {
+            return ApiResponse.sendError(401, "Invalid Google authentication code", request.getRequestURI());
+        }
     }
 
-    public ResponseEntity<?> verifyOtpCode(String email, String otp) {
+    public ResponseEntity<?> sendOtpCode(String email, HttpServletRequest request) {
+        try {
+            emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
+        } catch (RuntimeException e) {
+            return ApiResponse.sendError(400, e.getMessage(), request.getRequestURI());
+        }
+        return ApiResponse.sendSuccess(200, "OTP sent successfully to your email", null, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> verifyOtpCode(String email, String otp, HttpServletRequest request) {
         try {
             boolean isValid = otpService.verifyOtp(email, otp);
             if (isValid) {
-                return ResponseEntity.status(200).body(Map.of("message", "OTP verified successfully"));
+                accountVerifiedRepository.save(new AccountVerified(email));
+                return ApiResponse.sendSuccess(200, "OTP verified successfully", null, request.getRequestURI());
             } else {
-                return ResponseEntity.status(400).body(Map.of("error", "Wrong OTP code."));
+                return ApiResponse.sendError(401, "Invalid OTP code", request.getRequestURI());
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", e.getMessage()
-            ));
+            return ApiResponse.sendError(400, e.getMessage(), request.getRequestURI());
         }
     }
 
-    public ResponseEntity<?> registerAccount(User user) {
+    public ResponseEntity<?> registerAccount(User user, HttpServletRequest request) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "Email exists"
-            ));
+            return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
+        }
+        if (!accountVerifiedRepository.existsByEmail(user.getEmail())) {
+            return ApiResponse.sendError(403, "Email verification required to complete registration", request.getRequestURI());
         }
         user.setPassword(JwtUtil.hashPassword(user.getPassword()));
         Optional<Role> role = roleRepository.findById(user.getRoleId());
@@ -73,16 +138,16 @@ public class AuthService {
             if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
                 Influencer influencer = new Influencer();
                 influencer.setUserId(user.getUserId());
-                influencer.setCreateAt(user.getCreateAt());
+                influencer.setCreatedAt(user.getCreatedAt());
                 Gallery gallery = new Gallery();
                 gallery.setGalleryId(user.getUserId());
-                gallery.setCreateAt(user.getCreateAt());
+                gallery.setCreatedAt(user.getCreatedAt());
                 influencerRepository.save(influencer);
                 galleryRepository.save(gallery);
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
                 Brand brand = new Brand();
                 brand.setUserId(user.getUserId());
-                brand.setCreateAt(user.getCreateAt());
+                brand.setCreatedAt(user.getCreatedAt());
                 brandRepository.save(brand);
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
                 userRepository.deleteById(user.getUserId());
@@ -91,124 +156,89 @@ public class AuthService {
                 ));
             }
         } else {
-            return ResponseEntity.status(500).body(Map.of(
-                    "error", "Invalid role."
-            ));
+            return ApiResponse.sendError(404, "Role is not existed", request.getRequestURI());
         }
-
-        return ResponseEntity.status(201).body(Map.of(
-                "message", "Registration successful"
-        ));
+        return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> registerAdmin(Admin admin) {
+    public ResponseEntity<?> registerAdmin(Admin admin, HttpServletRequest request) {
         if (adminRepository.existsByEmail(admin.getEmail())) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "Email exists"
-            ));
+            return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
         admin.setPassword(JwtUtil.hashPassword(admin.getPassword()));
-        try {
-            adminRepository.save(admin);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of(
-                    "error", e.getMessage()
-            ));
-        }
-        return ResponseEntity.status(201).body(Map.of(
-                "message", "Registration successful"
-        ));
+        adminRepository.save(admin);
+        return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> loginAccount(User user) {
+    public ResponseEntity<?> loginAccount(User user, HttpServletRequest request) {
         Optional<User> existing = userRepository.findByEmail(user.getEmail());
-        if (existing.isEmpty() || !JwtUtil.isCorrectPassword(existing.get().getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body(Map.of(
-                    "error", "Invalid credentials"
-            ));
+        if (!existing.isPresent()) {
+            return ApiResponse.sendError(404, "Email does not exist", request.getRequestURI());
         }
-
-        return ResponseEntity.status(200).body(Map.of(
-                "token", JwtUtil.createToken(existing.get())));
+        if (!JwtUtil.isCorrectPassword(existing.get().getPassword(), user.getPassword())) {
+            return ApiResponse.sendError(401, "Incorrect password", request.getRequestURI());
+        }
+        return ApiResponse.sendSuccess(200, "Login successful",
+                Map.of(
+                        "token", JwtUtil.createToken(existing.get()),
+                        "id", existing.get().getUserId()
+                ),
+                request.getRequestURI());
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChange passwordRequest, HttpServletRequest request) {
         DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
         String userId = decodeJWT.getSubject();
-        User user;
-        try {
-            user = userRepository.findById(userId).get();
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "UNAUTHORIZED"
-            ));
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (!userOpt.isPresent()) {
+            return ApiResponse.sendError(401, "Invalid or expired token", request.getRequestURI());
         }
-
+        User user = userOpt.get();
         if (!JwtUtil.isCorrectPassword(user.getPassword(), passwordRequest.getOldPassword())) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "PASSWORD_WRONG"
-            ));
+            return ApiResponse.sendError(401, "Incorrect old password", request.getRequestURI());
         }
 
         if (!passwordRequest.getNewPassword().equalsIgnoreCase(passwordRequest.getPasswordConfirm())) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "CONFIRM_PASSWORD_WRONG"
-            ));
+            return ApiResponse.sendError(400, "New password and confirmation do not match", request.getRequestURI());
         }
 
         if (passwordRequest.getNewPassword().equalsIgnoreCase(passwordRequest.getOldPassword())) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "DOUBLE_PASSWORD"
-            ));
+            return ApiResponse.sendError(400, "New password cannot be the same as the old password", request.getRequestURI());
         }
 
         user.setPassword(JwtUtil.hashPassword(passwordRequest.getNewPassword()));
 
-        return ResponseEntity.status(200).body(Map.of(
-                "message", "Password changed."
-        ));
+        return ApiResponse.sendSuccess(200, "Password changed successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> recoveryPasswordByEndpoint(String email) {
+    public ResponseEntity<?> recoveryPasswordByEndpoint(String email, String url, HttpServletRequest request) {
         if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "Invalid email."
-            ));
+            return ApiResponse.sendError(400, "Invalid email", request.getRequestURI());
         }
         Optional<User> user = userRepository.findByEmail(email);
         if (!user.isPresent()) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "Email is not exists."
-            ));
+            return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
-        String resetURL = JwtUtil.createURLResetPassword(email);
+        String resetURL = JwtUtil.createURLResetPassword(url, email);
         String subject = "Reset your password";
         String message = "Click this url: " + resetURL + " to reset your password.";
         emailService.sendSimpleEmail(email, subject, message);
-        return ResponseEntity.status(200).body(Map.of(
-                "message", "Recovery email sent."
-        ));
+        return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", url, request.getRequestURI());
     }
 
-    public ResponseEntity<?> resetPasswordByToken(String token, PasswordReset passwordReset) {
+    public ResponseEntity<?> resetPasswordByToken(String token, PasswordReset passwordReset, HttpServletRequest request) {
         try {
             User user;
             DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
             user = userRepository.findByEmail(decodeJWT.getSubject()).get();
             if (!passwordReset.getPassword().equalsIgnoreCase(passwordReset.getPasswordConfirm())) {
-                return ResponseEntity.status(400).body(Map.of(
-                        "error", "Confirm password wrong."
-                ));
+                return ApiResponse.sendError(400, "New password and confirmation do not match", request.getRequestURI());
             }
             user.setPassword(JwtUtil.hashPassword(passwordReset.getPassword()));
             userRepository.save(user);
-            return ResponseEntity.status(200).body(Map.of(
-                    "message", "Password reset successful."
-            ));
+            return ApiResponse.sendSuccess(200, "Password reset successfully", null, request.getRequestURI());
         } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of(
-                    "error", "Invalid token."
-            ));
+            return ApiResponse.sendError(401, "Invalid or expired token", request.getRequestURI());
         }
     }
 
