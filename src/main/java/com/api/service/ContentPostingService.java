@@ -1,19 +1,18 @@
 package com.api.service;
 
-import com.api.dto.ApiResponse;
-import com.api.model.ContentPosting;
-import com.api.repository.IContentPostingRepository;
-import com.api.util.Helper;
-import com.api.util.JwtUtil;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
+import com.api.dto.ApiResponse;
+import com.api.model.ContentPosting;
+import com.api.repository.IContentPostingRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ContentPostingService {
@@ -46,7 +45,6 @@ public class ContentPostingService {
     if (contentPostingOpt.isPresent()) {
         ContentPosting contentPosting = contentPostingOpt.get();
 
-        // So sánh influencerID (chủ bài) với userId từ đường dẫn
         if (!contentPosting.getInfluencerID().equals(userId)) {
             return ResponseEntity.status(403).body(
                     Map.of("error", "Access denied. You are not the owner of this content."));
