@@ -144,7 +144,6 @@ public class AuthService {
         } else {
             return ApiResponse.sendError(404, "Role is not existed", request.getRequestURI());
         }
-
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
