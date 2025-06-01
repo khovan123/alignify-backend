@@ -1,15 +1,14 @@
 HELP.md
 
 ### Maven ###
-/target/classes/application.properties
 /target/classes/
+/target/test-classes/
+/target/maven-status/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 /pom.xml
-
 # Spring Boot resources
 /src/main/resources/
+/src/test/
 
 ### STS ###
 .apt_generated
@@ -81,4 +80,4 @@ Thumbs.db
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-replay_pid*/target/ 
+replay_pid*
