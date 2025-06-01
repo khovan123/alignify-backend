@@ -4,15 +4,24 @@
  */
 package com.api.model;
 
+import java.util.Date;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-
+@Document(collection = "contentPostings")
 public class ContentPosting {
+
     @Id
     private String contentId;
-    private String influencerID, content, imageUrl, categoryId;
+
+    private String influencerID;
+    private String content;
+    private String imageUrl;
+    private String categoryId;
+
     @CreatedDate
+    private Date timeStamp;
     private boolean isPublic;
     private String commentId;
     private int like;
@@ -20,12 +29,13 @@ public class ContentPosting {
     public ContentPosting() {
     }
 
-    public ContentPosting(String contentId, String influencerID, String content, String imageUrl, String categoryId, boolean isPublic, String commentId, int like) {
+    public ContentPosting(String contentId, String influencerID, String content, String imageUrl, String categoryId, Date timeStamp, boolean isPublic, String commentId, int like) {
         this.contentId = contentId;
         this.influencerID = influencerID;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryId = categoryId;
+        this.timeStamp = timeStamp;
         this.isPublic = isPublic;
         this.commentId = commentId;
         this.like = like;
@@ -53,6 +63,14 @@ public class ContentPosting {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Date timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     public String getImageUrl() {
@@ -94,5 +112,5 @@ public class ContentPosting {
     public void setLike(int like) {
         this.like = like;
     }
-    
+
 }
