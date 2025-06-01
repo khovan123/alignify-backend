@@ -1,10 +1,13 @@
 package com.api.model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.*;
-import org.springframework.data.annotation.CreatedDate;
 
 @Document(collection = "influencers")
 public class Influencer {

@@ -1,7 +1,8 @@
 package com.api.model;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Map;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
