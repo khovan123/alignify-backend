@@ -15,29 +15,34 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @GetMapping("/request-otp")
-    public ResponseEntity<?> requestOtp(@RequestParam("email") String email) {
-        return authService.sendOtpCode(email);
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestParam("code") String authCode, HttpServletRequest request) {
+        return authService.loginViaGoogle(authCode, request);
+    }
+
+    @PostMapping("/request-otp")
+    public ResponseEntity<?> requestOtp(@RequestParam("email") String email, HttpServletRequest request) {
+        return authService.sendOtpCode(email, request);
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestParam("email") String email, @RequestParam("otp") String otp) {
-        return authService.verifyOtpCode(email, otp);
+    public ResponseEntity<?> verifyOtp(@RequestParam("email") String email, @RequestParam("otp") String otp, HttpServletRequest request) {
+        return authService.verifyOtpCode(email, otp, request);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        return authService.registerAccount(user);
+    public ResponseEntity<?> register(@RequestBody User user, HttpServletRequest request) {
+        return authService.registerAccount(user, request);
     }
 
     @PostMapping("/register-secret")
-    public ResponseEntity<?> registerSecret(@RequestBody Admin admin) {
-        return authService.registerAdmin(admin);
+    public ResponseEntity<?> registerSecret(@RequestBody Admin admin, HttpServletRequest request) {
+        return authService.registerAdmin(admin, request);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
-        return authService.loginAccount(user);
+    public ResponseEntity<?> login(@RequestBody User user, HttpServletRequest request) {
+        return authService.loginAccount(user, request);
     }
 
     @PutMapping("/change-password")
@@ -46,12 +51,12 @@ public class AuthController {
     }
 
     @PostMapping("/recovery-password")
-    public ResponseEntity<?> recoveryPassword(@RequestParam("email") String email) {
-        return authService.recoveryPasswordByEndpoint(email);
+    public ResponseEntity<?> recoveryPassword(@RequestParam("email") String email, @RequestBody String url, HttpServletRequest request) {
+        return authService.recoveryPasswordByEndpoint(email, url, request);
     }
 
     @PostMapping("/reset-password/{token}")
-    public ResponseEntity<?> resetPassword(@PathVariable("token") String token, @RequestBody PasswordReset passwordReset) {
-        return authService.recoveryPasswordByEndpoint(token);
+    public ResponseEntity<?> resetPassword(@PathVariable("token") String token, @RequestBody PasswordReset passwordReset, HttpServletRequest request) {
+        return authService.resetPasswordByToken(token, passwordReset, request);
     }
 }
