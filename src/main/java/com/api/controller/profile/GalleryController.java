@@ -15,27 +15,22 @@ public class GalleryController {
     private GalleryService galleryService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getGallery(@PathVariable("id") String id, HttpServletRequest request,
-            @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "30") int pageSize) {
+    public ResponseEntity<?> getGallery(@PathVariable("id") String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "30") int pageSize) {
         return galleryService.getGalleryById(id, request, pageNumber, pageSize);
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestParam("file") MultipartFile file,
-            HttpServletRequest request) {
+    public ResponseEntity<?> postImage(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         return galleryService.saveImageUrlIntoGalleryById(id, file, request);
     }
 
     @DeleteMapping("/{id}/image/{imageId}")
-    public ResponseEntity<?> deleteImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId,
-            HttpServletRequest request) {
+    public ResponseEntity<?> deleteImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId, HttpServletRequest request) {
         return galleryService.deleteImageByImageId(id, imageId, request);
     }
 
     @GetMapping("/{id}/image/{imageId}")
-    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId,
-            HttpServletRequest request) {
+    public ResponseEntity<?> getImage(@PathVariable("id") String id, @PathVariable("imageId") String imageId, HttpServletRequest request) {
         return galleryService.getImageByImageId(id, imageId, request);
     }
 }

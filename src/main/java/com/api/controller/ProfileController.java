@@ -15,7 +15,7 @@ public class ProfileController {
     @Autowired
     private ProfileService profileService;
 
-    @GetMapping(path = { "/", "" })
+    @GetMapping(path = {"/", ""})
     public ResponseEntity<?> getAllProfile(@RequestParam("roleId") String roleId, HttpServletRequest request) {
         return profileService.getAllProfileByRoleId(roleId, request);
     }
@@ -26,8 +26,7 @@ public class ProfileController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProfile(@PathVariable("id") String id, @RequestBody Influencer influencer,
-            HttpServletRequest request) {
+    public ResponseEntity<?> updateProfile(@PathVariable("id") String id, @RequestBody Influencer influencer, HttpServletRequest request) {
         return profileService.updateProfileById(id, influencer, request);
     }
 
@@ -37,8 +36,7 @@ public class ProfileController {
     }
 
     @PostMapping("/avatar/{id}")
-    public ResponseEntity<?> changeAvatar(@PathVariable("id") String id, @RequestParam("file") MultipartFile file,
-            HttpServletRequest request) {
+    public ResponseEntity<?> changeAvatar(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         return profileService.saveAvatarUrlById(id, file, request);
     }
 
