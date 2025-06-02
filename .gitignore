@@ -2,6 +2,9 @@ HELP.md
 
 ### Maven ###
 /target/classes/
+/target/test-classes/
+/target/maven-status/
+/target/maven-archiver/
 !.mvn/wrapper/maven-wrapper.jar
 /pom.xml
 # Spring Boot resources
