@@ -19,15 +19,13 @@ public class CommonController {
     private CategoryRepository categoryRepository;
 
     @GetMapping("/role")
-    public ResponseEntity<?> getAllRole() {
-        return ResponseEntity.status(200).body(Map.of(
-                "data", Map.of("role", roleRepository.findAll())));
+    public ResponseEntity<?> getAllRole(HttpServletRequest request) {
+        return ApiResponse.sendSuccess(200, "Roles", roleRepository.findAll(), request.getRequestURI());
     }
 
     @GetMapping("/category")
-    public ResponseEntity<?> getAllCategory() {
-        return ResponseEntity.status(200).body(Map.of(
-                "data", Map.of("category", categoryRepository.findAll())));
+    public ResponseEntity<?> getAllCategory(HttpServletRequest request) {
+        return ApiResponse.sendSuccess(200, "Categories", categoryRepository.findAll(), request.getRequestURI());
     }
 
 }

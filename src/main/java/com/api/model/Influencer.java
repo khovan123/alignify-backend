@@ -33,9 +33,9 @@ public class Influencer {
         this.gender = "NONE";
     }
 
-    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String genderId, String bio,
+    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String gender, String bio,
             Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds,
-            boolean isPublic, Date createAt) {
+            boolean isPublic, LocalDateTime createdAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
@@ -135,6 +135,14 @@ public class Influencer {
     }
 
     public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public boolean isIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
 
