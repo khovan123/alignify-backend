@@ -44,8 +44,8 @@ public class JwtUtil {
                 .sign(EnvConfig.ALGORITHM);
     }
 
-    public static String createURLResetPassword(String email) {
-        return "http://localhost:8080/api/v1/auth/reset-password/" + createResetToken(email);
+    public static String createURLResetPassword(String url, String email) {
+        return (url.endsWith("/") ? url : url + "/") + createResetToken(email);
     }
 
     public static String hashPassword(String password) {
