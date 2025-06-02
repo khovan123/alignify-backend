@@ -1,14 +1,15 @@
 HELP.md
 
 ### Maven ###
-target/
+/target/classes/
+/target/test-classes/
+/target/maven-status/
+/target/maven-archiver/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 /pom.xml
-
 # Spring Boot resources
 /src/main/resources/
+/src/test/
 
 ### STS ###
 .apt_generated
@@ -66,13 +67,13 @@ Thumbs.db
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
 *.zip
 *.tar.gz
 *.rar
+*.json
 
 # Test reports and coverage
 /test-output/
