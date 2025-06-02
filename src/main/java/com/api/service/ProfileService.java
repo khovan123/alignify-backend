@@ -105,11 +105,9 @@ public class ProfileService {
                     map.put("DoB", profile.getDoB());
                     map.put("location", user.getLocation());
                     Optional<Gallery> galleryOpt = galleryRepository.findById(id);
-                    if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty()
-                            && galleryOpt.get().getImages() != null) {
+                    if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty() && galleryOpt.get().getImages() != null) {
                         List<String> imageIds = galleryOpt.get().getImages();
-                        List<GalleryImage> images = imageRepository
-                                .findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
+                        List<GalleryImage> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
                                 .sorted(Comparator.comparing(GalleryImage::getCreatedAt).reversed())
                                 .limit(9)
                                 .collect(Collectors.toList());
@@ -134,12 +132,10 @@ public class ProfileService {
         return ApiResponse.sendSuccess(200, "Response successfully", map, request.getRequestURI());
     }
 
-    public ResponseEntity<?> updateProfileById(String id, @RequestBody Influencer newProfile,
-            HttpServletRequest request) {
-        // if (!Helper.isOwner(id, request)) {
-        // return ApiResponse.sendError(403, "REALLLLL: Access denied: Insufficient
-        // permissions", request.getRequestURI());
-        // }
+    public ResponseEntity<?> updateProfileById(String id, @RequestBody Influencer newProfile, HttpServletRequest request) {
+//        if (!Helper.isOwner(id, request)) {
+//            return ApiResponse.sendError(403, "REALLLLL: Access denied: Insufficient permissions", request.getRequestURI());
+//        }
 
         Optional<Influencer> influencerOpt = influencerRepository.findById(id);
         if (!influencerOpt.isPresent()) {
