@@ -1,46 +1,28 @@
 package com.api.controller;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.api.config.*;
 import com.api.model.*;
-import com.api.repository.*;
-import com.api.util.*;
+import com.api.service.ProfileService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "/api/v1/profile")
 public class ProfileController {
 
     @Autowired
-    private InfluencerRepository influencerProfileRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private BrandRepository brandRepository;
-    @Autowired
-    private GalleryRepository galleryRepository;
-    @Autowired
-    private ImageRepository imageRepository;
+    private ProfileService profileService;
 
-    @GetMapping(path = {"/", ""})
+    @GetMapping(path = { "/", "" })
     public ResponseEntity<?> getAllProfile(@RequestParam String roleId, HttpServletRequest request) {
         DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
         String userId = decodeJWT.getSubject();
         List<Map<String, Object>> userList = new ArrayList<>();
         if (roleId.equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
             return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied."
-            ));
+                    "error", "Access is denied."));
         }
         userRepository.findByRoleIdAndUserIdNot(roleId, userId).forEach(user -> {
             Map<String, Object> map = new HashMap<>();
@@ -52,7 +34,7 @@ public class ProfileController {
                     Influencer profile = profileOtp.get();
                     map.put("rating", profile.getRating());
                     map.put("avatarUrl", profile.getAvatarUrl());
-                    map.put("isPublic", profile.isPublic());
+                    map.put("isPublic", profile.isIsPublic());
                     map.put("followerIds", profile.getFollowerIds());
                 }
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
@@ -66,8 +48,7 @@ public class ProfileController {
         });
 
         return ResponseEntity.status(200).body(Map.of(
-                "data", Map.of("profile", userList)
-        ));
+                "data", Map.of("profile", userList)));
     }
 
     @GetMapping("/{id}")
@@ -77,8 +58,7 @@ public class ProfileController {
             user = userRepository.findById(id).get();
         } catch (Exception e) {
             return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile not found."
-            ));
+                    "error", "Profile not found."));
         }
         Role roleOpt = roleRepository.findById(user.getRoleId()).get();
         Map<String, Object> map = new HashMap<>();
@@ -97,17 +77,19 @@ public class ProfileController {
                     map.put("category", categories);
                 }
                 map.put("role", roleOpt.getRoleName());
-                map.put("gender", profile.getGender());
-                map.put("isPublic", profile.isPublic());
+                map.put("gender", profile.getGenderId());
+                map.put("isPublic", profile.isIsPublic());
                 map.put("followerIds", profile.getFollowerIds());
-                if (profile.isPublic() || Helper.isOwner(id, request)) {
+                if (profile.isIsPublic() || Helper.isOwner(id, request)) {
                     map.put("socialMediaLink", profile.getSocialMediaLinks());
                     map.put("DoB", profile.getDoB());
                     map.put("location", user.getLocation());
                     Optional<Gallery> galleryOpt = galleryRepository.findById(id);
-                    if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty() && galleryOpt.get().getImages() != null) {
+                    if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty()
+                            && galleryOpt.get().getImages() != null) {
                         List<String> imageIds = galleryOpt.get().getImages();
-                        List<Image> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
+                        List<Image> images = imageRepository
+                                .findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
                                 .sorted(Comparator.comparing(Image::getCreateAt).reversed())
                                 .limit(9)
                                 .collect(Collectors.toList());
@@ -130,16 +112,16 @@ public class ProfileController {
             }
         }
         return ResponseEntity.status(200).body(Map.of(
-                "data", Map.of("profile", map)
-        ));
+                "data", Map.of("profile", map)));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") String id, @RequestBody Influencer newProfile, HttpServletRequest request) {
+    @PostMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable("id") String id, @RequestBody Influencer newProfile,
+            HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
             return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied. You do not have permission to view this directory or page using the credentials that you supplied."
-            ));
+                    "error",
+                    "Access is denied. You do not have permission to view this directory or page using the credentials that you supplied."));
         }
 
         Influencer influencerProfile;
@@ -147,8 +129,7 @@ public class ProfileController {
             influencerProfile = influencerProfileRepository.findById(id).get();
         } catch (Exception e) {
             return ResponseEntity.status(404).body(Map.of(
-                    "error", "Profile not found."
-            ));
+                    "error", "Profile not found."));
         }
 
         Influencer profile = influencerProfile;
@@ -157,7 +138,7 @@ public class ProfileController {
             profile.setBio(newProfile.getBio());
         }
 
-        if (newProfile.getAvatarUrl() != null) {
+        if (newProfile.getAvatarUrl() != null && !newProfile.getAvatarUrl().isEmpty()) {
             profile.setAvatarUrl(newProfile.getAvatarUrl());
         }
 
@@ -165,8 +146,8 @@ public class ProfileController {
             profile.setDoB(newProfile.getDoB());
         }
 
-        if (newProfile.getGender() != null) {
-            profile.setGender(newProfile.getGender().toUpperCase());
+        if (newProfile.getGenderId() != null && !newProfile.getGenderId().isEmpty()) {
+            profile.setGenderId(newProfile.getGenderId());
         }
 
         if (newProfile.getCategoryIds() != null) {
@@ -194,28 +175,24 @@ public class ProfileController {
             influencerProfileRepository.save(profile);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of(
-                    "error", e.getMessage()
-            ));
+                    "error", e.getMessage()));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of(
-                "message", "Profile updated."
-        ));
+                "message", "Profile updated."));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable("id") String id, HttpServletRequest request) {
         if (!Helper.isOwner(id, request)) {
             return ResponseEntity.status(403).body(Map.of(
-                    "error", "Access is denied"
-            ));
+                    "error", "Access is denied"));
         }
         User user = userRepository.findById(id).get();
         user.setIsActive(false);
         userRepository.save(user);
         return ResponseEntity.status(204).body(Map.of(
-                "message", "Delete account successful"
-        ));
+                "message", "Delete account successful"));
     }
 
 }
