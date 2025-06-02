@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.*;
@@ -13,7 +14,7 @@ public class Influencer {
     private String avatarUrl;
     private String backgroundUrl;
     private Date DoB;
-    private String genderId;
+    private String gender;
     private String bio;
     private Map<String, String> socialMediaLinks;
     private double rating;
@@ -22,28 +23,29 @@ public class Influencer {
     private boolean isPublic;
 
     @CreatedDate
-    private Date createAt;
+    private LocalDateTime createdAt;
 
     public Influencer() {
         this.rating = 0.0;
         this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.isPublic = true;
+        this.gender = "NONE";
     }
 
-    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String genderId, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds, boolean isPublic, Date createAt) {
+    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds, boolean isPublic, LocalDateTime createdAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
         this.DoB = DoB;
-        this.genderId = genderId;
+        this.gender = gender;
         this.bio = bio;
         this.socialMediaLinks = socialMediaLinks;
         this.rating = rating;
         this.categoryIds = categoryIds;
         this.followerIds = followerIds;
         this.isPublic = isPublic;
-        this.createAt = createAt;
+        this.createdAt = createdAt;
     }
 
     public String getUserId() {
@@ -78,12 +80,12 @@ public class Influencer {
         this.DoB = DoB;
     }
 
-    public String getGenderId() {
-        return genderId;
+    public String getGender() {
+        return gender;
     }
 
-    public void setGenderId(String genderId) {
-        this.genderId = genderId;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getBio() {
@@ -126,6 +128,14 @@ public class Influencer {
         this.followerIds = followerIds;
     }
 
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
     public boolean isIsPublic() {
         return isPublic;
     }
@@ -134,12 +144,12 @@ public class Influencer {
         this.isPublic = isPublic;
     }
 
-    public Date getCreateAt() {
-        return createAt;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreateAt(Date createAt) {
-        this.createAt = createAt;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
 }
