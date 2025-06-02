@@ -15,7 +15,8 @@ public class GalleryController {
     private GalleryService galleryService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getGallery(@PathVariable("id") String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "30") int pageSize) {
+    public ResponseEntity<?> getGallery(@PathVariable("id") String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "30") int pageSize) {
         return galleryService.getGalleryById(id, request, pageNumber, pageSize);
     }
 
