@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CategoryRepository extends MongoRepository<Category, String> {
 
-    List<Category> findByCategoryIdIn(List<String> categoryIds);
+    List<Category> findAllByCategoryIdIn(List<String> categoryIds);
 }
