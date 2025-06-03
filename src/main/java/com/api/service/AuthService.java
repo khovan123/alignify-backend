@@ -44,6 +44,10 @@ public class AuthService {
     private String clientId;
     @Value("${spring.google.secret-key}")
     private String secretId;
+    @Value("${spring.google.google-apis}")
+    private String googleapis;
+    @Value("${spring.google.type}")
+    private String googletype;
 
     public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
         if (request.getHeader("X-Requested-With") == null) {
@@ -53,11 +57,11 @@ public class AuthService {
             GoogleTokenResponse tokenResponse = new GoogleAuthorizationCodeTokenRequest(
                     new NetHttpTransport(),
                     JacksonFactory.getDefaultInstance(),
-                    "https://oauth2.googleapis.com/token",
+                    googleapis,
                     clientId,
                     secretId,
                     authCode,
-                    "postmessage"
+                    googletype
             ).execute();
 
             GoogleIdToken idToken = tokenResponse.parseIdToken();
@@ -144,7 +148,6 @@ public class AuthService {
         } else {
             return ApiResponse.sendError(404, "Role is not existed", request.getRequestURI());
         }
-
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 

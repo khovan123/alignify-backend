@@ -93,7 +93,7 @@ public class ProfileService {
                 map.put("rating", profile.getRating());
                 map.put("avatarUrl", profile.getAvatarUrl());
                 if (profile.getCategoryIds() != null) {
-                    List<Category> categories = categoryRepository.findByCategoryIdIn(profile.getCategoryIds());
+                    List<Category> categories = categoryRepository.findAllByCategoryIdIn(profile.getCategoryIds());
                     map.put("category", categories);
                 }
                 map.put("role", roleOpt.getRoleName());

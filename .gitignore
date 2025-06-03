@@ -1,15 +1,15 @@
 HELP.md
 
 ### Maven ###
-/target/classes/application.properties
 /target/classes/
+/target/test-classes/
+/target/maven-status/
+/target/maven-archiver/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 /pom.xml
-
 # Spring Boot resources
 /src/main/resources/
+/src/test/
 
 ### STS ###
 .apt_generated
