@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 
 public interface IContentPostingRepository extends MongoRepository<ContentPosting, String>{
-    List<ContentPosting> findByInfluencerID(String influencerID);
+    List<ContentPosting> findByUserId(String userId);
+    List<ContentPosting> findByIsPublicTrue();
+     
 
 }

@@ -36,6 +36,7 @@ public class MongoConfig {
         this.create_galleryImagesCollection(db);
         this.create_otpsCollection(db);
         this.create_accountVerifiedsCollection(db);
+        this.create_contentPostingsCollection(db);
     }
 
     public void create_usersCollection(MongoDatabase db) {
@@ -465,12 +466,12 @@ public class MongoConfig {
     Document jsonSchema = Document.parse("""
     {
         "bsonType": "object",
-        "required": ["influencerID", "content", "categoryId", "timeStamp", "isPublic", "like"],
+        "required": ["userId", "content", "categoryIds", "timestamp", "isPublic", "like"],
         "properties": {
             "contentId": {
                 "bsonType": "string"
             },
-            "influencerID": {
+            "userId": {
                 "bsonType": "string"
             },
             "content": {
@@ -479,17 +480,23 @@ public class MongoConfig {
             "imageUrl": {
                 "bsonType": "string"
             },
-            "categoryId": {
-                "bsonType": "string"
+            "categoryIds": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "string"
+                }
             },
-            "timeStamp": {
+            "timestamp": {
                 "bsonType": "date"
             },
             "isPublic": {
                 "bsonType": "bool"
             },
-            "commentId": {
-                "bsonType": "string"
+            "commentIds": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "string"
+                }
             },
             "like": {
                 "bsonType": "int"
@@ -506,5 +513,6 @@ public class MongoConfig {
 
     db.createCollection("contentPostings", options);
 }
+
 
 }

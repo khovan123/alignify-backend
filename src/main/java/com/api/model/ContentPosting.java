@@ -5,6 +5,7 @@
 package com.api.model;
 
 import java.util.Date;
+import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,29 +16,31 @@ public class ContentPosting {
     @Id
     private String contentId;
 
-    private String influencerID;
+    private String userId;
     private String content;
     private String imageUrl;
-    private String categoryId;
+    private List<String> categoryIds;
 
     @CreatedDate
-    private Date timeStamp;
+    private Date timestamp;
     private boolean isPublic;
-    private String commentId;
+    private List<String> commentIds;
     private int like;
 
     public ContentPosting() {
+        this.isPublic = true;
+        this.like = 0;
     }
 
-    public ContentPosting(String contentId, String influencerID, String content, String imageUrl, String categoryId, Date timeStamp, boolean isPublic, String commentId, int like) {
+    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
         this.contentId = contentId;
-        this.influencerID = influencerID;
+        this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
-        this.categoryId = categoryId;
-        this.timeStamp = timeStamp;
+        this.categoryIds = categoryIds;
+        this.timestamp = timestamp;
         this.isPublic = isPublic;
-        this.commentId = commentId;
+        this.commentIds = commentIds;
         this.like = like;
     }
 
@@ -49,12 +52,12 @@ public class ContentPosting {
         this.contentId = contentId;
     }
 
-    public String getInfluencerID() {
-        return influencerID;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setInfluencerID(String influencerID) {
-        this.influencerID = influencerID;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getContent() {
@@ -65,12 +68,12 @@ public class ContentPosting {
         this.content = content;
     }
 
-    public Date getTimeStamp() {
-        return timeStamp;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public void setTimeStamp(Date timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getImageUrl() {
@@ -81,12 +84,12 @@ public class ContentPosting {
         this.imageUrl = imageUrl;
     }
 
-    public String getCategoryId() {
-        return categoryId;
+    public List<String> getCategoryIds() {
+        return categoryIds;
     }
 
-    public void setCategoryId(String categoryId) {
-        this.categoryId = categoryId;
+    public void setCategoryIds(List<String> categoryIds) {
+        this.categoryIds = categoryIds;
     }
 
     public boolean isIsPublic() {
@@ -97,12 +100,12 @@ public class ContentPosting {
         this.isPublic = isPublic;
     }
 
-    public String getCommentId() {
-        return commentId;
+    public List<String> getCommentIds() {
+        return commentIds;
     }
 
-    public void setCommentId(String commentId) {
-        this.commentId = commentId;
+    public void setCommentIds(List<String> commentIds) {
+        this.commentIds = commentIds;
     }
 
     public int getLike() {

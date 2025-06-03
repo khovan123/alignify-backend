@@ -41,7 +41,7 @@ public class ContentPostingController {
             @PathVariable String userId,
             @RequestBody ContentPosting contentPosting,
             HttpServletRequest request) {
-        return contentPostingSer.updateContentPosting(contentId, userId, contentPosting, request);
+        return contentPostingSer.updateContentPosting(contentId,userId, contentPosting, request);
     }
 
     @DeleteMapping("/{contentId}/{userId}")
@@ -50,7 +50,7 @@ public class ContentPostingController {
             @PathVariable String userId,
             HttpServletRequest request) {
 
-        return contentPostingSer.deleteContentPosting(contentId, userId, request);
+        return contentPostingSer.deleteContentPosting(contentId,userId, request);
     }
 
 }

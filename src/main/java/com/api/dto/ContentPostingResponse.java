@@ -1,0 +1,112 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.api.dto;
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ *
+ * @author Admin
+ */
+public class ContentPostingResponse {
+    private String contentId;
+    private String userId;
+    private String content;
+    private String imageUrl;
+    private List<String> categoryNames;
+    private Date timestamp;
+    private boolean isPublic;
+    private List<String> commentIds;
+    private int like;
+
+    public ContentPostingResponse() {
+    }
+
+    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<String> categoryNames, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
+        this.contentId = contentId;
+        this.userId = userId;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.categoryNames = categoryNames;
+        this.timestamp = timestamp;
+        this.isPublic = isPublic;
+        this.commentIds = commentIds;
+        this.like = like;
+    }
+
+    public String getContentId() {
+        return contentId;
+    }
+
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public List<String> getCategoryNames() {
+        return categoryNames;
+    }
+
+    public void setCategoryNames(List<String> categoryNames) {
+        this.categoryNames = categoryNames;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public boolean isIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public List<String> getCommentIds() {
+        return commentIds;
+    }
+
+    public void setCommentIds(List<String> commentIds) {
+        this.commentIds = commentIds;
+    }
+
+    public int getLike() {
+        return like;
+    }
+
+    public void setLike(int like) {
+        this.like = like;
+    }
+    
+}
