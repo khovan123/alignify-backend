@@ -104,7 +104,7 @@ public class ContentPostingService {
 
             contentPostingRepo.deleteById(contentId);
             return ApiResponse.sendSuccess(
-                    200,
+                    204,
                     "Content posting deleted successfully",
                     null,
                     request.getRequestURI()
