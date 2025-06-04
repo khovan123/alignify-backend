@@ -21,7 +21,7 @@ import org.springframework.http.ResponseEntity;
 
 @Service
 public class AuthService {
-
+    
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -48,7 +48,7 @@ public class AuthService {
     private String googleapis;
     @Value("${spring.google.type}")
     private String googletype;
-
+    
     public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
         if (request.getHeader("X-Requested-With") == null) {
             return ApiResponse.sendError(400, "Missing required header field: X-Requested-With", request.getRequestURI());
@@ -63,12 +63,12 @@ public class AuthService {
                     authCode,
                     googletype
             ).execute();
-
+            
             GoogleIdToken idToken = tokenResponse.parseIdToken();
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
             String name = (String) payload.get("name");
-
+            
             User user;
             if (!userRepository.existsByEmail(email)) {
                 user = new User();
@@ -90,16 +90,17 @@ public class AuthService {
             return ApiResponse.sendError(401, "Invalid Google authentication code", request.getRequestURI());
         }
     }
-
+    
     public ResponseEntity<?> sendOtpCode(String email, HttpServletRequest request) {
         try {
-            emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
+//            emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
+            emailService.sendOtpEmail(email, otpService.generateOtp(email));
         } catch (RuntimeException e) {
             return ApiResponse.sendError(400, e.getMessage(), request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "OTP sent successfully to your email", null, request.getRequestURI());
     }
-
+    
     public ResponseEntity<?> verifyOtpCode(String email, String otp, HttpServletRequest request) {
         try {
             boolean isValid = otpService.verifyOtp(email, otp);
@@ -113,7 +114,7 @@ public class AuthService {
             return ApiResponse.sendError(400, e.getMessage(), request.getRequestURI());
         }
     }
-
+    
     public ResponseEntity<?> registerAccount(User user, HttpServletRequest request) {
         if (userRepository.existsByEmail(user.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
@@ -150,7 +151,7 @@ public class AuthService {
         }
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
-
+    
     public ResponseEntity<?> registerAdmin(Admin admin, HttpServletRequest request) {
         if (adminRepository.existsByEmail(admin.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
@@ -159,7 +160,7 @@ public class AuthService {
         adminRepository.save(admin);
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
-
+    
     public ResponseEntity<?> loginAccount(User user, HttpServletRequest request) {
         Optional<User> existing = userRepository.findByEmail(user.getEmail());
         if (!existing.isPresent()) {
@@ -175,7 +176,7 @@ public class AuthService {
                 ),
                 request.getRequestURI());
     }
-
+    
     public ResponseEntity<?> changeUserPassword(PasswordChange passwordRequest, HttpServletRequest request) {
         DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
         String userId = decodeJWT.getSubject();
@@ -187,20 +188,20 @@ public class AuthService {
         if (!JwtUtil.isCorrectPassword(user.getPassword(), passwordRequest.getOldPassword())) {
             return ApiResponse.sendError(401, "Incorrect old password", request.getRequestURI());
         }
-
+        
         if (!passwordRequest.getNewPassword().equalsIgnoreCase(passwordRequest.getPasswordConfirm())) {
             return ApiResponse.sendError(400, "New password and confirmation do not match", request.getRequestURI());
         }
-
+        
         if (passwordRequest.getNewPassword().equalsIgnoreCase(passwordRequest.getOldPassword())) {
             return ApiResponse.sendError(400, "New password cannot be the same as the old password", request.getRequestURI());
         }
-
+        
         user.setPassword(JwtUtil.hashPassword(passwordRequest.getNewPassword()));
-
+        
         return ApiResponse.sendSuccess(200, "Password changed successfully", null, request.getRequestURI());
     }
-
+    
     public ResponseEntity<?> recoveryPasswordByEndpoint(String email, String url, HttpServletRequest request) {
         if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             return ApiResponse.sendError(400, "Invalid email", request.getRequestURI());
@@ -210,12 +211,13 @@ public class AuthService {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
         String resetURL = JwtUtil.createURLResetPassword(url, email);
-        String subject = "Reset your password";
-        String message = "Click this url: " + resetURL + " to reset your password.";
-        emailService.sendSimpleEmail(email, subject, message);
+//        String subject = "Reset your password";
+//        String message = "Click this url: " + resetURL + " to reset your password.";
+//      emailService.sendSimpleEmail(email, subject, message);
+        emailService.sendResetPasswordEmail(email, resetURL);
         return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", url, request.getRequestURI());
     }
-
+    
     public ResponseEntity<?> resetPasswordByToken(String token, PasswordReset passwordReset, HttpServletRequest request) {
         try {
             User user;
@@ -231,5 +233,5 @@ public class AuthService {
             return ApiResponse.sendError(401, "Invalid or expired token", request.getRequestURI());
         }
     }
-
+    
 }
