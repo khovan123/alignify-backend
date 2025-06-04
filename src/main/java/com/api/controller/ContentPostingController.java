@@ -52,5 +52,11 @@ public class ContentPostingController {
 
         return contentPostingSer.deleteContentPosting(contentId,userId, request);
     }
+    
+    @PutMapping("/{contentId}")
+    public ResponseEntity<?> toggleLike(@PathVariable String contentId,
+            HttpServletRequest request) {
+        return contentPostingSer.toggleLike(contentId,request);
+    }
 
 }

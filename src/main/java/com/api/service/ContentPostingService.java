@@ -165,7 +165,6 @@ public class ContentPostingService {
     }
 
     String userId = Helper.extractUserIdFromRequest(request);
-
     Optional<Likes> existingLike = likesRepo.findByUserIdAndContentId(userId, contentId);
 
     if (existingLike.isPresent()) {
@@ -175,7 +174,11 @@ public class ContentPostingService {
         likesRepo.save(newLike);
     }
 
-    long likeCount = likesRepo .countByContentId(contentId);
+    long likeCount = likesRepo.countByContentId(contentId);
+
+    ContentPosting content = contentPostingOpt.get();
+    content.setLike((int) likeCount);
+    contentPostingRepo.save(content); 
 
     String message = existingLike.isPresent() ? "Like removed" : "Like added";
 
