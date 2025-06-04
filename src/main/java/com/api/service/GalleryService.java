@@ -60,9 +60,9 @@ public class GalleryService {
     }
 
     public ResponseEntity<?> saveImageUrlIntoGalleryById(String id, MultipartFile file, HttpServletRequest request) {
-        if (!Helper.isOwner(id, request)) {
-            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-        }
+//        if (!Helper.isOwner(id, request)) {
+//            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
+//        }
         Optional<Gallery> galleryOtp = galleryRepository.findById(id);
         Gallery gallery;
         if (!galleryOtp.isPresent()) {

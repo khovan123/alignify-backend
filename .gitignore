@@ -5,6 +5,8 @@ HELP.md
 /target/test-classes/
 /target/maven-status/
 /target/maven-archiver/
+/target/generated-sources/
+/target/alignify-backend-1.0.0.jar.original
 !.mvn/wrapper/maven-wrapper.jar
 /pom.xml
 # Spring Boot resources
