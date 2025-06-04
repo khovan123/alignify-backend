@@ -78,7 +78,7 @@ public class CampaignService {
             }
             campaignRepo.deleteById(campaignId);
             return ApiResponse.sendSuccess(
-                    200,
+                    204,
                     "campaign posting deleted successfully",
                     null,
                     request.getRequestURI()
