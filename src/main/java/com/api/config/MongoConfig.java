@@ -37,6 +37,7 @@ public class MongoConfig {
         this.create_otpsCollection(db);
         this.create_accountVerifiedsCollection(db);
         this.create_contentPostingsCollection(db);
+        this.create_likesCollection(db);
     }
 
     public void create_usersCollection(MongoDatabase db) {
@@ -457,16 +458,16 @@ public class MongoConfig {
 
         db.createCollection("accountVerifieds", options);
     }
-    
-    public void create_contentPostingsCollection(MongoDatabase db) {
-    if (db.getCollection("contentPostings") != null) {
-        db.getCollection("contentPostings").drop();
-    }
 
-    Document jsonSchema = Document.parse("""
+    public void create_contentPostingsCollection(MongoDatabase db) {
+        if (db.getCollection("contentPostings") != null) {
+            db.getCollection("contentPostings").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
     {
         "bsonType": "object",
-        "required": ["userId", "content", "categoryIds", "timestamp", "isPublic", "like"],
+        "required": ["userId", "content"],
         "properties": {
             "contentId": {
                 "bsonType": "string"
@@ -501,18 +502,55 @@ public class MongoConfig {
             "like": {
                 "bsonType": "int"
             }
+                                                     }
+        }
+    
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("contentPostings", options);
+    }
+
+    public void create_likesCollection(MongoDatabase db) {
+        if (db.getCollection("likes") != null) {
+            db.getCollection("likes").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["userId", "contentId", "createdAt"],
+        "properties": {
+            "userId": {
+                "bsonType": "string"
+            },
+            "contentId": {
+                "bsonType": "string"
+            },
+            "createdAt": {
+                "bsonType": "date"
+            }
         }
     }
     """);
 
-    ValidationOptions validationOptions = new ValidationOptions()
-            .validator(new Document("$jsonSchema", jsonSchema));
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
 
-    CreateCollectionOptions options = new CreateCollectionOptions()
-            .validationOptions(validationOptions);
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
 
-    db.createCollection("contentPostings", options);
-}
+        db.createCollection("likes", options);
 
+//        MongoCollection<Document> likesCollection = db.getCollection("likes");
+//        likesCollection.createIndex(Indexes.ascending("contentId"));
+//        likesCollection.createIndex(Indexes.ascending("userId"));
+//        likesCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("contentId"), Indexes.ascending("userId")));
+    }
 
 }

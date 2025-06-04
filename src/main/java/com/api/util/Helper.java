@@ -10,5 +10,10 @@ public class Helper {
         String ownerId = decodeJWT.getSubject();
         return ownerId.equalsIgnoreCase(id);
     }
+    
+    public static String extractUserIdFromRequest(HttpServletRequest request) {
+    DecodedJWT jwt = JwtUtil.decodeToken(request);
+    return jwt.getSubject();
+    }
 
 }

@@ -4,19 +4,22 @@
  */
 package com.api.dto;
 
+import com.api.model.Likes;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author Admin
  */
 public class ContentPostingResponse {
+
     private String contentId;
     private String userId;
     private String content;
     private String imageUrl;
-    private List<String> categoryNames;
+    private List<Map<String, String>> categories;
     private Date timestamp;
     private boolean isPublic;
     private List<String> commentIds;
@@ -25,12 +28,12 @@ public class ContentPostingResponse {
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<String> categoryNames, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
+    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
-        this.categoryNames = categoryNames;
+        this.categories = categories;
         this.timestamp = timestamp;
         this.isPublic = isPublic;
         this.commentIds = commentIds;
@@ -69,12 +72,12 @@ public class ContentPostingResponse {
         this.imageUrl = imageUrl;
     }
 
-    public List<String> getCategoryNames() {
-        return categoryNames;
-    }
+    public List<Map<String, String>> getCategories() {
+    return categories;
+}
 
-    public void setCategoryNames(List<String> categoryNames) {
-        this.categoryNames = categoryNames;
+    public void setCategories(List<Map<String, String>> categories) {
+        this.categories = categories;
     }
 
     public Date getTimestamp() {
@@ -108,5 +111,5 @@ public class ContentPostingResponse {
     public void setLike(int like) {
         this.like = like;
     }
-    
+
 }

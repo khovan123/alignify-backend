@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.api.model;
 
 import java.util.Date;
@@ -28,8 +24,8 @@ public class ContentPosting {
     private int like;
 
     public ContentPosting() {
-        this.isPublic = true;
-        this.like = 0;
+        this.like=0;
+        this.isPublic=true;
     }
 
     public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
