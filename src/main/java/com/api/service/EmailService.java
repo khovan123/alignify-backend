@@ -1,14 +1,17 @@
 package com.api.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
@@ -18,6 +21,14 @@ public class EmailService {
 
     @Value("${spring.mail.username}")
     private String fromEmail;
+
+    public void sendSimpleEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        javaMailSender.send(message);
+    }
 
     public void sendOtpEmail(String to, String otp) {
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -98,99 +109,100 @@ public class EmailService {
             helper.setFrom(fromEmail);
             helper.setSubject("Alignify: Reset Your Password");
             String htmlContent = """
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <style>
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                            background-color: #f4f4f4;
-                            color: #333;
-                        }
-                        .container {
-                            max-width: 600px;
-                            margin: 20px auto;
-                            background-color: #ffffff;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        }
-                        .header {
-                            background-color: #4a90e2;
-                            padding: 20px;
-                            text-align: center;
-                        }
-                        .header img {
-                            max-width: 150px;
-                        }
-                        .content {
-                            padding: 30px;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            gap: 20px;
-                        }
-                        .instructions {
-                            font-size: 16px;
-                            line-height: 1.6;
-                            color: #555;
-                            text-align: center;
-                        }
-                        .button {
-                            display: inline-block;
-                            padding: 12px 30px;
-                            background-color: #4a90e2;
-                            color: #ffffff;
-                            text-decoration: none;
-                            border-radius: 6px;
-                            font-size: 16px;
-                            font-weight: bold;
-                            transition: background-color 0.3s;
-                        }
-                        .button:hover {
-                            background-color: #357abd;
-                        }
-                        .footer {
-                            background-color: #f4f4f4;
-                            padding: 20px;
-                            text-align: center;
-                            font-size: 14px;
-                            color: #777;
-                        }
-                        @media only screen and (max-width: 600px) {
-                            .content {
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body {
+                                margin: 0;
+                                padding: 0;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                                background-color: #f4f4f4;
+                                color: #333;
+                            }
+                            .container {
+                                max-width: 600px;
+                                margin: 20px auto;
+                                background-color: #ffffff;
+                                border-radius: 8px;
+                                overflow: hidden;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            }
+                            .header {
+                                background-color: #4a90e2;
                                 padding: 20px;
+                                text-align: center;
+                            }
+                            .header img {
+                                max-width: 150px;
+                            }
+                            .content {
+                                padding: 30px;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 20px;
+                            }
+                            .instructions {
+                                font-size: 16px;
+                                line-height: 1.6;
+                                color: #555;
+                                text-align: center;
                             }
                             .button {
-                                width: 100%;
-                                box-sizing: border-box;
+                                display: inline-block;
+                                padding: 12px 30px;
+                                background-color: #4a90e2;
+                                color: #ffffff;
+                                text-decoration: none;
+                                border-radius: 6px;
+                                font-size: 16px;
+                                font-weight: bold;
+                                transition: background-color 0.3s;
                             }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <img src="https://via.placeholder.com/150x50?text=Alignify+Logo" alt="Alignify Logo">
+                            .button:hover {
+                                background-color: #357abd;
+                            }
+                            .footer {
+                                background-color: #f4f4f4;
+                                padding: 20px;
+                                text-align: center;
+                                font-size: 14px;
+                                color: #777;
+                            }
+                            @media only screen and (max-width: 600px) {
+                                .content {
+                                    padding: 20px;
+                                }
+                                .button {
+                                    width: 100%;
+                                    box-sizing: border-box;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <img src="https://via.placeholder.com/150x50?text=Alignify+Logo" alt="Alignify Logo">
+                            </div>
+                            <div class="content">
+                                <h1>Reset Your Alignify Password</h1>
+                                <p class="instructions">Click the button below to reset your password. This link is valid for 1 hour.</p>
+                                <a href="%s" class="button">Reset Password</a>
+                                <p class="instructions">If you didn’t request a password reset, please secure your account or contact our support team.</p>
+                            </div>
+                            <div class="footer">
+                                <p>Contact support at <a href="mailto:support@alignify.com">support@alignify.com</a> if you need assistance.</p>
+                                <p>© 2025 Alignify. All rights reserved.</p>
+                            </div>
                         </div>
-                        <div class="content">
-                            <h1>Reset Your Alignify Password</h1>
-                            <p class="instructions">Click the button below to reset your password. This link is valid for 1 hour.</p>
-                            <a href="%s" class="button">Reset Password</a>
-                            <p class="instructions">If you didn’t request a password reset, please secure your account or contact our support team.</p>
-                        </div>
-                        <div class="footer">
-                            <p>Contact support at <a href="mailto:support@alignify.com">support@alignify.com</a> if you need assistance.</p>
-                            <p>© 2025 Alignify. All rights reserved.</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-                """.formatted(resetUrl);
+                    </body>
+                    </html>
+                    """
+                    .formatted(resetUrl);
             helper.setText(htmlContent, true);
             javaMailSender.send(message);
         } catch (MessagingException e) {
