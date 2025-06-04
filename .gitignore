@@ -5,6 +5,7 @@ HELP.md
 /target/test-classes/
 /target/maven-status/
 /target/maven-archiver/
+/target/generated-sources/
 !.mvn/wrapper/maven-wrapper.jar
 /pom.xml
 # Spring Boot resources
