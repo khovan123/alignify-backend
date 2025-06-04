@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
@@ -24,8 +25,10 @@ public class ContentPosting {
     private int like;
 
     public ContentPosting() {
-        this.like=0;
-        this.isPublic=true;
+        this.like = 0;
+        this.isPublic = true;
+        this.categoryIds = new ArrayList<>();
+
     }
 
     public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
