@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,34 +28,41 @@ public class ContentPostingController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts(HttpServletRequest request) {
-        return contentPostingSer.getAllContentPostings(request);
+    public ResponseEntity<?> getAllPosts(
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return contentPostingSer.getAllContentPostings(request, pageNumber, pageSize);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getPostsByUserId(@PathVariable String userId, HttpServletRequest request) {
-        return contentPostingSer.getContentPostingById(userId, request);
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getPostsByUserId(
+            @PathVariable("userId") String userId,
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return contentPostingSer.getContentPostingById(userId, request, pageNumber, pageSize);
     }
 
-    @PutMapping("/{contentId}/{userId}")
-    public ResponseEntity<?> updatePost(@PathVariable String contentId,
-            @PathVariable String userId,
+    @PutMapping("/{userId}/{contentId}")
+    public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
+            @PathVariable("userId") String userId,
             @RequestBody ContentPosting contentPosting,
             HttpServletRequest request) {
         return contentPostingSer.updateContentPosting(contentId,userId, contentPosting, request);
     }
 
-    @DeleteMapping("/{contentId}/{userId}")
+    @DeleteMapping("/{userId}/{contentId}")
     public ResponseEntity<?> deletePost(
-            @PathVariable String contentId,
-            @PathVariable String userId,
+            @PathVariable("contentId") String contentId,
+            @PathVariable("userId") String userId,
             HttpServletRequest request) {
 
         return contentPostingSer.deleteContentPosting(contentId,userId, request);
     }
     
     @PutMapping("/{contentId}")
-    public ResponseEntity<?> toggleLike(@PathVariable String contentId,
+    public ResponseEntity<?> toggleLike(@PathVariable("contentId") String contentId,
             HttpServletRequest request) {
         return contentPostingSer.toggleLike(contentId,request);
     }
