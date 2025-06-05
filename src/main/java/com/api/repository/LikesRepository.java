@@ -1,4 +1,3 @@
-
 package com.api.repository;
 
 import java.util.Optional;
@@ -9,8 +8,18 @@ import org.springframework.stereotype.Repository;
 import com.api.model.Likes;
 
 @Repository
-public interface LikesRepository extends MongoRepository<Likes, String>{
-     Optional<Likes> findByUserIdAndContentId(String userId, String contentId);
+public interface LikesRepository extends MongoRepository<Likes, String> {
+
+    Optional<Likes> findByUserIdAndContentId(String userId, String contentId);
+
     long countByContentId(String contentId);
+
     void deleteByUserIdAndContentId(String userId, String contentId);
+
+    Optional<Likes> findByUserIdAndCommentId(String userId, String commentId);
+
+    void deleteByUserIdAndCommentId(String userId, String commentId);
+
+    long countByCommentId(String commentId);
+
 }

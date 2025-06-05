@@ -12,6 +12,7 @@ public class Likes {
     private String likeId;
     private String userId;
     private String contentId;
+    private String commentId;
     @CreatedDate
     private Date createdAt;
 
@@ -23,12 +24,21 @@ public class Likes {
         this.contentId = contentId;
     }
 
-    public Likes(String likeId, String userId, String contentId, Date createdAt) {
-        this.likeId = likeId;
+    public Likes(String userId, String contentId, String commentId) {
         this.userId = userId;
         this.contentId = contentId;
-        this.createdAt = createdAt;
+        this.commentId = commentId;
     }
+
+    public String getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(String commentId) {
+        this.commentId = commentId;
+    }
+
+    
 
     public String getLikeId() {
         return likeId;

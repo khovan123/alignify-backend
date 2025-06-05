@@ -1,0 +1,153 @@
+package com.api.service;
+
+import com.api.dto.ApiResponse;
+import com.api.model.Comment;
+import com.api.model.ContentPosting;
+import com.api.model.Likes;
+import com.api.repository.CommentRepository;
+import com.api.repository.IContentPostingRepository;
+import com.api.repository.LikesRepository;
+import com.api.util.Helper;
+import com.api.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CommentService {
+
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private IContentPostingRepository contentPostingRepo;
+    @Autowired
+    private LikesRepository likesRepo;
+
+    public ResponseEntity<?> createComment(Comment comment, HttpServletRequest request) {
+        comment = commentRepository.save(comment);
+        return ApiResponse.sendSuccess(201, "comment created successfully", comment,
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getCommentByUserId(String userId, HttpServletRequest request, int pageNumber, int pageSize) {
+        if (!Helper.isOwner(userId, request)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Access denied. You are not allowed to view these comments."));
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        List<Comment> comments = commentRepository.findByUserId(userId, pageable);
+
+        if (comments.isEmpty()) {
+            return ApiResponse.sendError(404, "No comments found for userId: " + userId, request.getRequestURI());
+        }
+
+        return ApiResponse.sendSuccess(200, "Comments retrieved successfully", comments, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getCommentByContentId(String contentId, HttpServletRequest request, int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        List<Comment> comments = commentRepository.findByContentId(contentId, pageable);
+
+        if (comments.isEmpty()) {
+            return ApiResponse.sendError(404, "No comments found for contentId: " + contentId, request.getRequestURI());
+        }
+
+        return ApiResponse.sendSuccess(200, "Comments retrieved successfully", comments, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> deleteComment(String commentId, HttpServletRequest request) {
+        Optional<Comment> commentOpt = commentRepository.findById(commentId);
+        if (commentOpt.isEmpty()) {
+            return ApiResponse.sendError(404, "Comment not found", request.getRequestURI());
+        }
+
+        Comment comment = commentOpt.get();
+
+        boolean isCommentOwner = Helper.isOwner(comment.getUserId(), request);
+
+        Optional<ContentPosting> contentOpt = contentPostingRepo.findById(comment.getContentId());
+        boolean isContentOwner = contentOpt.isPresent() && Helper.isOwner(contentOpt.get().getUserId(), request);
+
+        if (!isCommentOwner && !isContentOwner) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Access denied. You can only delete your own comment or comments on your content."));
+        }
+
+        commentRepository.deleteById(commentId);
+
+        return ApiResponse.sendSuccess(
+                200,
+                "Comment deleted successfully",
+                null,
+                request.getRequestURI()
+        );
+    }
+
+    public ResponseEntity<?> updateComment(String commentId, Comment updatedComment, HttpServletRequest request) {
+        Optional<Comment> commentOpt = commentRepository.findById(commentId);
+
+        if (commentOpt.isEmpty()) {
+            return ApiResponse.sendError(404, "Comment not found", request.getRequestURI());
+        }
+
+        Comment existingComment = commentOpt.get();
+
+        if (!Helper.isOwner(existingComment.getUserId(), request)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Access denied. You can only update your own comment."));
+        }
+
+        existingComment.setContent(updatedComment.getContent());
+        existingComment.setCreatedDate(new Date());
+
+        commentRepository.save(existingComment);
+
+        return ApiResponse.sendSuccess(200, "Comment updated successfully", existingComment, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> toggleLikeForComment(String commentId, HttpServletRequest request) {
+        Optional<Comment> commentOpt = commentRepository.findById(commentId);
+        if (commentOpt.isEmpty()) {
+            return ApiResponse.sendError(404, "Comment not found", request.getRequestURI());
+        }
+
+        String userId = JwtUtil.decodeToken(request).getSubject();
+        Optional<Likes> existingLike = likesRepo.findByUserIdAndCommentId(userId, commentId);
+
+        if (existingLike.isPresent()) {
+            likesRepo.deleteByUserIdAndCommentId(userId, commentId);
+        } else {
+            Likes newLike = new Likes();
+            newLike.setUserId(userId);
+            newLike.setCommentId(commentId);
+            newLike.setCreatedAt(new Date());
+            likesRepo.save(newLike);
+        }
+
+        long likeCount = likesRepo.countByCommentId(commentId);
+
+        Comment comment = commentOpt.get();
+        comment.setLike((int) likeCount);
+        commentRepository.save(comment);
+
+        String message = existingLike.isPresent() ? "Like removed from comment" : "Like added to comment";
+
+        return ApiResponse.sendSuccess(
+                200, message,
+                Map.of("likeCount", likeCount),
+                request.getRequestURI()
+        );
+    }
+
+}
