@@ -31,30 +31,30 @@ public class ContentPostingController {
         return contentPostingSer.getAllContentPostings(request);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getPostsByUserId(@PathVariable String userId, HttpServletRequest request) {
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getPostsByUserId(@PathVariable("userId") String userId, HttpServletRequest request) {
         return contentPostingSer.getContentPostingById(userId, request);
     }
 
-    @PutMapping("/{contentId}/{userId}")
-    public ResponseEntity<?> updatePost(@PathVariable String contentId,
+    @PutMapping("/{userId}/{contentId}")
+    public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
             @PathVariable String userId,
             @RequestBody ContentPosting contentPosting,
             HttpServletRequest request) {
         return contentPostingSer.updateContentPosting(contentId,userId, contentPosting, request);
     }
 
-    @DeleteMapping("/{contentId}/{userId}")
+    @DeleteMapping("/{userId}/{contentId}")
     public ResponseEntity<?> deletePost(
-            @PathVariable String contentId,
-            @PathVariable String userId,
+            @PathVariable("contentId") String contentId,
+            @PathVariable("userId") String userId,
             HttpServletRequest request) {
 
         return contentPostingSer.deleteContentPosting(contentId,userId, request);
     }
     
     @PutMapping("/{contentId}")
-    public ResponseEntity<?> toggleLike(@PathVariable String contentId,
+    public ResponseEntity<?> toggleLike(@PathVariable("contentId") String contentId,
             HttpServletRequest request) {
         return contentPostingSer.toggleLike(contentId,request);
     }

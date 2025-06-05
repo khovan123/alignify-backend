@@ -1,18 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.api.dto;
 
-import com.api.model.Likes;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * @author Admin
- */
+
 public class ContentPostingResponse {
 
     private String contentId;

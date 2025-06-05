@@ -502,8 +502,8 @@ public class MongoConfig {
             "like": {
                 "bsonType": "int"
             }
-                                                     }
         }
+    }
     
     """);
 
@@ -547,10 +547,6 @@ public class MongoConfig {
 
         db.createCollection("likes", options);
 
-//        MongoCollection<Document> likesCollection = db.getCollection("likes");
-//        likesCollection.createIndex(Indexes.ascending("contentId"));
-//        likesCollection.createIndex(Indexes.ascending("userId"));
-//        likesCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("contentId"), Indexes.ascending("userId")));
     }
 
 }
