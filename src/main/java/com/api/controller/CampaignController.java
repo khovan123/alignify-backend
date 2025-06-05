@@ -38,7 +38,7 @@ public class CampaignController {
         return campaignService.getCampaignsById(userId, request);
     }
 
-    @PutMapping("/{campaignId}/{userId}")
+    @PutMapping("/{userId}/{campaignId}")
     public ResponseEntity<?> updatePost(@PathVariable String campaignId,
             @PathVariable String userId,
             @RequestBody Campaign campaign,
@@ -46,7 +46,7 @@ public class CampaignController {
         return campaignService.updateCampaign(campaignId,userId, campaign, request);
     }
 
-    @DeleteMapping("/{campaignId}/{userId}")
+    @DeleteMapping("/{userId}/{campaignId}")
     public ResponseEntity<?> deletePost(
             @PathVariable String campaignId,
             @PathVariable String userId,

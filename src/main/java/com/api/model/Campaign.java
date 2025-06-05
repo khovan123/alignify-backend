@@ -19,14 +19,15 @@ public class Campaign {
     @CreatedDate
     private Date timestamp;
     private boolean isPublic;
+    private String status;
 
     public Campaign() {
         this.isPublic = true;
         this.categoryIds = new ArrayList<>();
+        this.status = "DRAFT";
     }
 
-    
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic) {
+    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, String status) {
         this.campaignId = campaignId;
         this.userId = userId;
         this.content = content;
@@ -34,6 +35,7 @@ public class Campaign {
         this.categoryIds = categoryIds;
         this.timestamp = timestamp;
         this.isPublic = isPublic;
+        this.status = status;
     }
 
     public String getCampaignId() {
@@ -91,6 +93,17 @@ public class Campaign {
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    
+    
     
     
 }

@@ -582,6 +582,10 @@ public class MongoConfig {
                     "bsonType": "string"
                 }
             },
+            "status": {
+                "bsonType": "string",
+                "enum": ["DRAFT","PENDING","COMPLETED"]
+            },
             "timestamp": {
                 "bsonType": "date"
             },

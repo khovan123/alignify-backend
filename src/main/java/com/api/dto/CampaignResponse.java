@@ -14,10 +14,19 @@ public class CampaignResponse {
     private List<Map<String, String>> categories;
     private Date timestamp;
     private boolean isPublic;
+    private String status;
 
     public CampaignResponse() {
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
     public String getCampaignId() {
         return campaignId;
     }

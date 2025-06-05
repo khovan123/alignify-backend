@@ -49,6 +49,7 @@ public class CampaignService {
     dto.setCategories(categoryInfo); 
     dto.setTimestamp(post.getTimestamp());
     dto.setIsPublic(post.isIsPublic());
+    dto.setStatus(post.getStatus());
 
     return dto;
 }
@@ -86,47 +87,53 @@ public class CampaignService {
         } else {
             return ApiResponse.sendError(
                     404,
-                    "Content posting not found",
+                    "Campaign posting not found",
                     request.getRequestURI()
             );
         }
     }
-     public ResponseEntity<?> updateCampaign(String campaignId, String user,
-            Campaign updatedCampaign,
-            HttpServletRequest request) {
+   public ResponseEntity<?> updateCampaign(String campaignId, String user,
+        Campaign updatedCampaign,
+        HttpServletRequest request) {
 
-        Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
-        if (campaignOpt.isPresent()) {
-            Campaign campaign = campaignOpt.get();
+    Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
+    if (campaignOpt.isPresent()) {
+        Campaign campaign = campaignOpt.get();
 
-            if (!Helper.isOwner(campaign.getUserId(), request)) {
-                return ResponseEntity.status(403).body(
-                        Map.of("error", "Access denied. You are not the owner of this content."));
-            }
-
-            List<String> updatedCategoryIds = updatedCampaign.getCategoryIds();
-            List<Category> validCategories = categoryRepo.findAllByCategoryIdIn(updatedCategoryIds);
-
-            if (validCategories == null || validCategories.isEmpty()) {
-                return ApiResponse.sendError(400, "No valid category IDs provided", request.getRequestURI());
-            }
-
-            List<String> validCategoryIds = validCategories.stream()
-                    .map(Category::getCategoryId)
-                    .toList();
-
-            campaign.setContent(updatedCampaign.getContent());
-            campaign.setImageUrl(updatedCampaign.getImageUrl());
-            campaign.setCategoryIds(validCategoryIds);
-            campaign.setIsPublic(updatedCampaign.isIsPublic());
-
-            campaignRepo.save(campaign);
-
-            return ApiResponse.sendSuccess(200, "Content posting updated successfully", campaign,
-                    request.getRequestURI());
-        } else {
-            return ApiResponse.sendError(404, "Content posting not found", request.getRequestURI());
+        if (!Helper.isOwner(campaign.getUserId(), request)) {
+            return ResponseEntity.status(403).body(
+                    Map.of("error", "Access denied. You are not the owner of this content."));
         }
-    }
 
+        List<String> updatedCategoryIds = updatedCampaign.getCategoryIds();
+        List<Category> validCategories = categoryRepo.findAllByCategoryIdIn(updatedCategoryIds);
+
+        if (validCategories == null || validCategories.isEmpty()) {
+            return ApiResponse.sendError(400, "No valid category IDs provided", request.getRequestURI());
+        }
+
+        String newStatus = updatedCampaign.getStatus();
+        List<String> validStatuses = List.of("DRAFT", "PENDING", "COMPLETED");
+        if (newStatus == null || !validStatuses.contains(newStatus)) {
+            return ApiResponse.sendError(400, "Invalid status. Allowed values: DRAFT, PENDING, COMPLETED", request.getRequestURI());
+        }
+
+        List<String> validCategoryIds = validCategories.stream()
+                .map(Category::getCategoryId)
+                .toList();
+
+        campaign.setContent(updatedCampaign.getContent());
+        campaign.setImageUrl(updatedCampaign.getImageUrl()); 
+        campaign.setCategoryIds(validCategoryIds);
+        campaign.setIsPublic(updatedCampaign.isIsPublic());
+        campaign.setStatus(newStatus);
+
+        campaignRepo.save(campaign);
+
+        return ApiResponse.sendSuccess(200, "Campaign posting updated successfully", null,
+                request.getRequestURI());
+    } else {
+        return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
+    }
+}
 }

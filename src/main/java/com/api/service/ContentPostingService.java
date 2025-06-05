@@ -164,7 +164,7 @@ public class ContentPostingService {
         return ApiResponse.sendError(404, "Content posting not found", request.getRequestURI());
     }
 
-    String userId = Helper.extractUserIdFromRequest(request);
+    String userId = JwtUtil.decodeToken(request).getId();
     Optional<Likes> existingLike = likesRepo.findByUserIdAndContentId(userId, contentId);
 
     if (existingLike.isPresent()) {
