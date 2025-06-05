@@ -8,11 +8,10 @@ HELP.md
 /target/generated-sources/
 /target/generated-test-sources/
 !.mvn/wrapper/maven-wrapper.jar
-#+ !/target/*.jar
 # Spring Boot resources
 /src/main/resources/
 /src/test/
-
+pom.xml
 ### STS ###
 .apt_generated
 .classpath
@@ -69,7 +68,6 @@ Thumbs.db
 .mtj.tmp/
 
 # Package Files #
-#- *.jar
 *.war
 *.nar
 *.ear
