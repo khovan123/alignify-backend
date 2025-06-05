@@ -1,15 +1,24 @@
 package com.api.config;
 
-import com.api.model.*;
-import com.api.repository.*;
-import com.mongodb.client.*;
-import com.mongodb.client.model.*;
+import java.util.List;
+
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import jakarta.annotation.PostConstruct;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+
+import com.api.model.Category;
+import com.api.model.Role;
+import com.api.repository.CategoryRepository;
+import com.api.repository.RoleRepository;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.ValidationOptions;
+
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class MongoConfig {
@@ -26,16 +35,16 @@ public class MongoConfig {
     @PostConstruct
     public void init() {
         MongoDatabase db = mongoClient.getDatabase(databaseName);
-//        this.create_usersCollection(db);
-//        this.create_influencersCollection(db);
-//        this.create_brandsCollection(db);
+       this.create_usersCollection(db);
+       this.create_influencersCollection(db);
+       this.create_brandsCollection(db);
 //        this.create_rolesCollection(db);
 //        this.create_categoriesCollection(db);
         this.create_adminsCollection(db);
         this.create_galleriesCollection(db);
         this.create_galleryImagesCollection(db);
         this.create_otpsCollection(db);
-//        this.create_accountVerifiedsCollection(db);
+       this.create_accountVerifiedsCollection(db);
         this.create_contentPostingsCollection(db);
         this.create_likesCollection(db);
     }
