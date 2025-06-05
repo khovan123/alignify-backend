@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
 
 @RestController
-@RequestMapping("api/v1/campaign")
+@RequestMapping("api/v1/campaigns")
 public class CampaignController {
     @Autowired
     private CampaignService campaignService;
@@ -28,15 +29,22 @@ public class CampaignController {
         return campaignService.createCampaign(campaign, request);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts(HttpServletRequest request) {
-        return campaignService.getAllCampaign(request);
-    }
+    @GetMapping("")
+    public ResponseEntity<?> getAllCampaigns(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        HttpServletRequest request) {
+    return campaignService.getAllCampaign(page, size, request);
+}
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getPostsByUserId(@PathVariable String userId, HttpServletRequest request) {
-        return campaignService.getCampaignsById(userId, request);
-    }
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getCampaignsByUserId(
+        @PathVariable String userId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        HttpServletRequest request) {
+    return campaignService.getCampaignsById(userId, page, size, request);
+}
 
     @PutMapping("/{userId}/{campaignId}")
     public ResponseEntity<?> updatePost(@PathVariable String campaignId,
