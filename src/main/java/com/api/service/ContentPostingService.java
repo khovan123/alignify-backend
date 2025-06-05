@@ -10,7 +10,6 @@ import com.api.repository.IContentPostingRepository;
 import com.api.repository.LikesRepository;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @Service
 public class ContentPostingService {
@@ -64,33 +66,44 @@ public class ContentPostingService {
 }
 
 
-    public ResponseEntity<?> getAllContentPostings(HttpServletRequest request) {
-        List<ContentPosting> contentPostings = contentPostingRepo.findByIsPublicTrue();
-        List<ContentPostingResponse> dtoList = contentPostings.stream()
-                .map(this::mapToDTO)
-                .toList();
+    public ResponseEntity<?> getAllContentPostings(HttpServletRequest request, int pageNumber, int pageSize) {
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "timestamp"));
+    List<ContentPosting> contentPostings = contentPostingRepo.findByIsPublicTrue(pageable);
+    
+    List<ContentPostingResponse> dtoList = contentPostings.stream()
+            .map(this::mapToDTO)
+            .toList();
 
-        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
+    return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
+}
+
+    public ResponseEntity<?> getContentPostingById(String userId, HttpServletRequest request, int pageNumber, int pageSize) {
+    List<ContentPosting> posts = contentPostingRepo.findByUserId(userId);
+
+    if (posts.isEmpty()) {
+        return ApiResponse.sendError(404, "No content postings found for userId: " + userId, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getContentPostingById(String userId, HttpServletRequest request) {
-        List<ContentPosting> posts = contentPostingRepo.findByUserId(userId);
+    boolean isOwner = Helper.isOwner(userId, request);
 
-        if (posts.isEmpty()) {
-            return ApiResponse.sendError(404, "No content postings found for userId: " + userId, request.getRequestURI());
-        }
+    List<ContentPosting> visiblePosts = isOwner
+            ? posts
+            : posts.stream().filter(ContentPosting::isIsPublic).toList();
 
-        boolean isOwner = Helper.isOwner(userId, request);
+    int start = pageNumber * pageSize;
+    int end = Math.min(start + pageSize, visiblePosts.size());
 
-        List<ContentPosting> visiblePosts = isOwner ? posts
-                : posts.stream().filter(ContentPosting::isIsPublic).toList();
-
-        List<ContentPostingResponse> dtoList = visiblePosts.stream()
-                .map(this::mapToDTO)
-                .toList();
-
-        return ApiResponse.sendSuccess(200, "Content postings fetched successfully", dtoList, request.getRequestURI());
+    if (start >= visiblePosts.size()) {
+        return ApiResponse.sendSuccess(200, "No more content", List.of(), request.getRequestURI());
     }
+
+    List<ContentPostingResponse> dtoList = visiblePosts.subList(start, end).stream()
+            .map(this::mapToDTO)
+            .toList();
+
+    return ApiResponse.sendSuccess(200, "Content postings fetched successfully", dtoList, request.getRequestURI());
+}
+
 
     public ResponseEntity<?> deleteContentPosting(String contentId, String userId, HttpServletRequest request) {
         Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
