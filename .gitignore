@@ -6,9 +6,9 @@ HELP.md
 /target/maven-status/
 /target/maven-archiver/
 /target/generated-sources/
-/target/alignify-backend-1.0.0.jar.original
+/target/generated-test-sources/
 !.mvn/wrapper/maven-wrapper.jar
-/pom.xml
++ !/target/*.jar
 # Spring Boot resources
 /src/main/resources/
 /src/test/
@@ -69,6 +69,7 @@ Thumbs.db
 .mtj.tmp/
 
 # Package Files #
+- *.jar
 *.war
 *.nar
 *.ear
