@@ -8,7 +8,7 @@ HELP.md
 /target/generated-sources/
 /target/generated-test-sources/
 !.mvn/wrapper/maven-wrapper.jar
-+ !/target/*.jar
+#+ !/target/*.jar
 # Spring Boot resources
 /src/main/resources/
 /src/test/
@@ -69,7 +69,7 @@ Thumbs.db
 .mtj.tmp/
 
 # Package Files #
-- *.jar
+#- *.jar
 *.war
 *.nar
 *.ear
@@ -77,6 +77,9 @@ Thumbs.db
 *.tar.gz
 *.rar
 *.json
+*.lst
+*.properties
+*.yml
 
 # Test reports and coverage
 /test-output/
