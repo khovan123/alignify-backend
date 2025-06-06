@@ -1,22 +1,13 @@
 package com.api.config;
 
 import java.util.List;
-
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.context.annotation.Configuration;
-
-import com.api.model.Category;
-import com.api.model.Role;
-import com.api.repository.CategoryRepository;
-import com.api.repository.RoleRepository;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.ValidationOptions;
+import com.api.model.*;
+import com.api.repository.*;
+import com.mongodb.client.*;
+import com.mongodb.client.model.*;
 
 import jakarta.annotation.PostConstruct;
 

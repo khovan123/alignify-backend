@@ -1,22 +1,13 @@
 package com.api.service;
 
-import com.api.dto.ApiResponse;
-import com.api.dto.CampaignResponse;
-import com.api.model.Campaign;
-import com.api.model.Category;
-import com.api.repository.CampaignRepository;
-import com.api.repository.CategoryRepository;
+import com.api.dto.*;
+import com.api.model.*;
+import com.api.repository.*;
 import com.api.util.Helper;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
