@@ -1,9 +1,9 @@
 package com.api.controller;
 
 import com.api.model.*;
-import com.api.service.ProfileService;
+import com.api.service.*;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
