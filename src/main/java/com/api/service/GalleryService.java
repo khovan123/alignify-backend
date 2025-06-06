@@ -1,18 +1,16 @@
 package com.api.service;
 
-import com.api.dto.ApiResponse;
+import com.api.dto.*;
 import com.api.model.*;
 import com.api.repository.*;
 import com.api.util.Helper;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

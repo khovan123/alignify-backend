@@ -26,13 +26,13 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestParam("email") String email, @RequestParam("otp") String otp, HttpServletRequest request) {
-        return authService.verifyOtpCode(email, otp, request);
+    public ResponseEntity<?> verifyOtp(@RequestBody VerifyOTPRequest verifyOTPRequest, HttpServletRequest request) {
+        return authService.verifyOtpCode(verifyOTPRequest, request);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user, HttpServletRequest request) {
-        return authService.registerAccount(user, request);
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest, @RequestParam("roleId") String roleId, HttpServletRequest request) {
+        return authService.registerAccount(registerRequest, roleId, request);
     }
 
     @PostMapping("/register-secret")
@@ -41,8 +41,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user, HttpServletRequest request) {
-        return authService.loginAccount(user, request);
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        return authService.loginAccount(loginRequest, request);
     }
 
     @PutMapping("/change-password")
@@ -51,8 +51,8 @@ public class AuthController {
     }
 
     @PostMapping("/recovery-password")
-    public ResponseEntity<?> recoveryPassword(@RequestParam("email") String email, @RequestBody String url, HttpServletRequest request) {
-        return authService.recoveryPasswordByEndpoint(email, url, request);
+    public ResponseEntity<?> recoveryPassword(@RequestBody RecoveryPasswordRequest recoveryPasswordRequest, HttpServletRequest request) {
+        return authService.recoveryPasswordByEndpoint(recoveryPasswordRequest, request);
     }
 
     @PostMapping("/reset-password/{token}")
