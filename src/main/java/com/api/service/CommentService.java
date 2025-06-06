@@ -116,38 +116,5 @@ public class CommentService {
         return ApiResponse.sendSuccess(200, "Comment updated successfully", existingComment, request.getRequestURI());
     }
 
-    public ResponseEntity<?> toggleLikeForComment(String commentId, HttpServletRequest request) {
-        Optional<Comment> commentOpt = commentRepository.findById(commentId);
-        if (commentOpt.isEmpty()) {
-            return ApiResponse.sendError(404, "Comment not found", request.getRequestURI());
-        }
-
-        String userId = JwtUtil.decodeToken(request).getSubject();
-        Optional<Likes> existingLike = likesRepo.findByUserIdAndCommentId(userId, commentId);
-
-        if (existingLike.isPresent()) {
-            likesRepo.deleteByUserIdAndCommentId(userId, commentId);
-        } else {
-            Likes newLike = new Likes();
-            newLike.setUserId(userId);
-            newLike.setCommentId(commentId);
-            newLike.setCreatedAt(new Date());
-            likesRepo.save(newLike);
-        }
-
-        long likeCount = likesRepo.countByCommentId(commentId);
-
-        Comment comment = commentOpt.get();
-        comment.setLike((int) likeCount);
-        commentRepository.save(comment);
-
-        String message = existingLike.isPresent() ? "Like removed from comment" : "Like added to comment";
-
-        return ApiResponse.sendSuccess(
-                200, message,
-                Map.of("likeCount", likeCount),
-                request.getRequestURI()
-        );
-    }
-
+    
 }

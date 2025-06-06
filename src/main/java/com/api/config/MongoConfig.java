@@ -579,10 +579,7 @@ public class MongoConfig {
             },
             "content": {
                 "bsonType": "string"
-            },
-            "like": {
-                "bsonType": "int"
-            }
+            }           
         }
     }
     

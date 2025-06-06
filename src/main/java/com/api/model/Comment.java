@@ -13,7 +13,6 @@ public class Comment {
     private String userId;
     private String contentId;
     private String content;
-    private int like;
 
     @CreatedDate
     private Date createdDate;
@@ -21,10 +20,9 @@ public class Comment {
     public Comment() {
     }
 
-    public Comment(String commentId, String content, int like, String userId, String contentId, Date createdDate) {
+    public Comment(String commentId, String content, String userId, String contentId, Date createdDate) {
         this.commentId = commentId;
         this.content = content;
-        this.like = like;
         this.userId = userId;
         this.contentId = contentId;
         this.createdDate = createdDate;
@@ -44,14 +42,6 @@ public class Comment {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public int getLike() {
-        return like;
-    }
-
-    public void setLike(int like) {
-        this.like = like;
     }
 
     public String getUserId() {
