@@ -1,19 +1,41 @@
 package com.api.service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.config.EnvConfig;
-import com.api.dto.*;
-import com.api.model.*;
-import com.api.repository.*;
+import com.api.dto.ApiResponse;
+import com.api.dto.LoginRequest;
+import com.api.dto.PasswordChange;
+import com.api.dto.PasswordReset;
+import com.api.dto.RecoveryPasswordRequest;
+import com.api.dto.RegisterRequest;
+import com.api.dto.VerifyOTPRequest;
+import com.api.model.AccountVerified;
+import com.api.model.Admin;
+import com.api.model.Brand;
+import com.api.model.Gallery;
+import com.api.model.Influencer;
+import com.api.model.Role;
+import com.api.model.User;
+import com.api.repository.AccountVerifiedRepository;
+import com.api.repository.AdminRepository;
+import com.api.repository.BrandRepository;
+import com.api.repository.GalleryRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.repository.RoleRepository;
+import com.api.repository.UserRepository;
 import com.api.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.google.api.client.googleapis.auth.oauth2.*;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
@@ -62,8 +84,7 @@ public class AuthService {
                     clientId,
                     secretId,
                     authCode,
-                    googletype
-            ).execute();
+                    googletype).execute();
 
             GoogleIdToken idToken = tokenResponse.parseIdToken();
             GoogleIdToken.Payload payload = idToken.getPayload();
@@ -91,9 +112,13 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity<?> sendOtpCode(String email, HttpServletRequest request) {
+    public ResponseEntity<?> sendRequestOtpCode(String email, HttpServletRequest request) {
         try {
-//            emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " + otpService.generateOtp(email) + ". It is valid for 3 minutes.");
+            if (accountVerifiedRepository.existsByEmail(email)) {
+                return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
+            }
+            // emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " +
+            // otpService.generateOtp(email) + ". It is valid for 3 minutes.");
             emailService.sendOtpEmail(email, otpService.generateOtp(email));
         } catch (RuntimeException e) {
             return ApiResponse.sendError(400, e.getMessage(), request.getRequestURI());
@@ -115,7 +140,8 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity<?> registerAccount(RegisterRequest registerRequest, String roleId, HttpServletRequest request) {
+    public ResponseEntity<?> registerAccount(RegisterRequest registerRequest, String roleId,
+            HttpServletRequest request) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
@@ -209,7 +235,8 @@ public class AuthService {
         return ApiResponse.sendSuccess(200, "Password changed successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> recoveryPasswordByEndpoint(RecoveryPasswordRequest recoveryPasswordRequest, HttpServletRequest request) {
+    public ResponseEntity<?> recoveryPasswordByEndpoint(RecoveryPasswordRequest recoveryPasswordRequest,
+            HttpServletRequest request) {
         if (!recoveryPasswordRequest.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             return ApiResponse.sendError(400, "Invalid email", request.getRequestURI());
         }
@@ -217,15 +244,18 @@ public class AuthService {
         if (!user.isPresent()) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
-        String resetURL = JwtUtil.createURLResetPassword(recoveryPasswordRequest.getUrl(), recoveryPasswordRequest.getEmail());
-//        String subject = "Reset your password";
-//        String message = "Click this url: " + resetURL + " to reset your password.";
-//      emailService.sendSimpleEmail(email, subject, message);
+        String resetURL = JwtUtil.createURLResetPassword(recoveryPasswordRequest.getUrl(),
+                recoveryPasswordRequest.getEmail());
+        // String subject = "Reset your password";
+        // String message = "Click this url: " + resetURL + " to reset your password.";
+        // emailService.sendSimpleEmail(email, subject, message);
         emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(), resetURL);
-        return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null,
+                request.getRequestURI());
     }
 
-    public ResponseEntity<?> resetPasswordByToken(String token, PasswordReset passwordReset, HttpServletRequest request) {
+    public ResponseEntity<?> resetPasswordByToken(String token, PasswordReset passwordReset,
+            HttpServletRequest request) {
         try {
             User user;
             DecodedJWT decodeJWT = JwtUtil.decodeToken(token);

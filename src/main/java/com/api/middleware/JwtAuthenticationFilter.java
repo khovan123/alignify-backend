@@ -14,11 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         String path = request.getRequestURI().split("\\?")[0];
         if (path.startsWith("/v3/api-docs")
                 || path.startsWith("/v3/api-docs/**")
@@ -32,17 +32,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/api/v1/auth/verify-otp/**")
                 || path.equals("/api/v1/auth/register/**")
                 || path.equals("/api/v1/auth/login")
-                || path.matches("/api/v1/(role|category|auth/(request-otp|verify-otp|register|login))(.*)?")) {
+                || path.equals("/api/v1/auth/google/**")
+                || path.equals("/api/v1/auth/google")
+                || path.matches("/api/v1/(role|category|auth/(request-otp|verify-otp|register|login|google))(.*)?")) {
             filterChain.doFilter(request, response);
             return;
         }
-        
+
         String header = request.getHeader("Authorization");
-        
+
         if (header == null || !header.startsWith("Bearer ")) {
             throw new IllegalArgumentException("Token is not provided or incorrectly formatted");
         }
-        
+
         try {
             JwtUtil.decodeToken(request);
             filterChain.doFilter(request, response);
