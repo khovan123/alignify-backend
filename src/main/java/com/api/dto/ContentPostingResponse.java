@@ -1,10 +1,9 @@
-
 package com.api.dto;
 
+import com.api.model.Comment;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 
 public class ContentPostingResponse {
 
@@ -17,6 +16,7 @@ public class ContentPostingResponse {
     private boolean isPublic;
     private List<String> commentIds;
     private int like;
+    private List<Comment> comments;
 
     public ContentPostingResponse() {
     }
@@ -66,8 +66,8 @@ public class ContentPostingResponse {
     }
 
     public List<Map<String, String>> getCategories() {
-    return categories;
-}
+        return categories;
+    }
 
     public void setCategories(List<Map<String, String>> categories) {
         this.categories = categories;
@@ -103,6 +103,14 @@ public class ContentPostingResponse {
 
     public void setLike(int like) {
         this.like = like;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
 }

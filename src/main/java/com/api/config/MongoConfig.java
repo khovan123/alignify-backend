@@ -47,6 +47,7 @@ public class MongoConfig {
        this.create_accountVerifiedsCollection(db);
         this.create_contentPostingsCollection(db);
         this.create_likesCollection(db);
+        this.create_campaignsCollection(db);
     }
 
     public void create_usersCollection(MongoDatabase db) {
@@ -592,5 +593,59 @@ public class MongoConfig {
                 .validationOptions(validationOptions);
 
         db.createCollection("comments", options);
+    }
+
+    
+    public void create_campaignsCollection(MongoDatabase db) {
+        if (db.getCollection("campaigns") != null) {
+            db.getCollection("campaigns").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["userId", "content"],
+        "properties": {
+            "campaignId": {
+                "bsonType": "string"
+            },
+            "userId": {
+                "bsonType": "string"
+            },
+            "content": {
+                "bsonType": "string"
+            },
+            "imageUrl": {
+                "bsonType": "string"
+            },
+            "categoryIds": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "string"
+                }
+            },
+            "status": {
+                "bsonType": "string",
+                "enum": ["DRAFT","PENDING","COMPLETED"]
+            },
+            "timestamp": {
+                "bsonType": "date"
+            },
+            "isPublic": {
+                "bsonType": "bool"
+            }
+            
+            }
+        }
+    
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("campaigns", options);
     }
 }

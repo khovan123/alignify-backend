@@ -3,14 +3,17 @@ package com.api.service;
 import com.api.dto.ApiResponse;
 import com.api.dto.ContentPostingResponse;
 import com.api.model.Category;
+import com.api.model.Comment;
 import com.api.model.ContentPosting;
 import com.api.model.Likes;
 import com.api.repository.CategoryRepository;
+import com.api.repository.CommentRepository;
 import com.api.repository.IContentPostingRepository;
 import com.api.repository.LikesRepository;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +35,8 @@ public class ContentPostingService {
     private CategoryRepository categoryRepo;
     @Autowired
     private LikesRepository likesRepo;
-
+    @Autowired
+    private CommentRepository commentRepository;
     public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, HttpServletRequest request) {
         contentPosting = contentPostingRepo.save(contentPosting);
         return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
@@ -51,6 +55,11 @@ public class ContentPostingService {
             })
             .toList();
 
+    List<Comment> comments = new ArrayList<>();
+    if (post.getCommentIds() != null && !post.getCommentIds().isEmpty()) {
+        comments = commentRepository.findAllById(post.getCommentIds());
+    }
+
     ContentPostingResponse dto = new ContentPostingResponse();
     dto.setContentId(post.getContentId());
     dto.setUserId(post.getUserId());
@@ -61,9 +70,11 @@ public class ContentPostingService {
     dto.setIsPublic(post.isIsPublic());
     dto.setCommentIds(post.getCommentIds());
     dto.setLike(post.getLike());
+    dto.setComments(comments); 
 
     return dto;
 }
+
 
 
     public ResponseEntity<?> getAllContentPostings(HttpServletRequest request, int pageNumber, int pageSize) {
