@@ -132,6 +132,7 @@ public class AuthService {
         user.setPassword(JwtUtil.hashPassword(registerRequest.getPassword()));
         Optional<Role> role = roleRepository.findById(roleId);
         if (role.isPresent()) {
+            user.setRoleId(roleId);
             user = userRepository.save(user);
             if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
                 Influencer influencer = new Influencer();
