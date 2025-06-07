@@ -12,8 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -60,7 +59,7 @@ public class ProfileService {
                     map.put("rating", profile.getRating());
                     map.put("avatarUrl", profile.getAvatarUrl());
                     map.put("isPublic", profile.isPublic());
-                    map.put("followerIds", profile.getFollowerIds());
+                    map.put("follower", profile.getFollower());
                 }
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
                 Optional<Brand> profileOtp = brandRepository.findById(user.getUserId());
@@ -93,13 +92,13 @@ public class ProfileService {
                 map.put("rating", profile.getRating());
                 map.put("avatarUrl", profile.getAvatarUrl());
                 if (profile.getCategoryIds() != null) {
-                    List<Category> categories = categoryRepository.findByCategoryIdIn(profile.getCategoryIds());
+                    List<Category> categories = categoryRepository.findAllByCategoryIdIn(profile.getCategoryIds());
                     map.put("category", categories);
                 }
                 map.put("role", roleOpt.getRoleName());
                 map.put("gender", profile.getGender());
                 map.put("isPublic", profile.isPublic());
-                map.put("followerIds", profile.getFollowerIds());
+                map.put("followerIds", profile.getFollower());
                 if (profile.isPublic() || Helper.isOwner(id, request)) {
                     map.put("socialMediaLink", profile.getSocialMediaLinks());
                     map.put("DoB", profile.getDoB());
@@ -162,10 +161,6 @@ public class ProfileService {
 
         if (newProfile.getCategoryIds() != null) {
             profile.setCategoryIds(newProfile.getCategoryIds());
-        }
-
-        if (newProfile.getFollowerIds() != null) {
-            profile.setFollowerIds(newProfile.getFollowerIds());
         }
 
         if (newProfile.getSocialMediaLinks() != null) {

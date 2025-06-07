@@ -1,6 +1,7 @@
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\CloudinaryConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\EnvConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\MongoConfig.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\SecurityConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\SwaggerConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\config\WebConfig.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\controller\AuthController.java
@@ -12,6 +13,7 @@ D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordCh
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\dto\PasswordReset.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\exception\JWTExceptionHandler.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\middleware\AuthorizationInterceptor.java
+D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\middleware\JwtAuthenticationFilter.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\AccountVerified.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Admin.java
 D:\FPTUNIVERSITY\SEMESTER5\alignify-backend\src\main\java\com\api\model\Brand.java
