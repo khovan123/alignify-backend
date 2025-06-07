@@ -665,7 +665,7 @@ public class MongoConfig {
                 },
                 "status": {
                   "bsonType": "string",
-                  "enum": ["PENDING","APPROVE","REFUSE"]
+                  "enum": ["PENDING","ACCEPTED","REJECTED"]
                 },
                 "createdAt": {
                   "bsonType": "date"
