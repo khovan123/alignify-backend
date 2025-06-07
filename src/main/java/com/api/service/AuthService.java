@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.LoginRequest;
-import com.api.dto.PasswordChange;
-import com.api.dto.PasswordReset;
+import com.api.dto.PasswordChangeRequest;
+import com.api.dto.PasswordResetRequest;
 import com.api.dto.RecoveryPasswordRequest;
 import com.api.dto.RegisterRequest;
 import com.api.dto.VerifyOTPRequest;
@@ -210,7 +210,7 @@ public class AuthService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> changeUserPassword(PasswordChange passwordRequest, CustomUserDetails userDetails,
+    public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
             HttpServletRequest request) {
         String userId = userDetails.getId();
         Optional<User> userOpt = userRepository.findById(userId);
@@ -243,19 +243,19 @@ public class AuthService {
         }
         Optional<User> user = userRepository.findByEmail(recoveryPasswordRequest.getEmail());
         if (!user.isPresent()) {
-            return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
+            return ApiResponse.sendError(400, "Email is not existed", request.getRequestURI());
         }
         String resetURL = JwtUtil.createURLResetPassword(recoveryPasswordRequest.getUrl(),
                 recoveryPasswordRequest.getEmail());
-        // String subject = "Reset your password";
-        // String message = "Click this url: " + resetURL + " to reset your password.";
-        // emailService.sendSimpleEmail(email, subject, message);
-        emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(), resetURL);
+        String subject = "Reset your password";
+        String message = "Click this url: " + resetURL + " to reset your password.";
+        emailService.sendSimpleEmail(recoveryPasswordRequest.getEmail(), subject, message);
+//        emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(), resetURL);
         return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null,
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> resetPasswordByToken(String token, PasswordReset passwordReset,
+    public ResponseEntity<?> resetPasswordByToken(String token, PasswordResetRequest passwordReset,
             HttpServletRequest request) {
         try {
             User user;

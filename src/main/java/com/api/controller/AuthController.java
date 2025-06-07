@@ -48,7 +48,7 @@ public class AuthController {
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody PasswordChange passwordRequest, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest passwordRequest, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return authService.changeUserPassword(passwordRequest, userDetails, request);
     }
 
@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password/{token}")
-    public ResponseEntity<?> resetPassword(@PathVariable("token") String token, @RequestBody PasswordReset passwordReset, HttpServletRequest request) {
+    public ResponseEntity<?> resetPassword(@PathVariable("token") String token, @RequestBody PasswordResetRequest passwordReset, HttpServletRequest request) {
         return authService.resetPasswordByToken(token, passwordReset, request);
     }
 }

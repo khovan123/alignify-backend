@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -38,7 +37,8 @@ public class SecurityConfig {
                         "/api/v1/auth/register/**",
                         "/api/v1/auth/google/**",
                         "/api/v1/auth/google",
-                        "/api/v1/auth/login"
+                        "/api/v1/auth/login",
+                        "/api/v1/auth/recovery-password"
                 ).permitAll()
                 .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
