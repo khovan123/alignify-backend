@@ -1,13 +1,19 @@
 package com.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class RegisterRequest {
 
+    @JsonProperty("name")
     private String name;
+    @JsonProperty("email")
     private String email;
+    @JsonProperty("password")
     private String password;
-    private String passwordConfirm;    
+    @JsonProperty("passwordConfirm")
+    private String passwordConfirm;
 
-    public RegisterRequest(String name, String email, String password, String passwordConfirm) {
+    public RegisterRequest(@JsonProperty("name") String name, @JsonProperty("email") String email, @JsonProperty("password") String password, @JsonProperty("passwordConfirm") String passwordConfirm) {
         this.name = name;
         this.email = email;
         this.password = password;

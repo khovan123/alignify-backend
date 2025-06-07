@@ -2,12 +2,9 @@ package com.api.service;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.*;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.api.config.EnvConfig;
@@ -39,10 +36,6 @@ public class ProfileService {
     private CategoryRepository categoryRepository;
     @Autowired
     private BrandRepository brandRepository;
-    @Autowired
-    private GalleryRepository galleryRepository;
-    @Autowired
-    private GalleryImageRepository imageRepository;
     @Autowired
     private Cloudinary cloudinary;
     @Value("${cloudinary.upload-preset}")
