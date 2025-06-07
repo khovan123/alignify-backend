@@ -16,12 +16,12 @@ public class CommonController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @GetMapping("/role")
+    @GetMapping("/roles")
     public ResponseEntity<?> getAllRole(HttpServletRequest request) {
         return ApiResponse.sendSuccess(200, "Roles", roleRepository.findAll(), request.getRequestURI());
     }
 
-    @GetMapping("/category")
+    @GetMapping("/categories")
     public ResponseEntity<?> getAllCategory(HttpServletRequest request) {
         return ApiResponse.sendSuccess(200, "Categories", categoryRepository.findAll(), request.getRequestURI());
     }
