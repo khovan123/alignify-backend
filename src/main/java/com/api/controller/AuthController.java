@@ -22,7 +22,7 @@ public class AuthController {
 
     @PostMapping("/request-otp")
     public ResponseEntity<?> requestOtp(@RequestParam("email") String email, HttpServletRequest request) {
-        return authService.sendOtpCode(email, request);
+        return authService.sendRequestOtpCode(email, request);
     }
 
     @PostMapping("/verify-otp")

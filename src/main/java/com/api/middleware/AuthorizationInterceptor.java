@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
     private static final List<String> EXCLUDED_PATHS = Arrays.asList(
+            "/api/v1/auth/google/**",
             "/api/v1/auth/google",
             "/api/v1/auth/request-otp/**",
             "/api/v1/auth/verify-otp/**",
