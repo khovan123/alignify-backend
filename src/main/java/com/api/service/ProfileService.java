@@ -59,7 +59,7 @@ public class ProfileService {
                     map.put("rating", profile.getRating());
                     map.put("avatarUrl", profile.getAvatarUrl());
                     map.put("isPublic", profile.isPublic());
-                    map.put("followerIds", profile.getFollowerIds());
+                    map.put("follower", profile.getFollower());
                 }
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
                 Optional<Brand> profileOtp = brandRepository.findById(user.getUserId());
@@ -98,7 +98,7 @@ public class ProfileService {
                 map.put("role", roleOpt.getRoleName());
                 map.put("gender", profile.getGender());
                 map.put("isPublic", profile.isPublic());
-                map.put("followerIds", profile.getFollowerIds());
+                map.put("followerIds", profile.getFollower());
                 if (profile.isPublic() || Helper.isOwner(id, request)) {
                     map.put("socialMediaLink", profile.getSocialMediaLinks());
                     map.put("DoB", profile.getDoB());
@@ -161,10 +161,6 @@ public class ProfileService {
 
         if (newProfile.getCategoryIds() != null) {
             profile.setCategoryIds(newProfile.getCategoryIds());
-        }
-
-        if (newProfile.getFollowerIds() != null) {
-            profile.setFollowerIds(newProfile.getFollowerIds());
         }
 
         if (newProfile.getSocialMediaLinks() != null) {
