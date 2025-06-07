@@ -38,7 +38,8 @@ public class SecurityConfig {
                         "/api/v1/auth/google/**",
                         "/api/v1/auth/google",
                         "/api/v1/auth/login",
-                        "/api/v1/auth/recovery-password"
+                        "/api/v1/auth/recovery-password",
+                        "/api/v1/auth/reset-password/**"
                 ).permitAll()
                 .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())

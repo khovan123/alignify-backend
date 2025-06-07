@@ -39,7 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/api/v1/auth/google/**")
                 || path.equals("/api/v1/auth/google")
                 || path.equals("/api/v1/auth/recovery-password")
-                || path.matches("/api/v1/(role|category|auth/(request-otp|verify-otp|register|login|google))(.*)?")) {
+                || path.equals("/api/v1/auth/reset-password/**")
+                || path.matches("/api/v1/(role|category|auth/(request-otp|verify-otp|register|login|google|reset-password|recovery-password))(.*)?")) {
             filterChain.doFilter(request, response);
             return;
         }
