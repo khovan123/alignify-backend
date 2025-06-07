@@ -34,19 +34,19 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         if (EXCLUDED_PATHS.stream().anyMatch(path -> uri.startsWith(path) || uri.matches(path.replace("/**", ".*")))) {
             return true;
         }
-
-        if ((method.equals("PUT") || method.equals("DELETE"))) {
-            String id = uri.substring(uri.lastIndexOf('/') + 1);
-
-            if (!Helper.isOwner(id, request)) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.setContentType("application/json");
-                response.getWriter().write(String.format(
-                        "{\"code\":403,\"message\":\"Access denied: Insufficient permissions\",\"path\":\"%s\"}",
-                        uri));
-                return false;
-            }
-        }
+//
+//        if ((method.equals("PUT") || method.equals("DELETE"))) {
+//            String id = uri.substring(uri.lastIndexOf('/') + 1);
+//
+//            if (!Helper.isOwner(id, request)) {
+//                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//                response.setContentType("application/json");
+//                response.getWriter().write(String.format(
+//                        "{\"code\":403,\"message\":\"Access denied: Insufficient permissions\",\"path\":\"%s\"}",
+//                        uri));
+//                return false;
+//            }
+//        }
 
         // Kiểm tra POST nếu endpoint thuộc danh sách bảo vệ
         // if (method.equals("POST")) {

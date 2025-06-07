@@ -3,7 +3,7 @@ package com.api.service;
 import com.api.dto.*;
 import com.api.model.*;
 import com.api.repository.*;
-import com.api.util.Helper;
+import com.api.security.CustomUserDetails;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -31,12 +30,9 @@ public class GalleryService {
     @Value("${cloudinary.upload-preset}")
     private String uploadPreset;
 
-    public ResponseEntity<?> getGalleryById(String id, HttpServletRequest request, @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "30") int pageSize) {
-        Optional<Influencer> influencerOpt = influencerProfileRepository.findById(id);
-        if (!influencerOpt.get().isPublic() && !Helper.isOwner(id, request)) {
-            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-        }
+    public ResponseEntity<?> getGallery(int pageNumber,
+            int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
+        String id = userDetails.getId();
         Optional<Gallery> galleryOpt = galleryRepository.findById(id);
         if (!galleryOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
@@ -57,10 +53,8 @@ public class GalleryService {
         }
     }
 
-    public ResponseEntity<?> saveImageUrlIntoGalleryById(String id, MultipartFile file, HttpServletRequest request) {
-//        if (!Helper.isOwner(id, request)) {
-//            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-//        }
+    public ResponseEntity<?> saveGalleryImageIntoGallery(MultipartFile file, CustomUserDetails userDetails, HttpServletRequest request) {
+        String id = userDetails.getId();
         Optional<Gallery> galleryOtp = galleryRepository.findById(id);
         Gallery gallery;
         if (!galleryOtp.isPresent()) {
@@ -98,11 +92,9 @@ public class GalleryService {
         );
     }
 
-    public ResponseEntity<?> deleteImageByImageId(String id, String imageId, HttpServletRequest request) {
-        if (!Helper.isOwner(id, request)) {
-            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-        }
-        Optional<GalleryImage> imageOpt = imageRepository.findById(imageId);
+    public ResponseEntity<?> deleteGalleryImageByImageId(String galleryImageId, CustomUserDetails userDetails, HttpServletRequest request) {
+        String id = userDetails.getId();
+        Optional<GalleryImage> imageOpt = imageRepository.findById(galleryImageId);
         if (!imageOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
@@ -110,17 +102,14 @@ public class GalleryService {
         return ApiResponse.sendSuccess(204, null, null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getImageByImageId(String id, String imageId, HttpServletRequest request) {
+    public ResponseEntity<?> getGalleryImageByImageId(String galleryImageId, CustomUserDetails userDetails, HttpServletRequest request) {
+        String id = userDetails.getId();
         Optional<Influencer> influencer = influencerProfileRepository.findById(id);
         if (!influencer.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
 
-        if (!influencer.get().isPublic()) {
-            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-        }
-
-        Optional<GalleryImage> imageOpt = imageRepository.findById(imageId);
+        Optional<GalleryImage> imageOpt = imageRepository.findById(galleryImageId);
         if (imageOpt.isPresent()) {
             return ApiResponse.sendSuccess(200, "", Map.of(
                     "galleryId", id,
@@ -128,7 +117,7 @@ public class GalleryService {
             ), request.getRequestURI()
             );
         } else {
-            return ApiResponse.sendError(404, imageId + " does not exist", request.getRequestURI());
+            return ApiResponse.sendError(404, galleryImageId + " does not exist", request.getRequestURI());
         }
     }
 }
