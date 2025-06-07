@@ -112,8 +112,11 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity<?> sendOtpCode(String email, HttpServletRequest request) {
+    public ResponseEntity<?> sendRequestOtpCode(String email, HttpServletRequest request) {
         try {
+            if (accountVerifiedRepository.existsByEmail(email)) {
+                return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
+            }
             // emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP code is: " +
             // otpService.generateOtp(email) + ". It is valid for 3 minutes.");
             emailService.sendOtpEmail(email, otpService.generateOtp(email));

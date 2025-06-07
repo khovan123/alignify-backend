@@ -36,18 +36,13 @@ public class SecurityConfig {
                         "/api/v1/auth/request-otp/**",
                         "/api/v1/auth/verify-otp/**",
                         "/api/v1/auth/register/**",
+                        "/api/v1/auth/google/**",
+                        "/api/v1/auth/google",
                         "/api/v1/auth/login"
                 ).permitAll()
-                .anyRequest().authenticated()
-                )
-                .csrf(csrf -> csrf
-                .ignoringRequestMatchers(
-                        new AntPathRequestMatcher("/api/v1/auth/request-otp/**"),
-                        new AntPathRequestMatcher("/api/v1/auth/verify-otp/**"),
-                        new AntPathRequestMatcher("/api/v1/auth/register/**"),
-                        new AntPathRequestMatcher("/api/v1/auth/login")
-                )
-                ).httpBasic(Customizer.withDefaults())
+                .anyRequest().authenticated())
+                .csrf(csrf -> csrf.disable())
+                .httpBasic(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
