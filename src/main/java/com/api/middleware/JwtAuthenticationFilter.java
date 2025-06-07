@@ -1,5 +1,6 @@
 package com.api.middleware;
 
+import com.api.security.CustomUserDetails;
 import java.io.IOException;
 
 import org.springframework.stereotype.Component;
@@ -53,7 +54,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             com.auth0.jwt.interfaces.DecodedJWT decodedJWT = JwtUtil.decodeToken(request);
             String userId = decodedJWT.getSubject();
-            UserDetails userDetails = new User(userId, "", Collections.emptyList());
+            String roleId = decodedJWT.getClaim("roleId").asString();
+            CustomUserDetails userDetails = new CustomUserDetails(userId, roleId, "", "", Collections.emptyList());
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);

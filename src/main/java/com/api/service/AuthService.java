@@ -31,6 +31,7 @@ import com.api.repository.GalleryRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.RoleRepository;
 import com.api.repository.UserRepository;
+import com.api.security.CustomUserDetails;
 import com.api.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
@@ -209,9 +210,9 @@ public class AuthService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> changeUserPassword(PasswordChange passwordRequest, HttpServletRequest request) {
-        DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
-        String userId = decodeJWT.getSubject();
+    public ResponseEntity<?> changeUserPassword(PasswordChange passwordRequest, CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String userId = userDetails.getId();
         Optional<User> userOpt = userRepository.findById(userId);
         if (!userOpt.isPresent()) {
             return ApiResponse.sendError(401, "Invalid or expired token", request.getRequestURI());

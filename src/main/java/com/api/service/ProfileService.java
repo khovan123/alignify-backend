@@ -1,14 +1,5 @@
 package com.api.service;
 
-import com.api.config.EnvConfig;
-import com.api.dto.ApiResponse;
-import com.api.model.*;
-import com.api.repository.*;
-import com.api.util.*;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,6 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.api.config.EnvConfig;
+import com.api.dto.ApiResponse;
+import com.api.model.*;
+import com.api.repository.*;
+import com.api.security.CustomUserDetails;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ProfileService {
@@ -41,9 +42,8 @@ public class ProfileService {
     @Value("${cloudinary.upload-preset}")
     private String uploadPreset;
 
-    public ResponseEntity<?> getAllProfileByRoleId(String roleId, HttpServletRequest request) {
-        DecodedJWT decodeJWT = JwtUtil.decodeToken(request);
-        String userId = decodeJWT.getSubject();
+    public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails, HttpServletRequest request) {
+        String userId = userDetails.getId();
         List<Map<String, Object>> userList = new ArrayList<>();
         if (roleId.equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
             return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
@@ -73,11 +73,12 @@ public class ProfileService {
         return ApiResponse.sendSuccess(200, "Response successfully", userList, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getProfileById(String id, HttpServletRequest request) {
+    public ResponseEntity<?> getProfileById(String id, CustomUserDetails userDetails, HttpServletRequest request) {
         Optional<User> userOpt = userRepository.findById(id);
         if (!userOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
+        String userId = userDetails.getId();
         User user = userOpt.get();
         Role roleOpt = roleRepository.findById(user.getRoleId()).get();
         Map<String, Object> map = new HashMap<>();
@@ -99,14 +100,16 @@ public class ProfileService {
                 map.put("gender", profile.getGender());
                 map.put("isPublic", profile.isPublic());
                 map.put("followerIds", profile.getFollower());
-                if (profile.isPublic() || Helper.isOwner(id, request)) {
+                if (profile.isPublic() || userId.equals(id)) {
                     map.put("socialMediaLink", profile.getSocialMediaLinks());
                     map.put("DoB", profile.getDoB());
                     map.put("location", user.getLocation());
                     Optional<Gallery> galleryOpt = galleryRepository.findById(id);
-                    if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty() && galleryOpt.get().getImages() != null) {
+                    if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty()
+                            && galleryOpt.get().getImages() != null) {
                         List<String> imageIds = galleryOpt.get().getImages();
-                        List<GalleryImage> images = imageRepository.findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
+                        List<GalleryImage> images = imageRepository
+                                .findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
                                 .sorted(Comparator.comparing(GalleryImage::getCreatedAt).reversed())
                                 .limit(9)
                                 .collect(Collectors.toList());
@@ -131,11 +134,9 @@ public class ProfileService {
         return ApiResponse.sendSuccess(200, "Response successfully", map, request.getRequestURI());
     }
 
-    public ResponseEntity<?> updateProfileById(String id, @RequestBody Influencer newProfile, HttpServletRequest request) {
-//        if (!Helper.isOwner(id, request)) {
-//            return ApiResponse.sendError(403, "REALLLLL: Access denied: Insufficient permissions", request.getRequestURI());
-//        }
-
+    public ResponseEntity<?> updateProfileById(@RequestBody Influencer newProfile, CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String id = userDetails.getId();
         Optional<Influencer> influencerOpt = influencerRepository.findById(id);
         if (!influencerOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
@@ -185,20 +186,16 @@ public class ProfileService {
         return ApiResponse.sendSuccess(200, "Update successfully", profile, id);
     }
 
-    public ResponseEntity<?> deleteAccountById(String id, HttpServletRequest request) {
-        if (!Helper.isOwner(id, request)) {
-            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-        }
+    public ResponseEntity<?> deleteAccountById(CustomUserDetails userDetails, HttpServletRequest request) {
+        String id = userDetails.getId();
         User user = userRepository.findById(id).get();
         user.setIsActive(false);
         userRepository.save(user);
         return ApiResponse.sendSuccess(204, null, null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> saveAvatarUrlById(String id, MultipartFile file, HttpServletRequest request) {
-        if (!Helper.isOwner(id, request)) {
-            return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
-        }
+    public ResponseEntity<?> saveAvatarUrlById(MultipartFile file, CustomUserDetails userDetails, HttpServletRequest request) {
+        String id = userDetails.getId();
         Optional<User> userOpt = userRepository.findById(id);
         if (!userOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
