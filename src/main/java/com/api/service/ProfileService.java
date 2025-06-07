@@ -12,13 +12,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
+import com.api.dto.BrandProfileRequest;
+import com.api.dto.BrandProfileResponse;
+import com.api.dto.InfluencerProfileRequest;
+import com.api.dto.InfluencerProfileResponse;
 import com.api.model.*;
 import com.api.repository.*;
 import com.api.security.CustomUserDetails;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Service
 public class ProfileService {
@@ -73,128 +79,100 @@ public class ProfileService {
         return ApiResponse.sendSuccess(200, "Response successfully", userList, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getProfileById(String id, CustomUserDetails userDetails, HttpServletRequest request) {
-        Optional<User> userOpt = userRepository.findById(id);
-        if (!userOpt.isPresent()) {
-            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
-        }
-        String userId = userDetails.getId();
-        User user = userOpt.get();
-        Role roleOpt = roleRepository.findById(user.getRoleId()).get();
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
-        map.put("name", user.getName());
-        map.put("email", user.getEmail());
-        if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
-            Optional<Influencer> profileOtp = influencerRepository.findById(user.getUserId());
-            if (profileOtp.isPresent()) {
-                Influencer profile = profileOtp.get();
-                map.put("bio", profile.getBio());
-                map.put("rating", profile.getRating());
-                map.put("avatarUrl", profile.getAvatarUrl());
-                if (profile.getCategoryIds() != null) {
-                    List<Category> categories = categoryRepository.findAllByCategoryIdIn(profile.getCategoryIds());
-                    map.put("category", categories);
-                }
-                map.put("role", roleOpt.getRoleName());
-                map.put("gender", profile.getGender());
-                map.put("isPublic", profile.isPublic());
-                map.put("followerIds", profile.getFollower());
-                if (profile.isPublic() || userId.equals(id)) {
-                    map.put("socialMediaLink", profile.getSocialMediaLinks());
-                    map.put("DoB", profile.getDoB());
-                    map.put("location", user.getLocation());
-                    Optional<Gallery> galleryOpt = galleryRepository.findById(id);
-                    if (galleryOpt.isPresent() && !galleryOpt.get().getImages().isEmpty()
-                            && galleryOpt.get().getImages() != null) {
-                        List<String> imageIds = galleryOpt.get().getImages();
-                        List<GalleryImage> images = imageRepository
-                                .findTop9ByIdInOrderByUploadedAtDesc(imageIds, PageRequest.of(0, 9)).stream()
-                                .sorted(Comparator.comparing(GalleryImage::getCreatedAt).reversed())
-                                .limit(9)
-                                .collect(Collectors.toList());
-                        if (!images.isEmpty()) {
-                            map.put("gallery", images);
-                        }
-                    }
-                }
-            }
-        } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
-            Optional<Brand> profileOtp = brandRepository.findById(user.getUserId());
-            if (profileOtp.isPresent()) {
-                Brand profile = profileOtp.get();
-                map.put("bio", profile.getBio());
-                map.put("avatarUrl", profile.getAvatarUrl());
-                map.put("contact", profile.getContacts());
-                map.put("socialMediaLink", profile.getSocialMediaLinks());
-                map.put("establishDate", profile.getEstablishDate());
-                map.put("location", user.getLocation());
-            }
-        }
-        return ApiResponse.sendSuccess(200, "Response successfully", map, request.getRequestURI());
-    }
-
-    public ResponseEntity<?> updateProfileById(@RequestBody Influencer newProfile, CustomUserDetails userDetails,
-            HttpServletRequest request) {
-        String id = userDetails.getId();
-        Optional<Influencer> influencerOpt = influencerRepository.findById(id);
-        if (!influencerOpt.isPresent()) {
-            return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
-        }
-
-        Influencer profile = influencerOpt.get();
-
-        if (newProfile.getBio() != null) {
-            profile.setBio(newProfile.getBio());
-        }
-
-        if (newProfile.getAvatarUrl() != null) {
-            profile.setAvatarUrl(newProfile.getAvatarUrl());
-        }
-
-        if (newProfile.getDoB() != null) {
-            profile.setDoB(newProfile.getDoB());
-        }
-
-        if (newProfile.getGender() != null) {
-            profile.setGender(newProfile.getGender().toUpperCase());
-        }
-
-        if (newProfile.getCategoryIds() != null) {
-            profile.setCategoryIds(newProfile.getCategoryIds());
-        }
-
-        if (newProfile.getSocialMediaLinks() != null) {
-            Map<String, String> socialMediaLinks = profile.getSocialMediaLinks();
-            if (socialMediaLinks == null) {
-                socialMediaLinks = new HashMap<>();
-            }
-            for (Map.Entry<String, String> entry : newProfile.getSocialMediaLinks().entrySet()) {
-                if (entry.getValue() != null && !entry.getValue().isBlank()) {
-                    socialMediaLinks.put(entry.getKey(), entry.getValue());
-                }
-            }
-            profile.setSocialMediaLinks(socialMediaLinks);
-        }
-
-        try {
-            influencerRepository.save(profile);
-        } catch (Exception e) {
-            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
-        }
-
-        return ApiResponse.sendSuccess(200, "Update successfully", profile, id);
-    }
-
-    public ResponseEntity<?> deleteAccountById(CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> getMe(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         String id = userDetails.getId();
         User user = userRepository.findById(id).get();
-        user.setIsActive(false);
+        Role role = roleRepository.findById(user.getRoleId()).get();
+        if (role.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Influencer influencer = influencerRepository.findById(id).get();
+            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer, true, categoryRepository);
+            return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse, request.getRequestURI());
+        } else if (role.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+            Brand brand = brandRepository.findById(id).get();
+            BrandProfileResponse brandProfileResponse = new BrandProfileResponse(user, brand, categoryRepository);
+            return ApiResponse.sendSuccess(200, "Response successfully", brandProfileResponse, request.getRequestURI());
+        }
+        return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getProfileById(String id, CustomUserDetails userDetails, HttpServletRequest request) {
+        String userId = userDetails.getId();
+        User user = userRepository.findById(id).get();
+        if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Influencer influencer = influencerRepository.findById(id).get();
+            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer, userId.equals(id), categoryRepository);
+            return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse, request.getRequestURI());
+        } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+            Brand brand = brandRepository.findById(id).get();
+            BrandProfileResponse brandProfileResponse = new BrandProfileResponse(user, brand, categoryRepository);
+            return ApiResponse.sendSuccess(200, "Response successfully", brandProfileResponse, request.getRequestURI());
+        }
+        return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
+    }
+
+    public ResponseEntity<?> updateProfile(Object profile, CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String id = userDetails.getId();
+        User user = userRepository.findById(id).get();
+        if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Influencer influencer = influencerRepository.findById(id).get();
+//            InfluencerProfileRequest newInfluencer = (InfluencerProfileRequest) profile;
+            InfluencerProfileRequest newInfluencer = convertToInfluencerProfileRequest(profile);
+            if (newInfluencer.getBio() != null) {
+                influencer.setBio(newInfluencer.getBio());
+            }
+
+            if (newInfluencer.getDoB() != null) {
+                influencer.setDoB(newInfluencer.getDoB());
+            }
+
+            if (newInfluencer.getGender() != null) {
+                influencer.setGender(newInfluencer.getGender().toUpperCase());
+            }
+
+            if (newInfluencer.getCategoryIds() != null && !newInfluencer.getCategoryIds().isEmpty()) {
+                influencer.setCategoryIds(newInfluencer.getCategoryIds());
+            }
+
+            if (newInfluencer.getSocialMediaLinks() != null && !newInfluencer.getSocialMediaLinks().isEmpty()) {
+                influencer.setSocialMediaLinks(newInfluencer.getSocialMediaLinks());
+            }
+            influencerRepository.save(influencer);
+            return ApiResponse.sendSuccess(200, "Update successfully", influencer, request.getRequestURI());
+        } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+            Brand brand = brandRepository.findById(id).get();
+//            BrandProfileRequest newBrand = (BrandProfileRequest) profile;
+            BrandProfileRequest newBrand = convertToBrandProfileRequest(profile);
+            if (newBrand.getBio() != null) {
+                brand.setBio(newBrand.getBio());
+            }
+            if (newBrand.getContacts() != null && !newBrand.getContacts().isEmpty()) {
+                brand.setCategoryIds(newBrand.getCategoryIds());
+            }
+            if (newBrand.getSocialMediaLinks() != null && !newBrand.getSocialMediaLinks().isEmpty()) {
+                brand.setSocialMediaLinks(newBrand.getSocialMediaLinks());
+            }
+            if (newBrand.getEstablishDate() != null) {
+                brand.setEstablishDate(newBrand.getEstablishDate());
+            }
+            if (newBrand.getCategoryIds() != null && !newBrand.getCategoryIds().isEmpty()) {
+                brand.setCategoryIds(newBrand.getCategoryIds());
+            }
+            brandRepository.save(brand);
+            return ApiResponse.sendSuccess(200, "Update successfully", brand, request.getRequestURI());
+        }
+        return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
+    }
+
+    public ResponseEntity<?> deleteAccount(CustomUserDetails userDetails, HttpServletRequest request) {
+        String id = userDetails.getId();
+        User user = userRepository.findById(id).get();
+        user.setActive(false);
         userRepository.save(user);
         return ApiResponse.sendSuccess(204, null, null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> saveAvatarUrlById(MultipartFile file, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> saveAvatarUrl(MultipartFile file, CustomUserDetails userDetails, HttpServletRequest request) {
         String id = userDetails.getId();
         Optional<User> userOpt = userRepository.findById(id);
         if (!userOpt.isPresent()) {
@@ -221,7 +199,27 @@ public class ProfileService {
             Brand brand = brandOpt.get();
             brand.setAvatarUrl(imageUrl);
             brandRepository.save(brand);
+        } else {
+            return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Change avatar successfully", imageUrl, request.getRequestURI());
+    }
+
+    private InfluencerProfileRequest convertToInfluencerProfileRequest(Object profile) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.convertValue(profile, InfluencerProfileRequest.class);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Failed to convert to InfluencerProfileRequest: " + e.getMessage());
+        }
+    }
+
+    private BrandProfileRequest convertToBrandProfileRequest(Object profile) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.convertValue(profile, BrandProfileRequest.class);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Failed to convert to BrandProfileRequest: " + e.getMessage());
+        }
     }
 }
