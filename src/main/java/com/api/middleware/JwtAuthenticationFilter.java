@@ -11,6 +11,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Collections;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -46,7 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            JwtUtil.decodeToken(request);
+            com.auth0.jwt.interfaces.DecodedJWT decodedJWT = JwtUtil.decodeToken(request);
+            String userId = decodedJWT.getSubject();
+            UserDetails userDetails = new User(userId, "", Collections.emptyList());
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             throw e;
