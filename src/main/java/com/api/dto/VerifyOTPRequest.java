@@ -1,11 +1,15 @@
 package com.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class VerifyOTPRequest {
 
+    @JsonProperty("email")
     private String email;
+    @JsonProperty("otp")
     private String otp;
 
-    public VerifyOTPRequest(String email, String otp) {
+    public VerifyOTPRequest(@JsonProperty("email") String email, @JsonProperty("otp") String otp) {
         this.email = email;
         this.otp = otp;
     }

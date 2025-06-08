@@ -13,7 +13,7 @@ public class Influencer {
     private String userId;
     private String avatarUrl;
     private String backgroundUrl;
-    private Date DoB;
+    private LocalDateTime DoB;
     private String gender;
     private String bio;
     private Map<String, String> socialMediaLinks;
@@ -27,13 +27,16 @@ public class Influencer {
 
     public Influencer() {
         this.rating = 0.0;
+        this.follower = 0;
         this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.isPublic = true;
         this.gender = "NONE";
+        this.categoryIds = new ArrayList<>();
+        this.socialMediaLinks = new HashMap<>();
     }
 
-    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, LocalDateTime createdAt) {
+    public Influencer(String userId, String avatarUrl, String backgroundUrl, LocalDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, LocalDateTime createdAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
@@ -72,11 +75,11 @@ public class Influencer {
         this.backgroundUrl = backgroundUrl;
     }
 
-    public Date getDoB() {
+    public LocalDateTime getDoB() {
         return DoB;
     }
 
-    public void setDoB(Date DoB) {
+    public void setDoB(LocalDateTime DoB) {
         this.DoB = DoB;
     }
 
@@ -133,14 +136,6 @@ public class Influencer {
     }
 
     public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
-
-    public boolean isIsPublic() {
-        return isPublic;
-    }
-
-    public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
 

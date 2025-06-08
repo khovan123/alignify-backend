@@ -1,15 +1,15 @@
 package com.api.dto;
 
-public class PasswordChange {
+public class PasswordChangeRequest {
 
     private String oldPassword;
     private String newPassword;
     private String passwordConfirm;
 
-    public PasswordChange() {
+    public PasswordChangeRequest() {
     }
 
-    public PasswordChange(String oldPassword, String newPassword, String passwordConfirm) {
+    public PasswordChangeRequest(String oldPassword, String newPassword, String passwordConfirm) {
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
         this.passwordConfirm = passwordConfirm;

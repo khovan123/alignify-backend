@@ -1,43 +1,49 @@
 package com.api.controller;
 
-import com.api.model.*;
+import com.api.security.CustomUserDetails;
 import com.api.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping(path = "/api/v1/profile")
+@RequestMapping(path = "/api/v1/profiles")
 public class ProfileController {
 
     @Autowired
     private ProfileService profileService;
 
-    @GetMapping(path = {"/", ""})
-    public ResponseEntity<?> getAllProfile(@RequestParam("roleId") String roleId, HttpServletRequest request) {
-        return profileService.getAllProfileByRoleId(roleId, request);
+    @GetMapping("")
+    public ResponseEntity<?> getAllProfileByRoleId(@RequestParam("roleId") String roleId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.getAllProfileByRoleId(roleId, userDetails, request);
+    }
+    
+    @GetMapping("/me")
+    public ResponseEntity<?> getMe(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.getMe(userDetails, request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getOneProfile(@PathVariable("id") String id, HttpServletRequest request) {
-        return profileService.getProfileById(id, request);
+    public ResponseEntity<?> getProfile(@PathVariable("id") String id, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.getProfileById(id, userDetails, request);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateProfile(@PathVariable("id") String id, @RequestBody Influencer influencer, HttpServletRequest request) {
-        return profileService.updateProfileById(id, influencer, request);
+    @PutMapping("")
+    public ResponseEntity<?> updateProfile(@RequestBody Object profile, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.updateProfile(profile, userDetails, request);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAccount(@PathVariable("id") String id, HttpServletRequest request) {
-        return profileService.deleteAccountById(id, request);
+    @DeleteMapping("")
+    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.deleteAccount(userDetails, request);
     }
 
-    @PostMapping("/avatar/{id}")
-    public ResponseEntity<?> changeAvatar(@PathVariable("id") String id, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
-        return profileService.saveAvatarUrlById(id, file, request);
+    @PostMapping("/avatar")
+    public ResponseEntity<?> changeAvatar(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.saveAvatarUrl(file, userDetails, request);
     }
 
 }
