@@ -14,14 +14,13 @@ public class ContentPostingResponse {
     private List<Map<String, String>> categories;
     private Date timestamp;
     private boolean isPublic;
-    private List<String> commentIds;
+    private int commentCount;
     private int like;
-    private List<Comment> comments;
 
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
+    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date timestamp, boolean isPublic, int commentCount, int like) {
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
@@ -29,7 +28,7 @@ public class ContentPostingResponse {
         this.categories = categories;
         this.timestamp = timestamp;
         this.isPublic = isPublic;
-        this.commentIds = commentIds;
+        this.commentCount = commentCount;
         this.like = like;
     }
 
@@ -89,12 +88,12 @@ public class ContentPostingResponse {
         this.isPublic = isPublic;
     }
 
-    public List<String> getCommentIds() {
-        return commentIds;
+    public int getCommentCount() {
+        return commentCount;
     }
 
-    public void setCommentIds(List<String> commentIds) {
-        this.commentIds = commentIds;
+    public void setCommentCount(int commentCount) {
+        this.commentCount = commentCount;
     }
 
     public int getLike() {
@@ -104,13 +103,4 @@ public class ContentPostingResponse {
     public void setLike(int like) {
         this.like = like;
     }
-
-    public List<Comment> getComments() {
-        return comments;
-    }
-
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-    }
-
 }

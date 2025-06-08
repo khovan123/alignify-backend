@@ -499,11 +499,8 @@ public class MongoConfig {
             "isPublic": {
                 "bsonType": "bool"
             },
-            "commentIds": {
-                "bsonType": "array",
-                "items": {
-                    "bsonType": "string"
-                }
+            "commentCount": {
+                "bsonType": "int"
             },
             "like": {
                 "bsonType": "int"

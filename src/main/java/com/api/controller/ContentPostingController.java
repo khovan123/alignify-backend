@@ -22,12 +22,12 @@ public class ContentPostingController {
     @Autowired
     ContentPostingService contentPostingSer;
 
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<?> createPost(@RequestBody ContentPosting contentPosting, HttpServletRequest request) {
         return contentPostingSer.createContentPosting(contentPosting, request);
     }
 
-    @GetMapping("/all")
+    @GetMapping("")
     public ResponseEntity<?> getAllPosts(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int pageNumber,

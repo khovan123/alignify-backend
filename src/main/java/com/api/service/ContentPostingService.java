@@ -55,10 +55,7 @@ public class ContentPostingService {
             })
             .toList();
 
-    List<Comment> comments = new ArrayList<>();
-    if (post.getCommentIds() != null && !post.getCommentIds().isEmpty()) {
-        comments = commentRepository.findAllById(post.getCommentIds());
-    }
+    List<Comment> comments = commentRepository.findAllByContentId(post.getContentId());
 
     ContentPostingResponse dto = new ContentPostingResponse();
     dto.setContentId(post.getContentId());
@@ -68,9 +65,8 @@ public class ContentPostingService {
     dto.setCategories(categoryInfo); 
     dto.setTimestamp(post.getTimestamp());
     dto.setIsPublic(post.isIsPublic());
-    dto.setCommentIds(post.getCommentIds());
+    dto.setCommentCount(comments.size());
     dto.setLike(post.getLike());
-    dto.setComments(comments); 
 
     return dto;
 }
@@ -170,7 +166,7 @@ public class ContentPostingService {
             contentPosting.setImageUrl(updatedContentPosting.getImageUrl());
             contentPosting.setCategoryIds(validCategoryIds);
             contentPosting.setIsPublic(updatedContentPosting.isIsPublic());
-            contentPosting.setCommentIds(updatedContentPosting.getCommentIds());
+            contentPosting.setCommentCount(updatedContentPosting.getCommentCount());
             contentPosting.setLike(updatedContentPosting.getLike());
 
             contentPostingRepo.save(contentPosting);

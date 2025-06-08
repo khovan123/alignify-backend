@@ -33,25 +33,20 @@ public class CommentService {
     private LikesRepository likesRepo;
 
     public ResponseEntity<?> createComment(Comment comment, HttpServletRequest request) {
-    comment.setCreatedDate(new Date());
-    comment = commentRepository.save(comment);
+        comment.setCreatedDate(new Date());
+        comment = commentRepository.save(comment);
 
-    Optional<ContentPosting> contentOpt = contentPostingRepo.findById(comment.getContentId());
-    if (contentOpt.isPresent()) {
-        ContentPosting content = contentOpt.get();
-        List<String> commentIds = content.getCommentIds();
-        if (commentIds == null) {
-            commentIds = new ArrayList<>();
+        Optional<ContentPosting> contentOpt = contentPostingRepo.findById(comment.getContentId());
+        if (contentOpt.isPresent()) {
+            ContentPosting content = contentOpt.get();
+            int count = content.getCommentCount();
+            content.setCommentCount(count + 1);
+            contentPostingRepo.save(content);
         }
-        commentIds.add(comment.getCommentId());
-        content.setCommentIds(commentIds);
-        contentPostingRepo.save(content);
+
+        return ApiResponse.sendSuccess(201, "Comment created successfully", comment,
+                request.getRequestURI());
     }
-
-    return ApiResponse.sendSuccess(201, "Comment created successfully", comment,
-            request.getRequestURI());
-}
-
 
     public ResponseEntity<?> getCommentByUserId(String userId, HttpServletRequest request, int pageNumber, int pageSize) {
         if (!Helper.isOwner(userId, request)) {
@@ -132,5 +127,4 @@ public class CommentService {
         return ApiResponse.sendSuccess(200, "Comment updated successfully", existingComment, request.getRequestURI());
     }
 
-    
 }

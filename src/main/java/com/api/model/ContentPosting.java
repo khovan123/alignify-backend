@@ -20,15 +20,16 @@ public class ContentPosting {
     @CreatedDate
     private Date timestamp;
     private boolean isPublic;
-    private List<String> commentIds;
+    private int commentCount;
     private int like;
 
     public ContentPosting() {
         this.like=0;
+        this.commentCount = 0;
         this.isPublic=true;
     }
 
-    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, List<String> commentIds, int like) {
+    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, int commentCount, int like) {
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
@@ -36,7 +37,7 @@ public class ContentPosting {
         this.categoryIds = categoryIds;
         this.timestamp = timestamp;
         this.isPublic = isPublic;
-        this.commentIds = commentIds;
+        this.commentCount = commentCount;
         this.like = like;
     }
 
@@ -96,12 +97,12 @@ public class ContentPosting {
         this.isPublic = isPublic;
     }
 
-    public List<String> getCommentIds() {
-        return commentIds;
+    public int getCommentCount() {
+        return commentCount;
     }
 
-    public void setCommentIds(List<String> commentIds) {
-        this.commentIds = commentIds;
+    public void setCommentCount(int commentCount) {
+        this.commentCount = commentCount;
     }
 
     public int getLike() {
