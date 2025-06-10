@@ -6,8 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.api.util.Helper;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -23,8 +21,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             "/api/v1/auth/login",
             "/api/v1/auth/recovery-password/**",
             "/api/v1/auth/reset-password/**",
-            "/api/v1/role",
-            "/api/v1/category",
+            "/api/v1/roles",
+            "/api/v1/categories",
             "/api/v1/auth/recovery-password"
     );
 

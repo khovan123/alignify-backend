@@ -474,72 +474,6 @@ public class MongoConfig {
     db.createCollection("accountVerifieds", options);
   }
 
-    public void create_campaignsCollection(MongoDatabase db) {
-        if (db.getCollection("campaigns") != null) {
-            db.getCollection("campaigns").drop();
-        }
-
-        Document jsonSchema = Document.parse("""
-    {
-        "bsonType": "object",
-        "required": ["content", "budget"],
-        "properties": {
-            "campaignId": {
-                "bsonType": "string"
-            },
-            "userId": {
-                "bsonType": "string"
-            },
-            "content": {
-                "bsonType": "string"
-            },
-            "imageUrl": {
-                "bsonType": "string"
-            },
-            "categoryIds": {
-                "bsonType": "array",
-                "items": {
-                    "bsonType": "string"
-                }
-            },
-            "status": {
-                "bsonType": "string",
-                "enum": ["DRAFT", "PENDING", "COMPLETED"]
-            },
-            "timestamp": {
-                "bsonType": "date"
-            },
-            "isPublic": {
-                "bsonType": "bool"
-            },
-            "budget": {
-                "bsonType": "long"
-            },
-            "campaignRequirements": {
-                "bsonType": "object",
-                "additionalProperties": {
-                    "bsonType": "int"
-                }
-            },
-            "influencerRequirement": {
-                "bsonType": "array",
-                "items": {
-                    "bsonType": "string"
-                }
-            }
-        }
-    }
-    """);
-
-        ValidationOptions validationOptions = new ValidationOptions()
-                .validator(new Document("$jsonSchema", jsonSchema));
-
-        CreateCollectionOptions options = new CreateCollectionOptions()
-                .validationOptions(validationOptions);
-
-        db.createCollection("campaigns", options);
-    }
-
   public void create_contentPostingsCollection(MongoDatabase db) {
     if (db.getCollection("contentPostings") != null) {
       db.getCollection("contentPostings").drop();
@@ -666,7 +600,72 @@ public class MongoConfig {
     db.createCollection("comments", options);
   }
 
-  
+  public void create_campaignsCollection(MongoDatabase db) {
+        if (db.getCollection("campaigns") != null) {
+            db.getCollection("campaigns").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["content", "budget"],
+        "properties": {
+            "campaignId": {
+                "bsonType": "string"
+            },
+            "userId": {
+                "bsonType": "string"
+            },
+            "content": {
+                "bsonType": "string"
+            },
+            "imageUrl": {
+                "bsonType": "string"
+            },
+            "categoryIds": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "string"
+                }
+            },
+            "status": {
+                "bsonType": "string",
+                "enum": ["DRAFT", "PENDING", "COMPLETED"]
+            },
+            "timestamp": {
+                "bsonType": "date"
+            },
+            "isPublic": {
+                "bsonType": "bool"
+            },
+            "budget": {
+                "bsonType": "long"
+            },
+            "campaignRequirements": {
+                "bsonType": "object",
+                "additionalProperties": {
+                    "bsonType": "int"
+                }
+            },
+            "influencerRequirement": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "string"
+                }
+            }
+        }
+    }
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("campaigns", options);
+    }
+
 
   public void create_applicationsCollection(MongoDatabase db) {
     if (db.getCollection("applications") != null) {

@@ -147,7 +147,8 @@ public class AuthService {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
         if (!accountVerifiedRepository.existsByEmail(registerRequest.getEmail())) {
-            return ApiResponse.sendError(403, "Email verification required to complete registration", request.getRequestURI());
+            return ApiResponse.sendError(403, "Email verification required to complete registration",
+                    request.getRequestURI());
         }
         if (!registerRequest.getPassword().equals(registerRequest.getPasswordConfirm())) {
             return ApiResponse.sendError(400, "Password and confirm password is wrong", request.getRequestURI());
@@ -253,8 +254,9 @@ public class AuthService {
         return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null,
                 request.getRequestURI());
     }
-    
-    public ResponseEntity<?> resetPasswordByToken(String token, PasswordResetRequest passwordReset, HttpServletRequest request) {
+
+    public ResponseEntity<?> resetPasswordByToken(String token, PasswordResetRequest passwordReset,
+            HttpServletRequest request) {
         try {
             User user;
             DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
