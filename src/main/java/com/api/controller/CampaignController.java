@@ -49,12 +49,12 @@ public class CampaignController {
     }
     
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getCampaignsById(
+    public ResponseEntity<?> getCampaignsByUserId(
             @PathVariable("userId") String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
-        return campaignService.getCampaignsById(userId, page, size, request);
+        return campaignService.getCampaignsByUserId(userId, page, size, request);
     }
 
     @PutMapping("/{campaignId}")

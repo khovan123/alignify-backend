@@ -19,7 +19,7 @@ public class Campaign {
     private String imageUrl;
     private List<String> categoryIds;
     @CreatedDate
-    private Date timestamp;
+    private Date createdDate;
     private boolean isPublic;
     private String status;
     private long budget;
@@ -31,24 +31,24 @@ public class Campaign {
         this.status = "DRAFT";
     }
 
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, String status) {
+    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date createdDate, boolean isPublic, String status) {
         this.campaignId = campaignId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
-        this.timestamp = timestamp;
+        this.createdDate = createdDate;
         this.isPublic = isPublic;
         this.status = status;
     }
 
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement) {
+    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date createdDate, boolean isPublic, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement) {
         this.campaignId = campaignId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
-        this.timestamp = timestamp;
+        this.createdDate = createdDate;
         this.isPublic = isPublic;
         this.status = status;
         this.budget = budget;
@@ -120,13 +120,14 @@ public class Campaign {
         this.categoryIds = categoryIds;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
+
 
     public boolean isIsPublic() {
         return isPublic;

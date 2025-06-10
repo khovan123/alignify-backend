@@ -38,7 +38,7 @@ public class MongoConfig {
     this.create_usersCollection(db);
     this.create_influencersCollection(db);
     this.create_brandsCollection(db);
-    // this.create_rolesCollection(db);
+     this.create_rolesCollection(db);
     // this.create_categoriesCollection(db);
     this.create_adminsCollection(db);
     this.create_galleriesCollection(db);
@@ -632,7 +632,7 @@ public class MongoConfig {
                 "bsonType": "string",
                 "enum": ["DRAFT", "PENDING", "COMPLETED"]
             },
-            "timestamp": {
+            "createdDate": {
                 "bsonType": "date"
             },
             "isPublic": {

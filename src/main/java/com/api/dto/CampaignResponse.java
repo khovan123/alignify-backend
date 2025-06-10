@@ -11,7 +11,7 @@ public class CampaignResponse {
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
-    private Date timestamp;
+    private Date createdDate;
     private boolean isPublic;
     private String status;
     private long budget;
@@ -69,13 +69,15 @@ public class CampaignResponse {
         this.categories = categories;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
+
+    
 
     public boolean isIsPublic() {
         return isPublic;

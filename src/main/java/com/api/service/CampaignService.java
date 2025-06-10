@@ -38,7 +38,9 @@ public class CampaignService {
     private UserRepository userRepository;
 
     public ResponseEntity<?> createCampaign(Campaign campaign,CustomUserDetails userDetails, HttpServletRequest request) {
-        if(userDetails.getId().equals(EnvConfig.BRAND_ROLE_ID)){
+        System.out.println(userDetails.getRoleId());
+        System.out.println(EnvConfig.BRAND_ROLE_ID);
+        if(userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)){
         campaign.setUserId(userDetails.getId());
         campaign = campaignRepo.save(campaign);
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully", campaign, request.getRequestURI());
@@ -64,7 +66,7 @@ public class CampaignService {
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
-        dto.setTimestamp(post.getTimestamp());
+        dto.setCreatedDate(post.getCreatedDate());
         dto.setIsPublic(post.isIsPublic());
         dto.setStatus(post.getStatus());
         dto.setBudget(post.getBudget());
@@ -75,7 +77,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllCampaign(int pageNumber, int pageSize, HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findAll(pageable);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
@@ -92,7 +94,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getMe(CustomUserDetails userDetails, int pageNumber, int pageSize, HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findByUserId(userDetails.getId(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
                 .map(this::mapToDTO)
@@ -106,8 +108,8 @@ public class CampaignService {
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
-    public ResponseEntity<?> getCampaignsById(String userId, int pageNumber, int pageSize, HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "timestamp"));
+    public ResponseEntity<?> getCampaignsByUserId(String userId, int pageNumber, int pageSize, HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findByUserIdAndIsPublic(userId,true, pageable);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
@@ -127,7 +129,7 @@ public class CampaignService {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
-            if (!campaign.getUserId().equals(userDetails)) {
+            if (!campaign.getUserId().equals(userDetails.getId())) {
                 return ResponseEntity.status(403).body(
                         Map.of("error", "Access denied. You are not the owner of this content."));
             }
