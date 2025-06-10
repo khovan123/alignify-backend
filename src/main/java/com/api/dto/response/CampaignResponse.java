@@ -1,43 +1,38 @@
-package com.api.dto;
 
-import com.api.model.Comment;
+package com.api.dto.response;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class ContentPostingResponse {
 
-    private String contentId;
+public class CampaignResponse {
+      private String campaignId;
     private String userId;
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
     private Date timestamp;
     private boolean isPublic;
-    private int commentCount;
-    private int like;
+    private String status;
 
-    public ContentPostingResponse() {
+    public CampaignResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date timestamp, boolean isPublic, int commentCount, int like) {
-        this.contentId = contentId;
-        this.userId = userId;
-        this.content = content;
-        this.imageUrl = imageUrl;
-        this.categories = categories;
-        this.timestamp = timestamp;
-        this.isPublic = isPublic;
-        this.commentCount = commentCount;
-        this.like = like;
+    public String getStatus() {
+        return status;
     }
 
-    public String getContentId() {
-        return contentId;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public String getCampaignId() {
+        return campaignId;
     }
 
-    public void setContentId(String contentId) {
-        this.contentId = contentId;
+    public void setCampaignId(String campaignId) {
+        this.campaignId = campaignId;
     }
 
     public String getUserId() {
@@ -87,20 +82,5 @@ public class ContentPostingResponse {
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
-
-    public int getCommentCount() {
-        return commentCount;
-    }
-
-    public void setCommentCount(int commentCount) {
-        this.commentCount = commentCount;
-    }
-
-    public int getLike() {
-        return like;
-    }
-
-    public void setLike(int like) {
-        this.like = like;
-    }
+    
 }

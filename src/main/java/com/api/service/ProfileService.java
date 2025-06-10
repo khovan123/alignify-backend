@@ -9,10 +9,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
-import com.api.dto.BrandProfileRequest;
-import com.api.dto.BrandProfileResponse;
-import com.api.dto.InfluencerProfileRequest;
-import com.api.dto.InfluencerProfileResponse;
+import com.api.dto.request.BrandProfileRequest;
+import com.api.dto.response.BrandProfileResponse;
+import com.api.dto.request.InfluencerProfileRequest;
+import com.api.dto.response.InfluencerProfileResponse;
 import com.api.model.*;
 import com.api.repository.*;
 import com.api.security.CustomUserDetails;

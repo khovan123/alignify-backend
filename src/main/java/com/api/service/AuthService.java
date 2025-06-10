@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
-import com.api.dto.LoginRequest;
-import com.api.dto.PasswordChangeRequest;
-import com.api.dto.PasswordResetRequest;
-import com.api.dto.RecoveryPasswordRequest;
-import com.api.dto.RegisterRequest;
-import com.api.dto.VerifyOTPRequest;
+import com.api.dto.request.LoginRequest;
+import com.api.dto.request.PasswordChangeRequest;
+import com.api.dto.request.PasswordResetRequest;
+import com.api.dto.request.RecoveryPasswordRequest;
+import com.api.dto.request.RegisterRequest;
+import com.api.dto.request.VerifyOTPRequest;
 import com.api.model.AccountVerified;
 import com.api.model.Admin;
 import com.api.model.Brand;
@@ -69,8 +69,8 @@ public class AuthService {
     private String secretId;
     @Value("${spring.google.google-apis}")
     private String googleapis;
-    @Value("${spring.google.type}")
-    private String googletype;
+    @Value("${spring.google.preset}")
+    private String preset;
 
     public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
         if (request.getHeader("X-Requested-With") == null) {
@@ -85,7 +85,7 @@ public class AuthService {
                     clientId,
                     secretId,
                     authCode,
-                    googletype).execute();
+                    preset).execute();
 
             GoogleIdToken idToken = tokenResponse.parseIdToken();
             GoogleIdToken.Payload payload = idToken.getPayload();
