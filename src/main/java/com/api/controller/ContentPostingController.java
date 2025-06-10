@@ -1,10 +1,12 @@
 package com.api.controller;
 
 import com.api.model.ContentPosting;
+import com.api.security.CustomUserDetails;
 import com.api.service.ContentPostingService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,31 +39,31 @@ public class ContentPostingController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<?> getPostsByUserId(
-            @PathVariable("userId") String userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize) {
-        return contentPostingSer.getContentPostingById(userId, request, pageNumber, pageSize);
+        return contentPostingSer.getContentPostingById(userDetails, request, pageNumber, pageSize);
     }
 
-    @PutMapping("/{userId}/{contentId}")
+    @PutMapping("/{contentId}")
     public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
-            @PathVariable("userId") String userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody ContentPosting contentPosting,
             HttpServletRequest request) {
-        return contentPostingSer.updateContentPosting(contentId,userId, contentPosting, request);
+        return contentPostingSer.updateContentPosting(contentId,userDetails, contentPosting, request);
     }
 
-    @DeleteMapping("/{userId}/{contentId}")
+    @DeleteMapping("/{contentId}")
     public ResponseEntity<?> deletePost(
             @PathVariable("contentId") String contentId,
-            @PathVariable("userId") String userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
 
-        return contentPostingSer.deleteContentPosting(contentId,userId, request);
+        return contentPostingSer.deleteContentPosting(contentId,userDetails, request);
     }
     
-    @PutMapping("/{contentId}")
+    @PutMapping("/{contentId}/like")
     public ResponseEntity<?> toggleLike(@PathVariable("contentId") String contentId,
             HttpServletRequest request) {
         return contentPostingSer.toggleLike(contentId,request);

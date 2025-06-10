@@ -28,7 +28,7 @@ public class CommentController {
     ){
         return commentservice.createComment(comment, request);
     }
-    @GetMapping("/contentId")
+    @GetMapping("contentId/{contentId}")
     public ResponseEntity<?> getCommentByContentId(
             @PathVariable("contentId") String contentId,
             HttpServletRequest request,
@@ -36,7 +36,7 @@ public class CommentController {
             @RequestParam(defaultValue = "10") int pageSize) {
         return commentservice.getCommentByContentId(contentId,request, pageNumber, pageSize);
     }
-    @GetMapping("/userId")
+    @GetMapping("userId/{userId}")
     public ResponseEntity<?> getCommentByUserId(
             @PathVariable("userId") String userId,
             HttpServletRequest request,
