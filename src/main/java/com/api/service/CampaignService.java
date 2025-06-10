@@ -54,6 +54,9 @@ public class CampaignService {
         dto.setTimestamp(post.getTimestamp());
         dto.setIsPublic(post.isIsPublic());
         dto.setStatus(post.getStatus());
+        dto.setBudget(post.getBudget());
+        dto.setCampaignRequirements(post.getCampaignRequirements());
+        dto.setInfluencerRequirement(post.getInfluencerRequirement());
 
         return dto;
     }
@@ -141,7 +144,10 @@ public class CampaignService {
             if (newStatus == null || !validStatuses.contains(newStatus)) {
                 return ApiResponse.sendError(400, "Invalid status. Allowed values: DRAFT, PENDING, COMPLETED", request.getRequestURI());
             }
-
+            long newBudget = updatedCampaign.getBudget();
+            if (newBudget < 0) {
+                return ApiResponse.sendError(400, "Budget must be a non-negative number", request.getRequestURI());
+            }
             List<String> validCategoryIds = validCategories.stream()
                     .map(Category::getCategoryId)
                     .toList();
@@ -151,6 +157,9 @@ public class CampaignService {
             campaign.setCategoryIds(validCategoryIds);
             campaign.setIsPublic(updatedCampaign.isIsPublic());
             campaign.setStatus(newStatus);
+            campaign.setBudget(newBudget);
+            campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
+            campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
 
             campaignRepo.save(campaign);
 
@@ -160,4 +169,5 @@ public class CampaignService {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
         }
     }
+
 }

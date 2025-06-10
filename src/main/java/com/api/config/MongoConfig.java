@@ -35,16 +35,16 @@ public class MongoConfig {
     @PostConstruct
     public void init() {
         MongoDatabase db = mongoClient.getDatabase(databaseName);
-       this.create_usersCollection(db);
-       this.create_influencersCollection(db);
-       this.create_brandsCollection(db);
+        this.create_usersCollection(db);
+        this.create_influencersCollection(db);
+        this.create_brandsCollection(db);
 //        this.create_rolesCollection(db);
 //        this.create_categoriesCollection(db);
         this.create_adminsCollection(db);
         this.create_galleriesCollection(db);
         this.create_galleryImagesCollection(db);
         this.create_otpsCollection(db);
-       this.create_accountVerifiedsCollection(db);
+        this.create_accountVerifiedsCollection(db);
         this.create_campaignsCollection(db);
     }
 
@@ -467,8 +467,6 @@ public class MongoConfig {
         db.createCollection("accountVerifieds", options);
     }
 
-
-    
     public void create_campaignsCollection(MongoDatabase db) {
         if (db.getCollection("campaigns") != null) {
             db.getCollection("campaigns").drop();
@@ -477,7 +475,7 @@ public class MongoConfig {
         Document jsonSchema = Document.parse("""
     {
         "bsonType": "object",
-        "required": ["userId", "content"],
+        "required": ["userId", "content", "budget"],
         "properties": {
             "campaignId": {
                 "bsonType": "string"
@@ -499,18 +497,31 @@ public class MongoConfig {
             },
             "status": {
                 "bsonType": "string",
-                "enum": ["DRAFT","PENDING","COMPLETED"]
+                "enum": ["DRAFT", "PENDING", "COMPLETED"]
             },
             "timestamp": {
                 "bsonType": "date"
             },
             "isPublic": {
                 "bsonType": "bool"
-            }
-            
+            },
+            "budget": {
+                "bsonType": "long"
+            },
+            "campaignRequirements": {
+                "bsonType": "object",
+                "additionalProperties": {
+                    "bsonType": "int"
+                }
+            },
+            "influencerRequirement": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "string"
+                }
             }
         }
-    
+    }
     """);
 
         ValidationOptions validationOptions = new ValidationOptions()
@@ -521,4 +532,5 @@ public class MongoConfig {
 
         db.createCollection("campaigns", options);
     }
+
 }
