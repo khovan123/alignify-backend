@@ -13,13 +13,13 @@ public class Influencer {
     private String userId;
     private String avatarUrl;
     private String backgroundUrl;
-    private Date DoB;
+    private LocalDateTime DoB;
     private String gender;
     private String bio;
     private Map<String, String> socialMediaLinks;
     private double rating;
     private List<String> categoryIds;
-    private List<String> followerIds;
+    private int follower;
     private boolean isPublic;
 
     @CreatedDate
@@ -27,13 +27,16 @@ public class Influencer {
 
     public Influencer() {
         this.rating = 0.0;
+        this.follower = 0;
         this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.isPublic = true;
         this.gender = "NONE";
+        this.categoryIds = new ArrayList<>();
+        this.socialMediaLinks = new HashMap<>();
     }
 
-    public Influencer(String userId, String avatarUrl, String backgroundUrl, Date DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, List<String> followerIds, boolean isPublic, LocalDateTime createdAt) {
+    public Influencer(String userId, String avatarUrl, String backgroundUrl, LocalDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, LocalDateTime createdAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
@@ -43,7 +46,7 @@ public class Influencer {
         this.socialMediaLinks = socialMediaLinks;
         this.rating = rating;
         this.categoryIds = categoryIds;
-        this.followerIds = followerIds;
+        this.follower = follower;
         this.isPublic = isPublic;
         this.createdAt = createdAt;
     }
@@ -72,11 +75,11 @@ public class Influencer {
         this.backgroundUrl = backgroundUrl;
     }
 
-    public Date getDoB() {
+    public LocalDateTime getDoB() {
         return DoB;
     }
 
-    public void setDoB(Date DoB) {
+    public void setDoB(LocalDateTime DoB) {
         this.DoB = DoB;
     }
 
@@ -120,12 +123,12 @@ public class Influencer {
         this.categoryIds = categoryIds;
     }
 
-    public List<String> getFollowerIds() {
-        return followerIds;
+    public int getFollower() {
+        return follower;
     }
 
-    public void setFollowerIds(List<String> followerIds) {
-        this.followerIds = followerIds;
+    public void setFollower(int follower) {
+        this.follower = follower;
     }
 
     public boolean isPublic() {
@@ -133,14 +136,6 @@ public class Influencer {
     }
 
     public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
-
-    public boolean isIsPublic() {
-        return isPublic;
-    }
-
-    public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
 

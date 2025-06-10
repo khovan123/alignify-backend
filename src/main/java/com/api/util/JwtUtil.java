@@ -33,7 +33,7 @@ public class JwtUtil {
         return JWT.create()
                 .withSubject(user.getUserId())
                 .withClaim("roleId", user.getRoleId())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 86400000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 86400000)) //1day
                 .sign(EnvConfig.ALGORITHM);
     }
 

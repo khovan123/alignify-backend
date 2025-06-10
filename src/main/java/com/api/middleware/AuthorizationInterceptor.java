@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
     private static final List<String> EXCLUDED_PATHS = Arrays.asList(
+            "/api/v1/auth/google/**",
             "/api/v1/auth/google",
             "/api/v1/auth/request-otp/**",
             "/api/v1/auth/verify-otp/**",
@@ -23,7 +24,9 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             "/api/v1/auth/recovery-password/**",
             "/api/v1/auth/reset-password/**",
             "/api/v1/role",
-            "/api/v1/category");
+            "/api/v1/category",
+            "/api/v1/auth/recovery-password"
+    );
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -33,19 +36,19 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         if (EXCLUDED_PATHS.stream().anyMatch(path -> uri.startsWith(path) || uri.matches(path.replace("/**", ".*")))) {
             return true;
         }
-
-        if ((method.equals("PUT") || method.equals("DELETE"))) {
-            String id = uri.substring(uri.lastIndexOf('/') + 1);
-
-            if (!Helper.isOwner(id, request)) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.setContentType("application/json");
-                response.getWriter().write(String.format(
-                        "{\"code\":403,\"message\":\"Access denied: Insufficient permissions\",\"path\":\"%s\"}",
-                        uri));
-                return false;
-            }
-        }
+//
+//        if ((method.equals("PUT") || method.equals("DELETE"))) {
+//            String id = uri.substring(uri.lastIndexOf('/') + 1);
+//
+//            if (!Helper.isOwner(id, request)) {
+//                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//                response.setContentType("application/json");
+//                response.getWriter().write(String.format(
+//                        "{\"code\":403,\"message\":\"Access denied: Insufficient permissions\",\"path\":\"%s\"}",
+//                        uri));
+//                return false;
+//            }
+//        }
 
         // Kiểm tra POST nếu endpoint thuộc danh sách bảo vệ
         // if (method.equals("POST")) {
