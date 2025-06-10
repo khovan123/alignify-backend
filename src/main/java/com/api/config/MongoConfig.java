@@ -46,6 +46,8 @@ public class MongoConfig {
     this.create_otpsCollection(db);
     this.create_accountVerifiedsCollection(db);
     this.create_campaignsCollection(db);
+    this.create_contentPostingsCollection(db);
+    this.create_likesCollection(db);
     this.create_applicationsCollection(db);
     this.create_campaignTrackingsCollection(db);
   }
@@ -472,6 +474,78 @@ public class MongoConfig {
     db.createCollection("accountVerifieds", options);
   }
 
+  public void create_likesCollection(MongoDatabase db) {
+    if (db.getCollection("likes") != null) {
+      db.getCollection("likes").drop();
+    }
+
+    Document jsonSchema = Document.parse("""
+        {
+            "bsonType": "object",
+            "required": ["userId", "contentId", "createdAt"],
+            "properties": {
+                "userId": {
+                    "bsonType": "string"
+                },
+                "contentId": {
+                    "bsonType": "string"
+                },
+                "createdAt": {
+                    "bsonType": "date"
+                }
+            }
+        }
+        """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("likes", options);
+
+  }
+
+  public void create_commentsCollection(MongoDatabase db) {
+    if (db.getCollection("comments") != null) {
+      db.getCollection("comments").drop();
+    }
+
+    Document jsonSchema = Document.parse("""
+        {
+            "bsonType": "object",
+            "required": ["userId","contentId", "content"],
+            "properties": {
+                "commentId": {
+                    "bsonType": "string"
+                },
+                 "userId": {
+                    "bsonType": "string"
+                },
+                "contentId": {
+                    "bsonType": "string"
+                },
+                "content": {
+                    "bsonType": "string"
+                },
+                "createdAt": {
+                    "bsonType": "date"
+                }
+            }
+        }
+
+        """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("comments", options);
+  }
+
   public void create_campaignsCollection(MongoDatabase db) {
     if (db.getCollection("campaigns") != null) {
       db.getCollection("campaigns").drop();
@@ -505,7 +579,7 @@ public class MongoConfig {
                     "bsonType": "string",
                     "enum": ["DRAFT","PENDING","COMPLETED"]
                 },
-                "timestamp": {
+                "createdAt": {
                     "bsonType": "date"
                 },
                 "isPublic": {
