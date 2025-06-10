@@ -1,14 +1,14 @@
-package com.api.dto;
+package com.api.dto.request;
 
-public class PasswordReset {
+public class PasswordResetRequest {
 
     private String password;
     private String passwordConfirm;
 
-    public PasswordReset() {
+    public PasswordResetRequest() {
     }
 
-    public PasswordReset(String password, String passwordConfirm) {
+    public PasswordResetRequest(String password, String passwordConfirm) {
         this.password = password;
         this.passwordConfirm = passwordConfirm;
     }

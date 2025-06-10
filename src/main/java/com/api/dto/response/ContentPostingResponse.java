@@ -1,41 +1,32 @@
-package com.api.model;
+package com.api.dto.response;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+public class ContentPostingResponse {
 
-@Document(collection = "contentPostings")
-public class ContentPosting {
-
-    @Id
     private String contentId;
-
     private String userId;
     private String content;
     private String imageUrl;
-    private List<String> categoryIds;
-
-    @CreatedDate
+    private List<Map<String, String>> categories;
     private Date timestamp;
     private boolean isPublic;
     private int commentCount;
     private int like;
 
-    public ContentPosting() {
-        this.like=0;
-        this.commentCount = 0;
-        this.isPublic=true;
+    public ContentPostingResponse() {
     }
 
-    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, int commentCount, int like) {
+    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl,
+            List<Map<String, String>> categories, Date timestamp, boolean isPublic, int commentCount, int like) {
+
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
-        this.categoryIds = categoryIds;
+        this.categories = categories;
         this.timestamp = timestamp;
         this.isPublic = isPublic;
         this.commentCount = commentCount;
@@ -66,14 +57,6 @@ public class ContentPosting {
         this.content = content;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
@@ -82,12 +65,20 @@ public class ContentPosting {
         this.imageUrl = imageUrl;
     }
 
-    public List<String> getCategoryIds() {
-        return categoryIds;
+    public List<Map<String, String>> getCategories() {
+        return categories;
     }
 
-    public void setCategoryIds(List<String> categoryIds) {
-        this.categoryIds = categoryIds;
+    public void setCategories(List<Map<String, String>> categories) {
+        this.categories = categories;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public boolean isIsPublic() {
@@ -113,5 +104,4 @@ public class ContentPosting {
     public void setLike(int like) {
         this.like = like;
     }
-
 }

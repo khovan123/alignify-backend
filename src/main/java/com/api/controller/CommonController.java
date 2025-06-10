@@ -5,9 +5,7 @@ import com.api.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -18,12 +16,12 @@ public class CommonController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @GetMapping("/role")
+    @GetMapping("/roles")
     public ResponseEntity<?> getAllRole(HttpServletRequest request) {
         return ApiResponse.sendSuccess(200, "Roles", roleRepository.findAll(), request.getRequestURI());
     }
 
-    @GetMapping("/category")
+    @GetMapping("/categories")
     public ResponseEntity<?> getAllCategory(HttpServletRequest request) {
         return ApiResponse.sendSuccess(200, "Categories", categoryRepository.findAll(), request.getRequestURI());
     }
