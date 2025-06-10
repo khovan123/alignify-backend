@@ -21,6 +21,7 @@ public class ContentPostingResponse {
 
     public ContentPostingResponse(String contentId, String userId, String content, String imageUrl,
             List<Map<String, String>> categories, Date timestamp, boolean isPublic, int commentCount, int like) {
+
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
