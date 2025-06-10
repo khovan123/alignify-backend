@@ -1,5 +1,5 @@
 
-package com.api.dto;
+package com.api.dto.response;
 
 import java.util.Date;
 import java.util.List;

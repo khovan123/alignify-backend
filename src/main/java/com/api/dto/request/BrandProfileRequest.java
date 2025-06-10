@@ -1,4 +1,4 @@
-package com.api.dto;
+package com.api.dto.request;
 
 import java.time.LocalDateTime;
 import java.util.List;
