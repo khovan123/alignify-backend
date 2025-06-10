@@ -13,7 +13,6 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private String location;
     private String roleId;
     private boolean isActive;
 
@@ -21,7 +20,6 @@ public class User {
     private LocalDateTime createdAt;
 
     public User() {
-        this.location = "NA";
         this.isActive = true;
     }
 
@@ -30,7 +28,6 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.location = location;
         this.roleId = roleId;
         this.isActive = isActive;
         this.createdAt = createdAt;
@@ -68,14 +65,6 @@ public class User {
         this.password = password;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public String getRoleId() {
         return roleId;
     }
@@ -84,11 +73,11 @@ public class User {
         this.roleId = roleId;
     }
 
-    public boolean isIsActive() {
+    public boolean isActive() {
         return isActive;
     }
 
-    public void setIsActive(boolean isActive) {
+    public void setActive(boolean isActive) {
         this.isActive = isActive;
     }
 

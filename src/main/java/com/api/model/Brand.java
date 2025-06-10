@@ -14,6 +14,7 @@ public class Brand {
     private String avatarUrl;
     private String backgroundUrl;
     private String bio;
+    private List<String> categoryIds;
     private Map<String, String> contacts;
     private Map<String, String> socialMediaLinks;
     private LocalDateTime establishDate;
@@ -24,13 +25,17 @@ public class Brand {
     public Brand() {
         this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
+        this.categoryIds = new ArrayList<>();
+        this.contacts = new HashMap<>();
+        this.socialMediaLinks = new HashMap<>();
     }
 
-    public Brand(String userId, String avatarUrl, String backgroundUrl, String bio, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate, LocalDateTime createdAt) {
+    public Brand(String userId, String avatarUrl, String backgroundUrl, String bio, List<String> categoryIds, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate, LocalDateTime createdAt) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
         this.bio = bio;
+        this.categoryIds = categoryIds;
         this.contacts = contacts;
         this.socialMediaLinks = socialMediaLinks;
         this.establishDate = establishDate;
@@ -67,6 +72,14 @@ public class Brand {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public List<String> getCategoryIds() {
+        return categoryIds;
+    }
+
+    public void setCategoryIds(List<String> categoryIds) {
+        this.categoryIds = categoryIds;
     }
 
     public Map<String, String> getContacts() {

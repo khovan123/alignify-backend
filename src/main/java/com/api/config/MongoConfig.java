@@ -1,15 +1,24 @@
 package com.api.config;
 
-import com.api.model.*;
-import com.api.repository.*;
-import com.mongodb.client.*;
-import com.mongodb.client.model.*;
+import java.util.List;
+
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import jakarta.annotation.PostConstruct;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+
+import com.api.model.Category;
+import com.api.model.Role;
+import com.api.repository.CategoryRepository;
+import com.api.repository.RoleRepository;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.ValidationOptions;
+
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class MongoConfig {
@@ -26,16 +35,19 @@ public class MongoConfig {
     @PostConstruct
     public void init() {
         MongoDatabase db = mongoClient.getDatabase(databaseName);
-        this.create_usersCollection(db);
-        this.create_influencersCollection(db);
-        this.create_brandsCollection(db);
+      this.create_usersCollection(db);
+      this.create_influencersCollection(db);
+      this.create_brandsCollection(db);
 //        this.create_rolesCollection(db);
 //        this.create_categoriesCollection(db);
         this.create_adminsCollection(db);
         this.create_galleriesCollection(db);
         this.create_galleryImagesCollection(db);
         this.create_otpsCollection(db);
-        this.create_accountVerifiedsCollection(db);
+      this.create_accountVerifiedsCollection(db);
+        this.create_contentPostingsCollection(db);
+        this.create_likesCollection(db);
+        this.create_campaignsCollection(db);
     }
 
     public void create_usersCollection(MongoDatabase db) {
@@ -46,7 +58,7 @@ public class MongoConfig {
         Document jsonSchema = Document.parse("""
         {
               "bsonType": "object",
-              "required": ["name", "email", "password", "location", "roleId"],
+              "required": ["name", "email", "password", "roleId"],
               "properties": {
               "name": {
                 "bsonType": "string"
@@ -59,9 +71,6 @@ public class MongoConfig {
                   "bsonType": "string",
                   "minLength": 6
                 },
-                "location": {
-                  "bsonType": "string"
-                },
                 "roleId": {
                   "bsonType": "string"
                 },
@@ -70,7 +79,7 @@ public class MongoConfig {
                 },
                 "createdAt": {
                   "bsonType": "date"
-                }                                            
+                }
               }
         }
         """);
@@ -98,12 +107,15 @@ public class MongoConfig {
             "avatarUrl": {
               "bsonType": "string"
             },
+            "backgroundUrl": {
+               "bsonType": "string"
+            },
             "DoB": {
               "bsonType": "date"
             },
             "gender": {
               "bsonType": "string",
-              "enum" : ["MALE", "FEMALE", "LGBT", "NONE"]                               
+              "enum" : ["MALE", "FEMALE", "OTHER", "LGBT", "NONE"]
             },
             "bio": {
               "bsonType": "string"
@@ -123,18 +135,15 @@ public class MongoConfig {
                 "bsonType": "string"
               }
             },
-            "followerIds": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string"
-              }
+            "follower": {
+              "bsonType": "int",
             },
             "isPublic": {
               "bsonType": "bool"
             },
             "createdAt": {
               "bsonType": "date"
-            }   
+            }
           }
         }
         """);
@@ -159,7 +168,7 @@ public class MongoConfig {
               "properties": {
               "roleName": {
                   "bsonType": "string"
-                }               
+                }
               }
         }
         """);
@@ -192,7 +201,7 @@ public class MongoConfig {
               "properties": {
                 "categoryName": {
                   "bsonType": "string"
-                }               
+                }
               }
         }
         """);
@@ -220,8 +229,7 @@ public class MongoConfig {
                     new Category("phong tục và văn hóa"),
                     new Category("khởi nghiệp"),
                     new Category("kĩ năng mềm"),
-                    new Category("mẹ và bé")
-            ));
+                    new Category("mẹ và bé")));
         }
     }
 
@@ -254,12 +262,18 @@ public class MongoConfig {
                     "bsonType": "string"
                   }
                 },
+                "categoryIds": {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string"
+                   }
+                },                  
                 "establishDate": {
                   "bsonType": "date",
                 },
                 "createdAt": {
                   "bsonType": "date"
-                }   
+                }
               }
         }
         """);
@@ -298,7 +312,7 @@ public class MongoConfig {
                 },
                 "createdAt": {
                   "bsonType": "date"
-                }                                            
+                }
               }
         }
         """);
@@ -331,7 +345,7 @@ public class MongoConfig {
                 },
                 "createdAt": {
                   "bsonType": "date"
-                }   
+                }
               }
         }
         """);
@@ -351,14 +365,14 @@ public class MongoConfig {
         Document jsonSchema = Document.parse("""
         {
               "bsonType": "object",
-              "required": ["imageUrl"],                                                                                                                                      
+              "required": ["imageUrl"],
               "properties": {
                 "imageUrl": {
                   "bsonType": "string",
                 },
                 "createdAt": {
                   "bsonType": "date"
-                }   
+                }
               }
         }
         """);
@@ -378,24 +392,24 @@ public class MongoConfig {
         Document jsonSchema = Document.parse("""
         {
               "bsonType": "object",
-              "required": ["otpCode","email"],                                                                                                                                      
+              "required": ["otpCode","email"],
               "properties": {
                 "email": {
                   "bsonType": "string",
                 },
                 "otpCode": {
                   "bsonType": "string",
-                  "pattern": "^[A-Z0-9]{6}$",          
-                },            
+                  "pattern": "^[A-Z0-9]{6}$",
+                },
                 "requestCount" :{
                   "bsonType": "int",
-                },  
+                },
                 "attemptCount" :{
                   "bsonType": "int",
-                },                                          
+                },
                 "createdAt": {
                   "bsonType": "date"
-                }   
+                }
               }
         }
         """);
@@ -437,14 +451,14 @@ public class MongoConfig {
         Document jsonSchema = Document.parse("""
         {
               "bsonType": "object",
-              "required": ["email"],                                                                                                                                      
-              "properties": {      
+              "required": ["email"],
+              "properties": {
                 "email": {
                   "bsonType": "string"
                 },
                 "createdAt": {
                   "bsonType": "date"
-                }   
+                }
               }
         }
         """);
@@ -457,4 +471,217 @@ public class MongoConfig {
         db.createCollection("accountVerifieds", options);
     }
 
+    public void create_contentPostingsCollection(MongoDatabase db) {
+        if (db.getCollection("contentPostings") != null) {
+            db.getCollection("contentPostings").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["userId", "content"],
+        "properties": {
+            "contentId": {
+                "bsonType": "string"
+            },
+            "userId": {
+                "bsonType": "string"
+            },
+            "content": {
+                "bsonType": "string"
+            },
+            "imageUrl": {
+                "bsonType": "string"
+            },
+            "categoryIds": {
+                "bsonType": "array",
+                "items": {
+                    "bsonType": "string"
+                }
+            },
+            "timestamp": {
+                "bsonType": "date"
+            },
+            "isPublic": {
+                "bsonType": "bool"
+            },
+            "commentCount": {
+                "bsonType": "int"
+            },
+            "like": {
+                "bsonType": "int"
+            }
+        }
+    }
+    
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("contentPostings", options);
+    }
+
+    public void create_likesCollection(MongoDatabase db) {
+        if (db.getCollection("likes") != null) {
+            db.getCollection("likes").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["userId", "contentId", "createdAt"],
+        "properties": {
+            "userId": {
+                "bsonType": "string"
+            },
+            "contentId": {
+                "bsonType": "string"
+            },
+            "createdAt": {
+                "bsonType": "date"
+            }
+        }
+    }
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("likes", options);
+
+    }
+    
+      public void create_commentsCollection(MongoDatabase db) {
+        if (db.getCollection("comments") != null) {
+            db.getCollection("comments").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+    {
+        "bsonType": "object",
+        "required": ["userId","contentId", "content"],
+        "properties": {
+            "commentId": {
+                "bsonType": "string"
+            },
+             "userId": {
+                "bsonType": "string"
+            },
+            "contentId": {
+                "bsonType": "string"
+            },
+            "content": {
+                "bsonType": "string"
+            }           
+        }
+    }
+    
+    """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("comments", options);
+    }
+
+    
+    public void create_campaignsCollection(MongoDatabase db) {
+        if (db.getCollection("campaigns") != null) {
+            db.getCollection("campaigns").drop();
+        }
+
+        Document jsonSchema = Document.parse("""
+        {
+            "bsonType": "object",
+            "required": ["userId", "content"],
+            "properties": {
+                "campaignId": {
+                    "bsonType": "string"
+                },
+                "userId": {
+                    "bsonType": "string"
+                },
+                "content": {
+                    "bsonType": "string"
+                },
+                "imageUrl": {
+                    "bsonType": "string"
+                },
+                "categoryIds": {
+                    "bsonType": "array",
+                    "items": {
+                        "bsonType": "string"
+                    }
+                },
+                "status": {
+                    "bsonType": "string",
+                    "enum": ["DRAFT","PENDING","COMPLETED"]
+                },
+                "timestamp": {
+                    "bsonType": "date"
+                },
+                "isPublic": {
+                    "bsonType": "bool"
+                }
+
+                }
+            }
+
+        """);
+
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("campaigns", options);
+    }
+
+    public void create_applicationsCollection(MongoDatabase db) {
+        if (db.getCollection("applications") != null) {
+            db.getCollection("applications").drop();
+        }
+        Document jsonSchema = Document.parse("""
+        {
+              "bsonType": "object",
+              "required": ["campaignId"],
+              "properties": {
+                "campaignId": {
+                  "bsonType": "string"
+                },
+                "influencerId":{
+                   "bsonType": "string"
+                },
+                "limited": {
+                  "bsonType": "int"
+                },
+                "status": {
+                  "bsonType": "string",
+                  "enum": ["PENDING","ACCEPTED","REJECTED"]
+                },
+                "createdAt": {
+                  "bsonType": "date"
+                }
+              }
+        }
+        """);
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
+
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
+
+        db.createCollection("applications", options);
+    }
 }
