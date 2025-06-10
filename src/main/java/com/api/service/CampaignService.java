@@ -1,5 +1,6 @@
 package com.api.service;
 
+import com.api.dto.response.CampaignResponse;
 import com.api.dto.*;
 import com.api.model.*;
 import com.api.repository.*;
