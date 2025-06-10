@@ -1,7 +1,19 @@
 package com.api.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.api.dto.ApiResponse;
-import com.api.dto.ContentPostingResponse;
+import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Category;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
@@ -13,19 +25,8 @@ import com.api.repository.LikesRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class ContentPostingService {
@@ -84,12 +85,14 @@ public class ContentPostingService {
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getContentPostingById(CustomUserDetails userDetails, HttpServletRequest request, int pageNumber, int pageSize) {
+    public ResponseEntity<?> getContentPostingById(CustomUserDetails userDetails, HttpServletRequest request,
+            int pageNumber, int pageSize) {
         String userId = userDetails.getId();
         List<ContentPosting> posts = contentPostingRepo.findByUserId(userId);
 
         if (posts.isEmpty()) {
-            return ApiResponse.sendError(404, "No content postings found for userId: " + userId, request.getRequestURI());
+            return ApiResponse.sendError(404, "No content postings found for userId: " + userId,
+                    request.getRequestURI());
         }
 
         boolean isOwner = Helper.isOwner(userId, request);
@@ -112,7 +115,8 @@ public class ContentPostingService {
         return ApiResponse.sendSuccess(200, "Content postings fetched successfully", dtoList, request.getRequestURI());
     }
 
-    public ResponseEntity<?> deleteContentPosting(String contentId, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> deleteContentPosting(String contentId, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
@@ -127,14 +131,12 @@ public class ContentPostingService {
                     204,
                     "Content posting deleted successfully",
                     null,
-                    request.getRequestURI()
-            );
+                    request.getRequestURI());
         } else {
             return ApiResponse.sendError(
                     404,
                     "Content posting not found",
-                    request.getRequestURI()
-            );
+                    request.getRequestURI());
         }
     }
 
@@ -214,8 +216,7 @@ public class ContentPostingService {
                 200,
                 message,
                 Map.of("likeCount", likeCount),
-                request.getRequestURI()
-        );
+                request.getRequestURI());
     }
 
 }
