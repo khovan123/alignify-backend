@@ -30,8 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.startsWith("/swagger-ui/**")
                 || path.equals("/swagger-ui.html")
                 || path.equals("/swagger-ui.html/**")
-                || path.equals("/api/v1/role")
-                || path.equals("/api/v1/category")
+                || path.equals("/api/v1/roles")
+                || path.equals("/api/v1/categories")
                 || path.equals("/api/v1/auth/request-otp/**")
                 || path.equals("/api/v1/auth/verify-otp/**")
                 || path.equals("/api/v1/auth/register/**")
@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/api/v1/auth/google")
                 || path.equals("/api/v1/auth/recovery-password")
                 || path.equals("/api/v1/auth/reset-password/**")
-                || path.matches("/api/v1/(role|category|auth/(request-otp|verify-otp|register|login|google|reset-password|recovery-password))(.*)?")) {
+                || path.matches("/api/v1/(roles|categoies|auth/(request-otp|verify-otp|register|login|google|reset-password|recovery-password))(.*)?")) {
             filterChain.doFilter(request, response);
             return;
         }
