@@ -1,4 +1,4 @@
-package com.api.dto;
+package com.api.dto.request;
 
 public class PasswordChangeRequest {
 

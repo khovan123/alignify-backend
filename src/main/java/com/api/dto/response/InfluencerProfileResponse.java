@@ -1,4 +1,4 @@
-package com.api.dto;
+package com.api.dto.response;
 
 import com.api.model.Category;
 import com.api.model.Influencer;

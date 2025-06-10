@@ -1,5 +1,11 @@
 package com.api.controller;
 
+import com.api.dto.request.VerifyOTPRequest;
+import com.api.dto.request.RegisterRequest;
+import com.api.dto.request.RecoveryPasswordRequest;
+import com.api.dto.request.PasswordResetRequest;
+import com.api.dto.request.PasswordChangeRequest;
+import com.api.dto.request.LoginRequest;
 import com.api.dto.*;
 import com.api.model.*;
 import com.api.security.CustomUserDetails;

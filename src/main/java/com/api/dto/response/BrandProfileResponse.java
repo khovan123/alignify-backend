@@ -1,4 +1,4 @@
-package com.api.dto;
+package com.api.dto.response;
 
 import com.api.model.Brand;
 import com.api.model.Category;
