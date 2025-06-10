@@ -1,6 +1,5 @@
-package com.api.dto;
+package com.api.dto.response;
 
-import com.api.model.Comment;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,8 @@ public class ContentPostingResponse {
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date timestamp, boolean isPublic, int commentCount, int like) {
+    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl,
+            List<Map<String, String>> categories, Date timestamp, boolean isPublic, int commentCount, int like) {
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
