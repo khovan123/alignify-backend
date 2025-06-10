@@ -67,7 +67,7 @@ public class CampaignService {
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
         dto.setCreatedDate(post.getCreatedDate());
-        dto.setIsPublic(post.isIsPublic());
+        dto.setPublic(post.isPublic());
         dto.setStatus(post.getStatus());
         dto.setBudget(post.getBudget());
         dto.setCampaignRequirements(post.getCampaignRequirements());
@@ -186,7 +186,7 @@ public class CampaignService {
             campaign.setContent(updatedCampaign.getContent());
             campaign.setImageUrl(updatedCampaign.getImageUrl());
             campaign.setCategoryIds(validCategoryIds);
-            campaign.setIsPublic(updatedCampaign.isIsPublic());
+            campaign.setPublic(updatedCampaign.isPublic());
             campaign.setStatus(newStatus);
             campaign.setBudget(newBudget);
             campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());

@@ -129,11 +129,11 @@ public class Campaign {
     }
 
 
-    public boolean isIsPublic() {
+    public boolean isPublic() {
         return isPublic;
     }
 
-    public void setIsPublic(boolean isPublic) {
+    public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
 
