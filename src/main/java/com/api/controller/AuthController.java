@@ -1,20 +1,27 @@
 package com.api.controller;
 
-import com.api.dto.request.VerifyOTPRequest;
-import com.api.dto.request.RegisterRequest;
-import com.api.dto.request.RecoveryPasswordRequest;
-import com.api.dto.request.PasswordResetRequest;
-import com.api.dto.request.PasswordChangeRequest;
-import com.api.dto.request.LoginRequest;
-import com.api.dto.*;
-import com.api.model.*;
-import com.api.security.CustomUserDetails;
-import com.api.service.*;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.api.dto.request.LoginRequest;
+import com.api.dto.request.PasswordChangeRequest;
+import com.api.dto.request.PasswordResetRequest;
+import com.api.dto.request.RecoveryPasswordRequest;
+import com.api.dto.request.RegisterRequest;
+import com.api.dto.request.VerifyOTPRequest;
+import com.api.model.Admin;
+import com.api.security.CustomUserDetails;
+import com.api.service.AuthService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/auth")
