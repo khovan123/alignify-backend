@@ -5,6 +5,7 @@ import com.api.service.ApplicationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,26 +17,30 @@ public class ApplicationController {
     private ApplicationService applicationService;
 
     @PostMapping("/{campaignId}/applications/apply")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER')")
     public ResponseEntity<?> apply(@PathVariable("campaignId") String campaignId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getId();
+        String userId = userDetails.getUserId();
         return applicationService.apply_Application(userId, campaignId, request);
     }
 
     @PostMapping("/applications/{applicationId}/cancel")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isApplicationOwner(#applicationId, authentication.principal.userId)")
     public ResponseEntity<?> cancel(@PathVariable("applicationId") String applicationId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getId();
+        String userId = userDetails.getUserId();
         return applicationService.cancel_Application(userId, applicationId, request);
     }
 
     @PostMapping("/applications/{applicationId}/re-apply")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isApplicationOwner(#applicationId, authentication.principal.userId)")
     public ResponseEntity<?> reApply(@PathVariable("applicationId") String applicationId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getId();
+        String userId = userDetails.getUserId();
         return applicationService.reApply_Application(userId, applicationId, request);
     }
 
     @PostMapping("/applications/{applicationId}/confirm")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isApplicationReceiver(#campaignId, authentication.principal.userId)")
     public ResponseEntity<?> confirm(@PathVariable("applicationId") String applicationId, @RequestParam("accepted") Boolean accepted, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getId();
+        String userId = userDetails.getUserId();
         return applicationService.confirm_Application(userId, applicationId, accepted, request);
     }
 }

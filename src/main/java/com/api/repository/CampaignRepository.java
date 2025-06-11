@@ -10,6 +10,7 @@ import com.api.model.Campaign;
 @Repository
 public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
+    @Override
     Page<Campaign> findAll(Pageable pageable);
 
     Page<Campaign> findByUserId(String userId, Pageable pageable);

@@ -114,7 +114,7 @@ public class ContentPostingService {
     public ResponseEntity<?> getMe(CustomUserDetails userDetails, HttpServletRequest request,
             int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<ContentPosting> posts = contentPostingRepo.findByUserId(userDetails.getId(), pageable);
+        Page<ContentPosting> posts = contentPostingRepo.findByUserId(userDetails.getUserId(), pageable);
 
         List<ContentPostingResponse> dtoList = posts.getContent().stream()
                 .map(this::mapToDTO)
@@ -162,7 +162,7 @@ public class ContentPostingService {
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
 
-            if (!Helper.isOwner(userDetails.getId(), request)) {
+            if (!Helper.isOwner(userDetails.getUserId(), request)) {
                 return ResponseEntity.status(403).body(
                         Map.of("error", "Access denied. You are not the owner of this content."));
             }
