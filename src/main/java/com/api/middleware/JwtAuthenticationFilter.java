@@ -1,5 +1,6 @@
 package com.api.middleware;
 
+import com.api.repository.RoleRepository;
 import com.api.security.CustomUserDetails;
 import java.io.IOException;
 
@@ -13,11 +14,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -61,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
             String roleId = decodedJWT.getClaim("roleId").asString();
-            if (roleId == null) {
+            if (roleId == null || !roleRepository.findById(roleId).isPresent()) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"code\":401,\"message\":\"Invalid token: Role ID is missing\",\"path\":\"" + path + "\"}");

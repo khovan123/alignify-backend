@@ -2,6 +2,7 @@
 package com.api.model;
 
 import java.util.Date;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,7 +13,6 @@ public class Likes {
     private String likeId;
     private String userId;
     private String contentId;
-    private String commentId;
     @CreatedDate
     private Date createdAt;
 
@@ -24,21 +24,12 @@ public class Likes {
         this.contentId = contentId;
     }
 
-    public Likes(String userId, String contentId, String commentId) {
+    public Likes(String likeId, String userId, String contentId, Date createdAt) {
+        this.likeId = likeId;
         this.userId = userId;
         this.contentId = contentId;
-        this.commentId = commentId;
+        this.createdAt = createdAt;
     }
-
-    public String getCommentId() {
-        return commentId;
-    }
-
-    public void setCommentId(String commentId) {
-        this.commentId = commentId;
-    }
-
-    
 
     public String getLikeId() {
         return likeId;
