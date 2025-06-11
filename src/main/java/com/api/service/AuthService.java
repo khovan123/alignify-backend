@@ -212,7 +212,7 @@ public class AuthService {
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
             HttpServletRequest request) {
-        String userId = userDetails.getId();
+        String userId = userDetails.getUserId();
         Optional<User> userOpt = userRepository.findById(userId);
         if (!userOpt.isPresent()) {
             return ApiResponse.sendError(401, "Invalid or expired token", request.getRequestURI());

@@ -1,7 +1,6 @@
 package com.api.dto.response;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +16,7 @@ public class CampaignResponse {
     private long budget;
     private Map<String, Integer> campaignRequirements;
     private List<String> influencerRequirement;
+    private int influencerCount;
 
     public CampaignResponse() {
     }
@@ -99,6 +99,14 @@ public class CampaignResponse {
 
     public void setInfluencerRequirement(List<String> influencerRequirement) {
         this.influencerRequirement = influencerRequirement;
+    }
+
+    public int getInfluencerCount() {
+        return influencerCount;
+    }
+
+    public void setInfluencerCount(int influencerCount) {
+        this.influencerCount = influencerCount;
     }
 
 }

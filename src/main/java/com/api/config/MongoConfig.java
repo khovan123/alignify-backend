@@ -35,22 +35,22 @@ public class MongoConfig {
   @PostConstruct
   public void init() {
     MongoDatabase db = mongoClient.getDatabase(databaseName);
-//    this.create_usersCollection(db);
-//    this.create_influencersCollection(db);
-//    this.create_brandsCollection(db);
-//     this.create_rolesCollection(db);
+    // this.create_usersCollection(db);
+    // this.create_influencersCollection(db);
+    // this.create_brandsCollection(db);
+    // this.create_rolesCollection(db);
     // this.create_categoriesCollection(db);
-//    this.create_adminsCollection(db);
+    // this.create_adminsCollection(db);
     this.create_galleriesCollection(db);
     this.create_galleryImagesCollection(db);
-//    this.create_otpsCollection(db);
-//    this.create_accountVerifiedsCollection(db);
+    // this.create_otpsCollection(db);
+    // this.create_accountVerifiedsCollection(db);
     this.create_campaignsCollection(db);
     this.create_contentPostingsCollection(db);
     this.create_likesCollection(db);
     this.create_applicationsCollection(db);
     this.create_campaignTrackingsCollection(db);
-    this.create_commentsCollection(db);   
+    this.create_commentsCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -602,68 +602,67 @@ public class MongoConfig {
   }
 
   public void create_campaignsCollection(MongoDatabase db) {
-        if (db.getCollection("campaigns") != null) {
-            db.getCollection("campaigns").drop();
-        }
+    if (db.getCollection("campaigns") != null) {
+      db.getCollection("campaigns").drop();
+    }
 
-        Document jsonSchema = Document.parse("""
-    {
-        "bsonType": "object",
-        "required": ["content", "budget"],
-        "properties": {
-            "campaignId": {
-                "bsonType": "string"
-            },
-            "userId": {
-                "bsonType": "string"
-            },
-            "content": {
-                "bsonType": "string"
-            },
-            "imageUrl": {
-                "bsonType": "string"
-            },
-            "categoryIds": {
-                "bsonType": "array",
-                "items": {
+    Document jsonSchema = Document.parse("""
+        {
+            "bsonType": "object",
+            "required": ["content", "budget"],
+            "properties": {
+                "campaignId": {
                     "bsonType": "string"
-                }
-            },
-            "status": {
-                "bsonType": "string",
-                "enum": ["DRAFT", "PENDING", "PARTICIPATING", "COMPLETED"]
-            },
-            "createdDate": {
-                "bsonType": "date"
-            },
-            "budget": {
-                "bsonType": "long"
-            },
-            "campaignRequirements": {
-                "bsonType": "object",
-                "additionalProperties": {
-                    "bsonType": "int"
-                }
-            },
-            "influencerRequirement": {
-                "bsonType": "array",
-                "items": {
+                },
+                "userId": {
                     "bsonType": "string"
+                },
+                "content": {
+                    "bsonType": "string"
+                },
+                "imageUrl": {
+                    "bsonType": "string"
+                },
+                "categoryIds": {
+                    "bsonType": "array",
+                    "items": {
+                        "bsonType": "string"
+                    }
+                },
+                "status": {
+                    "bsonType": "string",
+                    "enum": ["DRAFT", "PENDING", "PARTICIPATING", "COMPLETED"]
+                },
+                "createdDate": {
+                    "bsonType": "date"
+                },
+                "budget": {
+                    "bsonType": "long"
+                },
+                "campaignRequirements": {
+                    "bsonType": "object",
+                    "additionalProperties": {
+                        "bsonType": "int"
+                    }
+                },
+                "influencerRequirement": {
+                    "bsonType": "array",
+                    "items": {
+                        "bsonType": "string"
+                    }
                 }
             }
         }
-    }
-    """);
+        """);
 
-        ValidationOptions validationOptions = new ValidationOptions()
-                .validator(new Document("$jsonSchema", jsonSchema));
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
 
-        CreateCollectionOptions options = new CreateCollectionOptions()
-                .validationOptions(validationOptions);
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
 
-        db.createCollection("campaigns", options);
-    }
-
+    db.createCollection("campaigns", options);
+  }
 
   public void create_applicationsCollection(MongoDatabase db) {
     if (db.getCollection("applications") != null) {
@@ -711,8 +710,11 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking", "process", "createdAt"],
+                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking"],
                 "properties": {
+                    "_id": {
+                      "bsonType": "objectId"
+                    }
                     "campaignId": {
                         "bsonType": "string"
                     },
