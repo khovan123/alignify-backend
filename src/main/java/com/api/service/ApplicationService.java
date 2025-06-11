@@ -10,6 +10,7 @@ import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
+import com.api.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,8 @@ public class ApplicationService {
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
 
-    public ResponseEntity<?> apply_Application(String influencerId, String campaignId, HttpServletRequest request) {
+    public ResponseEntity<?> apply_Application(String campaignId, CustomUserDetails userDetails, HttpServletRequest request) {
+        String influencerId = userDetails.getUserId();
         Optional<Campaign> campaignOpt = campaignRepository.findById(campaignId);
         if (!campaignOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + campaignId + " not found", request.getRequestURI());
@@ -45,13 +47,15 @@ public class ApplicationService {
         if (applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
             return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
         }
-        Application application = applicationRepository.save(new Application(campaignId));
+        Application application = applicationRepository.save(new Application(campaignId, campaignId, influencerId, campaignId));
         return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> cancel_Application(String influencerId, String applicationId, HttpServletRequest request) {
-        Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
+    public ResponseEntity<?> cancel_Application(String applicationId, CustomUserDetails userDetails, HttpServletRequest request) {
+        String influencerId = userDetails.getUserId();
+
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId, influencerId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
@@ -59,9 +63,11 @@ public class ApplicationService {
         return ApiResponse.sendSuccess(204, "Delete application successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> reApply_Application(String influencerId, String applicationId,
+    public ResponseEntity<?> reApply_Application(String applicationId, CustomUserDetails userDetails,
             HttpServletRequest request) {
-        Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
+        String influencerId = userDetails.getUserId();
+
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId, influencerId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
@@ -80,15 +86,18 @@ public class ApplicationService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> confirm_Application(String brandId, String applicationId, boolean accepted, HttpServletRequest request) {
-        Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
+    public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails, HttpServletRequest request) {
+        String brandId = userDetails.getUserId();
+
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndBrandId(applicationId, brandId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
         Application application = applicationOpt.get();
+        Campaign campaign = campaignRepository.findById(application.getCampaignId()).get();
         if (accepted) {
             application.setStatus("ACCEPTED");
-            CampaignTracking campaignTracking = new CampaignTracking();
+            CampaignTracking campaignTracking = new CampaignTracking(application.getCampaignId(), brandId, application.getInfluencerId(), campaign.getCampaignRequirements());
             campaignTracking.setCampaignTrackingId(applicationId);
             campaignTrackingRepository.save(campaignTracking);
         } else {
