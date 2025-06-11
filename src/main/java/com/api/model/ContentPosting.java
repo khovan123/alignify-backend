@@ -19,27 +19,27 @@ public class ContentPosting {
     private List<String> categoryIds;
 
     @CreatedDate
-    private Date timestamp;
+    private Date createdDate;
     private boolean isPublic;
     private int commentCount;
-    private int like;
+    private int likeCount;
 
     public ContentPosting() {
-        this.like=0;
+        this.likeCount = 0;
         this.commentCount = 0;
-        this.isPublic=true;
+        this.isPublic = true;
     }
 
-    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date timestamp, boolean isPublic, int commentCount, int like) {
+    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
-        this.timestamp = timestamp;
+        this.createdDate = createdDate;
         this.isPublic = isPublic;
         this.commentCount = commentCount;
-        this.like = like;
+        this.likeCount = likeCount;
     }
 
     public String getContentId() {
@@ -66,12 +66,12 @@ public class ContentPosting {
         this.content = content;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 
     public String getImageUrl() {
@@ -106,12 +106,12 @@ public class ContentPosting {
         this.commentCount = commentCount;
     }
 
-    public int getLike() {
-        return like;
+    public int getLikeCount() {
+        return likeCount;
     }
 
-    public void setLike(int like) {
-        this.like = like;
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
     }
 
 }
