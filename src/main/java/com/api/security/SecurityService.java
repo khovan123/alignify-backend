@@ -2,8 +2,10 @@ package com.api.security;
 
 import com.api.model.Application;
 import com.api.model.Campaign;
+import com.api.model.CampaignTracking;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.CampaignRepository;
+import com.api.repository.CampaignTrackingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ public class SecurityService {
     private CampaignRepository campaignRepository;
     @Autowired
     private ApplicationRepository applicationRepository;
+    @Autowired
+    private CampaignTrackingRepository campaignTrackingRepository;
 
     public boolean isCampaignOwner(String campaignId, Object principal) {
         if (!(principal instanceof CustomUserDetails)) {
@@ -43,4 +47,24 @@ public class SecurityService {
         return applicationOpt.isPresent() && this.isCampaignOwner(applicationOpt.get().getCampaignId(), principal);
     }
 
+    public boolean isJoinedCampaignTracking(String campaignId, String trackingId, Object principal) {
+        if (!(principal instanceof CustomUserDetails)) {
+            return false;
+        }
+        String userId = ((CustomUserDetails) principal).getUserId();
+        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository.findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
+        if (!campaignTrackingOpt.isPresent()) {
+            return false;
+        }
+        if (hasInfluencerRole((CustomUserDetails) principal)) {
+            return campaignTrackingOpt.isPresent() && campaignTrackingOpt.get().getInfluencerId().equals(userId);
+        } else {
+            return campaignTrackingOpt.isPresent() && campaignTrackingOpt.get().getBrandId().equals(userId);
+        }
+    }
+
+    private boolean hasInfluencerRole(CustomUserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_INFLUENCER"));
+    }
 }

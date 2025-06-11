@@ -13,6 +13,7 @@ public class Application {
     private String applicationId;
     private String campaignId;
     private String influencerId;
+    private String brandId;
     private int limited;
     private String status;
     @CreatedDate
@@ -23,16 +24,20 @@ public class Application {
         this.status = "PENDING";
     }
 
-    public Application(String campaignId) {
-        this.limited = 2;
-        this.campaignId = campaignId;
-        this.status = "PENDING";
-    }
-
-    public Application(String applicationId, String campaignId, String influencerId, int limited, String status, LocalDateTime createdAt) {
+    public Application(String applicationId, String campaignId, String influencerId, String brandId) {
         this.applicationId = applicationId;
         this.campaignId = campaignId;
         this.influencerId = influencerId;
+        this.brandId = brandId;
+        this.limited = 2;
+        this.status = "PENDING";
+    }
+
+    public Application(String applicationId, String campaignId, String influencerId, String brandId, int limited, String status, LocalDateTime createdAt) {
+        this.applicationId = applicationId;
+        this.campaignId = campaignId;
+        this.influencerId = influencerId;
+        this.brandId = brandId;
         this.limited = limited;
         this.status = status;
         this.createdAt = createdAt;
@@ -84,6 +89,14 @@ public class Application {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getBrandId() {
+        return brandId;
+    }
+
+    public void setBrandId(String brandId) {
+        this.brandId = brandId;
     }
 
 }

@@ -679,6 +679,9 @@ public class MongoConfig {
                 "influencerId":{
                    "bsonType": "string"
                 },
+                "brandId":{
+                   "bsonType": "string"
+                },                         
                 "limited": {
                   "bsonType": "int"
                 },
