@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CampaignRequirementRequest {
 
-    @JsonProperty("requirement")
-    private String requirement;
+    @JsonProperty("index")
+    private int index;
     @JsonProperty("imageUrl")
     private String imageUrl;
     @JsonProperty("postUrl")
@@ -13,19 +13,19 @@ public class CampaignRequirementRequest {
     @JsonProperty("status")
     private String status;
 
-    public CampaignRequirementRequest(@JsonProperty("requirement") String requirement, @JsonProperty("imageUrl") String imageUrl, @JsonProperty("postUrl") String postUrl, @JsonProperty("status") String status) {
-        this.requirement = requirement;
+    public CampaignRequirementRequest(@JsonProperty("index") int index, @JsonProperty("imageUrl") String imageUrl, @JsonProperty("postUrl") String postUrl, @JsonProperty("status") String status) {
+        this.index = index;
         this.imageUrl = imageUrl;
         this.postUrl = postUrl;
         this.status = status;
     }
 
-    public String getRequirement() {
-        return requirement;
+    public int getIndex() {
+        return index;
     }
 
-    public void setRequirement(String requirement) {
-        this.requirement = requirement;
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     public String getImageUrl() {
