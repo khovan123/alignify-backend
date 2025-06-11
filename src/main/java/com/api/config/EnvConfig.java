@@ -13,9 +13,9 @@ public class EnvConfig {
 
     public static Algorithm ALGORITHM;
 
-    public static String BRAND_ROLE_ID = "6834312517f64328628a78dc";
-    public static String INFLUENCER_ROLE_ID = "6834312517f64328628a78dd";
-    public static String ADMIN_ROLE_ID = "6834312517f64328628a78db";
+    public static String BRAND_ROLE_ID = "68485dcedda6867ca0d23e8a";
+    public static String INFLUENCER_ROLE_ID = "68485dcedda6867ca0d23e8b";
+    public static String ADMIN_ROLE_ID = "68485dcedda6867ca0d23e89";
 
     @PostConstruct
     public void init() {

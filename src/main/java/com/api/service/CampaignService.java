@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
-import com.api.dto.CampaignResponse;
+import com.api.dto.response.CampaignResponse;
 import com.api.model.Campaign;
 import com.api.model.Category;
 import com.api.model.User;
@@ -24,6 +24,7 @@ import com.api.repository.CategoryRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -37,15 +38,17 @@ public class CampaignService {
     @Autowired
     private UserRepository userRepository;
 
-    public ResponseEntity<?> createCampaign(Campaign campaign,CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> createCampaign(Campaign campaign, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         System.out.println(userDetails.getRoleId());
         System.out.println(EnvConfig.BRAND_ROLE_ID);
-        if(userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)){
-        campaign.setUserId(userDetails.getId());
-        campaign = campaignRepo.save(campaign);
-        return ApiResponse.sendSuccess(201, "Campaign posting created successfully", campaign, request.getRequestURI());
+        if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+            campaign.setUserId(userDetails.getId());
+            campaign = campaignRepo.save(campaign);
+            return ApiResponse.sendSuccess(201, "Campaign posting created successfully", campaign,
+                    request.getRequestURI());
         }
-        return ApiResponse.sendError(403,"Campaign posting only create by Brand", request.getRequestURI());
+        return ApiResponse.sendError(403, "Campaign posting only create by Brand", request.getRequestURI());
     }
 
     public CampaignResponse mapToDTO(Campaign post) {
@@ -67,7 +70,6 @@ public class CampaignService {
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
         dto.setCreatedDate(post.getCreatedDate());
-        dto.setPublic(post.isPublic());
         dto.setStatus(post.getStatus());
         dto.setBudget(post.getBudget());
         dto.setCampaignRequirements(post.getCampaignRequirements());
@@ -93,7 +95,8 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getMe(CustomUserDetails userDetails, int pageNumber, int pageSize, HttpServletRequest request) {
+    public ResponseEntity<?> getMe(CustomUserDetails userDetails, int pageNumber, int pageSize,
+            HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findByUserId(userDetails.getId(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
@@ -108,9 +111,11 @@ public class CampaignService {
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
-    public ResponseEntity<?> getCampaignsByUserId(String userId, int pageNumber, int pageSize, HttpServletRequest request) {
+
+    public ResponseEntity<?> getCampaignsByUserId(String userId, int pageNumber, int pageSize,
+            HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Campaign> campaignPage = campaignRepo.findByUserIdAndIsPublic(userId,true, pageable);
+        Page<Campaign> campaignPage = campaignRepo.findByUserId(userId, pageable);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
                 .map(this::mapToDTO)
@@ -125,7 +130,8 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
@@ -138,14 +144,12 @@ public class CampaignService {
                     204,
                     "campaign posting deleted successfully",
                     null,
-                    request.getRequestURI()
-            );
+                    request.getRequestURI());
         } else {
             return ApiResponse.sendError(
                     404,
                     "Campaign posting not found",
-                    request.getRequestURI()
-            );
+                    request.getRequestURI());
         }
     }
 
@@ -173,7 +177,8 @@ public class CampaignService {
             String newStatus = updatedCampaign.getStatus();
             List<String> validStatuses = List.of("DRAFT", "PENDING", "COMPLETED");
             if (newStatus == null || !validStatuses.contains(newStatus)) {
-                return ApiResponse.sendError(400, "Invalid status. Allowed values: DRAFT, PENDING, COMPLETED", request.getRequestURI());
+                return ApiResponse.sendError(400, "Invalid status. Allowed values: DRAFT, PENDING, COMPLETED",
+                        request.getRequestURI());
             }
             long newBudget = updatedCampaign.getBudget();
             if (newBudget < 0) {
@@ -186,7 +191,6 @@ public class CampaignService {
             campaign.setContent(updatedCampaign.getContent());
             campaign.setImageUrl(updatedCampaign.getImageUrl());
             campaign.setCategoryIds(validCategoryIds);
-            campaign.setPublic(updatedCampaign.isPublic());
             campaign.setStatus(newStatus);
             campaign.setBudget(newBudget);
             campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
@@ -196,9 +200,18 @@ public class CampaignService {
 
             return ApiResponse.sendSuccess(200, "Campaign posting updated successfully", null,
                     request.getRequestURI());
-            
+
         } else {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
+        }
+    }
+
+    public Campaign convertToCampaign(Object campaign) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.convertValue(campaign, Campaign.class);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
         }
     }
 

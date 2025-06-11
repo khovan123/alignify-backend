@@ -1,8 +1,7 @@
-
 package com.api.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("campaigns")
 public class Campaign {
+
     @Id
     private String campaignId;
     private String userId;
@@ -19,37 +19,37 @@ public class Campaign {
     private String imageUrl;
     private List<String> categoryIds;
     @CreatedDate
-    private Date createdDate;
-    private boolean isPublic;
+    private LocalDateTime createdDate;
     private String status;
     private long budget;
-    private Map<String,Integer> campaignRequirements;
+    private Map<String, Integer> campaignRequirements;
     private List<String> influencerRequirement;
+
     public Campaign() {
-        this.isPublic = true;
         this.categoryIds = new ArrayList<>();
         this.status = "DRAFT";
     }
 
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date createdDate, boolean isPublic, String status) {
+    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds,
+            Date timestamp, boolean isPublic, String status) {
         this.campaignId = campaignId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
         this.createdDate = createdDate;
-        this.isPublic = isPublic;
         this.status = status;
     }
 
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, Date createdDate, boolean isPublic, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement) {
+    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds,
+            LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
+            List<String> influencerRequirement) {
         this.campaignId = campaignId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
         this.createdDate = createdDate;
-        this.isPublic = isPublic;
         this.status = status;
         this.budget = budget;
         this.campaignRequirements = campaignRequirements;
@@ -79,7 +79,7 @@ public class Campaign {
     public void setInfluencerRequirement(List<String> influencerRequirement) {
         this.influencerRequirement = influencerRequirement;
     }
-    
+
     public String getCampaignId() {
         return campaignId;
     }
@@ -120,21 +120,12 @@ public class Campaign {
         this.categoryIds = categoryIds;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
-    }
-
-
-    public boolean isPublic() {
-        return isPublic;
-    }
-
-    public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
     }
 
     public String getStatus() {
@@ -145,8 +136,4 @@ public class Campaign {
         this.status = status;
     }
 
-    
-    
-    
-    
 }
