@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api.model.Campaign;
 import com.api.security.CustomUserDetails;
 import com.api.service.CampaignService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("api/v1/campaigns")
@@ -28,6 +28,7 @@ public class CampaignController {
     private CampaignService campaignService;
 
     @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_BRAND')")
     public ResponseEntity<?> createPost(@RequestBody Object obj, @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         return campaignService.createCampaign(campaignService.convertToCampaign(obj), userDetails, request);
@@ -60,6 +61,7 @@ public class CampaignController {
     }
 
     @PutMapping("/{campaignId}")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal.userId)")
     public ResponseEntity<?> updatePost(@PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody Campaign campaign,
@@ -68,6 +70,7 @@ public class CampaignController {
     }
 
     @DeleteMapping("/{campaignId}")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal.userId)")
     public ResponseEntity<?> deletePost(
             @PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,

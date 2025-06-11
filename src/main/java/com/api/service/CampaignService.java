@@ -40,12 +40,10 @@ public class CampaignService {
 
     public ResponseEntity<?> createCampaign(Campaign campaign, CustomUserDetails userDetails,
             HttpServletRequest request) {
-        System.out.println(userDetails.getRoleId());
-        System.out.println(EnvConfig.BRAND_ROLE_ID);
         if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-            campaign.setUserId(userDetails.getId());
+            campaign.setUserId(userDetails.getUserId());
             campaign = campaignRepo.save(campaign);
-            return ApiResponse.sendSuccess(201, "Campaign posting created successfully", campaign,
+            return ApiResponse.sendSuccess(201, "Campaign posting created successfully", this.mapToDTO(campaign),
                     request.getRequestURI());
         }
         return ApiResponse.sendError(403, "Campaign posting only create by Brand", request.getRequestURI());
@@ -64,6 +62,7 @@ public class CampaignService {
                 .toList();
 
         CampaignResponse dto = new CampaignResponse();
+
         dto.setCampaignId(post.getCampaignId());
         dto.setUserId(post.getUserId());
         dto.setContent(post.getContent());
@@ -74,7 +73,7 @@ public class CampaignService {
         dto.setBudget(post.getBudget());
         dto.setCampaignRequirements(post.getCampaignRequirements());
         dto.setInfluencerRequirement(post.getInfluencerRequirement());
-
+        dto.setInfluencerCount(post.getInfluencerCount());
         return dto;
     }
 
@@ -98,7 +97,7 @@ public class CampaignService {
     public ResponseEntity<?> getMe(CustomUserDetails userDetails, int pageNumber, int pageSize,
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Campaign> campaignPage = campaignRepo.findByUserId(userDetails.getId(), pageable);
+        Page<Campaign> campaignPage = campaignRepo.findByUserId(userDetails.getUserId(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
@@ -135,7 +134,7 @@ public class CampaignService {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
-            if (!campaign.getUserId().equals(userDetails.getId())) {
+            if (!campaign.getUserId().equals(userDetails.getUserId())) {
                 return ResponseEntity.status(403).body(
                         Map.of("error", "Access denied. You are not the owner of this content."));
             }
@@ -158,7 +157,7 @@ public class CampaignService {
             HttpServletRequest request) {
 
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
-        User user = userRepository.findById(userDetails.getId()).get();
+        User user = userRepository.findById(userDetails.getUserId()).get();
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
 

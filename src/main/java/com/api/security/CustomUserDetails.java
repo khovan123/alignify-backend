@@ -1,28 +1,45 @@
 package com.api.security;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
+import com.api.config.EnvConfig;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final String id;
+    private final String userId;
     private final String roleId;
     private final String username;
     private final String password;
-    private final Collection<? extends GrantedAuthority> authorities;
+    private final List<GrantedAuthority> authorities;
 
-    public CustomUserDetails(String id, String roleId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        this.id = id;
+    public CustomUserDetails(String userId, String roleId, String username, String password) {
+        this.userId = userId;
         this.roleId = roleId;
         this.username = username;
         this.password = password;
-        this.authorities = authorities;
+        this.authorities = Collections.singletonList(new SimpleGrantedAuthority(mapRoleIdToAuthority(roleId)));
     }
 
-    public String getId() {
-        return id;
+    private static String mapRoleIdToAuthority(String roleId) {
+        if (roleId.equals(EnvConfig.ADMIN_ROLE_ID)) {
+            return "ROLE_ADMIN";
+        } else if (roleId.equals(EnvConfig.BRAND_ROLE_ID)) {
+            return "ROLE_BRAND";
+        } else if (roleId.equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            return "ROLE_INFLUENCER";
+        } else {
+            return "ROLE_UNKNOWN";
+        }
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public String getRoleId() {
@@ -30,8 +47,8 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
-        return username;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
     }
 
     @Override
@@ -40,8 +57,8 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+    public String getUsername() {
+        return username;
     }
 
     @Override

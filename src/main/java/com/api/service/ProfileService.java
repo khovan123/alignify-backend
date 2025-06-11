@@ -42,7 +42,7 @@ public class ProfileService {
     private String uploadPreset;
 
     public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getId();
+        String userId = userDetails.getUserId();
         List<Map<String, Object>> userList = new ArrayList<>();
         if (roleId.equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
             return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
@@ -73,7 +73,7 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> getMe(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         User user = userRepository.findById(id).get();
         Role role = roleRepository.findById(user.getRoleId()).get();
         if (role.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
@@ -89,7 +89,7 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> getProfileById(String id, CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getId();
+        String userId = userDetails.getUserId();
         User user = userRepository.findById(id).get();
         if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Influencer influencer = influencerRepository.findById(id).get();
@@ -105,7 +105,7 @@ public class ProfileService {
 
     public ResponseEntity<?> updateProfile(Object profile, CustomUserDetails userDetails,
             HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         User user = userRepository.findById(id).get();
         if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Influencer influencer = influencerRepository.findById(id).get();
@@ -158,7 +158,7 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> deleteAccount(CustomUserDetails userDetails, HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         User user = userRepository.findById(id).get();
         user.setActive(false);
         userRepository.save(user);
@@ -166,7 +166,7 @@ public class ProfileService {
     }
 
     public ResponseEntity<?> saveAvatarUrl(MultipartFile file, CustomUserDetails userDetails, HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         Optional<User> userOpt = userRepository.findById(id);
         if (!userOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
