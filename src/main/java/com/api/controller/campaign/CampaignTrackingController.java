@@ -6,16 +6,16 @@ import com.api.dto.request.StatusRequest;
 import com.api.model.*;
 import com.api.repository.CampaignTrackingRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/campaigns/{campaignId}/trackings/{traciking}")
+@RequestMapping("/api/v1/campaigns/{campaignId}/trackings/{trackingId}")
 public class CampaignTrackingController {
 
     @Autowired
@@ -33,10 +33,12 @@ public class CampaignTrackingController {
         return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackingOpt.get(), request.getRequestURI());
     }
 
-    @PostMapping("/requirements")
+    @PostMapping("/requirements/{type}")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') && @securityService.isJoinedCampaignTracking(#campaignId, #trackingId, authentication.principal.userId)")
     public ResponseEntity<?> addContentRequirement(
             @PathVariable("campaignId") String campaignId,
             @PathVariable("trackingId") String trackingId,
+            @PathVariable("type") String type,
             @RequestBody List<CampaignRequirementRequest> contentRequests,
             HttpServletRequest request
     ) {
@@ -46,13 +48,15 @@ public class CampaignTrackingController {
         }
         CampaignTracking tracking = campaignTrackingOpt.get();
         Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTracking();
-        for (CampaignRequirementRequest contentrequest : contentRequests) {
+        for (CampaignRequirementRequest contentRequest : contentRequests) {
             CampaignRequirement content = new CampaignRequirement(
-                    contentrequest.getImageUrl(),
-                    contentrequest.getPostUrl(),
-                    contentrequest.getStatus()
+                    contentRequest.getIndex(),
+                    contentRequest.getImageUrl(),
+                    contentRequest.getPostUrl(),
+                    contentRequest.getStatus()
             );
-            trackingMap.computeIfAbsent(contentrequest.getRequirement(), k -> new ArrayList<>()).add(content);
+            trackingMap.get(type).remove(content.getIndex());
+            trackingMap.get(type).add(content.getIndex(), content);
         }
         tracking.setProcess(calculateProcess(trackingMap));
         CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
@@ -60,6 +64,7 @@ public class CampaignTrackingController {
     }
 
     @PutMapping("requirements/{type}/{index}/status")
+    @PreAuthorize("hasRole('ROLE_BRAND') && @securityService.isJoinedCampaignTracking(#campaignId, #trackingId, authentication.principal.userId)")
     public ResponseEntity<?> updateRequirementStatus(
             @PathVariable("campaignId") String campaignId,
             @PathVariable("trackingId") String trackingId,
@@ -69,9 +74,9 @@ public class CampaignTrackingController {
             HttpServletRequest request
     ) {
         Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository.findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
-        if (!campaignTrackingOpt.isPresent()) {
-            ApiResponse.sendError(404, "Id: " + trackingId + " not found!", request.getRequestURI());
-        }
+//        if (!campaignTrackingOpt.isPresent()) {
+//            ApiResponse.sendError(404, "Id: " + trackingId + " not found!", request.getRequestURI());
+//        }
         CampaignTracking tracking = campaignTrackingOpt.get();
         Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTracking();
         List<CampaignRequirement> contents = trackingMap.get(type);

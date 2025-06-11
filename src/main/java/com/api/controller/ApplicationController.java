@@ -19,28 +19,24 @@ public class ApplicationController {
     @PostMapping("/{campaignId}/applications/apply")
     @PreAuthorize("hasRole('ROLE_INFLUENCER')")
     public ResponseEntity<?> apply(@PathVariable("campaignId") String campaignId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getUserId();
-        return applicationService.apply_Application(userId, campaignId, request);
+        return applicationService.apply_Application(campaignId,userDetails, request);
     }
 
     @PostMapping("/applications/{applicationId}/cancel")
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isApplicationOwner(#applicationId, authentication.principal.userId)")
     public ResponseEntity<?> cancel(@PathVariable("applicationId") String applicationId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getUserId();
-        return applicationService.cancel_Application(userId, applicationId, request);
+        return applicationService.cancel_Application(applicationId, userDetails,request);
     }
 
     @PostMapping("/applications/{applicationId}/re-apply")
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isApplicationOwner(#applicationId, authentication.principal.userId)")
     public ResponseEntity<?> reApply(@PathVariable("applicationId") String applicationId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getUserId();
-        return applicationService.reApply_Application(userId, applicationId, request);
+        return applicationService.reApply_Application(applicationId, userDetails,request);
     }
 
     @PostMapping("/applications/{applicationId}/confirm")
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isApplicationReceiver(#campaignId, authentication.principal.userId)")
     public ResponseEntity<?> confirm(@PathVariable("applicationId") String applicationId, @RequestParam("accepted") Boolean accepted, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        String userId = userDetails.getUserId();
-        return applicationService.confirm_Application(userId, applicationId, accepted, request);
+        return applicationService.confirm_Application(applicationId, accepted,userDetails, request);
     }
 }

@@ -1,6 +1,8 @@
 package com.api.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +29,15 @@ public class CampaignTracking {
         this.process = 0.0;
     }
 
-    public CampaignTracking(String campaignTrackingId, String campaignId, String brandId, String influencerId, Map<String, List<CampaignRequirement>> campaignRequirementTracking, double process, LocalDateTime createdAt) {
-        this.campaignTrackingId = campaignTrackingId;
+    public CampaignTracking(String campaignId, String brandId, String influencerId, Map<String, Integer> campaignRequirement) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.influencerId = influencerId;
-        this.campaignRequirementTracking = campaignRequirementTracking;
-        this.process = process;
-        this.createdAt = createdAt;
+        this.process = 0.0;
+        this.campaignRequirementTracking = new HashMap<>();
+        campaignRequirement.forEach((key, count)
+                -> campaignRequirementTracking.put(key, new ArrayList<>(Collections.nCopies(count, new CampaignRequirement(count))))
+        );
     }
 
     public String getCampaignTrackingId() {
