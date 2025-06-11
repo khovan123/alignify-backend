@@ -24,23 +24,14 @@ public class Campaign {
     private long budget;
     private Map<String, Integer> campaignRequirements;
     private List<String> influencerRequirement;
+    private int influencerCount;
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
         this.status = "DRAFT";
     }
 
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, String status) {
-        this.campaignId = campaignId;
-        this.userId = userId;
-        this.content = content;
-        this.imageUrl = imageUrl;
-        this.categoryIds = categoryIds;
-        this.createdDate = createdDate;
-        this.status = status;
-    }
-
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement) {
+    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement, int influencerCount) {
         this.campaignId = campaignId;
         this.userId = userId;
         this.content = content;
@@ -51,6 +42,7 @@ public class Campaign {
         this.budget = budget;
         this.campaignRequirements = campaignRequirements;
         this.influencerRequirement = influencerRequirement;
+        this.influencerCount = influencerCount;
     }
 
     public long getBudget() {
@@ -131,6 +123,14 @@ public class Campaign {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getInfluencerCount() {
+        return influencerCount;
+    }
+
+    public void setInfluencerCount(int influencerCount) {
+        this.influencerCount = influencerCount;
     }
 
 }

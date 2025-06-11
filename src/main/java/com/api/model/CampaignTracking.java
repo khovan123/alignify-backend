@@ -24,6 +24,7 @@ public class CampaignTracking {
 
     public CampaignTracking() {
         this.campaignRequirementTracking = new HashMap<>();
+        this.process = 0.0;
     }
 
     public CampaignTracking(String campaignTrackingId, String campaignId, String brandId, String influencerId, Map<String, List<CampaignRequirement>> campaignRequirementTracking, double process, LocalDateTime createdAt) {

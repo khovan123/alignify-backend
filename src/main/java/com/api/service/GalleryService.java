@@ -32,7 +32,7 @@ public class GalleryService {
 
     public ResponseEntity<?> getGallery(int pageNumber,
             int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         Optional<Gallery> galleryOpt = galleryRepository.findById(id);
         if (!galleryOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
@@ -54,7 +54,7 @@ public class GalleryService {
     }
 
     public ResponseEntity<?> saveGalleryImageIntoGallery(MultipartFile file, CustomUserDetails userDetails, HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         Optional<Gallery> galleryOtp = galleryRepository.findById(id);
         Gallery gallery;
         if (!galleryOtp.isPresent()) {
@@ -93,7 +93,7 @@ public class GalleryService {
     }
 
     public ResponseEntity<?> deleteGalleryImageByImageId(String galleryImageId, CustomUserDetails userDetails, HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         Optional<GalleryImage> imageOpt = imageRepository.findById(galleryImageId);
         if (!imageOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
@@ -103,7 +103,7 @@ public class GalleryService {
     }
 
     public ResponseEntity<?> getGalleryImageByImageId(String galleryImageId, CustomUserDetails userDetails, HttpServletRequest request) {
-        String id = userDetails.getId();
+        String id = userDetails.getUserId();
         Optional<Influencer> influencer = influencerProfileRepository.findById(id);
         if (!influencer.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
