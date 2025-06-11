@@ -5,7 +5,6 @@ import com.api.model.Comment;
 import com.api.model.ContentPosting;
 import com.api.model.Likes;
 import com.api.repository.CommentRepository;
-import com.api.repository.IContentPostingRepository;
 import com.api.repository.LikesRepository;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import com.api.repository.ContentPostingRepository;
 
 @Service
 public class CommentService {
@@ -28,7 +28,7 @@ public class CommentService {
     @Autowired
     private CommentRepository commentRepository;
     @Autowired
-    private IContentPostingRepository contentPostingRepo;
+    private ContentPostingRepository contentPostingRepo;
     @Autowired
     private LikesRepository likesRepo;
     

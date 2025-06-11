@@ -11,26 +11,24 @@ public class ContentPostingResponse {
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
-    private Date timestamp;
+    private Date createdDate;
     private boolean isPublic;
     private int commentCount;
-    private int like;
+    private int likeCount;
 
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl,
-            List<Map<String, String>> categories, Date timestamp, boolean isPublic, int commentCount, int like) {
-
+    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categories = categories;
-        this.timestamp = timestamp;
+        this.createdDate = createdDate;
         this.isPublic = isPublic;
         this.commentCount = commentCount;
-        this.like = like;
+        this.likeCount = likeCount;
     }
 
     public String getContentId() {
@@ -73,19 +71,19 @@ public class ContentPostingResponse {
         this.categories = categories;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getCreatedDate() {
+        return createdDate;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 
-    public boolean isIsPublic() {
+    public boolean isPublic() {
         return isPublic;
     }
 
-    public void setIsPublic(boolean isPublic) {
+    public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
 
@@ -97,11 +95,12 @@ public class ContentPostingResponse {
         this.commentCount = commentCount;
     }
 
-    public int getLike() {
-        return like;
+    public int getLikeCount() {
+        return likeCount;
     }
 
-    public void setLike(int like) {
-        this.like = like;
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
     }
+
 }

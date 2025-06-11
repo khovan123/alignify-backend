@@ -1,5 +1,6 @@
 package com.api.service;
 
+import com.api.config.EnvConfig;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,19 +21,20 @@ import com.api.model.ContentPosting;
 import com.api.model.Likes;
 import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
-import com.api.repository.IContentPostingRepository;
 import com.api.repository.LikesRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
+import com.api.repository.ContentPostingRepository;
 
 @Service
 public class ContentPostingService {
 
     @Autowired
-    private IContentPostingRepository contentPostingRepo;
+    private ContentPostingRepository contentPostingRepo;
     @Autowired
     private CategoryRepository categoryRepo;
     @Autowired
@@ -40,10 +42,13 @@ public class ContentPostingService {
     @Autowired
     private CommentRepository commentRepository;
 
-    public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, HttpServletRequest request) {
-        contentPosting = contentPostingRepo.save(contentPosting);
-        return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
-                request.getRequestURI());
+    public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, CustomUserDetails userDetails, HttpServletRequest request) {
+        if (userDetails.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            contentPosting = contentPostingRepo.save(contentPosting);
+            return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
+                    request.getRequestURI());
+        }
+        return ApiResponse.sendError(403, "Content Posting only create by Influencer", request.getRequestURI());
     }
 
     public ContentPostingResponse mapToDTO(ContentPosting post) {
@@ -66,53 +71,62 @@ public class ContentPostingService {
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
-        dto.setTimestamp(post.getTimestamp());
-        dto.setIsPublic(post.isIsPublic());
+        dto.setCreatedDate(post.getCreatedDate());
+        dto.setPublic(post.isIsPublic());
         dto.setCommentCount(comments.size());
-        dto.setLike(post.getLike());
-
+        dto.setLikeCount(post.getLikeCount());
         return dto;
     }
 
     public ResponseEntity<?> getAllContentPostings(HttpServletRequest request, int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "timestamp"));
-        List<ContentPosting> contentPostings = contentPostingRepo.findByIsPublicTrue(pageable);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<ContentPosting> posts = contentPostingRepo.findByIsPublicTrue(pageable);
 
-        List<ContentPostingResponse> dtoList = contentPostings.stream()
+        List<ContentPostingResponse> dtoList = posts.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
-
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", posts.getNumber());
+        responseData.put("totalPages", posts.getTotalPages());
+        responseData.put("totalItems", posts.getTotalElements());
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getContentPostingById(CustomUserDetails userDetails, HttpServletRequest request,
+    public ResponseEntity<?> getContentPostingById(String userId, HttpServletRequest request,
             int pageNumber, int pageSize) {
-        String userId = userDetails.getId();
-        List<ContentPosting> posts = contentPostingRepo.findByUserId(userId);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<ContentPosting> posts = contentPostingRepo.findByUserIdAndIsPublicTrue(userId, pageable);
 
-        if (posts.isEmpty()) {
-            return ApiResponse.sendError(404, "No content postings found for userId: " + userId,
-                    request.getRequestURI());
-        }
-
-        boolean isOwner = Helper.isOwner(userId, request);
-
-        List<ContentPosting> visiblePosts = isOwner
-                ? posts
-                : posts.stream().filter(ContentPosting::isIsPublic).toList();
-
-        int start = pageNumber * pageSize;
-        int end = Math.min(start + pageSize, visiblePosts.size());
-
-        if (start >= visiblePosts.size()) {
-            return ApiResponse.sendSuccess(200, "No more content", List.of(), request.getRequestURI());
-        }
-
-        List<ContentPostingResponse> dtoList = visiblePosts.subList(start, end).stream()
+        List<ContentPostingResponse> dtoList = posts.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
 
-        return ApiResponse.sendSuccess(200, "Content postings fetched successfully", dtoList, request.getRequestURI());
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", posts.getNumber());
+        responseData.put("totalPages", posts.getTotalPages());
+        responseData.put("totalItems", posts.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getMe(CustomUserDetails userDetails, HttpServletRequest request,
+            int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<ContentPosting> posts = contentPostingRepo.findByUserId(userDetails.getUserId(), pageable);
+
+        List<ContentPostingResponse> dtoList = posts.getContent().stream()
+                .map(this::mapToDTO)
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", posts.getNumber());
+        responseData.put("totalPages", posts.getTotalPages());
+        responseData.put("totalItems", posts.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
     public ResponseEntity<?> deleteContentPosting(String contentId, CustomUserDetails userDetails,
@@ -148,7 +162,7 @@ public class ContentPostingService {
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
 
-            if (!Helper.isOwner(userDetails.getId(), request)) {
+            if (!Helper.isOwner(userDetails.getUserId(), request)) {
                 return ResponseEntity.status(403).body(
                         Map.of("error", "Access denied. You are not the owner of this content."));
             }
@@ -169,7 +183,7 @@ public class ContentPostingService {
             contentPosting.setCategoryIds(validCategoryIds);
             contentPosting.setIsPublic(updatedContentPosting.isIsPublic());
             contentPosting.setCommentCount(updatedContentPosting.getCommentCount());
-            contentPosting.setLike(updatedContentPosting.getLike());
+            contentPosting.setLikeCount(updatedContentPosting.getLikeCount());
 
             contentPostingRepo.save(contentPosting);
 
@@ -207,7 +221,7 @@ public class ContentPostingService {
         }
 
         long likeCount = likesRepo.countByContentId(contentId);
-        content.setLike((int) likeCount);
+        content.setLikeCount((int) likeCount);
         contentPostingRepo.save(content);
 
         String message = existingLike.isPresent() ? "Like removed" : "Like added";

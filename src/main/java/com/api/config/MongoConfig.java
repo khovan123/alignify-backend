@@ -35,21 +35,22 @@ public class MongoConfig {
   @PostConstruct
   public void init() {
     MongoDatabase db = mongoClient.getDatabase(databaseName);
-    this.create_usersCollection(db);
-    this.create_influencersCollection(db);
-    this.create_brandsCollection(db);
+    // this.create_usersCollection(db);
+    // this.create_influencersCollection(db);
+    // this.create_brandsCollection(db);
     // this.create_rolesCollection(db);
     // this.create_categoriesCollection(db);
-    this.create_adminsCollection(db);
+    // this.create_adminsCollection(db);
     this.create_galleriesCollection(db);
     this.create_galleryImagesCollection(db);
-    this.create_otpsCollection(db);
-    this.create_accountVerifiedsCollection(db);
+    // this.create_otpsCollection(db);
+    // this.create_accountVerifiedsCollection(db);
     this.create_campaignsCollection(db);
     this.create_contentPostingsCollection(db);
     this.create_likesCollection(db);
     this.create_applicationsCollection(db);
     this.create_campaignTrackingsCollection(db);
+    this.create_commentsCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -482,7 +483,7 @@ public class MongoConfig {
     Document jsonSchema = Document.parse("""
         {
             "bsonType": "object",
-            "required": ["userId", "content"],
+            "required": ["content"],
             "properties": {
                 "contentId": {
                     "bsonType": "string"
@@ -502,7 +503,7 @@ public class MongoConfig {
                         "bsonType": "string"
                     }
                 },
-                "timestamp": {
+                "createdDate": {
                     "bsonType": "date"
                 },
                 "isPublic": {
@@ -511,7 +512,7 @@ public class MongoConfig {
                 "commentCount": {
                     "bsonType": "int"
                 },
-                "like": {
+                "likeCount": {
                     "bsonType": "int"
                 }
             }
@@ -608,7 +609,7 @@ public class MongoConfig {
     Document jsonSchema = Document.parse("""
         {
             "bsonType": "object",
-            "required": ["userId", "content"],
+            "required": ["content", "budget"],
             "properties": {
                 "campaignId": {
                     "bsonType": "string"
@@ -620,8 +621,7 @@ public class MongoConfig {
                     "bsonType": "string"
                 },
                 "imageUrl": {
-                    "bsonType": "string",
-                    "pattern": "^https?://.+$"
+                    "bsonType": "string"
                 },
                 "categoryIds": {
                     "bsonType": "array",
@@ -631,18 +631,28 @@ public class MongoConfig {
                 },
                 "status": {
                     "bsonType": "string",
-                    "enum": ["DRAFT","PENDING","COMPLETED"]
+                    "enum": ["DRAFT", "PENDING", "PARTICIPATING", "COMPLETED"]
                 },
-                "createdAt": {
+                "createdDate": {
                     "bsonType": "date"
                 },
-                "isPublic": {
-                    "bsonType": "bool"
+                "budget": {
+                    "bsonType": "long"
+                },
+                "campaignRequirements": {
+                    "bsonType": "object",
+                    "additionalProperties": {
+                        "bsonType": "int"
+                    }
+                },
+                "influencerRequirement": {
+                    "bsonType": "array",
+                    "items": {
+                        "bsonType": "string"
+                    }
                 }
-
             }
         }
-
         """);
 
     ValidationOptions validationOptions = new ValidationOptions()
@@ -700,8 +710,11 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking", "process", "createdAt"],
+                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking"],
                 "properties": {
+                    "_id": {
+                      "bsonType": "objectId"
+                    }
                     "campaignId": {
                         "bsonType": "string"
                     },

@@ -1,20 +1,22 @@
-
 package com.api.dto.response;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-
 public class CampaignResponse {
-      private String campaignId;
+
+    private String campaignId;
     private String userId;
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
-    private Date timestamp;
-    private boolean isPublic;
+    private LocalDateTime createdDate;
     private String status;
+    private long budget;
+    private Map<String, Integer> campaignRequirements;
+    private List<String> influencerRequirement;
+    private int influencerCount;
 
     public CampaignResponse() {
     }
@@ -26,7 +28,7 @@ public class CampaignResponse {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
     public String getCampaignId() {
         return campaignId;
     }
@@ -67,20 +69,44 @@ public class CampaignResponse {
         this.categories = categories;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 
-    public boolean isIsPublic() {
-        return isPublic;
+    public long getBudget() {
+        return budget;
     }
 
-    public void setIsPublic(boolean isPublic) {
-        this.isPublic = isPublic;
+    public void setBudget(long budget) {
+        this.budget = budget;
     }
-    
+
+    public Map<String, Integer> getCampaignRequirements() {
+        return campaignRequirements;
+    }
+
+    public void setCampaignRequirements(Map<String, Integer> campaignRequirements) {
+        this.campaignRequirements = campaignRequirements;
+    }
+
+    public List<String> getInfluencerRequirement() {
+        return influencerRequirement;
+    }
+
+    public void setInfluencerRequirement(List<String> influencerRequirement) {
+        this.influencerRequirement = influencerRequirement;
+    }
+
+    public int getInfluencerCount() {
+        return influencerCount;
+    }
+
+    public void setInfluencerCount(int influencerCount) {
+        this.influencerCount = influencerCount;
+    }
+
 }
