@@ -6,7 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "application")
+@Document(collection = "applications")
 public class Application {
 
     @Id
@@ -24,8 +24,7 @@ public class Application {
         this.status = "PENDING";
     }
 
-    public Application(String applicationId, String campaignId, String influencerId, String brandId) {
-        this.applicationId = applicationId;
+    public Application(String campaignId, String influencerId, String brandId) {
         this.campaignId = campaignId;
         this.influencerId = influencerId;
         this.brandId = brandId;

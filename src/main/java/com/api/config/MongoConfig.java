@@ -45,10 +45,10 @@ public class MongoConfig {
     this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
     // this.create_accountVerifiedsCollection(db);
-    this.create_campaignsCollection(db);
+//    this.create_campaignsCollection(db);
     this.create_contentPostingsCollection(db);
     this.create_likesCollection(db);
-    this.create_applicationsCollection(db);
+//    this.create_applicationsCollection(db);
     this.create_campaignTrackingsCollection(db);
     this.create_commentsCollection(db);
   }
@@ -485,9 +485,6 @@ public class MongoConfig {
             "bsonType": "object",
             "required": ["content"],
             "properties": {
-                "contentId": {
-                    "bsonType": "string"
-                },
                 "userId": {
                     "bsonType": "string"
                 },
@@ -572,9 +569,6 @@ public class MongoConfig {
             "bsonType": "object",
             "required": ["userId","contentId", "content"],
             "properties": {
-                "commentId": {
-                    "bsonType": "string"
-                },
                  "userId": {
                     "bsonType": "string"
                 },
@@ -609,12 +603,9 @@ public class MongoConfig {
     Document jsonSchema = Document.parse("""
         {
             "bsonType": "object",
-            "required": ["content", "budget"],
+            "required": ["brandId", "content", "budget", "campaignRequirements", "influencerRequirement"],
             "properties": {
-                "campaignId": {
-                    "bsonType": "string"
-                },
-                "userId": {
+                "brandId": {
                     "bsonType": "string"
                 },
                 "content": {
@@ -650,7 +641,10 @@ public class MongoConfig {
                     "items": {
                         "bsonType": "string"
                     }
-                }
+                },
+                "influencerCount": {
+                    "bsonType": "int"                                                                                 
+                },
             }
         }
         """);
@@ -733,8 +727,10 @@ public class MongoConfig {
                             "bsonType": "array",
                             "items": {
                                 "bsonType": "object",
-                                "required": ["imageUrl", "postUrl"],
                                 "properties": {
+                                    "index": {
+                                        "bsonType": "int"
+                                    },
                                     "imageUrl": {
                                         "bsonType": "string",
                                         "pattern": "^https?://.+$"

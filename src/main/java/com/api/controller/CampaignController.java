@@ -34,6 +34,11 @@ public class CampaignController {
         return campaignService.createCampaign(campaignService.convertToCampaign(obj), userDetails, request);
     }
 
+    @GetMapping("/{campaignId}")
+    public ResponseEntity<?> getCampaign(@PathVariable("campaignId") String campaignId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return campaignService.getCampaignsByCampaignId(campaignId, request);
+    }
+
     @GetMapping("")
     public ResponseEntity<?> getAllCampaigns(
             @RequestParam(defaultValue = "0") int page,
@@ -61,7 +66,7 @@ public class CampaignController {
     }
 
     @PutMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal.userId)")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
     public ResponseEntity<?> updatePost(@PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody Campaign campaign,
@@ -70,7 +75,7 @@ public class CampaignController {
     }
 
     @DeleteMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal.userId)")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
     public ResponseEntity<?> deletePost(
             @PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,

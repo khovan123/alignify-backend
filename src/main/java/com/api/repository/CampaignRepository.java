@@ -13,6 +13,6 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
     @Override
     Page<Campaign> findAll(Pageable pageable);
 
-    Page<Campaign> findByUserId(String userId, Pageable pageable);
+    Page<Campaign> findAllByBrandId(String userId, Pageable pageable);
 
 }

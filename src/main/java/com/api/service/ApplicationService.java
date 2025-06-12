@@ -1,6 +1,8 @@
 package com.api.service;
 
 import com.api.dto.ApiResponse;
+import com.api.dto.response.ApplicationsByCampaignResponse;
+import com.api.dto.response.CampaignResponse;
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
@@ -8,13 +10,22 @@ import com.api.repository.ApplicationRepository;
 import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
+import com.api.repository.CategoryRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +44,8 @@ public class ApplicationService {
     private CampaignRepository campaignRepository;
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     public ResponseEntity<?> apply_Application(String campaignId, CustomUserDetails userDetails, HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
@@ -47,7 +60,7 @@ public class ApplicationService {
         if (applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
             return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
         }
-        Application application = applicationRepository.save(new Application(campaignId, campaignId, influencerId, campaignId));
+        Application application = applicationRepository.save(new Application(campaignId, influencerId, campaignOpt.get().getBrandId()));
         return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                 request.getRequestURI());
     }
@@ -84,6 +97,37 @@ public class ApplicationService {
         applicationRepository.save(application);
         return ApiResponse.sendSuccess(201, "Re-send apply for application successfully", application,
                 request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getAllApplicationByMe(int pageNumber, int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
+        String brandId = userDetails.getUserId();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<Campaign> campaignPage = campaignRepository.findAllByBrandId(brandId, pageable);
+
+        List<Campaign> campaigns = campaignPage.getContent();
+
+        if (campaigns.isEmpty()) {
+            ApiResponse.sendError(400, "Not found any campaign!", request.getRequestURI());
+        }
+        List<String> campaignIds = campaigns.stream()
+                .map(Campaign::getCampaignId)
+                .toList();
+        List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
+        Map<String, List<Application>> applicationsByCampaign = applications.stream()
+                .collect(Collectors.groupingBy(Application::getCampaignId));
+
+        List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaigns.stream()
+                .map(campaignResponse -> new ApplicationsByCampaignResponse(
+                campaignResponse,
+                applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()), categoryRepository
+        ))
+                .toList();
+        return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getAllApplicationByEachCampaign(String campaignIdn, CustomUserDetails userDetails, HttpServletRequest request) {
+        List<Application> applications = applicationRepository.findAllByCampaignId(campaignIdn);
+        return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
     }
 
     public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails, HttpServletRequest request) {
