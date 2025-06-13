@@ -4,13 +4,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.api.model.Campaign;
+import com.api.model.Category;
+import com.api.repository.CategoryRepository;
+
 public class CampaignResponse {
 
     private String campaignId;
-    private String userId;
+    private String brandId;
     private String content;
     private String imageUrl;
-    private List<Map<String, String>> categories;
+    private List<Category> categories;
     private LocalDateTime createdDate;
     private String status;
     private long budget;
@@ -19,6 +23,20 @@ public class CampaignResponse {
     private int influencerCount;
 
     public CampaignResponse() {
+    }
+
+    public CampaignResponse(Campaign campaign, CategoryRepository categoryRepository) {
+        this.campaignId = campaign.getCampaignId();
+        this.brandId = campaign.getBrandId();
+        this.content = campaign.getContent();
+        this.imageUrl = campaign.getImageUrl();
+        this.categories = categoryRepository.findAllByCategoryIdIn(campaign.getCategoryIds());
+        this.createdDate = campaign.getCreatedDate();
+        this.status = campaign.getStatus();
+        this.budget = campaign.getBudget();
+        this.campaignRequirements = campaign.getCampaignRequirements();
+        this.influencerRequirement = campaign.getInfluencerRequirement();
+        this.influencerCount = campaign.getInfluencerCount();
     }
 
     public String getStatus() {
@@ -37,12 +55,12 @@ public class CampaignResponse {
         this.campaignId = campaignId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getBrandId() {
+        return brandId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setBrandId(String brandId) {
+        this.brandId = brandId;
     }
 
     public String getContent() {
@@ -61,11 +79,11 @@ public class CampaignResponse {
         this.imageUrl = imageUrl;
     }
 
-    public List<Map<String, String>> getCategories() {
+    public List<Category> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<Map<String, String>> categories) {
+    public void setCategories(List<Category> categories) {
         this.categories = categories;
     }
 

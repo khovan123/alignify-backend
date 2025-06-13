@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -35,9 +36,13 @@ public class CampaignTracking {
         this.influencerId = influencerId;
         this.process = 0.0;
         this.campaignRequirementTracking = new HashMap<>();
-        campaignRequirement.forEach((key, count)
-                -> campaignRequirementTracking.put(key, new ArrayList<>(Collections.nCopies(count, new CampaignRequirement(count))))
-        );
+        campaignRequirement.forEach((key, count) -> {
+            List<CampaignRequirement> requirements = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                requirements.add(new CampaignRequirement(i));
+            }
+            campaignRequirementTracking.put(key, requirements);
+        });
     }
 
     public String getCampaignTrackingId() {
