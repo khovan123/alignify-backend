@@ -30,15 +30,19 @@ public class CampaignTracking {
         this.process = 0.0;
     }
 
-    public CampaignTracking(String campaignId, String brandId, String influencerId,
-            Map<String, Integer> campaignRequirement) {
+    public CampaignTracking(String campaignId, String brandId, String influencerId, Map<String, Integer> campaignRequirement) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.influencerId = influencerId;
         this.process = 0.0;
         this.campaignRequirementTracking = new HashMap<>();
-        campaignRequirement.forEach((key, count) -> campaignRequirementTracking.put(key,
-                new ArrayList<>(Collections.nCopies(count, new CampaignRequirement(count)))));
+        campaignRequirement.forEach((key, count) -> {
+            List<CampaignRequirement> requirements = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                requirements.add(new CampaignRequirement(i));
+            }
+            campaignRequirementTracking.put(key, requirements);
+        });
     }
 
     public String getCampaignTrackingId() {

@@ -1,16 +1,18 @@
 package com.api.security;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.util.Optional;
 
 @Service
 public class SecurityService {
@@ -24,19 +26,21 @@ public class SecurityService {
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
 
-//    public boolean isCampaignOwner(String campaignId, Object principal) {
-//        System.out.println("hello");
-//        if (!(principal instanceof CustomUserDetails)) {
-//            return false;
-//        }
-//        String userId = ((CustomUserDetails) principal).getUserId();
-//        Optional<Campaign> optionalCampaign = campaignRepository.findById(campaignId);
-//        System.out.println(campaignId);
-//        System.out.println(optionalCampaign.get().getCampaignId());
-//        System.out.println(userId);
-//        System.out.println(optionalCampaign.get().getUserId());
-//        return optionalCampaign.isPresent() && optionalCampaign.get().getUserId().equals(userId);
-//    }
+    // public boolean isCampaignOwner(String campaignId, Object principal) {
+    // System.out.println("hello");
+    // if (!(principal instanceof CustomUserDetails)) {
+    // return false;
+    // }
+    // String userId = ((CustomUserDetails) principal).getUserId();
+    // Optional<Campaign> optionalCampaign =
+    // campaignRepository.findById(campaignId);
+    // System.out.println(campaignId);
+    // System.out.println(optionalCampaign.get().getCampaignId());
+    // System.out.println(userId);
+    // System.out.println(optionalCampaign.get().getUserId());
+    // return optionalCampaign.isPresent() &&
+    // optionalCampaign.get().getUserId().equals(userId);
+    // }
     public boolean isCampaignOwner(String campaignId, Object principal) {
         logger.debug("Checking if user is campaign owner for campaignId: {}", campaignId);
 
@@ -86,7 +90,8 @@ public class SecurityService {
             return false;
         }
         String userId = ((CustomUserDetails) principal).getUserId();
-        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository.findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
+        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
+                .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
         if (!campaignTrackingOpt.isPresent()) {
             return false;
         }
@@ -100,5 +105,15 @@ public class SecurityService {
     private boolean hasInfluencerRole(CustomUserDetails userDetails) {
         return userDetails.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_INFLUENCER"));
+    }
+
+    public boolean isOnGoingCampaign(String campaignId, Object principal) {
+        if (!(principal instanceof CustomUserDetails)) {
+            return false;
+        }
+        String userId = ((CustomUserDetails) principal).getUserId();
+        Optional<Campaign> optionalCampaign = campaignRepository.findById(campaignId);
+        return optionalCampaign.isPresent() && optionalCampaign.get().getBrandId().equals(userId)
+                && optionalCampaign.get().getStatus().equals("PARTICIPATING");
     }
 }

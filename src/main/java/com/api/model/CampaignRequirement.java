@@ -2,19 +2,28 @@ package com.api.model;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
-
 public class CampaignRequirement {
 
     private int index;
     private String imageUrl;
     private String postUrl;
     private String status;
-    @CreatedDate
     private LocalDateTime uploadedAt;
+
+    public CampaignRequirement() {
+        this.index = 0;
+        this.imageUrl = null;
+        this.postUrl = null;
+        this.status = null;
+        this.uploadedAt = LocalDateTime.now();
+    }
 
     public CampaignRequirement(int index) {
         this.index = index;
+        this.imageUrl = null;
+        this.postUrl = null;
+        this.status = null;
+        this.uploadedAt = LocalDateTime.now();
     }
 
     public CampaignRequirement(CampaignRequirement cr) {
@@ -22,6 +31,8 @@ public class CampaignRequirement {
         this.imageUrl = cr.imageUrl;
         this.status = cr.status;
         this.postUrl = cr.postUrl;
+        this.status = cr.status;
+        this.uploadedAt = cr.uploadedAt != null ? cr.uploadedAt : LocalDateTime.now();
     }
 
     public CampaignRequirement(int index, String imageUrl, String postUrl) {
@@ -29,21 +40,12 @@ public class CampaignRequirement {
         this.imageUrl = imageUrl;
         this.postUrl = postUrl;
         this.status = "PENDING";
+        this.uploadedAt = LocalDateTime.now();
     }
 
-    public CampaignRequirement(int index, String imageUrl, String postUrl, String status) {
-        this.index = index;
-        this.imageUrl = imageUrl;
-        this.postUrl = postUrl;
+    public CampaignRequirement(String status) {
         this.status = status;
-    }
-
-    public CampaignRequirement(int index, String imageUrl, String postUrl, String status, LocalDateTime uploadedAt) {
-        this.index = index;
-        this.imageUrl = imageUrl;
-        this.postUrl = postUrl;
-        this.status = status;
-        this.uploadedAt = uploadedAt;
+        this.uploadedAt = LocalDateTime.now();
     }
 
     public int getIndex() {

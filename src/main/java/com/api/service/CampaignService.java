@@ -15,10 +15,13 @@ import org.springframework.stereotype.Service;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
+import com.api.dto.request.StatusRequest;
 import com.api.dto.response.CampaignResponse;
 import com.api.model.Campaign;
+import com.api.model.CampaignTracking;
 import com.api.model.Category;
 import com.api.repository.CampaignRepository;
+import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
 import com.api.security.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +35,8 @@ public class CampaignService {
     private CampaignRepository campaignRepo;
     @Autowired
     private CategoryRepository categoryRepo;
+    @Autowired
+    private CampaignTrackingRepository campaignTrackingRepository;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -71,10 +76,29 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getMe(CustomUserDetails userDetails, int pageNumber, int pageSize,
+    public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails, int pageNumber, int pageSize,
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId(), pageable);
+        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", campaignPage.getNumber());
+        responseData.put("totalPages", campaignPage.getTotalPages());
+        responseData.put("totalItems", campaignPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
+            HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<String> campaignIdsPage = campaignTrackingRepository.findCampaignIdsByInfluencerId(userDetails.getUserId(),
+                pageable);
+        Page<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage.getContent(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
                 .map(campaign -> new CampaignResponse(campaign, categoryRepo))
                 .toList();
@@ -109,24 +133,22 @@ public class CampaignService {
     public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails,
             HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
-        if (campaignOpt.isPresent()) {
-            Campaign campaign = campaignOpt.get();
-            if (!campaign.getBrandId().equals(userDetails.getUserId())) {
-                return ResponseEntity.status(403).body(
-                        Map.of("error", "Access denied. You are not the owner of this content."));
-            }
-            campaignRepo.deleteById(campaignId);
-            return ApiResponse.sendSuccess(
-                    204,
-                    "campaign posting deleted successfully",
-                    null,
-                    request.getRequestURI());
-        } else {
-            return ApiResponse.sendError(
-                    404,
-                    "Campaign posting not found",
+        if (!campaignOpt.isPresent()) {
+            return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
+        }
+        Campaign campaign = campaignOpt.get();
+        if (!campaign.getBrandId().equals(userDetails.getUserId())) {
+            return ApiResponse.sendError(403, "Access denied. You are not the owner of this campaign.",
                     request.getRequestURI());
         }
+        List<CampaignTracking> relatedTrackings = campaignTrackingRepository.findAllByCampaignId(campaignId);
+        campaignTrackingRepository.deleteAll(relatedTrackings);
+        campaignRepo.deleteById(campaignId);
+        return ApiResponse.sendSuccess(
+                204,
+                "campaign posting and related trackings deleted successfully",
+                null,
+                request.getRequestURI());
     }
 
     public ResponseEntity<?> updateCampaign(String campaignId, CustomUserDetails userDetails,
@@ -136,11 +158,8 @@ public class CampaignService {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
-
-            String newStatus = updatedCampaign.getStatus();
-            List<String> validStatuses = List.of("DRAFT", "PENDING", "COMPLETED");
-            if (newStatus == null || !validStatuses.contains(newStatus)) {
-                return ApiResponse.sendError(400, "Invalid status. Allowed values: DRAFT, PENDING, COMPLETED",
+            if ("COMPLETED".equals(campaign.getStatus())) {
+                return ApiResponse.sendError(400, "Cannot update a campaign that is COMPLETED",
                         request.getRequestURI());
             }
             long newBudget = updatedCampaign.getBudget();
@@ -165,7 +184,7 @@ public class CampaignService {
                 campaign.setCategoryIds(validCategoryIds);
             }
             if (updatedCampaign.getStatus() != null) {
-                campaign.setStatus(newStatus);
+                campaign.setStatus(updatedCampaign.getStatus());
             }
             if (updatedCampaign.getBudget() > 0) {
                 campaign.setBudget(newBudget);
@@ -190,6 +209,17 @@ public class CampaignService {
         } else {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
         }
+    }
+
+    public ResponseEntity<?> updateCampaignStatus(String campaignId, StatusRequest statusRequest,
+            CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String brandId = userDetails.getUserId();
+        Optional<Campaign> campaignOpt = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
+        Campaign campaign = campaignOpt.get();
+        campaign.setStatus(statusRequest.getStatus());
+        campaignRepo.save(campaign);
+        return ApiResponse.sendSuccess(200, "Update campaign status successfully", campaign, request.getRequestURI());
     }
 
     public Campaign convertToCampaign(Object campaign) {

@@ -1,13 +1,20 @@
 package com.api.controller;
 
-import com.api.security.CustomUserDetails;
-import com.api.service.ApplicationService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.api.security.CustomUserDetails;
+import com.api.service.ApplicationService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/campaigns")
@@ -16,9 +23,19 @@ public class ApplicationController {
     @Autowired
     private ApplicationService applicationService;
 
-    @GetMapping("/applications/me")
+    @GetMapping("/applications/brand")
     @PreAuthorize("hasRole('ROLE_BRAND')")
-    public ResponseEntity<?> getAllApplicationByMe(
+    public ResponseEntity<?> getAllApplicationByBrand(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return applicationService.getAllApplicationByMe(pageNumber, pageSize, userDetails, request);
+    }
+
+    @GetMapping("/applications/brand")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER')")
+    public ResponseEntity<?> getAllApplicationByInfluencer(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @AuthenticationPrincipal CustomUserDetails userDetails,

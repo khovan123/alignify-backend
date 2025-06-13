@@ -19,6 +19,7 @@ import com.api.dto.response.ApplicationsByCampaignResponse;
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
+import com.api.model.Status;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
@@ -127,9 +128,9 @@ public class ApplicationService {
 
         List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaigns.stream()
                 .map(campaignResponse -> new ApplicationsByCampaignResponse(
-                        campaignResponse,
-                        applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
-                        categoryRepository))
+                campaignResponse,
+                applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
+                categoryRepository))
                 .toList();
         return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses,
                 request.getRequestURI());
@@ -152,8 +153,12 @@ public class ApplicationService {
         }
         Application application = applicationOpt.get();
         Campaign campaign = campaignRepository.findById(application.getCampaignId()).get();
+        if (!application.getStatus().equals(Status.PENDING.toString())) {
+            ApiResponse.sendError(400, "Already " + application.getStatus().toLowerCase(), request.getRequestURI());
+        }
         if (accepted) {
             application.setStatus("ACCEPTED");
+            applicationRepository.save(application);
             CampaignTracking campaignTracking = new CampaignTracking(application.getCampaignId(), brandId,
                     application.getInfluencerId(), campaign.getCampaignRequirements());
             campaignTracking.setCampaignTrackingId(applicationId);
@@ -161,7 +166,7 @@ public class ApplicationService {
         } else {
             application.setStatus("REJECTED");
         }
-        return ApiResponse.sendSuccess(200, "Confirm apllication successfully", null, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Confirm apllication successfully", application, request.getRequestURI());
     }
 
 }
