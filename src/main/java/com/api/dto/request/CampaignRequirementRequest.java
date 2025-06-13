@@ -13,12 +13,25 @@ public class CampaignRequirementRequest {
     @JsonProperty("status")
     private String status;
 
-    public CampaignRequirementRequest(@JsonProperty("index") int index, @JsonProperty("imageUrl") String imageUrl, @JsonProperty("postUrl") String postUrl, @JsonProperty("status") String status) {
+    // public CampaignRequirementRequest(@JsonProperty("index") int index,
+    // @JsonProperty("imageUrl") String imageUrl,
+    // @JsonProperty("postUrl") String postUrl) {
+    // this.index = index;
+    // this.imageUrl = imageUrl;
+    // this.postUrl = postUrl;
+    // }
+
+    public CampaignRequirementRequest(@JsonProperty("index") int index, @JsonProperty("imageUrl") String imageUrl,
+            @JsonProperty("postUrl") String postUrl, @JsonProperty("status") String status) {
         this.index = index;
         this.imageUrl = imageUrl;
         this.postUrl = postUrl;
         this.status = status;
     }
+
+    // public CampaignRequirementRequest(@JsonProperty("status") String status) {
+    // this.status = status;
+    // }
 
     public int getIndex() {
         return index;
