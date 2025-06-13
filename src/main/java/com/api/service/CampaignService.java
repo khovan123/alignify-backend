@@ -38,7 +38,8 @@ public class CampaignService {
         if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             campaign.setBrandId(userDetails.getUserId());
             campaign = campaignRepo.save(campaign);
-            return ApiResponse.sendSuccess(201, "Campaign posting created successfully", new CampaignResponse(campaign, categoryRepo),
+            return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
+                    new CampaignResponse(campaign, categoryRepo),
                     request.getRequestURI());
         }
         return ApiResponse.sendError(403, "Campaign posting only create by Brand", request.getRequestURI());
@@ -49,7 +50,8 @@ public class CampaignService {
         if (!campaignOpt.isPresent()) {
             return ApiResponse.sendError(404, "Id: " + campaignId + " not found", request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Success", new CampaignResponse(campaignOpt.get(), categoryRepo), request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Success", new CampaignResponse(campaignOpt.get(), categoryRepo),
+                request.getRequestURI());
     }
 
     public ResponseEntity<?> getAllCampaign(int pageNumber, int pageSize, HttpServletRequest request) {
@@ -168,10 +170,12 @@ public class CampaignService {
             if (updatedCampaign.getBudget() > 0) {
                 campaign.setBudget(newBudget);
             }
-            if (updatedCampaign.getCampaignRequirements() != null && !updatedCampaign.getCampaignRequirements().isEmpty()) {
+            if (updatedCampaign.getCampaignRequirements() != null
+                    && !updatedCampaign.getCampaignRequirements().isEmpty()) {
                 campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
             }
-            if (updatedCampaign.getInfluencerRequirement() != null && !updatedCampaign.getInfluencerRequirement().isEmpty()) {
+            if (updatedCampaign.getInfluencerRequirement() != null
+                    && !updatedCampaign.getInfluencerRequirement().isEmpty()) {
                 campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
             }
             if (updatedCampaign.getInfluencerCount() > 0) {
@@ -179,7 +183,8 @@ public class CampaignService {
             }
             campaignRepo.save(campaign);
 
-            return ApiResponse.sendSuccess(200, "Campaign posting updated successfully", new CampaignResponse(campaign, categoryRepo),
+            return ApiResponse.sendSuccess(200, "Campaign posting updated successfully",
+                    new CampaignResponse(campaign, categoryRepo),
                     request.getRequestURI());
 
         } else {

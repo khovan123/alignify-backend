@@ -1,10 +1,12 @@
 package com.api.repository;
 
-import com.api.model.Application;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+
+import com.api.model.Application;
 
 @Repository
 public interface ApplicationRepository extends MongoRepository<Application, String> {

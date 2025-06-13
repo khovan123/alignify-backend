@@ -1,8 +1,21 @@
 package com.api.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.api.dto.ApiResponse;
 import com.api.dto.response.ApplicationsByCampaignResponse;
-import com.api.dto.response.CampaignResponse;
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
@@ -14,20 +27,8 @@ import com.api.repository.CategoryRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
+
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ApplicationService {
@@ -47,7 +48,8 @@ public class ApplicationService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public ResponseEntity<?> apply_Application(String campaignId, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> apply_Application(String campaignId, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
         Optional<Campaign> campaignOpt = campaignRepository.findById(campaignId);
         if (!campaignOpt.isPresent()) {
@@ -60,15 +62,18 @@ public class ApplicationService {
         if (applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
             return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
         }
-        Application application = applicationRepository.save(new Application(campaignId, influencerId, campaignOpt.get().getBrandId()));
+        Application application = applicationRepository
+                .save(new Application(campaignId, influencerId, campaignOpt.get().getBrandId()));
         return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> cancel_Application(String applicationId, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> cancel_Application(String applicationId, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
 
-        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId, influencerId);
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId,
+                influencerId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
@@ -80,13 +85,16 @@ public class ApplicationService {
             HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
 
-        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId, influencerId);
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId,
+                influencerId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
         Application application = applicationOpt.get();
-        List<CampaignTracking> campaignTrackings = campaignTrackingRepository.findAllByCampaignId(application.getCampaignId());
-        if (campaignTrackings.size() >= campaignRepository.findById(application.getCampaignId()).get().getInfluencerCount()) {
+        List<CampaignTracking> campaignTrackings = campaignTrackingRepository
+                .findAllByCampaignId(application.getCampaignId());
+        if (campaignTrackings.size() >= campaignRepository.findById(application.getCampaignId()).get()
+                .getInfluencerCount()) {
             return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
         }
         if (application.getLimited() <= 0) {
@@ -99,7 +107,8 @@ public class ApplicationService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllApplicationByMe(int pageNumber, int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> getAllApplicationByMe(int pageNumber, int pageSize, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         String brandId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepository.findAllByBrandId(brandId, pageable);
@@ -118,22 +127,26 @@ public class ApplicationService {
 
         List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaigns.stream()
                 .map(campaignResponse -> new ApplicationsByCampaignResponse(
-                campaignResponse,
-                applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()), categoryRepository
-        ))
+                        campaignResponse,
+                        applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
+                        categoryRepository))
                 .toList();
-        return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses,
+                request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllApplicationByEachCampaign(String campaignIdn, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> getAllApplicationByEachCampaign(String campaignIdn, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         List<Application> applications = applicationRepository.findAllByCampaignId(campaignIdn);
         return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
     }
 
-    public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         String brandId = userDetails.getUserId();
 
-        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndBrandId(applicationId, brandId);
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndBrandId(applicationId,
+                brandId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
@@ -141,7 +154,8 @@ public class ApplicationService {
         Campaign campaign = campaignRepository.findById(application.getCampaignId()).get();
         if (accepted) {
             application.setStatus("ACCEPTED");
-            CampaignTracking campaignTracking = new CampaignTracking(application.getCampaignId(), brandId, application.getInfluencerId(), campaign.getCampaignRequirements());
+            CampaignTracking campaignTracking = new CampaignTracking(application.getCampaignId(), brandId,
+                    application.getInfluencerId(), campaign.getCampaignRequirements());
             campaignTracking.setCampaignTrackingId(applicationId);
             campaignTrackingRepository.save(campaignTracking);
         } else {

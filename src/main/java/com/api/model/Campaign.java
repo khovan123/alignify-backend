@@ -31,7 +31,9 @@ public class Campaign {
         this.status = "DRAFT";
     }
 
-    public Campaign(String campaignId, String brandId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement, int influencerCount) {
+    public Campaign(String campaignId, String brandId, String content, String imageUrl, List<String> categoryIds,
+            LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
+            List<String> influencerRequirement, int influencerCount) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.content = content;

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -29,15 +30,15 @@ public class CampaignTracking {
         this.process = 0.0;
     }
 
-    public CampaignTracking(String campaignId, String brandId, String influencerId, Map<String, Integer> campaignRequirement) {
+    public CampaignTracking(String campaignId, String brandId, String influencerId,
+            Map<String, Integer> campaignRequirement) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.influencerId = influencerId;
         this.process = 0.0;
         this.campaignRequirementTracking = new HashMap<>();
-        campaignRequirement.forEach((key, count)
-                -> campaignRequirementTracking.put(key, new ArrayList<>(Collections.nCopies(count, new CampaignRequirement(count))))
-        );
+        campaignRequirement.forEach((key, count) -> campaignRequirementTracking.put(key,
+                new ArrayList<>(Collections.nCopies(count, new CampaignRequirement(count)))));
     }
 
     public String getCampaignTrackingId() {

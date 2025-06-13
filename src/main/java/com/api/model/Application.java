@@ -32,7 +32,8 @@ public class Application {
         this.status = "PENDING";
     }
 
-    public Application(String applicationId, String campaignId, String influencerId, String brandId, int limited, String status, LocalDateTime createdAt) {
+    public Application(String applicationId, String campaignId, String influencerId, String brandId, int limited,
+            String status, LocalDateTime createdAt) {
         this.applicationId = applicationId;
         this.campaignId = campaignId;
         this.influencerId = influencerId;

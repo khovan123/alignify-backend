@@ -1,6 +1,7 @@
 package com.api.model;
 
 import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.CreatedDate;
 
 public class CampaignRequirement {
