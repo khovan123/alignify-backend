@@ -3,6 +3,7 @@ package com.api.controller.profile;
 import com.api.security.CustomUserDetails;
 import com.api.service.GalleryService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,8 +24,8 @@ public class GalleryController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> postImage(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        return galleryService.saveGalleryImageIntoGallery(file, userDetails, request);
+    public ResponseEntity<?> postImage(@RequestPart("images") List<MultipartFile> images, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return galleryService.saveGalleryImageIntoGallery(images, userDetails, request);
     }
 
     @DeleteMapping("/galleries/galleryImages/{galleryImageId}")
