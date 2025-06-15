@@ -14,7 +14,7 @@ public class Campaign {
 
     @Id
     private String campaignId;
-    private String userId;
+    private String brandId;
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
@@ -31,9 +31,11 @@ public class Campaign {
         this.status = "DRAFT";
     }
 
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement, int influencerCount) {
+    public Campaign(String campaignId, String brandId, String content, String imageUrl, List<String> categoryIds,
+            LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
+            List<String> influencerRequirement, int influencerCount) {
         this.campaignId = campaignId;
-        this.userId = userId;
+        this.brandId = brandId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
@@ -77,12 +79,12 @@ public class Campaign {
         this.campaignId = campaignId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getBrandId() {
+        return brandId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setBrandId(String brandId) {
+        this.brandId = brandId;
     }
 
     public String getContent() {

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.dto.request.StatusRequest;
 import com.api.model.Campaign;
 import com.api.security.CustomUserDetails;
 import com.api.service.CampaignService;
@@ -27,11 +28,10 @@ public class CampaignController {
     @Autowired
     private CampaignService campaignService;
 
-    @PostMapping("")
-    @PreAuthorize("hasRole('ROLE_BRAND')")
-    public ResponseEntity<?> createPost(@RequestBody Object obj, @AuthenticationPrincipal CustomUserDetails userDetails,
-            HttpServletRequest request) {
-        return campaignService.createCampaign(campaignService.convertToCampaign(obj), userDetails, request);
+    @GetMapping("/{campaignId}")
+    public ResponseEntity<?> getCampaign(@PathVariable("campaignId") String campaignId,
+            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return campaignService.getCampaignsByCampaignId(campaignId, request);
     }
 
     @GetMapping("")
@@ -42,41 +42,70 @@ public class CampaignController {
         return campaignService.getAllCampaign(page, size, request);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getMe(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest request) {
-        return campaignService.getMe(userDetails, page, size, request);
-    }
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getCampaignsByUserId(
-            @PathVariable("userId") String userId,
+    @GetMapping("/brands/{brandId}")
+    public ResponseEntity<?> getCampaignsByBrandId(
+            @PathVariable("brandId") String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
         return campaignService.getCampaignsByUserId(userId, page, size, request);
     }
 
+    @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    public ResponseEntity<?> createPost(@RequestBody Object obj, @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.createCampaign(campaignService.convertToCampaign(obj), userDetails, request);
+    }
+
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    @GetMapping("/brand")
+    public ResponseEntity<?> getMe(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+        return campaignService.getAllCampaignOfBrand(userDetails, page, size, request);
+    }
+
     @PutMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal.userId)")
-    public ResponseEntity<?> updatePost(@PathVariable String campaignId,
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
+    public ResponseEntity<?> updateCampaign(@PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody Campaign campaign,
             HttpServletRequest request) {
         return campaignService.updateCampaign(campaignId, userDetails, campaign, request);
     }
 
+    @PutMapping("/{campaignId}/status")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
+    public ResponseEntity<?> updateCampaignStatus(
+            @PathVariable String campaignId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody StatusRequest statusRequest,
+            HttpServletRequest request) {
+        return campaignService.updateCampaignStatus(campaignId, statusRequest, userDetails, request);
+    }
+
     @DeleteMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal.userId)")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
     public ResponseEntity<?> deletePost(
             @PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
 
         return campaignService.deleteCampaign(campaignId, userDetails, request);
+    }
+
+    @PreAuthorize("hasRole('ROLE_INFLUENCER')")
+    @GetMapping("/influencer")
+    public ResponseEntity<?> getAllCampaignOfInfluencer(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+
+        return campaignService.getAllCampaignOfInfluencer(userDetails, page, size, request);
     }
 
 }
