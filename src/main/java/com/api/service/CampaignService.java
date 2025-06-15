@@ -12,18 +12,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
 import com.api.dto.response.CampaignResponse;
+import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
 import com.api.model.Category;
+import com.api.repository.ApplicationRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
 import com.api.security.CustomUserDetails;
+import com.api.util.Helper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,17 +42,26 @@ public class CampaignService {
     private CategoryRepository categoryRepo;
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
-    public ResponseEntity<?> createCampaign(Campaign campaign, CustomUserDetails userDetails,
+    public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
-        if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-            campaign.setBrandId(userDetails.getUserId());
-            campaign = campaignRepo.save(campaign);
-            return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
-                    new CampaignResponse(campaign, categoryRepo),
-                    request.getRequestURI());
+        if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
+            ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
         }
-        return ApiResponse.sendError(403, "Campaign posting only create by Brand", request.getRequestURI());
+        String imageUrl;
+        try {
+            imageUrl = Helper.saveImage(file);
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
+        }
+        campaign.setBrandId(userDetails.getUserId());
+        campaign.setImageUrl(imageUrl);
+        campaign = campaignRepo.save(campaign);
+        return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
+                new CampaignResponse(campaign, categoryRepo),
+                request.getRequestURI());
     }
 
     public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
@@ -218,8 +232,28 @@ public class CampaignService {
         Optional<Campaign> campaignOpt = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
         Campaign campaign = campaignOpt.get();
         campaign.setStatus(statusRequest.getStatus());
+        if (statusRequest.getStatus().equals("PARTICIPATING")) {
+            List<Application> applications = applicationRepository.findAllByCampaignIdAndStatus(campaignId,
+                    statusRequest.getStatus());
+            if (!applications.isEmpty()) {
+                applications.forEach(app -> {
+                    campaignTrackingRepository
+                            .save(new CampaignTracking(app.getApplicationId(), app.getCampaignId(), brandId,
+                                    app.getInfluencerId(), campaign.getCampaignRequirements()));
+                });
+            } else {
+                return ApiResponse.sendError(403, "Please confirm at least one application", request.getRequestURI());
+            }
+        } else if (statusRequest.getStatus().equals("COMPLETED")) {
+            List<CampaignTracking> campaignTrackings = campaignTrackingRepository
+                    .findAllByCampaignIdAndStatus(campaignId, statusRequest.getStatus());
+            if (campaign.getInfluencerCount() > campaignTrackings.size()) {
+                return ApiResponse.sendError(403, "All campaign tracking must be completed", request.getRequestURI());
+            }
+        }
         campaignRepo.save(campaign);
-        return ApiResponse.sendSuccess(200, "Update campaign status successfully", campaign, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Update campaign status successfully", campaign,
+                request.getRequestURI());
     }
 
     public Campaign convertToCampaign(Object campaign) {

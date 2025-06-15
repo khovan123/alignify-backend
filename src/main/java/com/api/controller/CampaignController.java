@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.api.dto.request.StatusRequest;
 import com.api.model.Campaign;
@@ -29,8 +30,10 @@ public class CampaignController {
     private CampaignService campaignService;
 
     @GetMapping("/{campaignId}")
-    public ResponseEntity<?> getCampaign(@PathVariable("campaignId") String campaignId,
-            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> getCampaign(
+            @PathVariable("campaignId") String campaignId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
         return campaignService.getCampaignsByCampaignId(campaignId, request);
     }
 
@@ -51,16 +54,20 @@ public class CampaignController {
         return campaignService.getCampaignsByUserId(userId, page, size, request);
     }
 
+    //    --update thêm file ảnh--vao request
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_BRAND')")
-    public ResponseEntity<?> createPost(@RequestBody Object obj, @AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<?> createCampaign(
+            @RequestBody Object obj,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        return campaignService.createCampaign(campaignService.convertToCampaign(obj), userDetails, request);
+        return campaignService.createCampaign(campaignService.convertToCampaign(obj), file, userDetails, request);
     }
 
     @PreAuthorize("hasRole('ROLE_BRAND')")
     @GetMapping("/brand")
-    public ResponseEntity<?> getMe(
+    public ResponseEntity<?> getAllCampaignOfBrand(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -69,7 +76,7 @@ public class CampaignController {
     }
 
     @PutMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
     public ResponseEntity<?> updateCampaign(@PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody Campaign campaign,
@@ -88,8 +95,8 @@ public class CampaignController {
     }
 
     @DeleteMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
-    public ResponseEntity<?> deletePost(
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
+    public ResponseEntity<?> deleteCampaign(
             @PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {

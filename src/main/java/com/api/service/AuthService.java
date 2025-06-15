@@ -203,11 +203,15 @@ public class AuthService {
         if (!JwtUtil.isCorrectPassword(existing.get().getPassword(), loginRequest.getPassword())) {
             return ApiResponse.sendError(401, "Incorrect password", request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Login successful",
-                Map.of(
-                        "token", JwtUtil.createToken(existing.get()),
-                        "id", existing.get().getUserId()),
-                request.getRequestURI());
+        Optional<Role> role = roleRepository.findById(existing.get().getRoleId());
+        if (!role.isPresent()) {
+            return ApiResponse.sendError(400, "Invalid role", request.getRequestURI());
+        }
+        return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                "token", JwtUtil.createToken(existing.get()),
+                "id", existing.get().getUserId(),
+                "role", role.get().getRoleName()
+        ), request.getRequestURI());
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
@@ -250,7 +254,8 @@ public class AuthService {
         String subject = "Reset your password";
         String message = "Click this url: " + resetURL + " to reset your password.";
         emailService.sendSimpleEmail(recoveryPasswordRequest.getEmail(), subject, message);
-//        emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(), resetURL);
+        // emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(),
+        // resetURL);
         return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null,
                 request.getRequestURI());
     }

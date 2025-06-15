@@ -108,7 +108,7 @@ public class ApplicationService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllApplicationByMe(int pageNumber, int pageSize, CustomUserDetails userDetails,
+    public ResponseEntity<?> getAllApplicationByBrand(int pageNumber, int pageSize, CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
@@ -136,9 +136,10 @@ public class ApplicationService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllApplicationByEachCampaign(String campaignIdn, CustomUserDetails userDetails,
+    public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
             HttpServletRequest request) {
-        List<Application> applications = applicationRepository.findAllByCampaignId(campaignIdn);
+        String influencerId = userDetails.getUserId();
+        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
         return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
     }
 
@@ -153,19 +154,20 @@ public class ApplicationService {
         }
         Application application = applicationOpt.get();
         Campaign campaign = campaignRepository.findById(application.getCampaignId()).get();
+        List<Application> applications = applicationRepository.findAllByCampaignIdAndStatus(campaign.getCampaignId(),
+                "ACCEPTED");
+        if (applications.size() >= application.getLimited()) {
+            ApiResponse.sendError(400, "Reached to limitation", request.getRequestURI());
+        }
         if (!application.getStatus().equals(Status.PENDING.toString())) {
             ApiResponse.sendError(400, "Already " + application.getStatus().toLowerCase(), request.getRequestURI());
         }
         if (accepted) {
             application.setStatus("ACCEPTED");
-            applicationRepository.save(application);
-            CampaignTracking campaignTracking = new CampaignTracking(application.getCampaignId(), brandId,
-                    application.getInfluencerId(), campaign.getCampaignRequirements());
-            campaignTracking.setCampaignTrackingId(applicationId);
-            campaignTrackingRepository.save(campaignTracking);
         } else {
             application.setStatus("REJECTED");
         }
+        applicationRepository.save(application);
         return ApiResponse.sendSuccess(200, "Confirm apllication successfully", application, request.getRequestURI());
     }
 
