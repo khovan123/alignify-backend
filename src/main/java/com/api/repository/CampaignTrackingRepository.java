@@ -19,6 +19,8 @@ public interface CampaignTrackingRepository extends MongoRepository<CampaignTrac
 
     Page<CampaignTracking> findAllByInfluencerId(String influencerId, Pageable pageable);
 
+    List<CampaignTracking> findAllByCampaignIdAndStatus(String campaignId, String status);
+
     default Page<String> findCampaignIdsByInfluencerId(String influencerId, Pageable pageable) {
         return findAllByInfluencerId(influencerId, pageable)
                 .map(CampaignTracking::getCampaignId);

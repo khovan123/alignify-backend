@@ -3,6 +3,7 @@ package com.api.controller;
 import com.api.security.CustomUserDetails;
 import com.api.service.*;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,8 +43,8 @@ public class ProfileController {
     }
 
     @PostMapping("/avatar")
-    public ResponseEntity<?> changeAvatar(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        return profileService.saveAvatarUrl(file, userDetails, request);
+    public ResponseEntity<?> changeAvatar(@RequestPart("image") MultipartFile image, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.saveAvatarUrl(image, userDetails, request);
     }
 
 }

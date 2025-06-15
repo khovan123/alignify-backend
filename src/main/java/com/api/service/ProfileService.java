@@ -2,6 +2,7 @@ package com.api.service;
 
 import java.io.IOException;
 import java.util.*;
+
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,10 @@ import com.cloudinary.utils.ObjectUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import com.api.util.Helper;
 
 @Service
 public class ProfileService {
@@ -40,8 +44,11 @@ public class ProfileService {
     private Cloudinary cloudinary;
     @Value("${cloudinary.upload-preset}")
     private String uploadPreset;
+    @Autowired
+    private FileStorageService fileStorageService;
 
-    public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         String userId = userDetails.getUserId();
         List<Map<String, Object>> userList = new ArrayList<>();
         if (roleId.equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
@@ -78,8 +85,10 @@ public class ProfileService {
         Role role = roleRepository.findById(user.getRoleId()).get();
         if (role.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Influencer influencer = influencerRepository.findById(id).get();
-            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer, true, categoryRepository);
-            return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse, request.getRequestURI());
+            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer, true,
+                    categoryRepository);
+            return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse,
+                    request.getRequestURI());
         } else if (role.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             Brand brand = brandRepository.findById(id).get();
             BrandProfileResponse brandProfileResponse = new BrandProfileResponse(user, brand, categoryRepository);
@@ -93,8 +102,10 @@ public class ProfileService {
         User user = userRepository.findById(id).get();
         if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Influencer influencer = influencerRepository.findById(id).get();
-            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer, userId.equals(id), categoryRepository);
-            return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse, request.getRequestURI());
+            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer,
+                    userId.equals(id), categoryRepository);
+            return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse,
+                    request.getRequestURI());
         } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             Brand brand = brandRepository.findById(id).get();
             BrandProfileResponse brandProfileResponse = new BrandProfileResponse(user, brand, categoryRepository);
@@ -109,7 +120,7 @@ public class ProfileService {
         User user = userRepository.findById(id).get();
         if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Influencer influencer = influencerRepository.findById(id).get();
-//            InfluencerProfileRequest newInfluencer = (InfluencerProfileRequest) profile;
+            // InfluencerProfileRequest newInfluencer = (InfluencerProfileRequest) profile;
             InfluencerProfileRequest newInfluencer = convertToInfluencerProfileRequest(profile);
             if (newInfluencer.getBio() != null) {
                 influencer.setBio(newInfluencer.getBio());
@@ -134,7 +145,7 @@ public class ProfileService {
             return ApiResponse.sendSuccess(200, "Update successfully", influencer, request.getRequestURI());
         } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             Brand brand = brandRepository.findById(id).get();
-//            BrandProfileRequest newBrand = (BrandProfileRequest) profile;
+            // BrandProfileRequest newBrand = (BrandProfileRequest) profile;
             BrandProfileRequest newBrand = convertToBrandProfileRequest(profile);
             if (newBrand.getBio() != null) {
                 brand.setBio(newBrand.getBio());
@@ -165,22 +176,18 @@ public class ProfileService {
         return ApiResponse.sendSuccess(204, null, null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> saveAvatarUrl(MultipartFile file, CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> saveAvatarUrl(MultipartFile file, CustomUserDetails userDetails,
+            HttpServletRequest request) {
         String id = userDetails.getUserId();
         Optional<User> userOpt = userRepository.findById(id);
         if (!userOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
-        String imageUrl = null;
+        String imageUrl;
         try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                    ObjectUtils.asMap("upload_preset", uploadPreset));
-            imageUrl = (String) uploadResult.get("secure_url");
-        } catch (IOException e) {
-            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
-        }
-        if (imageUrl == null) {
-            return ApiResponse.sendError(500, "Internal server error", request.getRequestURI());
+            imageUrl = fileStorageService.storeFile(file);
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
         }
         if (userOpt.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(id);

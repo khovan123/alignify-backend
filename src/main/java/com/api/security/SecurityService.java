@@ -107,13 +107,13 @@ public class SecurityService {
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_INFLUENCER"));
     }
 
-    public boolean isOnGoingCampaign(String campaignId, Object principal) {
+    public boolean checkCampaignStatus(String campaignId, String status, Object principal) {
         if (!(principal instanceof CustomUserDetails)) {
             return false;
         }
         String userId = ((CustomUserDetails) principal).getUserId();
         Optional<Campaign> optionalCampaign = campaignRepository.findById(campaignId);
         return optionalCampaign.isPresent() && optionalCampaign.get().getBrandId().equals(userId)
-                && optionalCampaign.get().getStatus().equals("PARTICIPATING");
+                && optionalCampaign.get().getStatus().equals(status);
     }
 }

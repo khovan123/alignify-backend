@@ -30,17 +30,17 @@ public class ApplicationController {
             @RequestParam(defaultValue = "10") int pageSize,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        return applicationService.getAllApplicationByMe(pageNumber, pageSize, userDetails, request);
+        return applicationService.getAllApplicationByBrand(pageNumber, pageSize, userDetails, request);
     }
 
-    @GetMapping("/applications/brand")
+    @GetMapping("/applications/influencer")
     @PreAuthorize("hasRole('ROLE_INFLUENCER')")
     public ResponseEntity<?> getAllApplicationByInfluencer(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        return applicationService.getAllApplicationByMe(pageNumber, pageSize, userDetails, request);
+        return applicationService.getAllApplicationByInfluencer(userDetails, request);
     }
 
     @PostMapping("/{campaignId}/applications/apply")
