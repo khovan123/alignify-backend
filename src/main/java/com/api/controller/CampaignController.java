@@ -28,8 +28,10 @@ public class CampaignController {
     private CampaignService campaignService;
 
     @PostMapping("")
-    public ResponseEntity<?> createPost(@RequestBody Campaign campaign,@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        return campaignService.createCampaign(campaign,userDetails, request);
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    public ResponseEntity<?> createPost(@RequestBody Object obj, @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.createCampaign(campaignService.convertToCampaign(obj), userDetails, request);
     }
 
     @GetMapping("")
