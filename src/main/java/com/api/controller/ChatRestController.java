@@ -1,0 +1,118 @@
+package com.api.controller;
+
+import com.api.config.EnvConfig;
+import com.api.dto.ApiResponse;
+import com.api.dto.UserDTO;
+import com.api.dto.response.ChatMessageResponse;
+import com.api.dto.response.ChatRoomResponse;
+import com.api.model.Brand;
+import com.api.model.ChatMessage;
+import com.api.model.ChatRoom;
+import com.api.model.Influencer;
+import com.api.model.User;
+import com.api.repository.BrandRepository;
+import com.api.repository.ChatMessageRepository;
+import com.api.repository.ChatRoomRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.repository.UserRepository;
+import com.api.security.CustomUserDetails;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/messages")
+public class ChatRestController {
+
+    @Autowired
+    private ChatMessageRepository chatMessageRepository;
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BrandRepository brandRepository;
+    @Autowired
+    private InfluencerRepository influencerRepository;
+
+    @GetMapping("/{roomId}")
+    public ResponseEntity<?> getMessages(
+            @PathVariable("roomId") String roomId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request
+    ) {
+        String userId = userDetails.getUserId();
+        if (!chatRoomRepository.existsByChatRoomIdAndRoomOwnerIdOrMember(roomId, userId)) {
+            throw new SecurityException("User not authorized for room: " + roomId);
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomIdOrderBySendAtAsc(roomId, pageable).toList();
+        List<ChatMessageResponse> chatMessageResposes = new ArrayList<>();
+        chatMessages.forEach(msg -> {
+            User user = userRepository.findById(msg.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + msg.getUserId()));
+            String avatarUrl = null;
+            if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+                avatarUrl = influencerRepository.findById(msg.getUserId())
+                        .map(Influencer::getAvatarUrl)
+                        .orElse(null);
+            } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+                avatarUrl = brandRepository.findById(msg.getUserId())
+                        .map(Brand::getAvatarUrl)
+                        .orElse(null);
+            }
+            UserDTO userDTO = new UserDTO(msg.getUserId(), user.getName(), avatarUrl);
+            chatMessageResposes.add(new ChatMessageResponse(userDTO, msg));
+        });
+        return ApiResponse.sendSuccess(200, "Response successfully", chatMessageResposes, request.getRequestURI());
+    }
+
+    @GetMapping("/rooms")
+    public ResponseEntity<?> getRoomIds(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request
+    ) {
+        String userId = userDetails.getUserId();
+        Pageable pageable = PageRequest.of(page, size);
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllByRoomOwnerIdOrMember(userId, pageable).toList();
+        System.out.println(chatRooms.size());
+        List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        chatRooms.forEach(room -> {
+            ChatMessage chatMessage = chatMessageRepository.findTopByChatRoomIdOrderBySendAtDesc(room.getChatRoomId())
+                    .orElse(null);
+            if (chatMessage == null) {
+                List<String> readBy = new ArrayList<>();
+                readBy.add(userId);
+                ChatMessage newMsg = new ChatMessage();
+                newMsg.setMessage("Wellcome " + user.getName() + " !");
+                newMsg.setChatRoomId(room.getChatRoomId());
+                newMsg.setName(user.getName());
+                newMsg.setReadBy(readBy);
+                newMsg.setUserId(userId);
+                newMsg.setSendAt(LocalDateTime.now());
+                chatMessageRepository.save(newMsg);
+                chatMessage = newMsg;
+            }
+            chatRoomResponses.add(new ChatRoomResponse(room, chatMessage));
+        });
+        return ApiResponse.sendSuccess(200, "Response successfully", chatRoomResponses, request.getRequestURI());
+    }
+}

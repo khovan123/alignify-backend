@@ -2,12 +2,21 @@ package com.api.security;
 
 import com.api.model.Application;
 import com.api.model.Campaign;
+<<<<<<< Updated upstream
 import com.api.repository.ApplicationRepository;
 import com.api.repository.CampaignRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+=======
+import com.api.model.CampaignTracking;
+import com.api.model.Invitation;
+import com.api.repository.ApplicationRepository;
+import com.api.repository.CampaignRepository;
+import com.api.repository.CampaignTrackingRepository;
+import com.api.repository.InvitationRepository;
+>>>>>>> Stashed changes
 
 @Service
 public class SecurityService {
@@ -16,6 +25,13 @@ public class SecurityService {
     private CampaignRepository campaignRepository;
     @Autowired
     private ApplicationRepository applicationRepository;
+<<<<<<< Updated upstream
+=======
+    @Autowired
+    private CampaignTrackingRepository campaignTrackingRepository;
+    @Autowired
+    private InvitationRepository invitationRepository;
+>>>>>>> Stashed changes
 
     public boolean isCampaignOwner(String campaignId, Object principal) {
         if (!(principal instanceof CustomUserDetails)) {
@@ -43,4 +59,47 @@ public class SecurityService {
         return applicationOpt.isPresent() && this.isCampaignOwner(applicationOpt.get().getCampaignId(), principal);
     }
 
+<<<<<<< Updated upstream
+=======
+    public boolean isJoinedCampaignTracking(String campaignId, String trackingId, Object principal) {
+        if (!(principal instanceof CustomUserDetails)) {
+            return false;
+        }
+        String userId = ((CustomUserDetails) principal).getUserId();
+        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
+                .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
+        if (!campaignTrackingOpt.isPresent()) {
+            return false;
+        }
+        if (hasInfluencerRole((CustomUserDetails) principal)) {
+            return campaignTrackingOpt.isPresent() && campaignTrackingOpt.get().getInfluencerId().equals(userId);
+        } else {
+            return campaignTrackingOpt.isPresent() && campaignTrackingOpt.get().getBrandId().equals(userId);
+        }
+    }
+
+    private boolean hasInfluencerRole(CustomUserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_INFLUENCER"));
+    }
+
+    public boolean checkCampaignStatus(String campaignId, String status, Object principal) {
+        if (!(principal instanceof CustomUserDetails)) {
+            return false;
+        }
+
+        Optional<Campaign> optionalCampaign = campaignRepository.findById(campaignId);
+        return optionalCampaign.isPresent() && optionalCampaign.get().getStatus().equals(status);
+    }
+
+    public boolean isJoinedInvitation(String invitationId, Object principal) {
+        if (!(principal instanceof CustomUserDetails)) {
+            return false;
+        }
+        String userId = ((CustomUserDetails) principal).getUserId();
+
+        Optional<Invitation> invitationOpt = invitationRepository.findById(invitationId);
+        return invitationOpt.isPresent() && (invitationOpt.get().getBrandId().equals(userId) || invitationOpt.get().getInfluencerId().equals(userId));
+    }
+>>>>>>> Stashed changes
 }

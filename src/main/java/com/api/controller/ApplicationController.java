@@ -17,10 +17,19 @@ public class ApplicationController {
     private ApplicationService applicationService;
 
     @PostMapping("/{campaignId}/applications/apply")
+<<<<<<< Updated upstream
     @PreAuthorize("hasRole('ROLE_INFLUENCER')")
     public ResponseEntity<?> apply(@PathVariable("campaignId") String campaignId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         String userId = userDetails.getUserId();
         return applicationService.apply_Application(userId, campaignId, request);
+=======
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
+    public ResponseEntity<?> apply(
+            @PathVariable("campaignId") String campaignId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return applicationService.apply_Application(campaignId, userDetails, request);
+>>>>>>> Stashed changes
     }
 
     @PostMapping("/applications/{applicationId}/cancel")

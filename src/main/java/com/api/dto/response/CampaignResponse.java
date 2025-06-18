@@ -16,11 +16,32 @@ public class CampaignResponse {
     private long budget;
     private Map<String, Integer> campaignRequirements;
     private List<String> influencerRequirement;
-    private int influencerCount;
+    private int influencerCountExpected;
+    private int influencerCountCurrent;
+    private int applicationTotal;
 
     public CampaignResponse() {
     }
 
+<<<<<<< Updated upstream
+=======
+    public CampaignResponse(Campaign campaign, CategoryRepository categoryRepository) {
+        this.campaignId = campaign.getCampaignId();
+        this.brandId = campaign.getBrandId();
+        this.content = campaign.getContent();
+        this.imageUrl = campaign.getImageUrl();
+        this.categories = categoryRepository.findAllByCategoryIdIn(campaign.getCategoryIds());
+        this.createdDate = campaign.getCreatedDate();
+        this.status = campaign.getStatus();
+        this.budget = campaign.getBudget();
+        this.campaignRequirements = campaign.getCampaignRequirements();
+        this.influencerRequirement = campaign.getInfluencerRequirement();
+        this.influencerCountExpected = campaign.getInfluencerCountExpected();
+        this.influencerCountCurrent = campaign.getInfluencerCountCurrent();
+        this.applicationTotal = campaign.getApplicationTotal();
+    }
+
+>>>>>>> Stashed changes
     public String getStatus() {
         return status;
     }
@@ -101,12 +122,28 @@ public class CampaignResponse {
         this.influencerRequirement = influencerRequirement;
     }
 
-    public int getInfluencerCount() {
-        return influencerCount;
+    public int getInfluencerCountExpected() {
+        return influencerCountExpected;
     }
 
-    public void setInfluencerCount(int influencerCount) {
-        this.influencerCount = influencerCount;
+    public void setInfluencerCountExpected(int influencerCountExpected) {
+        this.influencerCountExpected = influencerCountExpected;
+    }
+
+    public int getInfluencerCountCurrent() {
+        return influencerCountCurrent;
+    }
+
+    public void setInfluencerCountCurrent(int influencerCountCurrent) {
+        this.influencerCountCurrent = influencerCountCurrent;
+    }
+
+    public int getApplicationTotal() {
+        return applicationTotal;
+    }
+
+    public void setApplicationTotal(int applicationTotal) {
+        this.applicationTotal = applicationTotal;
     }
 
 }
