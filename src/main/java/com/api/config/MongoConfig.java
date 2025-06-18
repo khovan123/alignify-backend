@@ -25,10 +25,13 @@ public class MongoConfig {
 
   @Autowired
   private MongoClient mongoClient;
+
   @Autowired
   private RoleRepository roleRepository;
+
   @Autowired
   private CategoryRepository categoryRepository;
+
   @Value("${spring.data.mongodb.database}")
   private String databaseName;
 
@@ -51,6 +54,8 @@ public class MongoConfig {
     // this.create_applicationsCollection(db);
     // this.create_campaignTrackingsCollection(db);
     this.create_commentsCollection(db);
+    // this.create_chatRoomsCollection(db);
+    this.create_messagesCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -58,35 +63,35 @@ public class MongoConfig {
       db.getCollection("users").drop();
     }
 
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["name", "email", "password", "roleId"],
-              "properties": {
-              "name": {
-                "bsonType": "string"
-                },
-                "email": {
-                  "bsonType": "string",
-                  "pattern": "^.+@.+\\\\..+$"
-                },
-                "password": {
-                  "bsonType": "string",
-                },
-                "roleId": {
-                  "bsonType": "string"
-                },
-                "isActive": {
-                  "bsonType": "bool"
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
-
-    ValidationOptions validationOptions = new ValidationOptions()
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["name", "email", "password", "roleId"],
+                  "properties": {
+                  "name": {
+                    "bsonType": "string"
+                    },
+                    "email": {
+                      "bsonType": "string",
+                      "pattern": "^.+@.+\\\\..+$"
+                    },
+                    "password": {
+                      "bsonType": "string",
+                    },
+                    "roleId": {
+                      "bsonType": "string"
+                    },
+                    "isActive": {
+                      "bsonType": "bool"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
+ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
     CreateCollectionOptions options = new CreateCollectionOptions()
@@ -99,57 +104,58 @@ public class MongoConfig {
     if (db.getCollection("influencers") != null) {
       db.getCollection("influencers").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-          "bsonType": "object",
-          "properties": {
-            "_id": {
-              "bsonType": "objectId"
-            },
-            "avatarUrl": {
-              "bsonType": "string",
-              "pattern": "^https?://.+$"
-            },
-            "backgroundUrl": {
-               "bsonType": "string"
-            },
-            "DoB": {
-              "bsonType": "date"
-            },
-            "gender": {
-              "bsonType": "string",
-              "enum" : ["MALE", "FEMALE", "OTHER", "LGBT", "NONE"]
-            },
-            "bio": {
-              "bsonType": "string"
-            },
-            "socialMediaLinks": {
+    Document jsonSchema = Document.parse(
+        """
+            {
               "bsonType": "object",
-              "additionalProperties": {
-                "bsonType": "string"
+              "properties": {
+                "_id": {
+                  "bsonType": "objectId"
+                },
+                "avatarUrl": {
+                  "bsonType": "string",
+                  "pattern": "^https?://.+$"
+                },
+                "backgroundUrl": {
+                   "bsonType": "string"
+                },
+                "DoB": {
+                  "bsonType": "date"
+                },
+                "gender": {
+                  "bsonType": "string",
+                  "enum" : ["MALE", "FEMALE", "OTHER", "LGBT", "NONE"]
+                },
+                "bio": {
+                  "bsonType": "string"
+                },
+                "socialMediaLinks": {
+                  "bsonType": "object",
+                  "additionalProperties": {
+                    "bsonType": "string"
+                  }
+                },
+                "rating": {
+                  "bsonType": "double"
+                },
+                "categoryIds": {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string"
+                  }
+                },
+                "follower": {
+                  "bsonType": "int",
+                },
+                "isPublic": {
+                  "bsonType": "bool"
+                },
+                "createdAt": {
+                  "bsonType": "date"
+                }
               }
-            },
-            "rating": {
-              "bsonType": "double"
-            },
-            "categoryIds": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string"
-              }
-            },
-            "follower": {
-              "bsonType": "int",
-            },
-            "isPublic": {
-              "bsonType": "bool"
-            },
-            "createdAt": {
-              "bsonType": "date"
             }
-          }
-        }
-        """);
+            """);
 
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
@@ -164,22 +170,23 @@ public class MongoConfig {
     if (db.getCollection("roles") != null) {
       db.getCollection("roles").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["roleName"],
-              "properties": {
-              "roleName": {
-                  "bsonType": "string"
-                }
-              }
-        }
-        """);
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["roleName"],
+                  "properties": {
+                  "roleName": {
+                      "bsonType": "string"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
     CreateCollectionOptions options = new CreateCollectionOptions()
-        .validationOptions(validationOptions);
+.validationOptions(validationOptions);
 
     db.createCollection("roles", options);
 
@@ -197,17 +204,18 @@ public class MongoConfig {
     if (db.getCollection("categories") != null) {
       db.getCollection("categories").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["categoryName"],
-              "properties": {
-                "categoryName": {
-                  "bsonType": "string"
-                }
-              }
-        }
-        """);
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["categoryName"],
+                  "properties": {
+                    "categoryName": {
+                      "bsonType": "string"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -217,22 +225,23 @@ public class MongoConfig {
     db.createCollection("categories", options);
 
     if (categoryRepository.count() == 0) {
-      categoryRepository.saveAll(List.of(
-          new Category("thời trang"),
-          new Category("mỹ phẩm"),
-          new Category("công nghệ"),
-          new Category("nghệ thuật"),
-          new Category("thể thao"),
-          new Category("ăn uống"),
-          new Category("du lịch"),
-          new Category("lối sống"),
-          new Category("âm nhạc"),
-          new Category("trò chơi điện tử"),
-          new Category("handmade"),
-          new Category("phong tục và văn hóa"),
-          new Category("khởi nghiệp"),
-          new Category("kĩ năng mềm"),
-          new Category("mẹ và bé")));
+      categoryRepository.saveAll(
+          List.of(
+              new Category("thời trang"),
+              new Category("mỹ phẩm"),
+              new Category("công nghệ"),
+              new Category("nghệ thuật"),
+              new Category("thể thao"),
+              new Category("ăn uống"),
+              new Category("du lịch"),
+              new Category("lối sống"),
+              new Category("âm nhạc"),
+              new Category("trò chơi điện tử"),
+              new Category("handmade"),
+              new Category("phong tục và văn hóa"),
+              new Category("khởi nghiệp"),
+              new Category("kĩ năng mềm"),
+              new Category("mẹ và bé")));
     }
   }
 
@@ -240,47 +249,48 @@ public class MongoConfig {
     if (db.getCollection("brands") != null) {
       db.getCollection("brands").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "properties": {
-                "_id": {
-                  "bsonType": "objectId",
-                },
-                "avatarUrl": {
-                  "bsonType": "string",
-                  "pattern": "^https?://.+$"
-                },
-                "bio": {
-                  "bsonType": "string",
-                },
-                "contacts": {
+    Document jsonSchema = Document.parse(
+        """
+            {
                   "bsonType": "object",
-                  "additionalProperties": {
-                    "bsonType": "string"
+                  "properties": {
+                    "_id": {
+                      "bsonType": "objectId",
+                    },
+                    "avatarUrl": {
+                      "bsonType": "string",
+                      "pattern": "^https?://.+$"
+                    },
+                    "bio": {
+                      "bsonType": "string",
+                    },
+                    "contacts": {
+                      "bsonType": "object",
+                      "additionalProperties": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "socialMediaLinks": {
+                      "bsonType": "object",
+"additionalProperties": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "categoryIds": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string"
+                       }
+                    },
+                    "establishDate": {
+                      "bsonType": "date",
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
                   }
-                },
-                "socialMediaLinks": {
-                  "bsonType": "object",
-                  "additionalProperties": {
-                    "bsonType": "string"
-                  }
-                },
-                "categoryIds": {
-                  "bsonType": "array",
-                  "items": {
-                    "bsonType": "string"
-                   }
-                },
-                "establishDate": {
-                  "bsonType": "date",
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -295,30 +305,31 @@ public class MongoConfig {
       db.getCollection("admins").drop();
     }
 
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["name", "email", "password", "roleId"],
-              "properties": {
-              "name": {
-                "bsonType": "string"
-                },
-                "email": {
-                  "bsonType": "string",
-                  "pattern": "^.+@.+\\\\..+$"
-                },
-                "password": {
-                  "bsonType": "string",
-                },
-                "roleId": {
-                  "bsonType": "string"
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["name", "email", "password", "roleId"],
+                  "properties": {
+                  "name": {
+                    "bsonType": "string"
+                    },
+                    "email": {
+                      "bsonType": "string",
+                      "pattern": "^.+@.+\\\\..+$"
+                    },
+                    "password": {
+                      "bsonType": "string",
+                    },
+                    "roleId": {
+                      "bsonType": "string"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
 
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
@@ -333,29 +344,29 @@ public class MongoConfig {
     if (db.getCollection("galleries") != null) {
       db.getCollection("galleries").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "properties": {
-                "_id": {
-                  "bsonType": "objectId",
-                },
-                "images": {
-                  "bsonType": "array",
-                  "items": {
-                    "bsonType": "string"
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "properties": {
+                    "_id": {
+                      "bsonType": "objectId",
+                    },
+                    "images": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
                   }
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
-
-    CreateCollectionOptions options = new CreateCollectionOptions()
+CreateCollectionOptions options = new CreateCollectionOptions()
         .validationOptions(validationOptions);
 
     db.createCollection("galleries", options);
@@ -365,21 +376,22 @@ public class MongoConfig {
     if (db.getCollection("galleryImages") != null) {
       db.getCollection("galleryImages").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["imageUrl"],
-              "properties": {
-                "imageUrl": {
-                  "bsonType": "string",
-                  "pattern": "^https?://.+$"
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["imageUrl"],
+                  "properties": {
+                    "imageUrl": {
+                      "bsonType": "string",
+                      "pattern": "^https?://.+$"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -393,30 +405,31 @@ public class MongoConfig {
     if (db.getCollection("otps") != null) {
       db.getCollection("otps").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["otpCode","email"],
-              "properties": {
-                "email": {
-                  "bsonType": "string",
-                },
-                "otpCode": {
-                  "bsonType": "string",
-                  "pattern": "^[A-Z0-9]{6}$",
-                },
-                "requestCount" :{
-                  "bsonType": "int",
-                },
-                "attemptCount" :{
-                  "bsonType": "int",
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["otpCode","email"],
+                  "properties": {
+                    "email": {
+                      "bsonType": "string",
+                    },
+                    "otpCode": {
+                      "bsonType": "string",
+                      "pattern": "^[A-Z0-9]{6}$",
+                    },
+                    "requestCount" :{
+                      "bsonType": "int",
+                    },
+                    "attemptCount" :{
+                      "bsonType": "int",
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -444,7 +457,7 @@ public class MongoConfig {
       IndexOptions indexOptions = new IndexOptions()
           .name("createdAt_ttl")
           .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
-      collection.createIndex(indexKeys, indexOptions);
+collection.createIndex(indexKeys, indexOptions);
     }
   }
 
@@ -452,20 +465,21 @@ public class MongoConfig {
     if (db.getCollection("accountVerifieds") != null) {
       db.getCollection("accountVerifieds").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["email"],
-              "properties": {
-                "email": {
-                  "bsonType": "string"
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["email"],
+                  "properties": {
+                    "email": {
+                      "bsonType": "string"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -480,42 +494,43 @@ public class MongoConfig {
       db.getCollection("contentPostings").drop();
     }
 
-    Document jsonSchema = Document.parse("""
-        {
-            "bsonType": "object",
-            "required": ["content"],
-            "properties": {
-                "userId": {
-                    "bsonType": "string"
-                },
-                "content": {
-                    "bsonType": "string"
-                },
-                "imageUrl": {
-                    "bsonType": "string"
-                },
-                "categoryIds": {
-                    "bsonType": "array",
-                    "items": {
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["content"],
+                "properties": {
+                    "userId": {
                         "bsonType": "string"
+                    },
+                    "content": {
+                        "bsonType": "string"
+                    },
+                    "imageUrl": {
+                        "bsonType": "string"
+                    },
+                    "categoryIds": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
+                    },
+                    "createdDate": {
+                        "bsonType": "date"
+                    },
+                    "isPublic": {
+                        "bsonType": "bool"
+                    },
+                    "commentCount": {
+                        "bsonType": "int"
+                    },
+                    "likeCount": {
+                        "bsonType": "int"
                     }
-                },
-                "createdDate": {
-                    "bsonType": "date"
-                },
-                "isPublic": {
-                    "bsonType": "bool"
-                },
-                "commentCount": {
-                    "bsonType": "int"
-                },
-                "likeCount": {
-                    "bsonType": "int"
                 }
             }
-        }
 
-        """);
+            """);
 
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
@@ -531,23 +546,24 @@ public class MongoConfig {
       db.getCollection("likes").drop();
     }
 
-    Document jsonSchema = Document.parse("""
-        {
-            "bsonType": "object",
-            "required": ["userId", "contentId", "createdAt"],
-            "properties": {
-                "userId": {
-                    "bsonType": "string"
-                },
-                "contentId": {
-                    "bsonType": "string"
-                },
-                "createdAt": {
-                    "bsonType": "date"
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["userId", "contentId", "createdAt"],
+                "properties": {
+                    "userId": {
+"bsonType": "string"
+                    },
+                    "contentId": {
+                        "bsonType": "string"
+                    },
+                    "createdAt": {
+                        "bsonType": "date"
+                    }
                 }
             }
-        }
-        """);
+            """);
 
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
@@ -556,7 +572,6 @@ public class MongoConfig {
         .validationOptions(validationOptions);
 
     db.createCollection("likes", options);
-
   }
 
   public void create_commentsCollection(MongoDatabase db) {
@@ -564,27 +579,28 @@ public class MongoConfig {
       db.getCollection("comments").drop();
     }
 
-    Document jsonSchema = Document.parse("""
-        {
-            "bsonType": "object",
-            "required": ["userId","contentId", "content"],
-            "properties": {
-                 "userId": {
-                    "bsonType": "string"
-                },
-                "contentId": {
-                    "bsonType": "string"
-                },
-                "content": {
-                    "bsonType": "string"
-                },
-                "createdAt": {
-                    "bsonType": "date"
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["userId","contentId", "content"],
+                "properties": {
+                     "userId": {
+                        "bsonType": "string"
+                    },
+                    "contentId": {
+                        "bsonType": "string"
+                    },
+                    "content": {
+                        "bsonType": "string"
+                    },
+                    "createdAt": {
+                        "bsonType": "date"
+                    }
                 }
             }
-        }
 
-        """);
+            """);
 
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
@@ -600,54 +616,64 @@ public class MongoConfig {
       db.getCollection("campaigns").drop();
     }
 
-    Document jsonSchema = Document.parse("""
-        {
-            "bsonType": "object",
-            "required": ["brandId", "content", "budget", "campaignRequirements", "influencerRequirement"],
-            "properties": {
-                "brandId": {
-                    "bsonType": "string"
-                },
-                "content": {
-                    "bsonType": "string"
-                },
-                "imageUrl": {
-                    "bsonType": "string"
-                },
-                "categoryIds": {
-                    "bsonType": "array",
-                    "items": {
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["brandId", "content", "budget", "campaignRequirements", "influencerRequirement"],
+                "properties": {
+                    "brandId": {
                         "bsonType": "string"
-                    }
-                },
-                "status": {
-                    "bsonType": "string",
-                    "enum": ["DRAFT", "RECRUITING", "PENDING", "PARTICIPATING", "COMPLETED"]
-                },
-                "createdDate": {
-                    "bsonType": "date"
-                },
-                "budget": {
-                    "bsonType": "long"
-                },
-                "campaignRequirements": {
-                    "bsonType": "object",
-                    "additionalProperties": {
+                    },
+                    "campaignName": {
+                        "bsonType": "string"
+                    },
+                    "content": {
+                        "bsonType": "string"
+                    },
+                    "imageUrl": {
+                        "bsonType": "string"
+                    },
+                    "categoryIds": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
+                    },
+                    "status": {
+                        "bsonType": "string",
+                        "enum": ["DRAFT", "RECRUITING", "PENDING", "PARTICIPATING", "COMPLETED"]
+                    },
+                    "createdDate": {
+"bsonType": "date"
+                    },
+                    "budget": {
+                        "bsonType": "long"
+                    },
+                    "campaignRequirements": {
+                        "bsonType": "object",
+                        "additionalProperties": {
+                            "bsonType": "int"
+                        }
+                    },
+                    "influencerRequirement": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
+                    },
+                    "influencerCountExpected": {
+                        "bsonType": "int"
+                    },
+                    "influencerCountCurrent": {
+                        "bsonType": "int"
+                    },
+                    "applicationTotal": {
                         "bsonType": "int"
                     }
-                },
-                "influencerRequirement": {
-                    "bsonType": "array",
-                    "items": {
-                        "bsonType": "string"
-                    }
-                },
-                "influencerCount": {
-                    "bsonType": "int"
-                },
+                }
             }
-        }
-        """);
+            """);
 
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
@@ -662,33 +688,34 @@ public class MongoConfig {
     if (db.getCollection("applications") != null) {
       db.getCollection("applications").drop();
     }
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["campaignId"],
-              "properties": {
-                "campaignId": {
-                  "bsonType": "string"
-                },
-                "influencerId":{
-                   "bsonType": "string"
-                },
-                "brandId":{
-                   "bsonType": "string"
-                },
-                "limited": {
-                  "bsonType": "int"
-                },
-                "status": {
-                  "bsonType": "string",
-                  "enum": ["PENDING","ACCEPTED","REJECTED"]
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["campaignId"],
+                  "properties": {
+                    "campaignId": {
+                      "bsonType": "string"
+                    },
+                    "influencerId":{
+                       "bsonType": "string"
+                    },
+                    "brandId":{
+                       "bsonType": "string"
+                    },
+                    "limited": {
+                      "bsonType": "int"
+                    },
+                    "status": {
+                      "bsonType": "string",
+                      "enum": ["PENDING","ACCEPTED","REJECTED"]
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -696,6 +723,47 @@ public class MongoConfig {
         .validationOptions(validationOptions);
 
     db.createCollection("applications", options);
+  }
+
+  public void create_invitationsCollection(MongoDatabase db) {
+    if (db.getCollection("invitations") != null) {
+      db.getCollection("invitations").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["brandId", "influencerId", "campaignId"],
+"properties": {
+                    "campaignId": {
+                      "bsonType": "string"
+                    },
+                    "influencerId":{
+                       "bsonType": "string"
+                    },
+                    "brandId":{
+                       "bsonType": "string"
+                    },
+                    "message": {
+                      "bsonType": "string"
+                    },
+                    "status": {
+                      "bsonType": "string",
+                      "enum": ["PENDING","ACCEPTED","REJECTED"]
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("invitations", options);
   }
 
   public void create_campaignTrackingsCollection(MongoDatabase db) {
@@ -742,7 +810,7 @@ public class MongoConfig {
                                         "pattern": "^https?://.+$"
                                     },
                                     "status": {
-                                        "bsonType": ["string", "null"],
+"bsonType": ["string", "null"],
                                         "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
                                     },
                                     "uploadedAt": {
@@ -777,6 +845,94 @@ public class MongoConfig {
     db.createCollection("campaignTrackings", options);
   }
 
+  public void create_messagesCollection(MongoDatabase db) {
+    if (db.getCollection("messages") != null) {
+      db.getCollection("messages").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["message", "chatRoomId", "userId"],
+                  "properties": {
+                    "userId": {
+                      "bsonType": "string"
+                    },
+                    "chatRoomId":{
+                       "bsonType": "string"
+                    },
+                    "name":{
+                      "bsonType": "string"
+                    },
+                    "message":{
+                       "bsonType": "string"
+                    },
+                    "tempId": {
+                      "bsonType": "string"
+                    },
+                    "sendAt": {
+                      "bsonType": "date"
+                    },
+                    "readBy": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string"
+                      }
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("messages", options);
+  }
+
+  public void create_chatRoomsCollection(MongoDatabase db) {
+    if (db.getCollection("chatRooms") != null) {
+      db.getCollection("chatRooms").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+"required": ["roomOwnerId"],
+                  "properties": {
+                    "_id": {
+                      "bsonType": "objectId"
+                    },
+                    "roomName": {
+                      "bsonType": "string"
+                    },
+                    "roomAvatarUrl":{
+                      "bsonType": "string"
+                   },
+                    "members": {
+                      "bsonType": "array",
+                      "items": {
+                          "bsonType": "string"
+                      }
+                    },
+                    "roomOwnerId":{
+                       "bsonType": "string"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("chatRooms", options);
+  }
   // public void create_campaignTrackingsCollection(MongoDatabase db) {
   // if (db.getCollection("campaignTrackings") != null) {
   // db.getCollection("campaignTrackings").drop();

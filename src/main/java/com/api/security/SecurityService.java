@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
+import com.api.model.Invitation;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
+import com.api.repository.InvitationRepository;
 
 @Service
 public class SecurityService {
@@ -25,6 +27,8 @@ public class SecurityService {
     private ApplicationRepository applicationRepository;
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
+    @Autowired
+    private InvitationRepository invitationRepository;
 
     // public boolean isCampaignOwner(String campaignId, Object principal) {
     // System.out.println("hello");
@@ -72,7 +76,7 @@ public class SecurityService {
         if (!(principal instanceof CustomUserDetails)) {
             return false;
         }
-        String userId = ((CustomUserDetails) principal).getUserId();
+String userId = ((CustomUserDetails) principal).getUserId();
         Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
         return applicationOpt.isPresent() && applicationOpt.get().getInfluencerId().equals(userId);
     }
@@ -111,9 +115,18 @@ public class SecurityService {
         if (!(principal instanceof CustomUserDetails)) {
             return false;
         }
-        String userId = ((CustomUserDetails) principal).getUserId();
+
         Optional<Campaign> optionalCampaign = campaignRepository.findById(campaignId);
-        return optionalCampaign.isPresent() && optionalCampaign.get().getBrandId().equals(userId)
-                && optionalCampaign.get().getStatus().equals(status);
+        return optionalCampaign.isPresent() && optionalCampaign.get().getStatus().equals(status);
+    }
+
+    public boolean isJoinedInvitation(String invitationId, Object principal) {
+        if (!(principal instanceof CustomUserDetails)) {
+            return false;
+        }
+        String userId = ((CustomUserDetails) principal).getUserId();
+
+        Optional<Invitation> invitationOpt = invitationRepository.findById(invitationId);
+        return invitationOpt.isPresent() && (invitationOpt.get().getBrandId().equals(userId) || invitationOpt.get().getInfluencerId().equals(userId));
     }
 }

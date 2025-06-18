@@ -20,7 +20,9 @@ public class CampaignResponse {
     private long budget;
     private Map<String, Integer> campaignRequirements;
     private List<String> influencerRequirement;
-    private int influencerCount;
+    private int influencerCountExpected;
+    private int influencerCountCurrent;
+    private int applicationTotal;
 
     public CampaignResponse() {
     }
@@ -36,7 +38,9 @@ public class CampaignResponse {
         this.budget = campaign.getBudget();
         this.campaignRequirements = campaign.getCampaignRequirements();
         this.influencerRequirement = campaign.getInfluencerRequirement();
-        this.influencerCount = campaign.getInfluencerCount();
+        this.influencerCountExpected = campaign.getInfluencerCountExpected();
+        this.influencerCountCurrent = campaign.getInfluencerCountCurrent();
+        this.applicationTotal = campaign.getApplicationTotal();
     }
 
     public String getStatus() {
@@ -119,12 +123,28 @@ public class CampaignResponse {
         this.influencerRequirement = influencerRequirement;
     }
 
-    public int getInfluencerCount() {
-        return influencerCount;
+    public int getInfluencerCountExpected() {
+        return influencerCountExpected;
     }
 
-    public void setInfluencerCount(int influencerCount) {
-        this.influencerCount = influencerCount;
+    public void setInfluencerCountExpected(int influencerCountExpected) {
+        this.influencerCountExpected = influencerCountExpected;
+    }
+
+    public int getInfluencerCountCurrent() {
+        return influencerCountCurrent;
+    }
+
+    public void setInfluencerCountCurrent(int influencerCountCurrent) {
+        this.influencerCountCurrent = influencerCountCurrent;
+    }
+
+    public int getApplicationTotal() {
+        return applicationTotal;
+    }
+
+    public void setApplicationTotal(int applicationTotal) {
+        this.applicationTotal = applicationTotal;
     }
 
 }
