@@ -16,12 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-<<<<<<< Updated upstream
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-=======
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
->>>>>>> Stashed changes
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -59,9 +54,5 @@ public class SecurityConfig {
 
         return http.build();
     }
-<<<<<<< Updated upstream
 
 }
-=======
-}
->>>>>>> Stashed changes

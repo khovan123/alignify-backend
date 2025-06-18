@@ -48,11 +48,11 @@ public class MongoConfig {
     this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
     // this.create_accountVerifiedsCollection(db);
-    this.create_campaignsCollection(db);
+    // this.create_campaignsCollection(db);
     this.create_contentPostingsCollection(db);
     this.create_likesCollection(db);
-    this.create_applicationsCollection(db);
-    this.create_campaignTrackingsCollection(db);
+    // this.create_applicationsCollection(db);
+    // this.create_campaignTrackingsCollection(db);
     this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
     this.create_messagesCollection(db);
@@ -496,28 +496,6 @@ public class MongoConfig {
       db.getCollection("contentPostings").drop();
     }
 
-<<<<<<< Updated upstream
-    Document jsonSchema = Document.parse("""
-        {
-            "bsonType": "object",
-            "required": ["content"],
-            "properties": {
-                "contentId": {
-                    "bsonType": "string"
-                },
-                "userId": {
-                    "bsonType": "string"
-                },
-                "content": {
-                    "bsonType": "string"
-                },
-                "imageUrl": {
-                    "bsonType": "string"
-                },
-                "categoryIds": {
-                    "bsonType": "array",
-                    "items": {
-=======
     Document jsonSchema = Document.parse(
         """
             {
@@ -525,7 +503,6 @@ public class MongoConfig {
                 "required": ["content"],
                 "properties": {
                     "userId": {
->>>>>>> Stashed changes
                         "bsonType": "string"
                     },
                     "content": {
@@ -604,27 +581,6 @@ public class MongoConfig {
       db.getCollection("comments").drop();
     }
 
-<<<<<<< Updated upstream
-    Document jsonSchema = Document.parse("""
-        {
-            "bsonType": "object",
-            "required": ["userId","contentId", "content"],
-            "properties": {
-                "commentId": {
-                    "bsonType": "string"
-                },
-                 "userId": {
-                    "bsonType": "string"
-                },
-                "contentId": {
-                    "bsonType": "string"
-                },
-                "content": {
-                    "bsonType": "string"
-                },
-                "createdAt": {
-                    "bsonType": "date"
-=======
     Document jsonSchema = Document.parse(
         """
             {
@@ -643,7 +599,6 @@ public class MongoConfig {
                     "createdAt": {
                         "bsonType": "date"
                     }
->>>>>>> Stashed changes
                 }
             }
 
@@ -663,52 +618,6 @@ public class MongoConfig {
       db.getCollection("campaigns").drop();
     }
 
-<<<<<<< Updated upstream
-    Document jsonSchema = Document.parse("""
-        {
-            "bsonType": "object",
-            "required": ["content", "budget"],
-            "properties": {
-                "campaignId": {
-                    "bsonType": "string"
-                },
-                "userId": {
-                    "bsonType": "string"
-                },
-                "content": {
-                    "bsonType": "string"
-                },
-                "imageUrl": {
-                    "bsonType": "string"
-                },
-                "categoryIds": {
-                    "bsonType": "array",
-                    "items": {
-                        "bsonType": "string"
-                    }
-                },
-                "status": {
-                    "bsonType": "string",
-                    "enum": ["DRAFT", "PENDING", "PARTICIPATING", "COMPLETED"]
-                },
-                "createdDate": {
-                    "bsonType": "date"
-                },
-                "budget": {
-                    "bsonType": "long"
-                },
-                "campaignRequirements": {
-                    "bsonType": "object",
-                    "additionalProperties": {
-                        "bsonType": "int"
-                    }
-                },
-                "influencerRequirement": {
-                    "bsonType": "array",
-                    "items": {
-                        "bsonType": "string"
-                    }
-=======
     Document jsonSchema = Document.parse(
         """
             {
@@ -782,32 +691,7 @@ public class MongoConfig {
     if (db.getCollection("applications") != null) {
       db.getCollection("applications").drop();
     }
-<<<<<<< Updated upstream
-    Document jsonSchema = Document.parse("""
-        {
-              "bsonType": "object",
-              "required": ["campaignId"],
-              "properties": {
-                "campaignId": {
-                  "bsonType": "string"
-                },
-                "influencerId":{
-                   "bsonType": "string"
-                },
-                "limited": {
-                  "bsonType": "int"
-                },
-                "status": {
-                  "bsonType": "string",
-                  "enum": ["PENDING","ACCEPTED","REJECTED"]
-                },
-                "createdAt": {
-                  "bsonType": "date"
-                }
-              }
-        }
-        """);
-=======
+   
     Document jsonSchema = Document.parse(
         """
             {
@@ -836,7 +720,6 @@ public class MongoConfig {
                   }
             }
             """);
->>>>>>> Stashed changes
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -896,11 +779,11 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking"],
+                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking", "process"],
                 "properties": {
                     "_id": {
-                      "bsonType": "objectId"
-                    }
+                        "bsonType": "objectId"
+                    },
                     "campaignId": {
                         "bsonType": "string"
                     },
@@ -916,22 +799,26 @@ public class MongoConfig {
                             "bsonType": "array",
                             "items": {
                                 "bsonType": "object",
-                                "required": ["imageUrl", "postUrl"],
+                                "required": ["index"],
                                 "properties": {
+                                    "index": {
+                                        "bsonType": "int",
+                                        "minimum": 0
+                                    },
                                     "imageUrl": {
-                                        "bsonType": "string",
+                                        "bsonType": ["string", "null"],
                                         "pattern": "^https?://.+$"
                                     },
                                     "postUrl": {
-                                        "bsonType": "string",
+                                        "bsonType": ["string", "null"],
                                         "pattern": "^https?://.+$"
                                     },
                                     "status": {
-                                        "bsonType": "string",
-                                        "enum": ["PENDING", "ACCEPTED", "REJECTED"]
+                                        "bsonType": ["string", "null"],
+                                        "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
                                     },
                                     "uploadedAt": {
-                                        "bsonType": "date"
+                                        "bsonType": ["date", "null"]
                                     }
                                 }
                             }
@@ -941,6 +828,10 @@ public class MongoConfig {
                         "bsonType": "double",
                         "minimum": 0,
                         "maximum": 100
+                    },
+                    "status": {
+                      "bsonType": "string",
+                      "enum": ["PENDING", "COMPLETED"],
                     },
                     "createdAt": {
                         "bsonType": "date"
@@ -957,9 +848,6 @@ public class MongoConfig {
 
     db.createCollection("campaignTrackings", options);
   }
-<<<<<<< Updated upstream
-=======
-
   public void create_messagesCollection(MongoDatabase db) {
     if (db.getCollection("messages") != null) {
       db.getCollection("messages").drop();
@@ -1121,5 +1009,4 @@ public class MongoConfig {
   //
   // db.createCollection("campaignTrackings", options);
   // }
->>>>>>> Stashed changes
 }

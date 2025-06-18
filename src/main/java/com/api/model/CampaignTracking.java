@@ -1,9 +1,11 @@
 package com.api.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,6 +20,7 @@ public class CampaignTracking {
     private String influencerId;
     private Map<String, List<CampaignRequirement>> campaignRequirementTracking;
     private double process;
+    private String status;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -25,16 +28,25 @@ public class CampaignTracking {
     public CampaignTracking() {
         this.campaignRequirementTracking = new HashMap<>();
         this.process = 0.0;
+        this.status = "PENDING";
     }
 
-    public CampaignTracking(String campaignTrackingId, String campaignId, String brandId, String influencerId, Map<String, List<CampaignRequirement>> campaignRequirementTracking, double process, LocalDateTime createdAt) {
-        this.campaignTrackingId = campaignTrackingId;
+    public CampaignTracking(String applicationId, String campaignId, String brandId, String influencerId,
+            Map<String, Integer> campaignRequirement) {
+        this.campaignTrackingId = applicationId;
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.influencerId = influencerId;
-        this.campaignRequirementTracking = campaignRequirementTracking;
-        this.process = process;
-        this.createdAt = createdAt;
+        this.process = 0.0;
+        this.campaignRequirementTracking = new HashMap<>();
+        campaignRequirement.forEach((key, count) -> {
+            List<CampaignRequirement> requirements = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                requirements.add(new CampaignRequirement(i));
+            }
+            campaignRequirementTracking.put(key, requirements);
+        });
+        this.status = "PENDING";
     }
 
     public String getCampaignTrackingId() {
@@ -83,6 +95,14 @@ public class CampaignTracking {
 
     public void setProcess(double process) {
         this.process = process;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public LocalDateTime getCreatedAt() {

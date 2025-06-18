@@ -1,35 +1,43 @@
 package com.api.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.api.dto.ApiResponse;
+import com.api.dto.response.ApplicationsByCampaignResponse;
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
-<<<<<<< Updated upstream
-=======
 import com.api.model.ChatRoom;
 import com.api.model.Status;
->>>>>>> Stashed changes
 import com.api.repository.ApplicationRepository;
 import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
-<<<<<<< Updated upstream
-=======
 import com.api.repository.CategoryRepository;
 import com.api.repository.ChatRoomRepository;
->>>>>>> Stashed changes
 import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
+import com.api.security.CustomUserDetails;
+
 import jakarta.servlet.http.HttpServletRequest;
-<<<<<<< Updated upstream
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-=======
 import java.util.Set;
->>>>>>> Stashed changes
 
 @Service
 public class ApplicationService {
@@ -46,15 +54,14 @@ public class ApplicationService {
     private CampaignRepository campaignRepository;
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
-<<<<<<< Updated upstream
-=======
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
     private ChatRoomRepository chatRoomRepository;
->>>>>>> Stashed changes
 
-    public ResponseEntity<?> apply_Application(String influencerId, String campaignId, HttpServletRequest request) {
+    public ResponseEntity<?> apply_Application(String campaignId, CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String influencerId = userDetails.getUserId();
         Optional<Campaign> campaignOpt = campaignRepository.findById(campaignId);
         if (!campaignOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + campaignId + " not found", request.getRequestURI());
@@ -66,19 +73,19 @@ public class ApplicationService {
         if (applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
             return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
         }
-<<<<<<< Updated upstream
-        Application application = applicationRepository.save(new Application(campaignId));
-=======
         Application application = applicationRepository
                 .save(new Application(campaignId, influencerId, campaign.getBrandId()));
         campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
->>>>>>> Stashed changes
         return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> cancel_Application(String influencerId, String applicationId, HttpServletRequest request) {
-        Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
+    public ResponseEntity<?> cancel_Application(String applicationId, CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String influencerId = userDetails.getUserId();
+
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId,
+                influencerId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
@@ -86,20 +93,18 @@ public class ApplicationService {
         return ApiResponse.sendSuccess(204, "Delete application successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> reApply_Application(String influencerId, String applicationId,
+    public ResponseEntity<?> reApply_Application(String applicationId, CustomUserDetails userDetails,
             HttpServletRequest request) {
-        Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
+        String influencerId = userDetails.getUserId();
+
+        Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndInfluencerId(applicationId,
+                influencerId);
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
         Application application = applicationOpt.get();
-<<<<<<< Updated upstream
-        List<CampaignTracking> campaignTrackings = campaignTrackingRepository.findAllByCampaignId(application.getCampaignId());
-        if (campaignTrackings.size() >= campaignRepository.findById(application.getCampaignId()).get().getInfluencerCount()) {
-=======
         Campaign campaign = campaignRepository.findById(application.getCampaignId()).get();
         if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
->>>>>>> Stashed changes
             return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
         }
         if (application.getLimited() <= 0) {
@@ -114,10 +119,6 @@ public class ApplicationService {
                 request.getRequestURI());
     }
 
-<<<<<<< Updated upstream
-    public ResponseEntity<?> confirm_Application(String brandId, String applicationId, boolean accepted, HttpServletRequest request) {
-        Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
-=======
     public ResponseEntity<?> getAllApplicationByBrand(int pageNumber, int pageSize, CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
@@ -196,18 +197,10 @@ public class ApplicationService {
 
         Optional<Application> applicationOpt = applicationRepository.findByApplicationIdAndBrandId(applicationId,
                 brandId);
->>>>>>> Stashed changes
         if (!applicationOpt.isPresent()) {
             return ApiResponse.sendError(404, "id: " + applicationId + " not found", request.getRequestURI());
         }
         Application application = applicationOpt.get();
-<<<<<<< Updated upstream
-        if (accepted) {
-            application.setStatus("ACCEPTED");
-            CampaignTracking campaignTracking = new CampaignTracking();
-            campaignTracking.setCampaignTrackingId(applicationId);
-            campaignTrackingRepository.save(campaignTracking);
-=======
         Campaign campaign = campaignRepository.findById(application.getCampaignId()).get();
         List<Application> applications = applicationRepository.findAllByCampaignIdAndStatus(campaign.getCampaignId(),
                 "ACCEPTED");
@@ -229,14 +222,14 @@ public class ApplicationService {
             chatRoomRepository.save(chatRoom);
             campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
             campaignRepository.save(campaign);
->>>>>>> Stashed changes
         } else {
             application.setStatus("REJECTED");
             roomMate.remove(application.getInfluencerId());
             chatRoom.setMembers(roomMate);
             chatRoomRepository.save(chatRoom);
         }
-        return ApiResponse.sendSuccess(200, "Confirm apllication successfully", null, request.getRequestURI());
+        applicationRepository.save(application);
+        return ApiResponse.sendSuccess(200, "Confirm apllication successfully", application, request.getRequestURI());
     }
 
 }

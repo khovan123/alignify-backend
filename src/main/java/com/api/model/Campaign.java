@@ -14,12 +14,8 @@ public class Campaign {
 
     @Id
     private String campaignId;
-<<<<<<< Updated upstream
-    private String userId;
-=======
     private String brandId;
     private String campaignName;
->>>>>>> Stashed changes
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
@@ -40,16 +36,13 @@ public class Campaign {
         this.applicationTotal = 0;
     }
 
-<<<<<<< Updated upstream
-    public Campaign(String campaignId, String userId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement, int influencerCount) {
-=======
+
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds,
             LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
             List<String> influencerRequirement, int influencerCountExpected) {
         this.campaignName = campaignName;
->>>>>>> Stashed changes
         this.campaignId = campaignId;
-        this.userId = userId;
+        this.brandId = brandId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
@@ -120,12 +113,12 @@ public class Campaign {
         this.campaignId = campaignId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getBrandId() {
+        return brandId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setBrandId(String brandId) {
+        this.brandId = brandId;
     }
 
     public String getContent() {

@@ -12,31 +12,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-<<<<<<< Updated upstream
-
 import com.api.config.EnvConfig;
-=======
 import org.springframework.web.multipart.MultipartFile;
->>>>>>> Stashed changes
 import com.api.dto.ApiResponse;
+import com.api.dto.request.StatusRequest;
 import com.api.dto.response.CampaignResponse;
+import com.api.model.Application;
 import com.api.model.Campaign;
+import com.api.model.CampaignTracking;
 import com.api.model.Category;
-<<<<<<< Updated upstream
-import com.api.model.User;
-=======
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
->>>>>>> Stashed changes
 import com.api.repository.CampaignRepository;
+import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
-<<<<<<< Updated upstream
-=======
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
->>>>>>> Stashed changes
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
@@ -54,9 +47,6 @@ public class CampaignService {
     @Autowired
     private CategoryRepository categoryRepo;
     @Autowired
-<<<<<<< Updated upstream
-    private UserRepository userRepository;
-=======
     private CampaignTrackingRepository campaignTrackingRepository;
     @Autowired
     private ApplicationRepository applicationRepository;
@@ -66,19 +56,9 @@ public class CampaignService {
     private ChatMessageRepository chatMessageRepository;
     @Autowired
     UserRepository userRepository;
->>>>>>> Stashed changes
 
-    public ResponseEntity<?> createCampaign(Campaign campaign, CustomUserDetails userDetails,
+    public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
-<<<<<<< Updated upstream
-        if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-            campaign.setUserId(userDetails.getUserId());
-            campaign = campaignRepo.save(campaign);
-            return ApiResponse.sendSuccess(201, "Campaign posting created successfully", this.mapToDTO(campaign),
-                    request.getRequestURI());
-        }
-        return ApiResponse.sendError(403, "Campaign posting only create by Brand", request.getRequestURI());
-=======
         String brandId = userDetails.getUserId();
         if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
             ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
@@ -107,35 +87,6 @@ public class CampaignService {
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(campaign, categoryRepo),
                 request.getRequestURI());
->>>>>>> Stashed changes
-    }
-
-    public CampaignResponse mapToDTO(Campaign post) {
-        List<Category> categories = categoryRepo.findAllByCategoryIdIn(post.getCategoryIds());
-
-        List<Map<String, String>> categoryInfo = categories.stream()
-                .map(cat -> {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("categoryId", cat.getCategoryId());
-                    map.put("categoryName", cat.getCategoryName());
-                    return map;
-                })
-                .toList();
-
-        CampaignResponse dto = new CampaignResponse();
-
-        dto.setCampaignId(post.getCampaignId());
-        dto.setUserId(post.getUserId());
-        dto.setContent(post.getContent());
-        dto.setImageUrl(post.getImageUrl());
-        dto.setCategories(categoryInfo);
-        dto.setCreatedDate(post.getCreatedDate());
-        dto.setStatus(post.getStatus());
-        dto.setBudget(post.getBudget());
-        dto.setCampaignRequirements(post.getCampaignRequirements());
-        dto.setInfluencerRequirement(post.getInfluencerRequirement());
-        dto.setInfluencerCount(post.getInfluencerCount());
-        return dto;
     }
 
     public ResponseEntity<?> getAllCampaign(int pageNumber, int pageSize, HttpServletRequest request) {
@@ -143,7 +94,7 @@ public class CampaignService {
         Page<Campaign> campaignPage = campaignRepo.findAll(pageable);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(this::mapToDTO)
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -155,12 +106,31 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getMe(CustomUserDetails userDetails, int pageNumber, int pageSize,
+    public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails, int pageNumber, int pageSize,
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Campaign> campaignPage = campaignRepo.findByUserId(userDetails.getUserId(), pageable);
+        Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(this::mapToDTO)
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", campaignPage.getNumber());
+        responseData.put("totalPages", campaignPage.getTotalPages());
+        responseData.put("totalItems", campaignPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
+            HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<String> campaignIdsPage = campaignTrackingRepository.findCampaignIdsByInfluencerId(userDetails.getUserId(),
+                pageable);
+        Page<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage.getContent(), pageable);
+        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -175,10 +145,10 @@ public class CampaignService {
     public ResponseEntity<?> getCampaignsByUserId(String userId, int pageNumber, int pageSize,
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Campaign> campaignPage = campaignRepo.findByUserId(userId, pageable);
+        Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userId, pageable);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(this::mapToDTO)
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -193,26 +163,14 @@ public class CampaignService {
     public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails,
             HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
-        if (campaignOpt.isPresent()) {
-            Campaign campaign = campaignOpt.get();
-            if (!campaign.getUserId().equals(userDetails.getUserId())) {
-                return ResponseEntity.status(403).body(
-                        Map.of("error", "Access denied. You are not the owner of this content."));
-            }
-            campaignRepo.deleteById(campaignId);
-            return ApiResponse.sendSuccess(
-                    204,
-                    "campaign posting deleted successfully",
-                    null,
-                    request.getRequestURI());
-        } else {
-            return ApiResponse.sendError(
-                    404,
-                    "Campaign posting not found",
+        if (!campaignOpt.isPresent()) {
+            return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
+        }
+        Campaign campaign = campaignOpt.get();
+        if (!campaign.getBrandId().equals(userDetails.getUserId())) {
+            return ApiResponse.sendError(403, "Access denied. You are not the owner of this campaign.",
                     request.getRequestURI());
         }
-<<<<<<< Updated upstream
-=======
         List<CampaignTracking> relatedTrackings = campaignTrackingRepository.findAllByCampaignId(campaignId);
         campaignTrackingRepository.deleteAll(relatedTrackings);
         campaignRepo.deleteById(campaignId);
@@ -222,7 +180,6 @@ public class CampaignService {
                 "campaign posting and related trackings deleted successfully",
                 null,
                 request.getRequestURI());
->>>>>>> Stashed changes
     }
 
     public ResponseEntity<?> updateCampaign(String campaignId, CustomUserDetails userDetails,
@@ -230,52 +187,17 @@ public class CampaignService {
             HttpServletRequest request) {
 
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
-        User user = userRepository.findById(userDetails.getUserId()).get();
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
-<<<<<<< Updated upstream
-
-            if (!Helper.isOwner(campaign.getUserId(), request)) {
-                return ResponseEntity.status(403).body(
-                        Map.of("error", "Access denied. You are not the owner of this content."));
-            }
-
-            List<String> updatedCategoryIds = updatedCampaign.getCategoryIds();
-            List<Category> validCategories = categoryRepo.findAllByCategoryIdIn(updatedCategoryIds);
-
-            if (validCategories == null || validCategories.isEmpty()) {
-                return ApiResponse.sendError(400, "No valid category IDs provided", request.getRequestURI());
-            }
-
-            String newStatus = updatedCampaign.getStatus();
-            List<String> validStatuses = List.of("DRAFT", "PENDING", "COMPLETED");
-            if (newStatus == null || !validStatuses.contains(newStatus)) {
-                return ApiResponse.sendError(400, "Invalid status. Allowed values: DRAFT, PENDING, COMPLETED",
-=======
             ChatRoom chatRoom = chatRoomRepository.findById(campaignId).get();
             if ("COMPLETED".equals(campaign.getStatus())) {
                 return ApiResponse.sendError(400, "Cannot update a campaign that is COMPLETED",
->>>>>>> Stashed changes
                         request.getRequestURI());
             }
             long newBudget = updatedCampaign.getBudget();
             if (newBudget < 0) {
                 return ApiResponse.sendError(400, "Budget must be a non-negative number", request.getRequestURI());
             }
-<<<<<<< Updated upstream
-            List<String> validCategoryIds = validCategories.stream()
-                    .map(Category::getCategoryId)
-                    .toList();
-
-            campaign.setContent(updatedCampaign.getContent());
-            campaign.setImageUrl(updatedCampaign.getImageUrl());
-            campaign.setCategoryIds(validCategoryIds);
-            campaign.setStatus(newStatus);
-            campaign.setBudget(newBudget);
-            campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
-            campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
-
-=======
             if (updatedCampaign.getCampaignName() != null) {
                 campaign.setCampaignName(updatedCampaign.getCampaignName());
                 chatRoom.setRoomName(updatedCampaign.getCampaignName());
@@ -315,11 +237,11 @@ public class CampaignService {
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
             }
->>>>>>> Stashed changes
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
 
-            return ApiResponse.sendSuccess(200, "Campaign posting updated successfully", null,
+            return ApiResponse.sendSuccess(200, "Campaign posting updated successfully",
+                    new CampaignResponse(campaign, categoryRepo),
                     request.getRequestURI());
 
         } else {
@@ -327,8 +249,6 @@ public class CampaignService {
         }
     }
 
-<<<<<<< Updated upstream
-=======
     public ResponseEntity<?> updateCampaignStatus(String campaignId, StatusRequest statusRequest,
             CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -365,7 +285,6 @@ public class CampaignService {
                 request.getRequestURI());
     }
 
->>>>>>> Stashed changes
     public Campaign convertToCampaign(Object campaign) {
         ObjectMapper mapper = new ObjectMapper();
         try {
