@@ -36,7 +36,6 @@ public class Campaign {
         this.applicationTotal = 0;
     }
 
-
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds,
             LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
             List<String> influencerRequirement, int influencerCountExpected) {
@@ -76,8 +75,7 @@ public class Campaign {
     public String getCampaignName() {
         return campaignName;
     }
-
-    public void setCampaignName(String campaignName) {
+public void setCampaignName(String campaignName) {
         this.campaignName = campaignName;
     }
 

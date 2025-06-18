@@ -91,8 +91,7 @@ public class MongoConfig {
                   }
             }
             """);
-
-    ValidationOptions validationOptions = new ValidationOptions()
+ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
     CreateCollectionOptions options = new CreateCollectionOptions()
@@ -187,7 +186,7 @@ public class MongoConfig {
         .validator(new Document("$jsonSchema", jsonSchema));
 
     CreateCollectionOptions options = new CreateCollectionOptions()
-        .validationOptions(validationOptions);
+.validationOptions(validationOptions);
 
     db.createCollection("roles", options);
 
@@ -273,7 +272,7 @@ public class MongoConfig {
                     },
                     "socialMediaLinks": {
                       "bsonType": "object",
-                      "additionalProperties": {
+"additionalProperties": {
                         "bsonType": "string"
                       }
                     },
@@ -367,8 +366,7 @@ public class MongoConfig {
             """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
-
-    CreateCollectionOptions options = new CreateCollectionOptions()
+CreateCollectionOptions options = new CreateCollectionOptions()
         .validationOptions(validationOptions);
 
     db.createCollection("galleries", options);
@@ -459,7 +457,7 @@ public class MongoConfig {
       IndexOptions indexOptions = new IndexOptions()
           .name("createdAt_ttl")
           .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
-      collection.createIndex(indexKeys, indexOptions);
+collection.createIndex(indexKeys, indexOptions);
     }
   }
 
@@ -555,7 +553,7 @@ public class MongoConfig {
                 "required": ["userId", "contentId", "createdAt"],
                 "properties": {
                     "userId": {
-                        "bsonType": "string"
+"bsonType": "string"
                     },
                     "contentId": {
                         "bsonType": "string"
@@ -647,7 +645,7 @@ public class MongoConfig {
                         "enum": ["DRAFT", "RECRUITING", "PENDING", "PARTICIPATING", "COMPLETED"]
                     },
                     "createdDate": {
-                        "bsonType": "date"
+"bsonType": "date"
                     },
                     "budget": {
                         "bsonType": "long"
@@ -673,7 +671,6 @@ public class MongoConfig {
                     "applicationTotal": {
                         "bsonType": "int"
                     }
->>>>>>> Stashed changes
                 }
             }
             """);
@@ -691,7 +688,6 @@ public class MongoConfig {
     if (db.getCollection("applications") != null) {
       db.getCollection("applications").drop();
     }
-   
     Document jsonSchema = Document.parse(
         """
             {
@@ -738,7 +734,7 @@ public class MongoConfig {
             {
                   "bsonType": "object",
                   "required": ["brandId", "influencerId", "campaignId"],
-                  "properties": {
+"properties": {
                     "campaignId": {
                       "bsonType": "string"
                     },
@@ -814,7 +810,7 @@ public class MongoConfig {
                                         "pattern": "^https?://.+$"
                                     },
                                     "status": {
-                                        "bsonType": ["string", "null"],
+"bsonType": ["string", "null"],
                                         "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
                                     },
                                     "uploadedAt": {
@@ -848,6 +844,7 @@ public class MongoConfig {
 
     db.createCollection("campaignTrackings", options);
   }
+
   public void create_messagesCollection(MongoDatabase db) {
     if (db.getCollection("messages") != null) {
       db.getCollection("messages").drop();
@@ -902,7 +899,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["roomOwnerId"],
+"required": ["roomOwnerId"],
                   "properties": {
                     "_id": {
                       "bsonType": "objectId"

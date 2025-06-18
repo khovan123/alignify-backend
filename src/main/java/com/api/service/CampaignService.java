@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.api.config.EnvConfig;
 import org.springframework.web.multipart.MultipartFile;
 import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
@@ -76,7 +75,7 @@ public class CampaignService {
         User user = userRepository.findById(brandId).get();
         List<String> readBy = new ArrayList<>();
         readBy.add(brandId);
-        ChatMessage chatMessage = new ChatMessage();
+ChatMessage chatMessage = new ChatMessage();
         chatMessage.setMessage("Wellcome " + user.getName() + " !");
         chatMessage.setChatRoomId(campaign.getCampaignId());
         chatMessage.setName(user.getName());
@@ -86,6 +85,15 @@ public class CampaignService {
         chatMessageRepository.save(new ChatMessage());
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(campaign, categoryRepo),
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
+        Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
+        if (!campaignOpt.isPresent()) {
+            return ApiResponse.sendError(404, "Id: " + campaignId + " not found", request.getRequestURI());
+        }
+        return ApiResponse.sendSuccess(200, "Success", new CampaignResponse(campaignOpt.get(), categoryRepo),
                 request.getRequestURI());
     }
 
@@ -122,8 +130,7 @@ public class CampaignService {
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
-
-    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
+public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<String> campaignIdsPage = campaignTrackingRepository.findCampaignIdsByInfluencerId(userDetails.getUserId(),
@@ -175,7 +182,7 @@ public class CampaignService {
         campaignTrackingRepository.deleteAll(relatedTrackings);
         campaignRepo.deleteById(campaignId);
         chatRoomRepository.deleteById(campaignId);
-        return ApiResponse.sendSuccess(
+return ApiResponse.sendSuccess(
                 204,
                 "campaign posting and related trackings deleted successfully",
                 null,
@@ -232,7 +239,7 @@ public class CampaignService {
             }
             if (updatedCampaign.getInfluencerRequirement() != null
                     && !updatedCampaign.getInfluencerRequirement().isEmpty()) {
-                campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
+campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
             }
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
@@ -290,7 +297,7 @@ public class CampaignService {
         try {
             return mapper.convertValue(campaign, Campaign.class);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
+throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
         }
     }
 

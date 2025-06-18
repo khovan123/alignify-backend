@@ -32,11 +32,6 @@ import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import java.util.Set;
 
 @Service
@@ -76,7 +71,7 @@ public class ApplicationService {
         Application application = applicationRepository
                 .save(new Application(campaignId, influencerId, campaign.getBrandId()));
         campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
-        return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
+return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                 request.getRequestURI());
     }
 
@@ -133,7 +128,7 @@ public class ApplicationService {
         List<String> campaignIds = campaigns.stream()
                 .map(Campaign::getCampaignId)
                 .toList();
-        List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
+List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
         Map<String, List<Application>> applicationsByCampaign = applications.stream()
                 .collect(Collectors.groupingBy(Application::getCampaignId));
 

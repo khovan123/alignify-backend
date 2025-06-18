@@ -30,6 +30,21 @@ public class SecurityService {
     @Autowired
     private InvitationRepository invitationRepository;
 
+    // public boolean isCampaignOwner(String campaignId, Object principal) {
+    // System.out.println("hello");
+    // if (!(principal instanceof CustomUserDetails)) {
+    // return false;
+    // }
+    // String userId = ((CustomUserDetails) principal).getUserId();
+    // Optional<Campaign> optionalCampaign =
+    // campaignRepository.findById(campaignId);
+    // System.out.println(campaignId);
+    // System.out.println(optionalCampaign.get().getCampaignId());
+    // System.out.println(userId);
+    // System.out.println(optionalCampaign.get().getUserId());
+    // return optionalCampaign.isPresent() &&
+    // optionalCampaign.get().getUserId().equals(userId);
+    // }
     public boolean isCampaignOwner(String campaignId, Object principal) {
         logger.debug("Checking if user is campaign owner for campaignId: {}", campaignId);
 
@@ -61,7 +76,7 @@ public class SecurityService {
         if (!(principal instanceof CustomUserDetails)) {
             return false;
         }
-        String userId = ((CustomUserDetails) principal).getUserId();
+String userId = ((CustomUserDetails) principal).getUserId();
         Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
         return applicationOpt.isPresent() && applicationOpt.get().getInfluencerId().equals(userId);
     }
