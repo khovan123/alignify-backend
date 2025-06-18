@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import com.api.model.Campaign;
+import java.util.Set;
 
 @Repository
 public interface CampaignRepository extends MongoRepository<Campaign, String> {
@@ -21,5 +22,7 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
     Page<Campaign> findAllByCampaignIdIn(List<String> campaignIds, Pageable pageable);
 
     Optional<Campaign> findByCampaignIdAndBrandId(String campaignId, String brandId);
+
+    List<Campaign> findAllByCampaignIdIn(Set<String> campaignIds);
 
 }

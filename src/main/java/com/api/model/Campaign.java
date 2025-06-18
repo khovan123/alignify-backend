@@ -15,6 +15,7 @@ public class Campaign {
     @Id
     private String campaignId;
     private String brandId;
+    private String campaignName;
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
@@ -24,16 +25,21 @@ public class Campaign {
     private long budget;
     private Map<String, Integer> campaignRequirements;
     private List<String> influencerRequirement;
-    private int influencerCount;
+    private int influencerCountExpected;
+    private int influencerCountCurrent;
+    private int applicationTotal;
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
         this.status = "DRAFT";
+        this.influencerCountCurrent = 0;
+        this.applicationTotal = 0;
     }
 
-    public Campaign(String campaignId, String brandId, String content, String imageUrl, List<String> categoryIds,
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds,
             LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
-            List<String> influencerRequirement, int influencerCount) {
+            List<String> influencerRequirement, int influencerCountExpected) {
+        this.campaignName = campaignName;
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.content = content;
@@ -44,7 +50,33 @@ public class Campaign {
         this.budget = budget;
         this.campaignRequirements = campaignRequirements;
         this.influencerRequirement = influencerRequirement;
-        this.influencerCount = influencerCount;
+        this.influencerCountExpected = influencerCountExpected;
+    }
+
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds,
+            LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
+            List<String> influencerRequirement, int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+        this.campaignId = campaignId;
+        this.brandId = brandId;
+        this.campaignName = campaignName;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.categoryIds = categoryIds;
+        this.createdDate = createdDate;
+        this.status = status;
+        this.budget = budget;
+        this.campaignRequirements = campaignRequirements;
+        this.influencerRequirement = influencerRequirement;
+        this.influencerCountExpected = influencerCountExpected;
+        this.influencerCountCurrent = influencerCountCurrent;
+        this.applicationTotal = applicationTotal;
+    }
+
+    public String getCampaignName() {
+        return campaignName;
+    }
+public void setCampaignName(String campaignName) {
+        this.campaignName = campaignName;
     }
 
     public long getBudget() {
@@ -127,12 +159,28 @@ public class Campaign {
         this.status = status;
     }
 
-    public int getInfluencerCount() {
-        return influencerCount;
+    public int getInfluencerCountExpected() {
+        return influencerCountExpected;
     }
 
-    public void setInfluencerCount(int influencerCount) {
-        this.influencerCount = influencerCount;
+    public void setInfluencerCountExpected(int influencerCountExpected) {
+        this.influencerCountExpected = influencerCountExpected;
+    }
+
+    public int getInfluencerCountCurrent() {
+        return influencerCountCurrent;
+    }
+
+    public void setInfluencerCountCurrent(int influencerCountCurrent) {
+        this.influencerCountCurrent = influencerCountCurrent;
+    }
+
+    public int getApplicationTotal() {
+        return applicationTotal;
+    }
+
+    public void setApplicationTotal(int applicationTotal) {
+        this.applicationTotal = applicationTotal;
     }
 
 }

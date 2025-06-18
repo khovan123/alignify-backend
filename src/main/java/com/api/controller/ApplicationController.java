@@ -44,7 +44,7 @@ public class ApplicationController {
     }
 
     @PostMapping("/{campaignId}/applications/apply")
-    @PreAuthorize("hasRole('ROLE_INFLUENCER')")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
     public ResponseEntity<?> apply(
             @PathVariable("campaignId") String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -58,7 +58,7 @@ public class ApplicationController {
             @PathVariable("applicationId") String applicationId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        return applicationService.cancel_Application(applicationId, userDetails, request);
+return applicationService.cancel_Application(applicationId, userDetails, request);
     }
 
     @PostMapping("/applications/{applicationId}/re-apply")
