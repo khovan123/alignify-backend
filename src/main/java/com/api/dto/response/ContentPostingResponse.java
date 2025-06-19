@@ -1,5 +1,6 @@
 package com.api.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -7,11 +8,13 @@ import java.util.Map;
 public class ContentPostingResponse {
 
     private String contentId;
+    private String contentName;
     private String userId;
+    private String userName;
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
-    private Date createdDate;
+    private LocalDateTime createdDate;
     private boolean isPublic;
     private int commentCount;
     private int likeCount;
@@ -19,9 +22,11 @@ public class ContentPostingResponse {
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date createdDate, boolean isPublic, int commentCount, int likeCount) {
+    public ContentPostingResponse(String contentId, String contentName, String userId, String userName, String content, String imageUrl, List<Map<String, String>> categories, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
+        this.contentName = contentName;
         this.userId = userId;
+        this.userName = userName;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categories = categories;
@@ -30,6 +35,32 @@ public class ContentPostingResponse {
         this.commentCount = commentCount;
         this.likeCount = likeCount;
     }
+
+    public String getContentName() {
+        return contentName;
+    }
+
+    public void setContentName(String contentName) {
+        this.contentName = contentName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public boolean isIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+ 
 
     public String getContentId() {
         return contentId;
@@ -71,11 +102,11 @@ public class ContentPostingResponse {
         this.categories = categories;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 

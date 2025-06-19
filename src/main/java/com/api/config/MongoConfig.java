@@ -499,9 +499,12 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["content", "userId", "imageUrl"],
+                "required": ["contentName","content", "userId", "imageUrl"],
                 "properties": {
                     "userId": {
+                        "bsonType": "string"
+                    },
+                    "contentName": {
                         "bsonType": "string"
                     },
                     "content": {
