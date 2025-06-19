@@ -71,7 +71,7 @@ public class ApplicationService {
         Application application = applicationRepository
                 .save(new Application(campaignId, influencerId, campaign.getBrandId()));
         campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
-return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
+        return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                 request.getRequestURI());
     }
 
@@ -128,7 +128,7 @@ return ApiResponse.sendSuccess(201, "Send apply for application successfully", a
         List<String> campaignIds = campaigns.stream()
                 .map(Campaign::getCampaignId)
                 .toList();
-List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
+        List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
         Map<String, List<Application>> applicationsByCampaign = applications.stream()
                 .collect(Collectors.groupingBy(Application::getCampaignId));
 
@@ -148,7 +148,7 @@ List<Application> applications = applicationRepository.findAllByCampaignIdIn(cam
         List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
         return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
     }
-    
+
 //    public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
 //            HttpServletRequest request) {
 //        String influencerId = userDetails.getUserId();
@@ -185,7 +185,6 @@ List<Application> applications = applicationRepository.findAllByCampaignIdIn(cam
 //        return ApiResponse.sendSuccess(200, "Response successfully", applicationsByCampaignResponses,
 //                request.getRequestURI());
 //    }
-
     public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
