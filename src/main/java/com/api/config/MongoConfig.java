@@ -69,7 +69,7 @@ public class MongoConfig {
                   "bsonType": "object",
                   "required": ["name", "email", "password", "roleId"],
                   "properties": {
-                  "name": {
+                    "name": {
                     "bsonType": "string"
                     },
                     "email": {
@@ -176,7 +176,7 @@ public class MongoConfig {
                   "bsonType": "object",
                   "required": ["roleName"],
                   "properties": {
-                  "roleName": {
+                    "roleName": {
                       "bsonType": "string"
                     }
                   }
@@ -251,46 +251,46 @@ public class MongoConfig {
     }
     Document jsonSchema = Document.parse(
         """
-                        {
-                              "bsonType": "object",
-                              "properties": {
-                                "_id": {
-                                  "bsonType": "objectId",
-                                },
-                                "avatarUrl": {
-                                  "bsonType": "string",
-                                  "pattern": "^https?://.+$"
-                                },
-                                "bio": {
-                                  "bsonType": "string",
-                                },
-                                "contacts": {
-                                  "bsonType": "object",
-                                  "additionalProperties": {
-                                    "bsonType": "string"
-                                  }
-                                },
-                                "socialMediaLinks": {
-                                  "bsonType": "object",
-            "additionalProperties": {
-                                    "bsonType": "string"
-                                  }
-                                },
-                                "categoryIds": {
-                                  "bsonType": "array",
-                                  "items": {
-                                    "bsonType": "string"
-                                   }
-                                },
-                                "establishDate": {
-                                  "bsonType": "date",
-                                },
-                                "createdAt": {
-                                  "bsonType": "date"
-                                }
-                              }
-                        }
-                        """);
+            {
+                  "bsonType": "object",
+                  "properties": {
+                    "_id": {
+                      "bsonType": "objectId",
+                    },
+                    "avatarUrl": {
+                      "bsonType": "string",
+                      "pattern": "^https?://.+$"
+                    },
+                    "bio": {
+                      "bsonType": "string",
+                    },
+                    "contacts": {
+                      "bsonType": "object",
+                      "additionalProperties": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "socialMediaLinks": {
+                      "bsonType": "object",
+                      "additionalProperties": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "categoryIds": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string"
+                       }
+                    },
+                    "establishDate": {
+                      "bsonType": "date",
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
@@ -311,7 +311,7 @@ public class MongoConfig {
                   "bsonType": "object",
                   "required": ["name", "email", "password", "roleId"],
                   "properties": {
-                  "name": {
+                    "name": {
                     "bsonType": "string"
                     },
                     "email": {
@@ -549,22 +549,22 @@ public class MongoConfig {
 
     Document jsonSchema = Document.parse(
         """
-                        {
-                            "bsonType": "object",
-                            "required": ["userId", "contentId", "createdAt"],
-                            "properties": {
-                                "userId": {
-            "bsonType": "string"
-                                },
-                                "contentId": {
-                                    "bsonType": "string"
-                                },
-                                "createdAt": {
-                                    "bsonType": "date"
-                                }
-                            }
-                        }
-                        """);
+            {
+                "bsonType": "object",
+                "required": ["userId", "contentId", "createdAt"],
+                "properties": {
+                    "userId": {
+                      "bsonType": "string"
+                    },
+                    "contentId": {
+                        "bsonType": "string"
+                    },
+                    "createdAt": {
+                        "bsonType": "date"
+                    }
+                }
+            }
+            """);
 
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
@@ -621,7 +621,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "content", "budget", "campaignRequirements", "influencerRequirement"],
+                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal"],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -645,14 +645,17 @@ public class MongoConfig {
                         "bsonType": "string",
                         "enum": ["DRAFT", "RECRUITING", "PENDING", "PARTICIPATING", "COMPLETED"]
                     },
-                    "createdDate": {
+                    "createdAt": {
                         "bsonType": "date"
                     },
-                    "endDate": {
+                    "startAt":{
+                      "bsonType": "date"
+                    },
+                    "dueAt": {
                         "bsonType": "date"
                     },
                     "budget": {
-                        "bsonType": "long"
+                        "bsonType": "int"
                     },
                     "campaignRequirements": {
                         "bsonType": "object",
@@ -660,7 +663,7 @@ public class MongoConfig {
                             "bsonType": "int"
                         }
                     },
-                    "influencerRequirement": {
+                    "influencerRequirements": {
                         "bsonType": "array",
                         "items": {
                             "bsonType": "string"
@@ -737,7 +740,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["brandId", "influencerId", "campaignId"],
+                  "required": ["brandId", "influencerId", "campaignId", "message", "status"],
                   "properties": {
                     "campaignId": {
                       "bsonType": "string"
@@ -779,7 +782,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking", "process"],
+                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTrackings", "process", "status"],
                 "properties": {
                     "_id": {
                         "bsonType": "objectId"
@@ -793,7 +796,7 @@ public class MongoConfig {
                     "influencerId": {
                         "bsonType": "string"
                     },
-                    "campaignRequirementTracking": {
+                    "campaignRequirementTrackings": {
                         "bsonType": "object",
                         "additionalProperties": {
                             "bsonType": "array",
@@ -857,7 +860,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["message", "chatRoomId", "userId"],
+                  "required": ["message", "chatRoomId", "userId", "name", "readBy"],
                   "properties": {
                     "userId": {
                       "bsonType": "string"
@@ -901,34 +904,34 @@ public class MongoConfig {
     }
     Document jsonSchema = Document.parse(
         """
-                        {
-                              "bsonType": "object",
-            "required": ["roomOwnerId"],
-                              "properties": {
-                                "_id": {
-                                  "bsonType": "objectId"
-                                },
-                                "roomName": {
-                                  "bsonType": "string"
-                                },
-                                "roomAvatarUrl":{
-                                  "bsonType": "string"
-                               },
-                                "members": {
-                                  "bsonType": "array",
-                                  "items": {
-                                      "bsonType": "string"
-                                  }
-                                },
-                                "roomOwnerId":{
-                                   "bsonType": "string"
-                                },
-                                "createdAt": {
-                                  "bsonType": "date"
-                                }
-                              }
-                        }
-                        """);
+            {
+                  "bsonType": "object",
+                  "required": ["roomOwnerId", "roomAvatarUrl", "roomName", "members"],
+                  "properties": {
+                    "_id": {
+                      "bsonType": "objectId"
+                    },
+                    "roomName": {
+                      "bsonType": "string"
+                    },
+                    "roomAvatarUrl":{
+                      "bsonType": "string"
+                   },
+                    "members": {
+                      "bsonType": "array",
+                      "items": {
+                          "bsonType": "string"
+                      }
+                    },
+                    "roomOwnerId":{
+                       "bsonType": "string"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    }
+                  }
+            }
+            """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 

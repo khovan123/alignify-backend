@@ -246,13 +246,19 @@ public class CampaignService {
             if (updatedCampaign.getBudget() > 0) {
                 campaign.setBudget(newBudget);
             }
+            if(updatedCampaign.getStartAt()!=null){
+                campaign.setStartAt(updatedCampaign.getStartAt());
+            }
+            if(updatedCampaign.getDueAt()!=null){
+                campaign.setDueAt(updatedCampaign.getDueAt());
+            }
             if (updatedCampaign.getCampaignRequirements() != null
                     && !updatedCampaign.getCampaignRequirements().isEmpty()) {
                 campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
             }
-            if (updatedCampaign.getInfluencerRequirement() != null
-                    && !updatedCampaign.getInfluencerRequirement().isEmpty()) {
-                campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
+            if (updatedCampaign.getInfluencerRequirements() != null
+                    && !updatedCampaign.getInfluencerRequirements().isEmpty()) {
+                campaign.setInfluencerRequirements(updatedCampaign.getInfluencerRequirements());
             }
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
