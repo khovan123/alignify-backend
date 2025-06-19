@@ -21,6 +21,7 @@ import com.api.security.CustomUserDetails;
 import com.api.service.CampaignService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestPart;
 
 @RestController
 @RequestMapping("api/v1/campaigns")
@@ -58,11 +59,11 @@ public class CampaignController {
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_BRAND')")
     public ResponseEntity<?> createCampaign(
-            @RequestBody Object obj,
-            @RequestParam("file") MultipartFile file,
+            @RequestPart("campaign")  Object obj,
+            @RequestPart("image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        return campaignService.createCampaign(campaignService.convertToCampaign(obj), file, userDetails, request);
+        return campaignService.createCampaign(campaignService.convertToCampaign(obj), image, userDetails, request);
     }
 
     @PreAuthorize("hasRole('ROLE_BRAND')")

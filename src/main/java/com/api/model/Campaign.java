@@ -20,11 +20,13 @@ public class Campaign {
     private String imageUrl;
     private List<String> categoryIds;
     @CreatedDate
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime dueAt;
+    private LocalDateTime startAt;
     private String status;
     private long budget;
     private Map<String, Integer> campaignRequirements;
-    private List<String> influencerRequirement;
+    private List<String> influencerRequirements;
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
@@ -36,46 +38,99 @@ public class Campaign {
         this.applicationTotal = 0;
     }
 
-    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds,
-            LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
-            List<String> influencerRequirement, int influencerCountExpected) {
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
+            List<String> categoryIds, String status, long budget, Map<String, Integer> campaignRequirements,
+            List<String> influencerRequirements, int influencerCountExpected) {
         this.campaignName = campaignName;
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
-        this.createdDate = createdDate;
         this.status = status;
         this.budget = budget;
         this.campaignRequirements = campaignRequirements;
-        this.influencerRequirement = influencerRequirement;
+        this.influencerRequirements = influencerRequirements;
         this.influencerCountExpected = influencerCountExpected;
     }
 
-    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds,
-            LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
-            List<String> influencerRequirement, int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
+            List<String> categoryIds,
+            LocalDateTime createdAt, String status, long budget, Map<String, Integer> campaignRequirements,
+            List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent,
+            int applicationTotal) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.campaignName = campaignName;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categoryIds = categoryIds;
-        this.createdDate = createdDate;
+        this.createdAt = createdAt;
         this.status = status;
         this.budget = budget;
         this.campaignRequirements = campaignRequirements;
-        this.influencerRequirement = influencerRequirement;
+        this.influencerRequirements = influencerRequirements;
         this.influencerCountExpected = influencerCountExpected;
         this.influencerCountCurrent = influencerCountCurrent;
         this.applicationTotal = applicationTotal;
     }
 
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdAt, LocalDateTime dueAt, LocalDateTime startAt, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+        this.campaignId = campaignId;
+        this.brandId = brandId;
+        this.campaignName = campaignName;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.categoryIds = categoryIds;
+        this.createdAt = createdAt;
+        this.dueAt = dueAt;
+        this.startAt = startAt;
+        this.status = status;
+        this.budget = budget;
+        this.campaignRequirements = campaignRequirements;
+        this.influencerRequirements = influencerRequirements;
+        this.influencerCountExpected = influencerCountExpected;
+        this.influencerCountCurrent = influencerCountCurrent;
+        this.applicationTotal = applicationTotal;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getDueAt() {
+        return dueAt;
+    }
+
+    public void setDueAt(LocalDateTime dueAt) {
+        this.dueAt = dueAt;
+    }
+
+    public LocalDateTime getStartAt() {
+        return startAt;
+    }
+
+    public void setStartAt(LocalDateTime startAt) {
+        this.startAt = startAt;
+    }
+
+    public List<String> getInfluencerRequirements() {
+        return influencerRequirements;
+    }
+
+    public void setInfluencerRequirements(List<String> influencerRequirements) {
+        this.influencerRequirements = influencerRequirements;
+    }
+
     public String getCampaignName() {
         return campaignName;
     }
-public void setCampaignName(String campaignName) {
+
+    public void setCampaignName(String campaignName) {
         this.campaignName = campaignName;
     }
 
@@ -93,14 +148,6 @@ public void setCampaignName(String campaignName) {
 
     public void setCampaignRequirements(Map<String, Integer> campaignRequirements) {
         this.campaignRequirements = campaignRequirements;
-    }
-
-    public List<String> getInfluencerRequirement() {
-        return influencerRequirement;
-    }
-
-    public void setInfluencerRequirement(List<String> influencerRequirement) {
-        this.influencerRequirement = influencerRequirement;
     }
 
     public String getCampaignId() {
@@ -141,14 +188,6 @@ public void setCampaignName(String campaignName) {
 
     public void setCategoryIds(List<String> categoryIds) {
         this.categoryIds = categoryIds;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
     }
 
     public String getStatus() {

@@ -48,7 +48,7 @@ public class MongoConfig {
     this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
     // this.create_accountVerifiedsCollection(db);
-    // this.create_campaignsCollection(db);
+    this.create_campaignsCollection(db);
     this.create_contentPostingsCollection(db);
     this.create_likesCollection(db);
     // this.create_applicationsCollection(db);
@@ -69,7 +69,7 @@ public class MongoConfig {
                   "bsonType": "object",
                   "required": ["name", "email", "password", "roleId"],
                   "properties": {
-                  "name": {
+                    "name": {
                     "bsonType": "string"
                     },
                     "email": {
@@ -91,7 +91,7 @@ public class MongoConfig {
                   }
             }
             """);
-ValidationOptions validationOptions = new ValidationOptions()
+    ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
     CreateCollectionOptions options = new CreateCollectionOptions()
@@ -176,7 +176,7 @@ ValidationOptions validationOptions = new ValidationOptions()
                   "bsonType": "object",
                   "required": ["roleName"],
                   "properties": {
-                  "roleName": {
+                    "roleName": {
                       "bsonType": "string"
                     }
                   }
@@ -186,7 +186,7 @@ ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
 
     CreateCollectionOptions options = new CreateCollectionOptions()
-.validationOptions(validationOptions);
+        .validationOptions(validationOptions);
 
     db.createCollection("roles", options);
 
@@ -272,7 +272,7 @@ ValidationOptions validationOptions = new ValidationOptions()
                     },
                     "socialMediaLinks": {
                       "bsonType": "object",
-"additionalProperties": {
+                      "additionalProperties": {
                         "bsonType": "string"
                       }
                     },
@@ -311,7 +311,7 @@ ValidationOptions validationOptions = new ValidationOptions()
                   "bsonType": "object",
                   "required": ["name", "email", "password", "roleId"],
                   "properties": {
-                  "name": {
+                    "name": {
                     "bsonType": "string"
                     },
                     "email": {
@@ -348,6 +348,7 @@ ValidationOptions validationOptions = new ValidationOptions()
         """
             {
                   "bsonType": "object",
+                  "required": ["images"],
                   "properties": {
                     "_id": {
                       "bsonType": "objectId",
@@ -366,7 +367,7 @@ ValidationOptions validationOptions = new ValidationOptions()
             """);
     ValidationOptions validationOptions = new ValidationOptions()
         .validator(new Document("$jsonSchema", jsonSchema));
-CreateCollectionOptions options = new CreateCollectionOptions()
+    CreateCollectionOptions options = new CreateCollectionOptions()
         .validationOptions(validationOptions);
 
     db.createCollection("galleries", options);
@@ -457,7 +458,7 @@ CreateCollectionOptions options = new CreateCollectionOptions()
       IndexOptions indexOptions = new IndexOptions()
           .name("createdAt_ttl")
           .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
-collection.createIndex(indexKeys, indexOptions);
+      collection.createIndex(indexKeys, indexOptions);
     }
   }
 
@@ -498,7 +499,7 @@ collection.createIndex(indexKeys, indexOptions);
         """
             {
                 "bsonType": "object",
-                "required": ["content"],
+                "required": ["content", "userId", "imageUrl"],
                 "properties": {
                     "userId": {
                         "bsonType": "string"
@@ -553,7 +554,7 @@ collection.createIndex(indexKeys, indexOptions);
                 "required": ["userId", "contentId", "createdAt"],
                 "properties": {
                     "userId": {
-"bsonType": "string"
+                      "bsonType": "string"
                     },
                     "contentId": {
                         "bsonType": "string"
@@ -620,7 +621,7 @@ collection.createIndex(indexKeys, indexOptions);
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "content", "budget", "campaignRequirements", "influencerRequirement"],
+                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal"],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -644,11 +645,17 @@ collection.createIndex(indexKeys, indexOptions);
                         "bsonType": "string",
                         "enum": ["DRAFT", "RECRUITING", "PENDING", "PARTICIPATING", "COMPLETED"]
                     },
-                    "createdDate": {
-"bsonType": "date"
+                    "createdAt": {
+                        "bsonType": "date"
+                    },
+                    "startAt":{
+                      "bsonType": "date"
+                    },
+                    "dueAt": {
+                        "bsonType": "date"
                     },
                     "budget": {
-                        "bsonType": "long"
+                        "bsonType": "int"
                     },
                     "campaignRequirements": {
                         "bsonType": "object",
@@ -656,7 +663,7 @@ collection.createIndex(indexKeys, indexOptions);
                             "bsonType": "int"
                         }
                     },
-                    "influencerRequirement": {
+                    "influencerRequirements": {
                         "bsonType": "array",
                         "items": {
                             "bsonType": "string"
@@ -692,7 +699,7 @@ collection.createIndex(indexKeys, indexOptions);
         """
             {
                   "bsonType": "object",
-                  "required": ["campaignId"],
+                  "required": ["campaignId", "influencerId", "brandId", "limited", "status"],
                   "properties": {
                     "campaignId": {
                       "bsonType": "string"
@@ -733,8 +740,8 @@ collection.createIndex(indexKeys, indexOptions);
         """
             {
                   "bsonType": "object",
-                  "required": ["brandId", "influencerId", "campaignId"],
-"properties": {
+                  "required": ["brandId", "influencerId", "campaignId", "message", "status"],
+                  "properties": {
                     "campaignId": {
                       "bsonType": "string"
                     },
@@ -775,7 +782,7 @@ collection.createIndex(indexKeys, indexOptions);
         """
             {
                 "bsonType": "object",
-                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTracking", "process"],
+                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTrackings", "process", "status"],
                 "properties": {
                     "_id": {
                         "bsonType": "objectId"
@@ -789,7 +796,7 @@ collection.createIndex(indexKeys, indexOptions);
                     "influencerId": {
                         "bsonType": "string"
                     },
-                    "campaignRequirementTracking": {
+                    "campaignRequirementTrackings": {
                         "bsonType": "object",
                         "additionalProperties": {
                             "bsonType": "array",
@@ -810,7 +817,7 @@ collection.createIndex(indexKeys, indexOptions);
                                         "pattern": "^https?://.+$"
                                     },
                                     "status": {
-"bsonType": ["string", "null"],
+                                        "bsonType": ["string", "null"],
                                         "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
                                     },
                                     "uploadedAt": {
@@ -853,7 +860,7 @@ collection.createIndex(indexKeys, indexOptions);
         """
             {
                   "bsonType": "object",
-                  "required": ["message", "chatRoomId", "userId"],
+                  "required": ["message", "chatRoomId", "userId", "name", "readBy"],
                   "properties": {
                     "userId": {
                       "bsonType": "string"
@@ -899,7 +906,7 @@ collection.createIndex(indexKeys, indexOptions);
         """
             {
                   "bsonType": "object",
-"required": ["roomOwnerId"],
+                  "required": ["roomOwnerId", "roomAvatarUrl", "roomName", "members"],
                   "properties": {
                     "_id": {
                       "bsonType": "objectId"

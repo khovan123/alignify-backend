@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 
 @Service
 public class ApplicationService {
@@ -138,9 +138,9 @@ public class ApplicationService {
 
         List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaigns.stream()
                 .map(campaignResponse -> new ApplicationsByCampaignResponse(
-                campaignResponse,
-                applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
-                categoryRepository))
+                        campaignResponse,
+                        applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
+                        categoryRepository))
                 .toList();
         return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses,
                 request.getRequestURI());
@@ -196,6 +196,7 @@ public class ApplicationService {
     // applicationsByCampaignResponses,
     // request.getRequestURI());
     // }
+
     public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();

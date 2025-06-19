@@ -21,7 +21,6 @@ import com.api.model.CampaignRequirement;
 import com.api.model.CampaignTracking;
 import com.api.repository.CampaignTrackingRepository;
 import com.api.service.FileStorageService;
-import com.api.util.Helper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -126,7 +125,7 @@ public class CampaignTrackingController {
                 return ApiResponse.sendError(404, "Tracking ID: " + trackingId + " not found", request.getRequestURI());
             }
             CampaignTracking tracking = campaignTrackingOpt.get();
-            Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTracking();
+            Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTrackings();
 
             // Process each requirement type
             int imageIndex = 0;
@@ -173,7 +172,7 @@ public class CampaignTrackingController {
 
             // Save updated tracking
             CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
-            return ApiResponse.sendSuccess(200, "Response successfully", updatedTracking.getCampaignRequirementTracking(),
+            return ApiResponse.sendSuccess(200, "Response successfully", updatedTracking.getCampaignRequirementTrackings(),
                     request.getRequestURI());
 
         } catch (Exception e) {
@@ -231,7 +230,7 @@ public class CampaignTrackingController {
             return ApiResponse.sendError(404, "Id: " + trackingId + " not found!", request.getRequestURI());
         }
         CampaignTracking tracking = campaignTrackingOpt.get();
-        Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTracking();
+        Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTrackings();
         for (Map.Entry<String, List<CampaignRequirementRequest>> entry : requirementsMap.entrySet()) {
             String type = entry.getKey();
             List<CampaignRequirementRequest> contentRequests = entry.getValue();
