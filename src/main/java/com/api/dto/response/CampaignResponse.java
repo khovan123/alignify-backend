@@ -13,6 +13,7 @@ public class CampaignResponse {
 
     private String campaignId;
     private String brandName;
+    private String campaignName;
     private String content;
     private String imageUrl;
     private List<Category> categories;
@@ -34,6 +35,7 @@ public class CampaignResponse {
         this.campaignId = campaign.getCampaignId();
         this.brandName = userRepository.findByUserId(campaign.getBrandId()).getName();
         this.content = campaign.getContent();
+        this.campaignName = campaign.getCampaignName();
         this.imageUrl = campaign.getImageUrl();
         this.categories = categoryRepository.findAllByCategoryIdIn(campaign.getCategoryIds());
         this.createdAt = campaign.getCreatedAt();
@@ -127,6 +129,14 @@ public class CampaignResponse {
 
     public void setInfluencerRequirements(List<String> influencerRequirements) {
         this.influencerRequirements = influencerRequirements;
+    }
+
+    public String getCampaignName() {
+        return campaignName;
+    }
+
+    public void setCampaignName(String campaignName) {
+        this.campaignName = campaignName;
     }
     
     public long getBudget() {

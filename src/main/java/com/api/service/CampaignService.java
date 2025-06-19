@@ -88,7 +88,7 @@ public class CampaignService {
         chatMessage.setSendAt(LocalDateTime.now());
         chatMessageRepository.save(new ChatMessage());
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
-                new CampaignResponse(campaign, categoryRepo),
+                new CampaignResponse(campaign, categoryRepo,userRepository),
                 request.getRequestURI());
     }
 
@@ -107,7 +107,7 @@ public class CampaignService {
         if (!campaignOpt.isPresent()) {
             return ApiResponse.sendError(404, "Id: " + campaignId + " not found", request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Success", new CampaignResponse(campaignOpt.get(), categoryRepo),
+        return ApiResponse.sendSuccess(200, "Success", new CampaignResponse(campaignOpt.get(), categoryRepo,userRepository),
                 request.getRequestURI());
     }
 
@@ -116,7 +116,7 @@ public class CampaignService {
         Page<Campaign> campaignPage = campaignRepo.findAll(pageable);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -133,7 +133,7 @@ public class CampaignService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -152,7 +152,7 @@ public class CampaignService {
                 pageable);
         Page<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage.getContent(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -170,7 +170,7 @@ public class CampaignService {
         Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userId, pageable);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo))
+                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -269,7 +269,7 @@ public class CampaignService {
             chatRoomRepository.save(chatRoom);
 
             return ApiResponse.sendSuccess(200, "Campaign posting updated successfully",
-                    new CampaignResponse(campaign, categoryRepo),
+                    new CampaignResponse(campaign, categoryRepo,userRepository),
                     request.getRequestURI());
 
         } else {
