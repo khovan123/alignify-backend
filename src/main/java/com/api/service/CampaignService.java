@@ -58,10 +58,12 @@ public class CampaignService {
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
+        
         String brandId = userDetails.getUserId();
         if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
             ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
         }
+        validateCampaignRequirements(campaign.getCampaignRequirements());
         String imageUrl;
         try {
             imageUrl = Helper.saveImage(file);
@@ -75,7 +77,7 @@ public class CampaignService {
         User user = userRepository.findById(brandId).get();
         List<String> readBy = new ArrayList<>();
         readBy.add(brandId);
-ChatMessage chatMessage = new ChatMessage();
+        ChatMessage chatMessage = new ChatMessage();
         chatMessage.setMessage("Wellcome " + user.getName() + " !");
         chatMessage.setChatRoomId(campaign.getCampaignId());
         chatMessage.setName(user.getName());
@@ -86,6 +88,16 @@ ChatMessage chatMessage = new ChatMessage();
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(campaign, categoryRepo),
                 request.getRequestURI());
+    }
+
+    private void validateCampaignRequirements(Map<String, Integer> campaignRequirements) {
+        if (campaignRequirements != null) {
+            for (Map.Entry<String, Integer> entry : campaignRequirements.entrySet()) {
+                if (entry.getValue() == null || entry.getValue() < 0) {
+                    throw new IllegalArgumentException("Campaign requirements must be non-negative integers");
+                }
+            }
+        }
     }
 
     public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
@@ -130,7 +142,8 @@ ChatMessage chatMessage = new ChatMessage();
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
-public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
+
+    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<String> campaignIdsPage = campaignTrackingRepository.findCampaignIdsByInfluencerId(userDetails.getUserId(),
@@ -182,7 +195,7 @@ public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetail
         campaignTrackingRepository.deleteAll(relatedTrackings);
         campaignRepo.deleteById(campaignId);
         chatRoomRepository.deleteById(campaignId);
-return ApiResponse.sendSuccess(
+        return ApiResponse.sendSuccess(
                 204,
                 "campaign posting and related trackings deleted successfully",
                 null,
@@ -233,13 +246,19 @@ return ApiResponse.sendSuccess(
             if (updatedCampaign.getBudget() > 0) {
                 campaign.setBudget(newBudget);
             }
+            if(updatedCampaign.getStartAt()!=null){
+                campaign.setStartAt(updatedCampaign.getStartAt());
+            }
+            if(updatedCampaign.getDueAt()!=null){
+                campaign.setDueAt(updatedCampaign.getDueAt());
+            }
             if (updatedCampaign.getCampaignRequirements() != null
                     && !updatedCampaign.getCampaignRequirements().isEmpty()) {
                 campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
             }
-            if (updatedCampaign.getInfluencerRequirement() != null
-                    && !updatedCampaign.getInfluencerRequirement().isEmpty()) {
-campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
+            if (updatedCampaign.getInfluencerRequirements() != null
+                    && !updatedCampaign.getInfluencerRequirements().isEmpty()) {
+                campaign.setInfluencerRequirements(updatedCampaign.getInfluencerRequirements());
             }
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
@@ -297,7 +316,7 @@ campaign.setInfluencerRequirement(updatedCampaign.getInfluencerRequirement());
         try {
             return mapper.convertValue(campaign, Campaign.class);
         } catch (IllegalArgumentException e) {
-throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
+            throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
         }
     }
 
