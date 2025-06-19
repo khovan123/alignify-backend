@@ -29,6 +29,7 @@ import com.api.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import com.api.repository.ContentPostingRepository;
+import com.api.repository.UserRepository;
 
 @Service
 public class ContentPostingService {
@@ -41,9 +42,12 @@ public class ContentPostingService {
     private LikesRepository likesRepo;
     @Autowired
     private CommentRepository commentRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, CustomUserDetails userDetails, HttpServletRequest request) {
         if (userDetails.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            contentPosting.setUserId(userDetails.getUserId());
             contentPosting = contentPostingRepo.save(contentPosting);
             return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
                     request.getRequestURI());
@@ -67,7 +71,9 @@ public class ContentPostingService {
 
         ContentPostingResponse dto = new ContentPostingResponse();
         dto.setContentId(post.getContentId());
+        dto.setContentName(post.getContentName());
         dto.setUserId(post.getUserId());
+        dto.setUserName(userRepository.findByUserId(post.getUserId()).getName());
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
@@ -126,7 +132,7 @@ public class ContentPostingService {
         responseData.put("totalPages", posts.getTotalPages());
         responseData.put("totalItems", posts.getTotalElements());
 
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
     public ResponseEntity<?> deleteContentPosting(String contentId, CustomUserDetails userDetails,

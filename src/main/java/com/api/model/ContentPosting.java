@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -13,13 +14,14 @@ public class ContentPosting {
     @Id
     private String contentId;
 
+    private String contentName;
     private String userId;
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
 
     @CreatedDate
-    private Date createdDate;
+    private LocalDateTime createdDate;
     private boolean isPublic;
     private int commentCount;
     private int likeCount;
@@ -30,8 +32,9 @@ public class ContentPosting {
         this.isPublic = true;
     }
 
-    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date createdDate, boolean isPublic, int commentCount, int likeCount) {
+    public ContentPosting(String contentId, String contentName, String userId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
+        this.contentName = contentName;
         this.userId = userId;
         this.content = content;
         this.imageUrl = imageUrl;
@@ -41,6 +44,16 @@ public class ContentPosting {
         this.commentCount = commentCount;
         this.likeCount = likeCount;
     }
+
+    public String getContentName() {
+        return contentName;
+    }
+
+    public void setContentName(String contentName) {
+        this.contentName = contentName;
+    }
+
+  
 
     public String getContentId() {
         return contentId;
@@ -66,11 +79,11 @@ public class ContentPosting {
         this.content = content;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 
