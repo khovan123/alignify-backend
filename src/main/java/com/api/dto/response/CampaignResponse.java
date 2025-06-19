@@ -6,16 +6,24 @@ import java.util.Map;
 
 import com.api.model.Campaign;
 import com.api.model.Category;
+import com.api.repository.BrandRepository;
 import com.api.repository.CategoryRepository;
+import com.api.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class CampaignResponse {
-
+    
+     
+    @Autowired
+    private UserRepository userRepository;
+    
     private String campaignId;
-    private String brandId;
+    private String brandName;
     private String content;
     private String imageUrl;
     private List<Category> categories;
     private LocalDateTime createdDate;
+    private LocalDateTime endDate;
     private String status;
     private long budget;
     private Map<String, Integer> campaignRequirements;
@@ -29,11 +37,12 @@ public class CampaignResponse {
 
     public CampaignResponse(Campaign campaign, CategoryRepository categoryRepository) {
         this.campaignId = campaign.getCampaignId();
-        this.brandId = campaign.getBrandId();
+        this.brandName = userRepository.findByUserId(campaign.getBrandId()).getName();
         this.content = campaign.getContent();
         this.imageUrl = campaign.getImageUrl();
         this.categories = categoryRepository.findAllByCategoryIdIn(campaign.getCategoryIds());
         this.createdDate = campaign.getCreatedDate();
+        this.endDate = campaign.getEndDate();
         this.status = campaign.getStatus();
         this.budget = campaign.getBudget();
         this.campaignRequirements = campaign.getCampaignRequirements();
@@ -59,14 +68,15 @@ public class CampaignResponse {
         this.campaignId = campaignId;
     }
 
-    public String getBrandId() {
-        return brandId;
+    public String getBrandName() {
+        return brandName;
     }
 
-    public void setBrandId(String brandId) {
-        this.brandId = brandId;
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
     }
 
+    
     public String getContent() {
         return content;
     }
@@ -99,6 +109,14 @@ public class CampaignResponse {
         this.createdDate = createdDate;
     }
 
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
+    
     public long getBudget() {
         return budget;
     }

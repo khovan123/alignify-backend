@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 
 public interface BrandRepository extends MongoRepository<Brand, String>{
-
+    Brand findBrandByBrandId(String brandId);
 }
