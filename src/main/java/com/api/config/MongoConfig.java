@@ -645,7 +645,10 @@ collection.createIndex(indexKeys, indexOptions);
                         "enum": ["DRAFT", "RECRUITING", "PENDING", "PARTICIPATING", "COMPLETED"]
                     },
                     "createdDate": {
-"bsonType": "date"
+                        "bsonType": "date"
+                    },
+                    "endDate": {
+                        "bsonType": "date"
                     },
                     "budget": {
                         "bsonType": "long"
