@@ -18,7 +18,7 @@ public class CampaignTracking {
     private String campaignId;
     private String brandId;
     private String influencerId;
-    private Map<String, List<CampaignRequirement>> campaignRequirementTracking;
+    private Map<String, List<CampaignRequirement>> campaignRequirementTrackings;
     private double process;
     private String status;
 
@@ -26,7 +26,7 @@ public class CampaignTracking {
     private LocalDateTime createdAt;
 
     public CampaignTracking() {
-        this.campaignRequirementTracking = new HashMap<>();
+        this.campaignRequirementTrackings = new HashMap<>();
         this.process = 0.0;
         this.status = "PENDING";
     }
@@ -38,13 +38,13 @@ public class CampaignTracking {
         this.brandId = brandId;
         this.influencerId = influencerId;
         this.process = 0.0;
-        this.campaignRequirementTracking = new HashMap<>();
+        this.campaignRequirementTrackings = new HashMap<>();
         campaignRequirement.forEach((key, count) -> {
             List<CampaignRequirement> requirements = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 requirements.add(new CampaignRequirement(i));
             }
-            campaignRequirementTracking.put(key, requirements);
+            campaignRequirementTrackings.put(key, requirements);
         });
         this.status = "PENDING";
     }
@@ -81,12 +81,12 @@ public class CampaignTracking {
         this.influencerId = influencerId;
     }
 
-    public Map<String, List<CampaignRequirement>> getCampaignRequirementTracking() {
-        return campaignRequirementTracking;
+    public Map<String, List<CampaignRequirement>> getCampaignRequirementTrackings() {
+        return campaignRequirementTrackings;
     }
-
-    public void setCampaignRequirementTracking(Map<String, List<CampaignRequirement>> campaignRequirementTracking) {
-        this.campaignRequirementTracking = campaignRequirementTracking;
+    
+    public void setCampaignRequirementTrackings(Map<String, List<CampaignRequirement>> campaignRequirementTrackings) {
+        this.campaignRequirementTrackings = campaignRequirementTrackings;
     }
 
     public double getProcess() {

@@ -1,17 +1,9 @@
 package com.api.controller;
 
-import com.api.dto.UserDTO;
-import com.api.dto.response.ChatMessageResponse;
-import com.api.model.ChatMessage;
-import com.api.repository.ChatMessageRepository;
-import com.api.repository.ChatRoomRepository;
-import com.api.security.StompPrincipal;
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -19,6 +11,13 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+
+import com.api.dto.UserDTO;
+import com.api.dto.response.ChatMessageResponse;
+import com.api.model.ChatMessage;
+import com.api.repository.ChatMessageRepository;
+import com.api.repository.ChatRoomRepository;
+import com.api.security.StompPrincipal;
 
 @Controller
 public class ChatController {
@@ -37,8 +36,7 @@ public class ChatController {
     public ChatMessageResponse sendMessage(
             @Payload ChatMessage chatMessage,
             @DestinationVariable("roomId") String roomId,
-            Principal principal
-    ) {
+            Principal principal) {
         if (principal == null || principal.getName() == null) {
             throw new SecurityException("User not authorized for room: " + roomId);
         }
@@ -47,9 +45,11 @@ public class ChatController {
             if (!chatRoomRepository.existsByChatRoomIdAndRoomOwnerIdOrMember(roomId, userId)) {
                 throw new SecurityException("User not authorized for room: " + roomId);
             }
-            UserDTO userDTO = new UserDTO(stompPrincipal.getUserId(), stompPrincipal.getName(), stompPrincipal.getAvatarUrl());
+            UserDTO userDTO = new UserDTO(stompPrincipal.getUserId(), stompPrincipal.getName(),
+                    stompPrincipal.getAvatarUrl());
             chatMessage.setName(stompPrincipal.getName());
-            chatMessage.setSendAt(LocalDateTime.now());
+            System.out.println(chatMessage.getSendAt());
+            // chatMessage.setSendAt(LocalDateTime.now(ZoneId.of("+07:00")));
             chatMessage.setChatRoomId(roomId);
             chatMessage.setUserId(userId);
             chatMessageRepository.save(chatMessage);
@@ -62,8 +62,7 @@ public class ChatController {
     public void markMessageAsRead(
             @Payload ReadMessagePayload payload,
             @DestinationVariable("roomId") String roomId,
-            Principal principal
-    ) {
+            Principal principal) {
         String userId = principal.getName();
         if (!chatRoomRepository.existsByChatRoomIdAndRoomOwnerIdOrMember(roomId, userId)) {
             throw new SecurityException("User not authorized for room: " + roomId);
@@ -80,8 +79,7 @@ public class ChatController {
             chatMessageRepository.save(message);
             messagingTemplate.convertAndSend(
                     "/topic/read/" + roomId,
-                    new ReadStatusUpdate(payload.getMessageId(), Collections.singletonList(userId))
-            );
+                    new ReadStatusUpdate(payload.getMessageId(), Collections.singletonList(userId)));
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,21 +19,22 @@ import com.api.dto.ApiResponse;
 import com.api.dto.response.ApplicationsByCampaignResponse;
 import com.api.model.Application;
 import com.api.model.Campaign;
-import com.api.model.CampaignTracking;
+import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.Status;
+import com.api.model.User;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
+import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Set;
 
 @Service
 public class ApplicationService {
@@ -53,6 +55,8 @@ public class ApplicationService {
     private CategoryRepository categoryRepository;
     @Autowired
     private ChatRoomRepository chatRoomRepository;
+    @Autowired
+    private ChatMessageRepository chatMessageRepository;
 
     public ResponseEntity<?> apply_Application(String campaignId, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -71,7 +75,7 @@ public class ApplicationService {
         Application application = applicationRepository
                 .save(new Application(campaignId, influencerId, campaign.getBrandId()));
         campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
-return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
+        return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                 request.getRequestURI());
     }
 
@@ -128,15 +132,15 @@ return ApiResponse.sendSuccess(201, "Send apply for application successfully", a
         List<String> campaignIds = campaigns.stream()
                 .map(Campaign::getCampaignId)
                 .toList();
-List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
+        List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
         Map<String, List<Application>> applicationsByCampaign = applications.stream()
                 .collect(Collectors.groupingBy(Application::getCampaignId));
 
         List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaigns.stream()
                 .map(campaignResponse -> new ApplicationsByCampaignResponse(
-                campaignResponse,
-                applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
-                categoryRepository))
+                        campaignResponse,
+                        applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
+                        categoryRepository))
                 .toList();
         return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses,
                 request.getRequestURI());
@@ -148,43 +152,50 @@ List<Application> applications = applicationRepository.findAllByCampaignIdIn(cam
         List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
         return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
     }
-    
-//    public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
-//            HttpServletRequest request) {
-//        String influencerId = userDetails.getUserId();
-//        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
-//
-//        if (applications.isEmpty()) {
-//            return ApiResponse.sendError(400, "Not found any application for this influencer!", request.getRequestURI());
-//        }
-//
-//        Set<String> campaignIds = applications.stream()
-//                .map(Application::getCampaignId)
-//                .collect(Collectors.toSet());
-//
-//        List<Campaign> campaigns = campaignRepository.findAllByCampaignIdIn(campaignIds);
-//
-//        Map<String, Campaign> campaignMap = campaigns.stream()
-//                .collect(Collectors.toMap(Campaign::getCampaignId, campaign -> campaign));
-//
-//        Map<String, List<Application>> applicationsByCampaign = applications.stream()
-//                .collect(Collectors.groupingBy(Application::getCampaignId));
-//
-//        List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaignIds.stream()
-//                .map(campaignId -> {
-//                    Campaign campaign = campaignMap.get(campaignId);
-//                    List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(campaignId, Collections.emptyList());
-//                    return new ApplicationsByCampaignResponse(
-//                            campaign, 
-//                            appsForCampaign,
-//                            categoryRepository
-//                    );
-//                })
-//                .collect(Collectors.toList());
-//
-//        return ApiResponse.sendSuccess(200, "Response successfully", applicationsByCampaignResponses,
-//                request.getRequestURI());
-//    }
+
+    // public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails
+    // userDetails,
+    // HttpServletRequest request) {
+    // String influencerId = userDetails.getUserId();
+    // List<Application> applications =
+    // applicationRepository.findAllByInfluencerId(influencerId);
+    //
+    // if (applications.isEmpty()) {
+    // return ApiResponse.sendError(400, "Not found any application for this
+    // influencer!", request.getRequestURI());
+    // }
+    //
+    // Set<String> campaignIds = applications.stream()
+    // .map(Application::getCampaignId)
+    // .collect(Collectors.toSet());
+    //
+    // List<Campaign> campaigns =
+    // campaignRepository.findAllByCampaignIdIn(campaignIds);
+    //
+    // Map<String, Campaign> campaignMap = campaigns.stream()
+    // .collect(Collectors.toMap(Campaign::getCampaignId, campaign -> campaign));
+    //
+    // Map<String, List<Application>> applicationsByCampaign = applications.stream()
+    // .collect(Collectors.groupingBy(Application::getCampaignId));
+    //
+    // List<ApplicationsByCampaignResponse> applicationsByCampaignResponses =
+    // campaignIds.stream()
+    // .map(campaignId -> {
+    // Campaign campaign = campaignMap.get(campaignId);
+    // List<Application> appsForCampaign =
+    // applicationsByCampaign.getOrDefault(campaignId, Collections.emptyList());
+    // return new ApplicationsByCampaignResponse(
+    // campaign,
+    // appsForCampaign,
+    // categoryRepository
+    // );
+    // })
+    // .collect(Collectors.toList());
+    //
+    // return ApiResponse.sendSuccess(200, "Response successfully",
+    // applicationsByCampaignResponses,
+    // request.getRequestURI());
+    // }
 
     public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -203,7 +214,8 @@ List<Application> applications = applicationRepository.findAllByCampaignIdIn(cam
             return ApiResponse.sendError(400, "Reached to limitation", request.getRequestURI());
         }
         if (!application.getStatus().equals(Status.PENDING.toString())) {
-            return ApiResponse.sendError(400, "Already " + application.getStatus().toLowerCase(), request.getRequestURI());
+            return ApiResponse.sendError(400, "Already " + application.getStatus().toLowerCase(),
+                    request.getRequestURI());
         }
         if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
             return ApiResponse.sendError(400, "Reached to limitation", request.getRequestURI());
@@ -217,6 +229,14 @@ List<Application> applications = applicationRepository.findAllByCampaignIdIn(cam
             chatRoomRepository.save(chatRoom);
             campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
             campaignRepository.save(campaign);
+            ChatMessage chatMessage = new ChatMessage();
+            User user = userRepository.findById(brandId).get();
+            chatMessage.setMessage("Xin chào " + user.getName() + " !");
+            chatMessage.setName(user.getName());
+            chatMessage.setSendAt(LocalDateTime.now());
+            chatMessage.setChatRoomId(chatRoom.getChatRoomId());
+            chatMessage.setUserId("#SYS");
+            chatMessageRepository.save(chatMessage);
         } else {
             application.setStatus("REJECTED");
             roomMate.remove(application.getInfluencerId());
