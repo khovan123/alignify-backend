@@ -6,28 +6,27 @@ import java.util.Map;
 
 import com.api.model.Campaign;
 import com.api.model.Category;
-import com.api.repository.BrandRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class CampaignResponse {
-    
-     
+
     @Autowired
     private UserRepository userRepository;
-    
+
     private String campaignId;
     private String brandName;
     private String content;
     private String imageUrl;
     private List<Category> categories;
-    private LocalDateTime createdDate;
-    private LocalDateTime endDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime dueAt;
+    private LocalDateTime startAt;
     private String status;
     private long budget;
     private Map<String, Integer> campaignRequirements;
-    private List<String> influencerRequirement;
+    private List<String> influencerRequirements;
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
@@ -41,12 +40,13 @@ public class CampaignResponse {
         this.content = campaign.getContent();
         this.imageUrl = campaign.getImageUrl();
         this.categories = categoryRepository.findAllByCategoryIdIn(campaign.getCategoryIds());
-        this.createdDate = campaign.getCreatedDate();
-        this.endDate = campaign.getEndDate();
+        this.createdAt = campaign.getCreatedAt();
+        this.dueAt = campaign.getDueAt();
+        this.startAt = campaign.getStartAt();
         this.status = campaign.getStatus();
         this.budget = campaign.getBudget();
         this.campaignRequirements = campaign.getCampaignRequirements();
-        this.influencerRequirement = campaign.getInfluencerRequirement();
+        this.influencerRequirements = campaign.getInfluencerRequirements();
         this.influencerCountExpected = campaign.getInfluencerCountExpected();
         this.influencerCountCurrent = campaign.getInfluencerCountCurrent();
         this.applicationTotal = campaign.getApplicationTotal();
@@ -76,7 +76,6 @@ public class CampaignResponse {
         this.brandName = brandName;
     }
 
-    
     public String getContent() {
         return content;
     }
@@ -101,22 +100,46 @@ public class CampaignResponse {
         this.categories = categories;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public UserRepository getUserRepository() {
+        return userRepository;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public LocalDateTime getEndDate() {
-        return endDate;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
-    
+
+    public LocalDateTime getDueAt() {
+        return dueAt;
+    }
+
+    public void setDueAt(LocalDateTime dueAt) {
+        this.dueAt = dueAt;
+    }
+
+    public LocalDateTime getStartAt() {
+        return startAt;
+    }
+
+    public void setStartAt(LocalDateTime startAt) {
+        this.startAt = startAt;
+    }
+
+    public List<String> getInfluencerRequirements() {
+        return influencerRequirements;
+    }
+
+    public void setInfluencerRequirements(List<String> influencerRequirements) {
+        this.influencerRequirements = influencerRequirements;
+    }
+
     public long getBudget() {
         return budget;
     }
@@ -131,14 +154,6 @@ public class CampaignResponse {
 
     public void setCampaignRequirements(Map<String, Integer> campaignRequirements) {
         this.campaignRequirements = campaignRequirements;
-    }
-
-    public List<String> getInfluencerRequirement() {
-        return influencerRequirement;
-    }
-
-    public void setInfluencerRequirement(List<String> influencerRequirement) {
-        this.influencerRequirement = influencerRequirement;
     }
 
     public int getInfluencerCountExpected() {
