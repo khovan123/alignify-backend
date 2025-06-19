@@ -28,8 +28,6 @@ public class Influencer {
     public Influencer() {
         this.rating = 0.0;
         this.follower = 0;
-        this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
-        this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.isPublic = true;
         this.gender = "NONE";
         this.categoryIds = new ArrayList<>();

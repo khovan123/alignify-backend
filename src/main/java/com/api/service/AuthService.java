@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
+import com.api.dto.UserDTO;
 import com.api.dto.request.LoginRequest;
 import com.api.dto.request.PasswordChangeRequest;
 import com.api.dto.request.PasswordResetRequest;
@@ -200,17 +201,27 @@ public class AuthService {
         if (!existing.isPresent()) {
             return ApiResponse.sendError(404, "Email does not exist", request.getRequestURI());
         }
+        User user = existing.get();
         if (!JwtUtil.isCorrectPassword(existing.get().getPassword(), loginRequest.getPassword())) {
             return ApiResponse.sendError(401, "Incorrect password", request.getRequestURI());
         }
-        Optional<Role> role = roleRepository.findById(existing.get().getRoleId());
+        Optional<Role> role = roleRepository.findById(user.getRoleId());
         if (!role.isPresent()) {
             return ApiResponse.sendError(400, "Invalid role", request.getRequestURI());
         }
+        String avatarUrl = null;
+        if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+            avatarUrl = brandRepository.findById(user.getUserId()).get().getAvatarUrl();
+        }
+        if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            avatarUrl = influencerRepository.findById(user.getUserId()).get().getAvatarUrl();
+
+        }
+        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl);
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                 "token", JwtUtil.createToken(existing.get()),
-                "id", existing.get().getUserId(),
-                "role", role.get().getRoleName()
+                "role", role.get().getRoleName(),
+                "user", userDTO
         ), request.getRequestURI());
     }
 

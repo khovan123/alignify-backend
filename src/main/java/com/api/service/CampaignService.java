@@ -75,13 +75,13 @@ public class CampaignService {
         User user = userRepository.findById(brandId).get();
         List<String> readBy = new ArrayList<>();
         readBy.add(brandId);
-ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setMessage("Wellcome " + user.getName() + " !");
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setMessage("Xin chào " + user.getName() + " !");
         chatMessage.setChatRoomId(campaign.getCampaignId());
         chatMessage.setName(user.getName());
         chatMessage.setReadBy(readBy);
-        chatMessage.setUserId(brandId);
-        chatMessage.setSendAt(LocalDateTime.MIN);
+        chatMessage.setUserId("#SYS");
+        chatMessage.setSendAt(LocalDateTime.now());
         chatMessageRepository.save(new ChatMessage());
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(campaign, categoryRepo),
