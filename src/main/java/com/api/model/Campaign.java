@@ -21,6 +21,7 @@ public class Campaign {
     private List<String> categoryIds;
     @CreatedDate
     private LocalDateTime createdDate;
+    private LocalDateTime endDate; 
     private String status;
     private long budget;
     private Map<String, Integer> campaignRequirements;
@@ -72,6 +73,32 @@ public class Campaign {
         this.applicationTotal = applicationTotal;
     }
 
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, LocalDateTime endDate, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement, int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+        this.campaignId = campaignId;
+        this.brandId = brandId;
+        this.campaignName = campaignName;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.categoryIds = categoryIds;
+        this.createdDate = createdDate;
+        this.endDate = endDate;
+        this.status = status;
+        this.budget = budget;
+        this.campaignRequirements = campaignRequirements;
+        this.influencerRequirement = influencerRequirement;
+        this.influencerCountExpected = influencerCountExpected;
+        this.influencerCountCurrent = influencerCountCurrent;
+        this.applicationTotal = applicationTotal;
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
+    
     public String getCampaignName() {
         return campaignName;
     }
