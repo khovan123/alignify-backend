@@ -621,7 +621,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "campaignName", "imageUrl", "content", "budget", "status", "campaignRequirements", "influencerRequirement","influencerCountExpected",],
+                "required": ["brandId", "content", "budget", "campaignRequirements", "influencerRequirement"],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -648,8 +648,11 @@ public class MongoConfig {
                     "createdDate": {
                         "bsonType": "date"
                     },
+                    "endDate": {
+                        "bsonType": "date"
+                    },
                     "budget": {
-                        "bsonType": "int"
+                        "bsonType": "long"
                     },
                     "campaignRequirements": {
                         "bsonType": "object",

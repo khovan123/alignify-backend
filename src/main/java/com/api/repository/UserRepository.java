@@ -17,4 +17,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     @Query("{ 'roleId': ?0, '_id': { $ne: ?1 } }")
     List<User> findByRoleIdAndUserIdNot(String roleId, String excludedId);
 
+    User findByUserId(String userId);
+
 }
