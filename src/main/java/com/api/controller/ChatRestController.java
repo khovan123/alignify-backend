@@ -100,13 +100,12 @@ public class ChatRestController {
                     .orElse(null);
             if (chatMessage == null) {
                 List<String> readBy = new ArrayList<>();
-                readBy.add(userId);
                 ChatMessage newMsg = new ChatMessage();
-                newMsg.setMessage("Wellcome " + user.getName() + " !");
+                newMsg.setMessage("Xin chào " + user.getName() + " !");
                 newMsg.setChatRoomId(room.getChatRoomId());
                 newMsg.setName(user.getName());
                 newMsg.setReadBy(readBy);
-                newMsg.setUserId(userId);
+                newMsg.setUserId("#SYS");
                 newMsg.setSendAt(LocalDateTime.now());
                 chatMessageRepository.save(newMsg);
                 chatMessage = newMsg;
