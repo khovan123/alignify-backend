@@ -1,5 +1,7 @@
 package com.api.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
 import com.api.dto.response.CampaignResponse;
@@ -35,8 +38,6 @@ import com.api.util.Helper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Service
 public class CampaignService {
@@ -58,7 +59,7 @@ public class CampaignService {
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
-        
+
         String brandId = userDetails.getUserId();
         if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
             ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
@@ -73,17 +74,18 @@ public class CampaignService {
         campaign.setBrandId(brandId);
         campaign.setImageUrl(imageUrl);
         campaign = campaignRepo.save(campaign);
-        chatRoomRepository.save(new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(), campaign.getImageUrl()));
+        chatRoomRepository.save(
+                new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(), campaign.getImageUrl()));
         User user = userRepository.findById(brandId).get();
         List<String> readBy = new ArrayList<>();
         readBy.add(brandId);
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setMessage("Wellcome " + user.getName() + " !");
+        chatMessage.setMessage("Xin chào " + user.getName() + " !");
         chatMessage.setChatRoomId(campaign.getCampaignId());
         chatMessage.setName(user.getName());
         chatMessage.setReadBy(readBy);
-        chatMessage.setUserId(brandId);
-        chatMessage.setSendAt(LocalDateTime.MIN);
+        chatMessage.setUserId("#SYS");
+        chatMessage.setSendAt(LocalDateTime.now());
         chatMessageRepository.save(new ChatMessage());
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(campaign, categoryRepo),
@@ -246,10 +248,10 @@ public class CampaignService {
             if (updatedCampaign.getBudget() > 0) {
                 campaign.setBudget(newBudget);
             }
-            if(updatedCampaign.getStartAt()!=null){
+            if (updatedCampaign.getStartAt() != null) {
                 campaign.setStartAt(updatedCampaign.getStartAt());
             }
-            if(updatedCampaign.getDueAt()!=null){
+            if (updatedCampaign.getDueAt() != null) {
                 campaign.setDueAt(updatedCampaign.getDueAt());
             }
             if (updatedCampaign.getCampaignRequirements() != null

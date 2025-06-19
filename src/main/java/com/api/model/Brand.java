@@ -23,8 +23,6 @@ public class Brand {
     private LocalDateTime createdAt;
 
     public Brand() {
-        this.avatarUrl = "https://localhost:8080/cloud/avatar-default.png";
-        this.backgroundUrl = "https://localhost:8080/cloud/avatar-default.png";
         this.categoryIds = new ArrayList<>();
         this.contacts = new HashMap<>();
         this.socialMediaLinks = new HashMap<>();
