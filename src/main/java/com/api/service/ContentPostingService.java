@@ -24,6 +24,7 @@ import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
 import com.api.repository.ContentPostingRepository;
 import com.api.repository.LikesRepository;
+import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
@@ -41,16 +42,19 @@ public class ContentPostingService {
     private LikesRepository likesRepo;
     @Autowired
     private CommentRepository commentRepository;
-
-    public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, CustomUserDetails userDetails, HttpServletRequest request) {
-        if (userDetails.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
-            contentPosting = contentPostingRepo.save(contentPosting);
-            return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
-                    request.getRequestURI());
-        }
-        return ApiResponse.sendError(403, "Content Posting only create by Influencer", request.getRequestURI());
+    @Autowired
+    private UserRepository userRepository;
+   public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, CustomUserDetails userDetails, HttpServletRequest request) {
+    if (userDetails.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+        contentPosting.setUserId(userDetails.getUserId());
+        contentPosting.setUserName(userRepository.findByUserId(userDetails.getUserId()).getName());
+        contentPosting = contentPostingRepo.save(contentPosting);
+        return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
+                request.getRequestURI());
     }
-
+    return ApiResponse.sendError(403, "Content Posting only create by Influencer", request.getRequestURI());
+}
+   
     public ContentPostingResponse mapToDTO(ContentPosting post) {
         List<Category> categories = categoryRepo.findAllByCategoryIdIn(post.getCategoryIds());
 
@@ -68,6 +72,7 @@ public class ContentPostingService {
         ContentPostingResponse dto = new ContentPostingResponse();
         dto.setContentId(post.getContentId());
         dto.setUserId(post.getUserId());
+        dto.setUserName(userRepository.findByUserId(post.getUserId()).getName());
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
@@ -108,7 +113,7 @@ public class ContentPostingService {
         responseData.put("totalPages", posts.getTotalPages());
         responseData.put("totalItems", posts.getTotalElements());
 
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
     public ResponseEntity<?> getMe(CustomUserDetails userDetails, HttpServletRequest request,

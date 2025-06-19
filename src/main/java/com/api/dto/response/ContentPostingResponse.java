@@ -8,6 +8,7 @@ public class ContentPostingResponse {
 
     private String contentId;
     private String userId;
+    private String userName;
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
@@ -19,9 +20,10 @@ public class ContentPostingResponse {
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String userId, String content, String imageUrl, List<Map<String, String>> categories, Date createdDate, boolean isPublic, int commentCount, int likeCount) {
+    public ContentPostingResponse(String contentId, String userId, String userName, String content, String imageUrl, List<Map<String, String>> categories, Date createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
         this.userId = userId;
+        this.userName = userName;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categories = categories;
@@ -31,6 +33,15 @@ public class ContentPostingResponse {
         this.likeCount = likeCount;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    
     public String getContentId() {
         return contentId;
     }

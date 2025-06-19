@@ -30,6 +30,7 @@ import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Set;
 
 @Service
 public class ApplicationService {
@@ -136,13 +137,49 @@ public class ApplicationService {
                 request.getRequestURI());
     }
 
+//    public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
+//            HttpServletRequest request) {
+//        String influencerId = userDetails.getUserId();
+//        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
+//        return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
+//    }
+
     public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
             HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
         List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
-        return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
-    }
 
+        if (applications.isEmpty()) {
+            return ApiResponse.sendError(400, "Not found any application for this influencer!", request.getRequestURI());
+        }
+
+        Set<String> campaignIds = applications.stream()
+                .map(Application::getCampaignId)
+                .collect(Collectors.toSet());
+
+        List<Campaign> campaigns = campaignRepository.findAllByCampaignIdIn(campaignIds);
+
+        Map<String, Campaign> campaignMap = campaigns.stream()
+                .collect(Collectors.toMap(Campaign::getCampaignId, campaign -> campaign));
+
+        Map<String, List<Application>> applicationsByCampaign = applications.stream()
+                .collect(Collectors.groupingBy(Application::getCampaignId));
+
+        List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaignIds.stream()
+                .map(campaignId -> {
+                    Campaign campaign = campaignMap.get(campaignId);
+                    List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(campaignId, Collections.emptyList());
+                    return new ApplicationsByCampaignResponse(
+                            campaign, 
+                            appsForCampaign,
+                            categoryRepository
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return ApiResponse.sendSuccess(200, "Response successfully", applicationsByCampaignResponses,
+                request.getRequestURI());
+    }
     public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted, CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
@@ -170,5 +207,7 @@ public class ApplicationService {
         applicationRepository.save(application);
         return ApiResponse.sendSuccess(200, "Confirm apllication successfully", application, request.getRequestURI());
     }
+
+   
 
 }

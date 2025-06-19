@@ -14,6 +14,7 @@ public class ContentPosting {
     private String contentId;
 
     private String userId;
+    private String userName;
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
@@ -30,17 +31,14 @@ public class ContentPosting {
         this.isPublic = true;
     }
 
-    public ContentPosting(String contentId, String userId, String content, String imageUrl, List<String> categoryIds, Date createdDate, boolean isPublic, int commentCount, int likeCount) {
-        this.contentId = contentId;
-        this.userId = userId;
-        this.content = content;
-        this.imageUrl = imageUrl;
-        this.categoryIds = categoryIds;
-        this.createdDate = createdDate;
-        this.isPublic = isPublic;
-        this.commentCount = commentCount;
-        this.likeCount = likeCount;
+    public String getUserName() {
+        return userName;
     }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
 
     public String getContentId() {
         return contentId;

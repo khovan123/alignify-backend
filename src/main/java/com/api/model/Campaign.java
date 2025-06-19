@@ -17,6 +17,7 @@ public class Campaign {
     private String brandId;
     private String content;
     private String imageUrl;
+    private String discription;
     private List<String> categoryIds;
     @CreatedDate
     private LocalDateTime createdDate;
@@ -31,13 +32,12 @@ public class Campaign {
         this.status = "DRAFT";
     }
 
-    public Campaign(String campaignId, String brandId, String content, String imageUrl, List<String> categoryIds,
-            LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements,
-            List<String> influencerRequirement, int influencerCount) {
+    public Campaign(String campaignId, String brandId, String content, String imageUrl, String discription, List<String> categoryIds, LocalDateTime createdDate, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirement, int influencerCount) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.content = content;
         this.imageUrl = imageUrl;
+        this.discription = discription;
         this.categoryIds = categoryIds;
         this.createdDate = createdDate;
         this.status = status;
@@ -47,6 +47,15 @@ public class Campaign {
         this.influencerCount = influencerCount;
     }
 
+    public String getDiscription() {
+        return discription;
+    }
+
+    public void setDiscription(String discription) {
+        this.discription = discription;
+    }
+
+    
     public long getBudget() {
         return budget;
     }

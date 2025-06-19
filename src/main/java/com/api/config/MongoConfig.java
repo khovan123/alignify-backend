@@ -488,6 +488,9 @@ public class MongoConfig {
                 "userId": {
                     "bsonType": "string"
                 },
+                "userName": {
+                    "bsonType": "string"
+                },                      
                 "content": {
                     "bsonType": "string"
                 },

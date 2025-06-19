@@ -23,7 +23,8 @@ public class Application {
         this.limited = 2;
         this.status = "PENDING";
     }
-
+        
+    
     public Application(String campaignId, String influencerId, String brandId) {
         this.campaignId = campaignId;
         this.influencerId = influencerId;
