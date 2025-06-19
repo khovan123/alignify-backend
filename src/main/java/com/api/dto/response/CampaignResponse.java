@@ -8,15 +8,12 @@ import com.api.model.Campaign;
 import com.api.model.Category;
 import com.api.repository.CategoryRepository;
 import com.api.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class CampaignResponse {
 
-    @Autowired
-    private UserRepository userRepository;
-
     private String campaignId;
     private String brandName;
+    private String campaignName;
     private String content;
     private String imageUrl;
     private List<Category> categories;
@@ -34,10 +31,11 @@ public class CampaignResponse {
     public CampaignResponse() {
     }
 
-    public CampaignResponse(Campaign campaign, CategoryRepository categoryRepository) {
+    public CampaignResponse(Campaign campaign, CategoryRepository categoryRepository, UserRepository userRepository) {
         this.campaignId = campaign.getCampaignId();
         this.brandName = userRepository.findByUserId(campaign.getBrandId()).getName();
         this.content = campaign.getContent();
+        this.campaignName = campaign.getCampaignName();
         this.imageUrl = campaign.getImageUrl();
         this.categories = categoryRepository.findAllByCategoryIdIn(campaign.getCategoryIds());
         this.createdAt = campaign.getCreatedAt();
@@ -76,6 +74,7 @@ public class CampaignResponse {
         this.brandName = brandName;
     }
 
+    
     public String getContent() {
         return content;
     }
@@ -98,14 +97,6 @@ public class CampaignResponse {
 
     public void setCategories(List<Category> categories) {
         this.categories = categories;
-    }
-
-    public UserRepository getUserRepository() {
-        return userRepository;
-    }
-
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -140,6 +131,14 @@ public class CampaignResponse {
         this.influencerRequirements = influencerRequirements;
     }
 
+    public String getCampaignName() {
+        return campaignName;
+    }
+
+    public void setCampaignName(String campaignName) {
+        this.campaignName = campaignName;
+    }
+    
     public long getBudget() {
         return budget;
     }
