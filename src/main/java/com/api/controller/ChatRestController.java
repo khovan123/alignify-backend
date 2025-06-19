@@ -1,5 +1,20 @@
 package com.api.controller;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.UserDTO;
@@ -16,21 +31,8 @@ import com.api.repository.ChatRoomRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
+
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/messages")
@@ -53,29 +55,34 @@ public class ChatRestController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         String userId = userDetails.getUserId();
         if (!chatRoomRepository.existsByChatRoomIdAndRoomOwnerIdOrMember(roomId, userId)) {
             throw new SecurityException("User not authorized for room: " + roomId);
         }
         Pageable pageable = PageRequest.of(page, size);
-        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomIdOrderBySendAtAsc(roomId, pageable).toList();
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomIdOrderBySendAtAsc(roomId, pageable)
+                .toList();
         List<ChatMessageResponse> chatMessageResposes = new ArrayList<>();
         chatMessages.forEach(msg -> {
-            User user = userRepository.findById(msg.getUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + msg.getUserId()));
             String avatarUrl = null;
-            if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
-                avatarUrl = influencerRepository.findById(msg.getUserId())
-                        .map(Influencer::getAvatarUrl)
-                        .orElse(null);
-            } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-                avatarUrl = brandRepository.findById(msg.getUserId())
-                        .map(Brand::getAvatarUrl)
-                        .orElse(null);
+            UserDTO userDTO;
+            if (msg.getUserId().equals("#SYS")) {
+                userDTO = new UserDTO(msg.getUserId(), "#SYS", avatarUrl);
+            } else {
+                User user = userRepository.findById(msg.getUserId())
+                        .orElseThrow(() -> new IllegalArgumentException("User not found: " + msg.getUserId()));
+                if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+                    avatarUrl = influencerRepository.findById(msg.getUserId())
+                            .map(Influencer::getAvatarUrl)
+                            .orElse(null);
+                } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+                    avatarUrl = brandRepository.findById(msg.getUserId())
+                            .map(Brand::getAvatarUrl)
+                            .orElse(null);
+                }
+                userDTO = new UserDTO(msg.getUserId(), user.getName(), avatarUrl);
             }
-            UserDTO userDTO = new UserDTO(msg.getUserId(), user.getName(), avatarUrl);
             chatMessageResposes.add(new ChatMessageResponse(userDTO, msg));
         });
         return ApiResponse.sendSuccess(200, "Response successfully", chatMessageResposes, request.getRequestURI());
@@ -86,8 +93,7 @@ public class ChatRestController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         String userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
         List<ChatRoom> chatRooms = chatRoomRepository.findAllByRoomOwnerIdOrMember(userId, pageable).toList();
@@ -101,11 +107,13 @@ public class ChatRestController {
             if (chatMessage == null) {
                 List<String> readBy = new ArrayList<>();
                 ChatMessage newMsg = new ChatMessage();
+                // readBy.add(userId);
                 newMsg.setMessage("Xin chào " + user.getName() + " !");
                 newMsg.setChatRoomId(room.getChatRoomId());
                 newMsg.setName(user.getName());
                 newMsg.setReadBy(readBy);
                 newMsg.setUserId("#SYS");
+                // newMsg.setUserId(user.getUserId());
                 newMsg.setSendAt(LocalDateTime.now());
                 chatMessageRepository.save(newMsg);
                 chatMessage = newMsg;

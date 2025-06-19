@@ -48,7 +48,6 @@ public class ChatController {
             UserDTO userDTO = new UserDTO(stompPrincipal.getUserId(), stompPrincipal.getName(),
                     stompPrincipal.getAvatarUrl());
             chatMessage.setName(stompPrincipal.getName());
-            System.out.println(chatMessage.getSendAt());
             // chatMessage.setSendAt(LocalDateTime.now(ZoneId.of("+07:00")));
             chatMessage.setChatRoomId(roomId);
             chatMessage.setUserId(userId);
