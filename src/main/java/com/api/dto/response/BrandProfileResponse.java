@@ -28,8 +28,8 @@ public class BrandProfileResponse {
         this.name = user.getName();
         this.email = user.getEmail();
         this.roleId = user.getRoleId();
-        this.avatarUrl = brand.getAvatarUrl();
-        this.backgroundUrl = brand.getBackgroundUrl();
+        this.avatarUrl = user.getAvatarUrl();
+        this.backgroundUrl = user.getBackgroundUrl();
         this.bio = brand.getBio();
         this.categories = (brand.getCategoryIds() != null && !brand.getCategoryIds().contains(null))
                 ? categoryRepository.findAllById(brand.getCategoryIds())

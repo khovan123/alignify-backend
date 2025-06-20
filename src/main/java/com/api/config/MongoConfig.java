@@ -44,18 +44,18 @@ public class MongoConfig {
     // this.create_rolesCollection(db);
     // this.create_categoriesCollection(db);
     // this.create_adminsCollection(db);
-//    this.create_galleriesCollection(db);
-//    this.create_galleryImagesCollection(db);
+    // this.create_galleriesCollection(db);
+    // this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
     // this.create_accountVerifiedsCollection(db);
-    this.create_campaignsCollection(db);
-//    this.create_contentPostingsCollection(db);
-//    this.create_likesCollection(db);
+    // this.create_campaignsCollection(db);
+    // this.create_contentPostingsCollection(db);
+    // this.create_likesCollection(db);
     // this.create_applicationsCollection(db);
     // this.create_campaignTrackingsCollection(db);
-//    this.create_commentsCollection(db);
+    // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
-//    this.create_messagesCollection(db);
+    // this.create_messagesCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {

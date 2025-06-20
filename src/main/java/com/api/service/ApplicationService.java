@@ -124,7 +124,7 @@ public class ApplicationService {
         String brandId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepository.findAllByBrandId(brandId, pageable);
-
+        Optional<User> user = userRepository.findById(brandId);
         List<Campaign> campaigns = campaignPage.getContent();
 
         if (campaigns.isEmpty()) {
@@ -138,10 +138,10 @@ public class ApplicationService {
                 .collect(Collectors.groupingBy(Application::getCampaignId));
 
         List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaigns.stream()
-                .map(campaignResponse -> new ApplicationsByCampaignResponse(
+                .map(campaignResponse -> new ApplicationsByCampaignResponse(user.get(),
                         campaignResponse,
                         applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
-                        categoryRepository, userRepository))
+                        categoryRepository))
                 .toList();
         return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses,
                 request.getRequestURI());
@@ -158,7 +158,7 @@ public class ApplicationService {
             HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
         List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
-
+        Optional<User> user = userRepository.findById(influencerId);
         if (applications.isEmpty()) {
             return ApiResponse.sendError(400, "Not found any application for this influencer!", request.getRequestURI());
         }
@@ -180,10 +180,10 @@ public class ApplicationService {
                     Campaign campaign = campaignMap.get(campaignId);
                     List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(campaignId, Collections.emptyList());
                     return new ApplicationsByCampaignResponse(
+                            user.get(),
                             campaign, 
                             appsForCampaign,
-                            categoryRepository,
-                            userRepository
+                            categoryRepository                           
                     );
                 })
                 .collect(Collectors.toList());
