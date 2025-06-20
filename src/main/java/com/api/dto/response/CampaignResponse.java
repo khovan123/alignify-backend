@@ -60,6 +60,14 @@ public class CampaignResponse {
         this.status = status;
     }
 
+    public String getBrandAvartar() {
+        return brandAvartar;
+    }
+
+    public void setBrandAvartar(String brandAvartar) {
+        this.brandAvartar = brandAvartar;
+    }
+
     public String getCampaignId() {
         return campaignId;
     }

@@ -72,6 +72,7 @@ public class ContentPostingService {
         ContentPostingResponse dto = new ContentPostingResponse();
         dto.setContentId(post.getContentId());
         dto.setContentName(post.getContentName());
+        dto.setUserAvatar(userRepository.findByUserId(post.getUserId()).getAvatarUrl());
         dto.setUserId(post.getUserId());
         dto.setUserName(userRepository.findByUserId(post.getUserId()).getName());
         dto.setContent(post.getContent());
