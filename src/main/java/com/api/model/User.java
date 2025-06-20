@@ -15,7 +15,8 @@ public class User {
     private String password;
     private String roleId;
     private boolean isActive;
-
+    private String avatarUrl;
+    private String backgroundUrl;
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -23,15 +24,34 @@ public class User {
         this.isActive = true;
     }
 
-    public User(String userId, String name, String email, String password, String location, String roleId, boolean isActive, LocalDateTime createdAt) {
+    public User(String userId, String name, String email, String password, String roleId, boolean isActive, String avatarUrl, String backgroundUrl, LocalDateTime createdAt) {
         this.userId = userId;
         this.name = name;
         this.email = email;
         this.password = password;
         this.roleId = roleId;
         this.isActive = isActive;
+        this.avatarUrl = avatarUrl;
+        this.backgroundUrl = backgroundUrl;
         this.createdAt = createdAt;
     }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public String getBackgroundUrl() {
+        return backgroundUrl;
+    }
+
+    public void setBackgroundUrl(String backgroundUrl) {
+        this.backgroundUrl = backgroundUrl;
+    }
+
 
     public String getUserId() {
         return userId;

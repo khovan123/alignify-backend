@@ -38,6 +38,9 @@ import com.api.util.Helper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class CampaignService {
@@ -55,7 +58,7 @@ public class CampaignService {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -88,7 +91,7 @@ public class CampaignService {
         chatMessage.setSendAt(LocalDateTime.now());
         chatMessageRepository.save(new ChatMessage());
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
-                new CampaignResponse(campaign, categoryRepo,userRepository),
+                new CampaignResponse(user, campaign, categoryRepo),
                 request.getRequestURI());
     }
 
@@ -104,21 +107,30 @@ public class CampaignService {
 
     public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
+        User user = userRepository.findById(campaignOpt.get().getBrandId()).get();
         if (!campaignOpt.isPresent()) {
             return ApiResponse.sendError(404, "Id: " + campaignId + " not found", request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Success", new CampaignResponse(campaignOpt.get(), categoryRepo,userRepository),
+        return ApiResponse.sendSuccess(200, "Success", new CampaignResponse(user, campaignOpt.get(), categoryRepo),
                 request.getRequestURI());
     }
 
     public ResponseEntity<?> getAllCampaign(int pageNumber, int pageSize, HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findAll(pageable);
+        Set<String> brandIds = campaignPage.getContent().stream()
+                .map(Campaign::getBrandId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
+                .map(campaign -> {
+                    User user = brandMap.get(campaign.getBrandId());
+                    return new CampaignResponse(user, campaign, categoryRepo);
+                })
                 .toList();
-
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("campaigns", dtoList);
         responseData.put("currentPage", campaignPage.getNumber());
@@ -131,9 +143,12 @@ public class CampaignService {
     public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails, int pageNumber, int pageSize,
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+
         Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId(), pageable);
+        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
+
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
+                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -150,9 +165,10 @@ public class CampaignService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<String> campaignIdsPage = campaignTrackingRepository.findCampaignIdsByInfluencerId(userDetails.getUserId(),
                 pageable);
+        Optional<User> user = userRepository.findById(userDetails.getUserId());
         Page<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage.getContent(), pageable);
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
+                .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -168,9 +184,10 @@ public class CampaignService {
             HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userId, pageable);
+        Optional<User> user = userRepository.findById(userId);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(campaign, categoryRepo,userRepository))
+                .map(campaign -> new CampaignResponse(user.get(),campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -209,6 +226,7 @@ public class CampaignService {
             HttpServletRequest request) {
 
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
+        Optional<User> user = userRepository.findById(campaignOpt.get().getBrandId());
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
             ChatRoom chatRoom = chatRoomRepository.findById(campaignId).get();
@@ -269,7 +287,7 @@ public class CampaignService {
             chatRoomRepository.save(chatRoom);
 
             return ApiResponse.sendSuccess(200, "Campaign posting updated successfully",
-                    new CampaignResponse(campaign, categoryRepo,userRepository),
+                    new CampaignResponse(user.get(),campaign, categoryRepo),
                     request.getRequestURI());
 
         } else {

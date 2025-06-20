@@ -30,8 +30,8 @@ public class InfluencerProfileResponse {
         this.userId = user.getUserId();
         this.name = user.getName();
         this.roleId = user.getRoleId();
-        this.avatarUrl = influencer.getAvatarUrl();
-        this.backgroundUrl = influencer.getBackgroundUrl();
+        this.avatarUrl = user.getAvatarUrl();
+        this.backgroundUrl = user.getBackgroundUrl();
         this.bio = influencer.getBio();
         this.isPublic = influencer.isPublic();
         if (isPublic || isOwner) {
