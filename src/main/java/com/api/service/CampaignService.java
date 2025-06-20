@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,15 +37,11 @@ import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
-import com.api.util.Helper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class CampaignService {
@@ -191,7 +190,7 @@ public class CampaignService {
         Optional<User> user = userRepository.findById(userId);
 
         List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(user.get(),campaign, categoryRepo))
+                .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -246,7 +245,6 @@ public class CampaignService {
                 campaign.setCampaignName(updatedCampaign.getCampaignName());
                 chatRoom.setRoomName(updatedCampaign.getCampaignName());
             }
-
             if (updatedCampaign.getContent() != null) {
                 campaign.setContent(updatedCampaign.getContent());
             }
@@ -291,7 +289,7 @@ public class CampaignService {
             chatRoomRepository.save(chatRoom);
 
             return ApiResponse.sendSuccess(200, "Campaign posting updated successfully",
-                    new CampaignResponse(user.get(),campaign, categoryRepo),
+                    new CampaignResponse(user.get(), campaign, categoryRepo),
                     request.getRequestURI());
 
         } else {
@@ -335,14 +333,15 @@ public class CampaignService {
                 request.getRequestURI());
     }
 
-//    public Campaign convertToCampaign(Object campaign) {
-//        ObjectMapper mapper = new ObjectMapper();
-//        try {
-//            return mapper.convertValue(campaign, Campaign.class);
-//        } catch (IllegalArgumentException e) {
-//            throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
-//        }
-//    }
+    // public Campaign convertToCampaign(Object campaign) {
+    // ObjectMapper mapper = new ObjectMapper();
+    // try {
+    // return mapper.convertValue(campaign, Campaign.class);
+    // } catch (IllegalArgumentException e) {
+    // throw new IllegalArgumentException("Failed to convert to Campaign: " +
+    // e.getMessage());
+    // }
+    // }
     public Campaign convertToCampaign(String obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();
