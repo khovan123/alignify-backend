@@ -11,8 +11,6 @@ public class Influencer {
 
     @Id
     private String userId;
-    private String avatarUrl;
-    private String backgroundUrl;
     private LocalDateTime DoB;
     private String gender;
     private String bio;
@@ -34,10 +32,9 @@ public class Influencer {
         this.socialMediaLinks = new HashMap<>();
     }
 
-    public Influencer(String userId, String avatarUrl, String backgroundUrl, LocalDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, LocalDateTime createdAt) {
+    public Influencer(String userId, LocalDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, LocalDateTime createdAt) {
         this.userId = userId;
-        this.avatarUrl = avatarUrl;
-        this.backgroundUrl = backgroundUrl;
+
         this.DoB = DoB;
         this.gender = gender;
         this.bio = bio;
@@ -55,22 +52,6 @@ public class Influencer {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
-    public String getBackgroundUrl() {
-        return backgroundUrl;
-    }
-
-    public void setBackgroundUrl(String backgroundUrl) {
-        this.backgroundUrl = backgroundUrl;
     }
 
     public LocalDateTime getDoB() {

@@ -6,13 +6,14 @@ import java.util.Map;
 
 import com.api.model.Campaign;
 import com.api.model.Category;
+import com.api.model.User;
 import com.api.repository.CategoryRepository;
-import com.api.repository.UserRepository;
 
 public class CampaignResponse {
 
     private String campaignId;
     private String brandName;
+    private String brandAvartar;
     private String campaignName;
     private String content;
     private String imageUrl;
@@ -31,10 +32,11 @@ public class CampaignResponse {
     public CampaignResponse() {
     }
 
-    public CampaignResponse(Campaign campaign, CategoryRepository categoryRepository, UserRepository userRepository) {
+    public CampaignResponse(User user, Campaign campaign, CategoryRepository categoryRepository) {
         this.campaignId = campaign.getCampaignId();
-        this.brandName = userRepository.findByUserId(campaign.getBrandId()).getName();
+        this.brandName = user.getName();
         this.content = campaign.getContent();
+        this.brandAvartar = user.getAvatarUrl();
         this.campaignName = campaign.getCampaignName();
         this.imageUrl = campaign.getImageUrl();
         this.categories = categoryRepository.findAllByCategoryIdIn(campaign.getCategoryIds());
@@ -56,6 +58,14 @@ public class CampaignResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getBrandAvartar() {
+        return brandAvartar;
+    }
+
+    public void setBrandAvartar(String brandAvartar) {
+        this.brandAvartar = brandAvartar;
     }
 
     public String getCampaignId() {

@@ -2,8 +2,8 @@ package com.api.dto.response;
 
 import com.api.model.Application;
 import com.api.model.Campaign;
+import com.api.model.User;
 import com.api.repository.CategoryRepository;
-import com.api.repository.UserRepository;
 import java.util.List;
 
 public class ApplicationsByCampaignResponse {
@@ -11,8 +11,8 @@ public class ApplicationsByCampaignResponse {
     private CampaignResponse campaignResponse;
     private List<Application> applications;
 
-    public ApplicationsByCampaignResponse(Campaign campaign, List<Application> applications, CategoryRepository categoryRepository, UserRepository userRepository) {
-        this.campaignResponse = new CampaignResponse(campaign, categoryRepository, userRepository);
+    public ApplicationsByCampaignResponse(User user,Campaign campaign, List<Application> applications, CategoryRepository categoryRepository) {
+        this.campaignResponse = new CampaignResponse(user, campaign, categoryRepository);
         this.applications = applications;
     }
 

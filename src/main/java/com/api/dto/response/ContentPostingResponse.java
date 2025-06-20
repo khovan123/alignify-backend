@@ -1,7 +1,6 @@
 package com.api.dto.response;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +10,7 @@ public class ContentPostingResponse {
     private String contentName;
     private String userId;
     private String userName;
+    private String userAvatar;
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
@@ -22,11 +22,12 @@ public class ContentPostingResponse {
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String contentName, String userId, String userName, String content, String imageUrl, List<Map<String, String>> categories, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
+    public ContentPostingResponse(String contentId, String contentName, String userId, String userName, String userAvatar, String content, String imageUrl, List<Map<String, String>> categories, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
         this.contentName = contentName;
         this.userId = userId;
         this.userName = userName;
+        this.userAvatar = userAvatar;
         this.content = content;
         this.imageUrl = imageUrl;
         this.categories = categories;
@@ -35,6 +36,15 @@ public class ContentPostingResponse {
         this.commentCount = commentCount;
         this.likeCount = likeCount;
     }
+
+    public String getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(String userAvatar) {
+        this.userAvatar = userAvatar;
+    }
+
 
     public String getContentName() {
         return contentName;

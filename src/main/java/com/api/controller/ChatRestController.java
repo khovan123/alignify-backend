@@ -72,15 +72,10 @@ public class ChatRestController {
             } else {
                 User user = userRepository.findById(msg.getUserId())
                         .orElseThrow(() -> new IllegalArgumentException("User not found: " + msg.getUserId()));
-                if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
-                    avatarUrl = influencerRepository.findById(msg.getUserId())
-                            .map(Influencer::getAvatarUrl)
+                    avatarUrl = userRepository.findById(msg.getUserId())
+                            .map(User::getAvatarUrl)
                             .orElse(null);
-                } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-                    avatarUrl = brandRepository.findById(msg.getUserId())
-                            .map(Brand::getAvatarUrl)
-                            .orElse(null);
-                }
+
                 userDTO = new UserDTO(msg.getUserId(), user.getName(), avatarUrl);
             }
             chatMessageResposes.add(new ChatMessageResponse(userDTO, msg));

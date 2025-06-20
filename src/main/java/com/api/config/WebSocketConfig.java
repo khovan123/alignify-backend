@@ -66,15 +66,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         User user = userRepository.findById(userId)
                             .orElseThrow(() -> new SecurityException("User not found: " + userId));
                         String avatarUrl = null;
-                        if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
-                            avatarUrl = influencerRepository.findById(userId)
-                                .map(Influencer::getAvatarUrl)
+                            avatarUrl = userRepository.findById(userId)
+                                .map(User::getAvatarUrl)
                                 .orElse(null);
-                        } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-                            avatarUrl = brandRepository.findById(userId)
-                                .map(Brand::getAvatarUrl)
-                                .orElse(null);
-                        }
                         accessor.setUser(new StompPrincipal(userId, user.getName(), user.getRoleId(), avatarUrl));
                     } catch (Exception e) {
                         throw new SecurityException("Security error at websocket: " + e.getMessage());

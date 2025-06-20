@@ -58,12 +58,13 @@ public class ProfileService {
             Map<String, Object> map = new HashMap<>();
             map.put("name", user.getName());
             map.put("id", user.getUserId());
+            map.put("avatarUrl", user.getAvatarUrl());
+            map.put("backgroundUrl",user.getBackgroundUrl());
             if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
                 Optional<Influencer> profileOtp = influencerRepository.findById(user.getUserId());
                 if (profileOtp.isPresent()) {
                     Influencer profile = profileOtp.get();
                     map.put("rating", profile.getRating());
-                    map.put("avatarUrl", profile.getAvatarUrl());
                     map.put("isPublic", profile.isPublic());
                     map.put("follower", profile.getFollower());
                 }
@@ -71,7 +72,11 @@ public class ProfileService {
                 Optional<Brand> profileOtp = brandRepository.findById(user.getUserId());
                 if (profileOtp.isPresent()) {
                     Brand profile = profileOtp.get();
-                    map.put("avatarUrl", profile.getAvatarUrl());
+                    map.put("bio", profile.getBio());
+                    map.put("contacts",profile.getContacts());
+                    map.put("socialMediaLinks", profile.getSocialMediaLinks());
+                    map.put("establishDate", profile.getEstablishDate());
+                    map.put("totalCampaign", profile.getTotalCampaign());
                 }
             }
             userList.add(map);
@@ -189,19 +194,8 @@ public class ProfileService {
         } catch (Exception e) {
             return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
         }
-        if (userOpt.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
-            Optional<Influencer> influencerOpt = influencerRepository.findById(id);
-            Influencer influencer = influencerOpt.get();
-            influencer.setAvatarUrl(imageUrl);
-            influencerRepository.save(influencer);
-        } else if (userOpt.get().getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
-            Optional<Brand> brandOpt = brandRepository.findById(id);
-            Brand brand = brandOpt.get();
-            brand.setAvatarUrl(imageUrl);
-            brandRepository.save(brand);
-        } else {
-            return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
-        }
+        userOpt.get().setAvatarUrl(imageUrl);
+        
         return ApiResponse.sendSuccess(200, "Change avatar successfully", imageUrl, request.getRequestURI());
     }
 
