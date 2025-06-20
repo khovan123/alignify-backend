@@ -1,5 +1,6 @@
 package com.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("campaigns")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Campaign {
 
     @Id
@@ -24,7 +26,7 @@ public class Campaign {
     private LocalDateTime dueAt;
     private LocalDateTime startAt;
     private String status;
-    private long budget;
+    private int budget;
     private Map<String, Integer> campaignRequirements;
     private List<String> influencerRequirements;
     private int influencerCountExpected;
@@ -39,7 +41,7 @@ public class Campaign {
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
-            List<String> categoryIds, String status, long budget, Map<String, Integer> campaignRequirements,
+            List<String> categoryIds, String status, int budget, Map<String, Integer> campaignRequirements,
             List<String> influencerRequirements, int influencerCountExpected) {
         this.campaignName = campaignName;
         this.campaignId = campaignId;
@@ -56,7 +58,7 @@ public class Campaign {
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
             List<String> categoryIds,
-            LocalDateTime createdAt, String status, long budget, Map<String, Integer> campaignRequirements,
+            LocalDateTime createdAt, String status, int budget, Map<String, Integer> campaignRequirements,
             List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent,
             int applicationTotal) {
         this.campaignId = campaignId;
@@ -75,7 +77,7 @@ public class Campaign {
         this.applicationTotal = applicationTotal;
     }
 
-    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdAt, LocalDateTime dueAt, LocalDateTime startAt, String status, long budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdAt, LocalDateTime dueAt, LocalDateTime startAt, String status, int budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.campaignName = campaignName;
@@ -134,11 +136,11 @@ public class Campaign {
         this.campaignName = campaignName;
     }
 
-    public long getBudget() {
+    public int getBudget() {
         return budget;
     }
 
-    public void setBudget(long budget) {
+    public void setBudget(int budget) {
         this.budget = budget;
     }
 

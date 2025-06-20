@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Configuration;
 import com.api.middleware.AuthorizationInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
@@ -13,6 +15,11 @@ public class WebConfig implements WebMvcConfigurer {
     private AuthorizationInterceptor authorizationInterceptor;
     @Value("${cors.allowed-origins}")
     private String origins;
+
+    @Bean
+    public StandardServletMultipartResolver multipartResolver() {
+        return new StandardServletMultipartResolver();
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
