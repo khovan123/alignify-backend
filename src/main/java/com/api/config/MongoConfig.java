@@ -76,6 +76,13 @@ public class MongoConfig {
                       "bsonType": "string",
                       "pattern": "^.+@.+\\\\..+$"
                     },
+                    "avatarUrl": {
+                      "bsonType": "string",
+                      "pattern": "^https?://.+$"
+                        },
+                    "backgroundUrl": {
+                      "bsonType": "string"
+                        },
                     "password": {
                       "bsonType": "string",
                     },
@@ -112,13 +119,7 @@ public class MongoConfig {
                 "_id": {
                   "bsonType": "objectId"
                 },
-                "avatarUrl": {
-                  "bsonType": "string",
-                  "pattern": "^https?://.+$"
-                },
-                "backgroundUrl": {
-                   "bsonType": "string"
-                },
+                
                 "DoB": {
                   "bsonType": "date"
                 },
@@ -257,10 +258,6 @@ public class MongoConfig {
                     "_id": {
                       "bsonType": "objectId",
                     },
-                    "avatarUrl": {
-                      "bsonType": "string",
-                      "pattern": "^https?://.+$"
-                    },
                     "bio": {
                       "bsonType": "string",
                     },
@@ -287,7 +284,10 @@ public class MongoConfig {
                     },
                     "createdAt": {
                       "bsonType": "date"
-                    }
+                    },
+                    "totalCampaign": {
+                      "bsonType": "int",
+                    },
                   }
             }
             """);
