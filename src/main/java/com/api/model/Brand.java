@@ -7,37 +7,44 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "brands")
-public class Brand {
+public class Brand{
 
     @Id
     private String userId;
-    private String avatarUrl;
-    private String backgroundUrl;
     private String bio;
     private List<String> categoryIds;
     private Map<String, String> contacts;
     private Map<String, String> socialMediaLinks;
     private LocalDateTime establishDate;
+    private int totalCampaign;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
     public Brand() {
+        this.totalCampaign = 0;
         this.categoryIds = new ArrayList<>();
         this.contacts = new HashMap<>();
         this.socialMediaLinks = new HashMap<>();
     }
 
-    public Brand(String userId, String avatarUrl, String backgroundUrl, String bio, List<String> categoryIds, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate, LocalDateTime createdAt) {
+    public Brand(String userId, String bio, List<String> categoryIds, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate, int totalCampaign, LocalDateTime createdAt) {
         this.userId = userId;
-        this.avatarUrl = avatarUrl;
-        this.backgroundUrl = backgroundUrl;
         this.bio = bio;
         this.categoryIds = categoryIds;
         this.contacts = contacts;
         this.socialMediaLinks = socialMediaLinks;
         this.establishDate = establishDate;
+        this.totalCampaign = totalCampaign;
         this.createdAt = createdAt;
+    }
+
+    public int getTotalCampaign() {
+        return totalCampaign;
+    }
+
+    public void setTotalCampaign(int totalCampaign) {
+        this.totalCampaign = totalCampaign;
     }
 
     public String getUserId() {
@@ -46,22 +53,6 @@ public class Brand {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
-    public String getBackgroundUrl() {
-        return backgroundUrl;
-    }
-
-    public void setBackgroundUrl(String backgroundUrl) {
-        this.backgroundUrl = backgroundUrl;
     }
 
     public String getBio() {

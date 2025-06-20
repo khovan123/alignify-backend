@@ -209,14 +209,7 @@ public class AuthService {
         if (!role.isPresent()) {
             return ApiResponse.sendError(400, "Invalid role", request.getRequestURI());
         }
-        String avatarUrl = null;
-        if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-            avatarUrl = brandRepository.findById(user.getUserId()).get().getAvatarUrl();
-        }
-        if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
-            avatarUrl = influencerRepository.findById(user.getUserId()).get().getAvatarUrl();
-
-        }
+        String avatarUrl = user.getAvatarUrl();
         UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl);
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                 "token", JwtUtil.createToken(existing.get()),
