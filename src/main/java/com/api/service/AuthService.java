@@ -211,11 +211,25 @@ public class AuthService {
         }
         String avatarUrl = user.getAvatarUrl();
         UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl);
+        if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
+            if (!influencerOpt.isPresent()) {
+                Influencer influencer = new Influencer();
+                influencer.setUserId(user.getUserId());
+                influencerRepository.save(influencer);
+            }
+        } else if (existing.get().getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+            Optional<Brand> brandOpt = brandRepository.findById(user.getUserId());
+            if (!brandOpt.isPresent()) {
+                Brand brand = new Brand();
+                brand.setUserId(user.getUserId());
+                brandRepository.save(brand);
+            }
+        }
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                 "token", JwtUtil.createToken(existing.get()),
                 "role", role.get().getRoleName(),
-                "user", userDTO
-        ), request.getRequestURI());
+                "user", userDTO), request.getRequestURI());
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,

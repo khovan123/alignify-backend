@@ -119,7 +119,6 @@ public class MongoConfig {
                 "_id": {
                   "bsonType": "objectId"
                 },
-                
                 "DoB": {
                   "bsonType": "date"
                 },
