@@ -1,5 +1,6 @@
 package com.api.controller;
 
+import com.api.dto.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,11 +60,23 @@ public class CampaignController {
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_BRAND')")
     public ResponseEntity<?> createCampaign(
-            @RequestPart("campaign")  Object obj,
-            @RequestPart("image") MultipartFile image,
+            @RequestPart("campaign") String obj,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        return campaignService.createCampaign(campaignService.convertToCampaign(obj), image, userDetails, request);
+        System.out.println(obj);
+        try {
+            System.out.println("Received campaign JSON: " + obj);
+            Campaign campaign = campaignService.convertToCampaign(obj);
+            if (image != null && !image.isEmpty()) {
+                System.out.println("Received image: " + image.getOriginalFilename());
+            } else {
+                System.out.println("No image provided");
+            }
+            return campaignService.createCampaign(campaign, image, userDetails, request);
+        } catch (Exception e) {
+            return ApiResponse.sendError(400, "Invalid request: " + e.getMessage(), request.getRequestURI());
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_BRAND')")
