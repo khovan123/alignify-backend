@@ -1,18 +1,19 @@
 package com.api.service;
 
-import com.api.config.EnvConfig;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Category;
@@ -21,15 +22,14 @@ import com.api.model.ContentPosting;
 import com.api.model.Likes;
 import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
+import com.api.repository.ContentPostingRepository;
 import com.api.repository.LikesRepository;
+import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.data.domain.Page;
-import com.api.repository.ContentPostingRepository;
-import com.api.repository.UserRepository;
 
 @Service
 public class ContentPostingService {
@@ -44,6 +44,7 @@ public class ContentPostingService {
     private CommentRepository commentRepository;
     @Autowired
     private UserRepository userRepository;
+
 
     public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, CustomUserDetails userDetails, HttpServletRequest request) {
         if (userDetails.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {

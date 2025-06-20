@@ -35,7 +35,9 @@ import com.api.repository.ChatRoomRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Set;
@@ -59,6 +61,8 @@ public class CampaignService {
     private ChatMessageRepository chatMessageRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -70,7 +74,7 @@ public class CampaignService {
         validateCampaignRequirements(campaign.getCampaignRequirements());
         String imageUrl;
         try {
-            imageUrl = Helper.saveImage(file);
+            imageUrl = fileStorageService.storeFile(file);
         } catch (Exception e) {
             return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
         }
@@ -89,7 +93,7 @@ public class CampaignService {
         chatMessage.setReadBy(readBy);
         chatMessage.setUserId("#SYS");
         chatMessage.setSendAt(LocalDateTime.now());
-        chatMessageRepository.save(new ChatMessage());
+        chatMessageRepository.save(chatMessage);
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(user, campaign, categoryRepo),
                 request.getRequestURI());
@@ -234,7 +238,7 @@ public class CampaignService {
                 return ApiResponse.sendError(400, "Cannot update a campaign that is COMPLETED",
                         request.getRequestURI());
             }
-            long newBudget = updatedCampaign.getBudget();
+            int newBudget = updatedCampaign.getBudget();
             if (newBudget < 0) {
                 return ApiResponse.sendError(400, "Budget must be a non-negative number", request.getRequestURI());
             }
@@ -331,13 +335,22 @@ public class CampaignService {
                 request.getRequestURI());
     }
 
-    public Campaign convertToCampaign(Object campaign) {
-        ObjectMapper mapper = new ObjectMapper();
+//    public Campaign convertToCampaign(Object campaign) {
+//        ObjectMapper mapper = new ObjectMapper();
+//        try {
+//            return mapper.convertValue(campaign, Campaign.class);
+//        } catch (IllegalArgumentException e) {
+//            throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
+//        }
+//    }
+    public Campaign convertToCampaign(String obj) {
         try {
-            return mapper.convertValue(campaign, Campaign.class);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Failed to convert to Campaign: " + e.getMessage());
+            ObjectMapper mapper = new ObjectMapper();
+            // Configure ObjectMapper to handle Java 8 date/time types if needed
+            mapper.registerModule(new JavaTimeModule());
+            return mapper.readValue(obj, Campaign.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid campaign JSON: " + e.getMessage(), e);
         }
     }
-
 }
