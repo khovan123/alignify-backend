@@ -2,7 +2,6 @@ package com.api.service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -141,8 +140,24 @@ public class ApplicationService {
 
         List<ApplicationsByBrandResponse> applicationsByCampaignResponses = campaigns.stream()
                 .map(campaign -> {
-                    List<ApplicationPlusInfluencer> appResponses = applications.stream()
+                    List<Application> appsForCampaign = applications.stream()
                             .filter(app -> app.getCampaignId().equals(campaign.getCampaignId()))
+                            .collect(Collectors.toList());
+
+                    if (campaign.getApplicationTotal() != appsForCampaign.size()) {
+                        campaign.setApplicationTotal(appsForCampaign.size());
+
+                        long acceptedCount = appsForCampaign.stream()
+                                .filter(app -> Status.ACCEPTED.toString().equals(app.getStatus()))
+                                .count();
+
+                        if (campaign.getInfluencerCountCurrent() != acceptedCount) {
+                            campaign.setInfluencerCountCurrent((int) acceptedCount);
+                        }
+                        campaignRepository.save(campaign);
+                    }
+
+                    List<ApplicationPlusInfluencer> appResponses = appsForCampaign.stream()
                             .map(app -> {
                                 User user = userRepository.findById(app.getInfluencerId()).orElse(null);
                                 Influencer influencer = influencerRepository.findById(app.getInfluencerId())
@@ -150,6 +165,7 @@ public class ApplicationService {
                                 return new ApplicationPlusInfluencer(user, influencer, app);
                             })
                             .collect(Collectors.toList());
+
                     return new ApplicationsByBrandResponse(brandUser.get(), campaign, appResponses, categoryRepository);
                 })
                 .collect(Collectors.toList());
@@ -187,14 +203,15 @@ public class ApplicationService {
                             Collections.emptyList());
                     if (campaign.getApplicationTotal() != appsForCampaign.size()) {
                         campaign.setApplicationTotal(appsForCampaign.size());
-                        Set<String> status = Set.of(Status.PENDING.toString(), Status.ACCEPTED.toString(),
-                                Status.REJECTED.toString());
-                        Map<String, List<Application>> applicationMap = applications.stream()
-                                .filter(app -> status.contains(app.getStatus()))
-                                .collect(Collectors.groupingBy(Application::getCampaignId));
-                        if (campaign.getInfluencerCountCurrent() != applicationMap.get(Status.ACCEPTED.toString()).size()) {
-                            campaign.setInfluencerCountCurrent(applicationMap.get(Status.ACCEPTED.toString()).size());
+
+                        long acceptedCount = appsForCampaign.stream()
+                                .filter(app -> Status.ACCEPTED.toString().equals(app.getStatus()))
+                                .count();
+
+                        if (campaign.getInfluencerCountCurrent() != acceptedCount) {
+                            campaign.setInfluencerCountCurrent((int) acceptedCount);
                         }
+
                         campaignRepository.save(campaign);
                     }
                     return new ApplicationsByfInfluencerResponse(
