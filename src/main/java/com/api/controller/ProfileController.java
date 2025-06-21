@@ -1,14 +1,24 @@
 package com.api.controller;
 
-import com.api.security.CustomUserDetails;
-import com.api.service.*;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.http.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.api.security.CustomUserDetails;
+import com.api.service.ProfileService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping(path = "/api/v1/profiles")
@@ -18,32 +28,37 @@ public class ProfileController {
     private ProfileService profileService;
 
     @GetMapping("")
-    public ResponseEntity<?> getAllProfileByRoleId(@RequestParam("roleId") String roleId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> getAllProfileByRoleId(@RequestParam("roleId") String roleId,
+            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.getAllProfileByRoleId(roleId, userDetails, request);
     }
-    
+
     @GetMapping("/me")
     public ResponseEntity<?> getMe(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.getMe(userDetails, request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProfile(@PathVariable("id") String id, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> getProfile(@PathVariable("id") String id,
+            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.getProfileById(id, userDetails, request);
     }
 
     @PutMapping("")
-    public ResponseEntity<?> updateProfile(@RequestBody Object profile, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> updateProfile(@RequestBody Object profile,
+            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.updateProfile(profile, userDetails, request);
     }
 
     @DeleteMapping("")
-    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
         return profileService.deleteAccount(userDetails, request);
     }
 
     @PostMapping("/avatar")
-    public ResponseEntity<?> changeAvatar(@RequestPart("image") MultipartFile image, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+    public ResponseEntity<?> changeAvatar(@RequestPart("image") MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.saveAvatarUrl(image, userDetails, request);
     }
 

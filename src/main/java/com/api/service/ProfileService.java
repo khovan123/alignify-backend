@@ -1,31 +1,38 @@
 package com.api.service;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.request.BrandProfileRequest;
-import com.api.dto.response.BrandProfileResponse;
 import com.api.dto.request.InfluencerProfileRequest;
+import com.api.dto.response.BrandProfileResponse;
 import com.api.dto.response.InfluencerProfileResponse;
-import com.api.model.*;
-import com.api.repository.*;
+import com.api.model.Brand;
+import com.api.model.Influencer;
+import com.api.model.Role;
+import com.api.model.User;
+import com.api.repository.BrandRepository;
+import com.api.repository.CategoryRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.repository.RoleRepository;
+import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-import com.api.util.Helper;
 
 @Service
 public class ProfileService {
@@ -59,7 +66,7 @@ public class ProfileService {
             map.put("name", user.getName());
             map.put("id", user.getUserId());
             map.put("avatarUrl", user.getAvatarUrl());
-            map.put("backgroundUrl",user.getBackgroundUrl());
+            map.put("backgroundUrl", user.getBackgroundUrl());
             if (user.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
                 Optional<Influencer> profileOtp = influencerRepository.findById(user.getUserId());
                 if (profileOtp.isPresent()) {
@@ -67,16 +74,20 @@ public class ProfileService {
                     map.put("rating", profile.getRating());
                     map.put("isPublic", profile.isPublic());
                     map.put("follower", profile.getFollower());
+                    if (!profile.getCategoryIds().isEmpty())
+                        map.put("category", categoryRepository.findAllByCategoryIdIn(profile.getCategoryIds()));
                 }
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
                 Optional<Brand> profileOtp = brandRepository.findById(user.getUserId());
                 if (profileOtp.isPresent()) {
                     Brand profile = profileOtp.get();
                     map.put("bio", profile.getBio());
-                    map.put("contacts",profile.getContacts());
+                    map.put("contacts", profile.getContacts());
                     map.put("socialMediaLinks", profile.getSocialMediaLinks());
                     map.put("establishDate", profile.getEstablishDate());
                     map.put("totalCampaign", profile.getTotalCampaign());
+                    if (!profile.getCategoryIds().isEmpty())
+                        map.put("category", categoryRepository.findAllByCategoryIdIn(profile.getCategoryIds()));
                 }
             }
             userList.add(map);
@@ -195,7 +206,7 @@ public class ProfileService {
             return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
         }
         userOpt.get().setAvatarUrl(imageUrl);
-        
+
         return ApiResponse.sendSuccess(200, "Change avatar successfully", imageUrl, request.getRequestURI());
     }
 
