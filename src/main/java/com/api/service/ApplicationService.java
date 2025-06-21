@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.Set;
-    
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +17,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.api.dto.ApiResponse;
-import com.api.dto.response.ApplicationsByCampaignResponse;
+import com.api.dto.response.ApplicationPlusInfluencer;
+import com.api.dto.response.ApplicationsByBrandResponse;
+import com.api.dto.response.ApplicationsByfInfluencerResponse;
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
+import com.api.model.Influencer;
 import com.api.model.Status;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
@@ -124,7 +127,7 @@ public class ApplicationService {
         String brandId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Campaign> campaignPage = campaignRepository.findAllByBrandId(brandId, pageable);
-        Optional<User> user = userRepository.findById(brandId);
+        Optional<User> brandUser = userRepository.findById(brandId);
         List<Campaign> campaigns = campaignPage.getContent();
 
         if (campaigns.isEmpty()) {
@@ -134,33 +137,34 @@ public class ApplicationService {
                 .map(Campaign::getCampaignId)
                 .toList();
         List<Application> applications = applicationRepository.findAllByCampaignIdIn(campaignIds);
-        Map<String, List<Application>> applicationsByCampaign = applications.stream()
-                .collect(Collectors.groupingBy(Application::getCampaignId));
 
-        List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaigns.stream()
-                .map(campaignResponse -> new ApplicationsByCampaignResponse(user.get(),
-                        campaignResponse,
-                        applicationsByCampaign.getOrDefault(campaignResponse.getCampaignId(), Collections.emptyList()),
-                        categoryRepository))
-                .toList();
+        List<ApplicationsByBrandResponse> applicationsByCampaignResponses = campaigns.stream()
+                .map(campaign -> {
+                    List<ApplicationPlusInfluencer> appResponses = applications.stream()
+                            .filter(app -> app.getCampaignId().equals(campaign.getCampaignId()))
+                            .map(app -> {
+                                User user = userRepository.findById(app.getInfluencerId()).orElse(null);
+                                Influencer influencer = influencerRepository.findById(app.getInfluencerId())
+                                        .orElse(null);
+                                return new ApplicationPlusInfluencer(user, influencer, app);
+                            })
+                            .collect(Collectors.toList());
+                    return new ApplicationsByBrandResponse(brandUser.get(), campaign, appResponses, categoryRepository);
+                })
+                .collect(Collectors.toList());
+
         return ApiResponse.sendSuccess(200, "Reponse successfully", applicationsByCampaignResponses,
                 request.getRequestURI());
     }
 
-//    public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
-//            HttpServletRequest request) {
-//        String influencerId = userDetails.getUserId();
-//        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
-//        return ApiResponse.sendSuccess(200, "Reponse successfully", applications, request.getRequestURI());
-//    }
-
-         public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
+    public ResponseEntity<?> getAllApplicationByInfluencer(CustomUserDetails userDetails,
             HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
         List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
         Optional<User> user = userRepository.findById(influencerId);
         if (applications.isEmpty()) {
-            return ApiResponse.sendError(400, "Not found any application for this influencer!", request.getRequestURI());
+            return ApiResponse.sendError(400, "Not found any application for this influencer!",
+                    request.getRequestURI());
         }
 
         Set<String> campaignIds = applications.stream()
@@ -175,16 +179,16 @@ public class ApplicationService {
         Map<String, List<Application>> applicationsByCampaign = applications.stream()
                 .collect(Collectors.groupingBy(Application::getCampaignId));
 
-        List<ApplicationsByCampaignResponse> applicationsByCampaignResponses = campaignIds.stream()
+        List<ApplicationsByfInfluencerResponse> applicationsByCampaignResponses = campaignIds.stream()
                 .map(campaignId -> {
                     Campaign campaign = campaignMap.get(campaignId);
-                    List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(campaignId, Collections.emptyList());
-                    return new ApplicationsByCampaignResponse(
+                    List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(campaignId,
+                            Collections.emptyList());
+                    return new ApplicationsByfInfluencerResponse(
                             user.get(),
-                            campaign, 
+                            campaign,
                             appsForCampaign,
-                            categoryRepository                           
-                    );
+                            categoryRepository);
                 })
                 .collect(Collectors.toList());
 
