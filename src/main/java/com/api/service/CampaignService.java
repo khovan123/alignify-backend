@@ -2,11 +2,13 @@ package com.api.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -83,13 +85,11 @@ public class CampaignService {
         chatRoomRepository.save(
                 new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(), campaign.getImageUrl()));
         User user = userRepository.findById(brandId).get();
-        List<String> readBy = new ArrayList<>();
-        readBy.add(brandId);
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setMessage("Xin chào " + user.getName() + " !");
         chatMessage.setChatRoomId(campaign.getCampaignId());
         chatMessage.setName(user.getName());
-        chatMessage.setReadBy(readBy);
+        chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
         chatMessage.setUserId("#SYS");
         chatMessage.setSendAt(LocalDateTime.now());
         chatMessageRepository.save(chatMessage);
@@ -213,6 +213,10 @@ public class CampaignService {
             return ApiResponse.sendError(403, "Access denied. You are not the owner of this campaign.",
                     request.getRequestURI());
         }
+        if (!campaign.getStatus().equals("DRAFT")) {
+            return ApiResponse.sendError(403, "Access denied",
+                    request.getRequestURI());
+        }
         List<CampaignTracking> relatedTrackings = campaignTrackingRepository.findAllByCampaignId(campaignId);
         campaignTrackingRepository.deleteAll(relatedTrackings);
         campaignRepo.deleteById(campaignId);
@@ -233,8 +237,8 @@ public class CampaignService {
         if (campaignOpt.isPresent()) {
             Campaign campaign = campaignOpt.get();
             ChatRoom chatRoom = chatRoomRepository.findById(campaignId).get();
-            if ("COMPLETED".equals(campaign.getStatus())) {
-                return ApiResponse.sendError(400, "Cannot update a campaign that is COMPLETED",
+            if (!"DRAFT".equals(campaign.getStatus())) {
+                return ApiResponse.sendError(400, "Access denied.",
                         request.getRequestURI());
             }
             int newBudget = updatedCampaign.getBudget();
@@ -285,6 +289,7 @@ public class CampaignService {
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
             }
+            campaign.setCreatedAt(LocalDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
 
@@ -303,8 +308,22 @@ public class CampaignService {
         String brandId = userDetails.getUserId();
         Optional<Campaign> campaignOpt = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
         Campaign campaign = campaignOpt.get();
+        if ((!campaign.getStatus().equals("PENDING")) && (!campaign.getStatus().equals("RECRUITING"))
+                && statusRequest.getStatus().equals("DRAFT")) {
+            return ApiResponse.sendError(403, "Access denied.", request.getRequestURI());
+        }
         campaign.setStatus(statusRequest.getStatus());
-        if (statusRequest.getStatus().equals("PARTICIPATING")) {
+        if (campaign.getStatus().equals("DRAFT") && statusRequest.getStatus().equals("RECRUITING")) {
+        } else if (campaign.getStatus().equals("RECRUITING") && statusRequest.getStatus().equals("PENDING")) {
+        } else if ((campaign.getStatus().equals("PENDING")) || (campaign.getStatus().equals("RECRUITING"))
+                && statusRequest.getStatus().equals("DRAFT")) {
+            applicationRepository.deleteAllByCampaignId(campaignId);
+            ChatRoom chatRoom = chatRoomRepository.findById(campaignId).get();
+            chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
+            chatRoomRepository.save(chatRoom);
+            chatMessageRepository.deleteAllByChatRoomId(campaignId);
+        }
+        if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
             List<Application> applications = applicationRepository.findAllByCampaignId(campaignId);
             if (!applications.isEmpty()) {
                 applications.forEach(app -> {
@@ -321,12 +340,14 @@ public class CampaignService {
             } else {
                 return ApiResponse.sendError(403, "Please confirm at least one application", request.getRequestURI());
             }
-        } else if (statusRequest.getStatus().equals("COMPLETED")) {
+        } else if (statusRequest.getStatus().equals("COMPLETED") && campaign.getStatus().equals("PARTICIPATING")) {
             List<CampaignTracking> campaignTrackings = campaignTrackingRepository
                     .findAllByCampaignIdAndStatus(campaignId, "COMPLETED");
             if (campaign.getInfluencerCountCurrent() > campaignTrackings.size()) {
                 return ApiResponse.sendError(403, "All campaign tracking must be completed", request.getRequestURI());
             }
+        } else {
+            return ApiResponse.sendError(403, "Not supported yet.", request.getRequestURI());
         }
         campaignRepo.save(campaign);
         return ApiResponse.sendSuccess(200, "Update campaign status successfully", campaign,
@@ -345,7 +366,6 @@ public class CampaignService {
     public Campaign convertToCampaign(String obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            // Configure ObjectMapper to handle Java 8 date/time types if needed
             mapper.registerModule(new JavaTimeModule());
             return mapper.readValue(obj, Campaign.class);
         } catch (JsonProcessingException e) {
