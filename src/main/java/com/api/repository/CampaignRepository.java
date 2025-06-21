@@ -2,6 +2,7 @@ package com.api.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,13 +10,14 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import com.api.model.Campaign;
-import java.util.Set;
 
 @Repository
 public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     @Override
     Page<Campaign> findAll(Pageable pageable);
+
+    Page<Campaign> findAllByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
 
     Page<Campaign> findAllByBrandId(String userId, Pageable pageable);
 
