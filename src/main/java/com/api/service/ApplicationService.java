@@ -2,6 +2,7 @@ package com.api.service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -184,6 +185,18 @@ public class ApplicationService {
                     Campaign campaign = campaignMap.get(campaignId);
                     List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(campaignId,
                             Collections.emptyList());
+                    if (campaign.getApplicationTotal() != appsForCampaign.size()) {
+                        campaign.setApplicationTotal(appsForCampaign.size());
+                        Set<String> status = Set.of(Status.PENDING.toString(), Status.ACCEPTED.toString(),
+                                Status.REJECTED.toString());
+                        Map<String, List<Application>> applicationMap = applications.stream()
+                                .filter(app -> status.contains(app.getStatus()))
+                                .collect(Collectors.groupingBy(Application::getCampaignId));
+                        if (campaign.getInfluencerCountCurrent() != applicationMap.get(Status.ACCEPTED.toString()).size()) {
+                            campaign.setInfluencerCountCurrent(applicationMap.get(Status.ACCEPTED.toString()).size());
+                        }
+                        campaignRepository.save(campaign);
+                    }
                     return new ApplicationsByfInfluencerResponse(
                             user.get(),
                             campaign,
