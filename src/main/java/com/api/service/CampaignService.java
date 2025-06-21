@@ -119,8 +119,8 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllCampaign(int pageNumber, int pageSize, HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Campaign> campaignPage = campaignRepo.findAll(pageable);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Campaign> campaignPage = campaignRepo.findAllByStatusOrderByCreatedAtDesc("RECRUITING", pageable);
         Set<String> brandIds = campaignPage.getContent().stream()
                 .map(Campaign::getBrandId)
                 .collect(Collectors.toSet());

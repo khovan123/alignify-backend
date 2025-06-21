@@ -1,6 +1,5 @@
 package com.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +8,8 @@ import java.util.Map;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document("campaigns")
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,7 +36,7 @@ public class Campaign {
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
-        this.status = "DRAFT";
+        this.status = "RECRUITING";
         this.influencerCountCurrent = 0;
         this.applicationTotal = 0;
     }
@@ -77,7 +78,10 @@ public class Campaign {
         this.applicationTotal = applicationTotal;
     }
 
-    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdAt, LocalDateTime dueAt, LocalDateTime startAt, String status, int budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+    public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
+            List<String> categoryIds, LocalDateTime createdAt, LocalDateTime dueAt, LocalDateTime startAt,
+            String status, int budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements,
+            int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.campaignName = campaignName;
