@@ -1,17 +1,19 @@
 package com.api.dto.response;
 
+import java.util.List;
+
 import com.api.model.Application;
 import com.api.model.Campaign;
 import com.api.model.User;
 import com.api.repository.CategoryRepository;
-import java.util.List;
 
-public class ApplicationsByCampaignResponse {
+public class ApplicationsByfInfluencerResponse {
 
     private CampaignResponse campaignResponse;
     private List<Application> applications;
 
-    public ApplicationsByCampaignResponse(User user,Campaign campaign, List<Application> applications, CategoryRepository categoryRepository) {
+    public ApplicationsByfInfluencerResponse(User user, Campaign campaign, List<Application> applications,
+            CategoryRepository categoryRepository) {
         this.campaignResponse = new CampaignResponse(user, campaign, categoryRepository);
         this.applications = applications;
     }
