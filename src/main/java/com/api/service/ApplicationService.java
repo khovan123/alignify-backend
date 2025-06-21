@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -125,8 +124,10 @@ public class ApplicationService {
     public ResponseEntity<?> getAllApplicationByBrand(int pageNumber, int pageSize, CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Campaign> campaignPage = campaignRepository.findAllByBrandId(brandId, pageable);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Campaign> campaignPage = campaignRepository.findAllByBrandIdAndStatusOrderByCreatedAtDesc(brandId,
+                "RECRUITING",
+                pageable);
         Optional<User> brandUser = userRepository.findById(brandId);
         List<Campaign> campaigns = campaignPage.getContent();
 
