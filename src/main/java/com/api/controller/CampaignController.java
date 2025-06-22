@@ -1,6 +1,5 @@
 package com.api.controller;
 
-import com.api.dto.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,16 +12,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
 import com.api.model.Campaign;
 import com.api.security.CustomUserDetails;
 import com.api.service.CampaignService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.RequestPart;
 
 @RestController
 @RequestMapping("api/v1/campaigns")
@@ -47,16 +47,16 @@ public class CampaignController {
         return campaignService.getAllCampaign(page, size, request);
     }
 
-    @GetMapping("/brands/{brandId}")
-    public ResponseEntity<?> getCampaignsByBrandId(
-            @PathVariable("brandId") String userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest request) {
-        return campaignService.getCampaignsByUserId(userId, page, size, request);
-    }
+    // @GetMapping("/brands/{brandId}")
+    // public ResponseEntity<?> getCampaignsByBrandId(
+    // @PathVariable("brandId") String userId,
+    // @RequestParam(defaultValue = "0") int page,
+    // @RequestParam(defaultValue = "10") int size,
+    // HttpServletRequest request) {
+    // return campaignService.getCampaignsByUserId(userId, page, size, request);
+    // }
 
-    //    --update thêm file ảnh--vao request
+    // --update thêm file ảnh--vao request
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_BRAND')")
     public ResponseEntity<?> createCampaign(
