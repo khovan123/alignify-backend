@@ -58,7 +58,7 @@ public class ApplicationController {
             @PathVariable("applicationId") String applicationId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-return applicationService.cancel_Application(applicationId, userDetails, request);
+        return applicationService.cancel_Application(applicationId, userDetails, request);
     }
 
     @PostMapping("/applications/{applicationId}/re-apply")
