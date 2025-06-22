@@ -254,7 +254,7 @@ public class AuthService {
         }
 
         user.setPassword(JwtUtil.hashPassword(passwordRequest.getNewPassword()));
-
+        userRepository.save(user);
         return ApiResponse.sendSuccess(200, "Password changed successfully", null, request.getRequestURI());
     }
 
