@@ -1,6 +1,7 @@
 package com.api.service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -272,7 +273,29 @@ public class ApplicationService {
                 if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Reached to limitation", request.getRequestURI());
                 }
-                ChatRoom chatRoom = chatRoomRepository.findById(application.getCampaignId()).get();
+                Optional<ChatRoom> chatRoomOpt = chatRoomRepository.findById(application.getCampaignId());
+                ChatRoom chatRoom;
+                if (!chatRoomOpt.isPresent()) {
+                        chatRoom = new ChatRoom();
+                        chatRoom.setChatRoomId(application.getCampaignId());
+                        chatRoom.setRoomOwnerId(brandId);
+                        chatRoom.setMembers(Arrays.asList(brandId));
+                        chatRoom = chatRoomRepository.save(chatRoom);
+                        ChatMessage chatMessage = new ChatMessage();
+                        Optional<User> userOpt = userRepository.findById(brandId);
+                        if (!userOpt.isPresent()) {
+                                return ApiResponse.sendError(404, "User not found", request.getRequestURI());
+                        }
+                        User user = userOpt.get();
+                        chatMessage.setMessage("Xin chào " + user.getName() + " !");
+                        chatMessage.setName(user.getName());
+                        chatMessage.setSendAt(LocalDateTime.now());
+                        chatMessage.setChatRoomId(chatRoom.getChatRoomId());
+                        chatMessage.setUserId("#SYS");
+                        chatMessageRepository.save(chatMessage);
+                } else {
+                        chatRoom = chatRoomOpt.get();
+                }
                 List<String> roomMate = chatRoom.getMembers();
                 if (accepted) {
                         application.setStatus("ACCEPTED");
@@ -282,7 +305,11 @@ public class ApplicationService {
                         campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
                         campaignRepository.save(campaign);
                         ChatMessage chatMessage = new ChatMessage();
-                        User user = userRepository.findById(brandId).get();
+                        Optional<User> userOpt = userRepository.findById(application.getInfluencerId());
+                        if (!userOpt.isPresent()) {
+                                return ApiResponse.sendError(404, "User not found", request.getRequestURI());
+                        }
+                        User user = userOpt.get();
                         chatMessage.setMessage("Xin chào " + user.getName() + " !");
                         chatMessage.setName(user.getName());
                         chatMessage.setSendAt(LocalDateTime.now());
