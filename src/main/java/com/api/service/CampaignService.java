@@ -326,8 +326,7 @@ public class CampaignService {
             chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
             chatRoomRepository.save(chatRoom);
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
-        }
-        if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
+        } else if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
             List<Application> applications = applicationRepository.findAllByCampaignId(campaignId);
             if (!applications.isEmpty()) {
                 applications.forEach(app -> {

@@ -137,7 +137,8 @@ public class ApplicationService {
                 List<Campaign> campaigns = campaignPage.getContent();
 
                 if (campaigns.isEmpty()) {
-                        ApiResponse.sendError(400, "Not found any campaign!", request.getRequestURI());
+                        return ApiResponse.sendSuccess(200, "You dont have any campaigns yet!", null,
+                                        request.getRequestURI());
                 }
                 List<String> campaignIds = campaigns.stream()
                                 .map(Campaign::getCampaignId)
@@ -194,7 +195,7 @@ public class ApplicationService {
                 List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
                 Optional<User> user = userRepository.findById(influencerId);
                 if (applications.isEmpty()) {
-                        return ApiResponse.sendError(400, "Not found any application for this influencer!",
+                        return ApiResponse.sendSuccess(200, "You dont have any applications yet!", null,
                                         request.getRequestURI());
                 }
 
