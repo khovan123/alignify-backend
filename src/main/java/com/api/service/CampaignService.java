@@ -145,7 +145,7 @@ public class CampaignService {
 
     public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails, int pageNumber, int pageSize,
             HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId(), pageable);
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
@@ -183,24 +183,28 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getCampaignsByUserId(String userId, int pageNumber, int pageSize,
-            HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userId, pageable);
-        Optional<User> user = userRepository.findById(userId);
+    // public ResponseEntity<?> getCampaignsByUserId(String userId, int pageNumber,
+    // int pageSize,
+    // HttpServletRequest request) {
+    // Pageable pageable = PageRequest.of(pageNumber, pageSize,
+    // Sort.by(Sort.Direction.DESC, "createdDate"));
+    // Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userId,
+    // pageable);
+    // Optional<User> user = userRepository.findById(userId);
 
-        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
-                .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
-                .toList();
+    // List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+    // .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
+    // .toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", campaignPage.getNumber());
-        responseData.put("totalPages", campaignPage.getTotalPages());
-        responseData.put("totalItems", campaignPage.getTotalElements());
+    // Map<String, Object> responseData = new HashMap<>();
+    // responseData.put("campaigns", dtoList);
+    // responseData.put("currentPage", campaignPage.getNumber());
+    // responseData.put("totalPages", campaignPage.getTotalPages());
+    // responseData.put("totalItems", campaignPage.getTotalElements());
 
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
-    }
+    // return ApiResponse.sendSuccess(200, "Success", responseData,
+    // request.getRequestURI());
+    // }
 
     public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails,
             HttpServletRequest request) {
