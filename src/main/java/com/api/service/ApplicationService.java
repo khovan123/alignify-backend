@@ -147,7 +147,8 @@ public class ApplicationService {
                                 .map(campaign -> {
                                         List<Application> appsForCampaign = applications.stream()
                                                         .filter(app -> app.getCampaignId()
-                                                                        .equals(campaign.getCampaignId()))
+                                                                        .equals(campaign.getCampaignId())
+                                                                        && campaign.getBrandId().equals(brandId))
                                                         .collect(Collectors.toList());
 
                                         if (campaign.getApplicationTotal() != appsForCampaign.size()) {
