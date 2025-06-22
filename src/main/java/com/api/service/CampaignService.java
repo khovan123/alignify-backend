@@ -108,6 +108,47 @@ public class CampaignService {
         }
     }
 
+    public ResponseEntity<?> getCampaignsByCategoryIds(
+            int pageNumber,
+            int pageSize,
+            String categoryIds,
+            HttpServletRequest request) {
+
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return ApiResponse.sendError(400, "Category list must not be empty", request.getRequestURI());
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Campaign> campaignPage = campaignRepo.findByCategoryIdsInAndStatusOrderByCreatedAtDesc(
+                categoryIds, "RECRUITING", pageable);
+
+        Set<String> brandIds = campaignPage.getContent().stream()
+                .map(Campaign::getBrandId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+                .map(campaign -> {
+                    User user = brandMap.get(campaign.getBrandId());
+                    if (user == null) {
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
+                    }
+                    return new CampaignResponse(user, campaign, categoryRepo);
+                })
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", campaignPage.getNumber());
+        responseData.put("totalPages", campaignPage.getTotalPages());
+        responseData.put("totalItems", campaignPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
     public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         User user = userRepository.findById(campaignOpt.get().getBrandId()).get();
@@ -191,21 +232,17 @@ public class CampaignService {
     // Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userId,
     // pageable);
     // Optional<User> user = userRepository.findById(userId);
-
     // List<CampaignResponse> dtoList = campaignPage.getContent().stream()
     // .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
     // .toList();
-
     // Map<String, Object> responseData = new HashMap<>();
     // responseData.put("campaigns", dtoList);
     // responseData.put("currentPage", campaignPage.getNumber());
     // responseData.put("totalPages", campaignPage.getTotalPages());
     // responseData.put("totalItems", campaignPage.getTotalElements());
-
     // return ApiResponse.sendSuccess(200, "Success", responseData,
     // request.getRequestURI());
     // }
-
     public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails,
             HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
