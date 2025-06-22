@@ -55,7 +55,6 @@ public class CampaignController {
     // HttpServletRequest request) {
     // return campaignService.getCampaignsByUserId(userId, page, size, request);
     // }
-
     // --update thêm file ảnh--vao request
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_BRAND')")
@@ -129,4 +128,13 @@ public class CampaignController {
         return campaignService.getAllCampaignOfInfluencer(userDetails, page, size, request);
     }
 
+    @GetMapping("/filterByCategory/{categoryId}")
+    public ResponseEntity<?> getCampaignsByCategoryId(
+            @PathVariable("categoryId") String categoryId,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+
+        return campaignService.getCampaignsByCategoryIds(pageNumber, pageSize, categoryId, request);
+    }
 }
