@@ -109,7 +109,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getCampaignsByCategoryIds(
-             int pageNumber,
+            int pageNumber,
             int pageSize,
             String categoryIds,
             HttpServletRequest request) {
@@ -133,7 +133,8 @@ public class CampaignService {
                 .map(campaign -> {
                     User user = brandMap.get(campaign.getBrandId());
                     if (user == null) {
-                        throw new IllegalArgumentException("Brand user not found for campaign " + campaign.getCampaignId());
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
                     }
                     return new CampaignResponse(user, campaign, categoryRepo);
                 })
@@ -362,8 +363,7 @@ public class CampaignService {
             chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
             chatRoomRepository.save(chatRoom);
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
-        }
-        if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
+        } else if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
             List<Application> applications = applicationRepository.findAllByCampaignId(campaignId);
             if (!applications.isEmpty()) {
                 applications.forEach(app -> {
