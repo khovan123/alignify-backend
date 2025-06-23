@@ -41,8 +41,8 @@ public class CampaignController {
 
     @GetMapping("")
     public ResponseEntity<?> getAllCampaigns(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0", name = "pageNumber") int page,
+            @RequestParam(defaultValue = "10", name = "pageSize") int size,
             HttpServletRequest request) {
         return campaignService.getAllCampaign(page, size, request);
     }
