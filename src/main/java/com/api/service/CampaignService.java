@@ -403,6 +403,33 @@ public class CampaignService {
     // e.getMessage());
     // }
     // }
+    public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Campaign> campaignPage = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+
+        Set<String> brandIds = campaignPage.getContent().stream()
+                .map(Campaign::getBrandId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+                .map(campaign -> {
+                    User user = brandMap.get(campaign.getBrandId());
+                    return new CampaignResponse(user, campaign, categoryRepo);
+                })
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", campaignPage.getNumber());
+        responseData.put("totalPages", campaignPage.getTotalPages());
+        responseData.put("totalItems", campaignPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Response success", responseData, request.getRequestURI());
+    }
+
     public Campaign convertToCampaign(String obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();

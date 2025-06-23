@@ -31,4 +31,6 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     Page<Campaign> findByCategoryIdsInAndStatusOrderByCreatedAtDesc(String category, String status, Pageable pageable);
 
+    Page<Campaign> findByCampaignNameContainingIgnoreCase(String campaignName, Pageable pageable);
+
 }
