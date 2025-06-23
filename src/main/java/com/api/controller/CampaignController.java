@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
 import com.api.model.Campaign;
 import com.api.security.CustomUserDetails;
@@ -63,19 +62,7 @@ public class CampaignController {
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        System.out.println(obj);
-        try {
-            System.out.println("Received campaign JSON: " + obj);
-            Campaign campaign = campaignService.convertToCampaign(obj);
-            if (image != null && !image.isEmpty()) {
-                System.out.println("Received image: " + image.getOriginalFilename());
-            } else {
-                System.out.println("No image provided");
-            }
-            return campaignService.createCampaign(campaign, image, userDetails, request);
-        } catch (Exception e) {
-            return ApiResponse.sendError(400, "Invalid request: " + e.getMessage(), request.getRequestURI());
-        }
+        return campaignService.createCampaign(campaignService.convertToCampaign(obj), image, userDetails, request);
     }
 
     @PreAuthorize("hasRole('ROLE_BRAND')")
