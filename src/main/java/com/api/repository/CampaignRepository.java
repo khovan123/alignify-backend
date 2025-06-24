@@ -25,6 +25,8 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     Page<Campaign> findAllByBrandId(String userId, Pageable pageable);
 
+    List<Campaign> findAllByBrandId(String userId);
+
     Page<Campaign> findAllByCampaignIdIn(List<String> campaignIds, Pageable pageable);
 
     Optional<Campaign> findByCampaignIdAndBrandId(String campaignId, String brandId);
