@@ -72,12 +72,19 @@ public class ApplicationService {
                 if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
                 }
-                if (campaign.getAppliedInfluencerIds().contains(influencerId)) {
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)
+                                || applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
                         return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
                 }
                 Application application = applicationRepository
                                 .save(new Application(campaignId, influencerId, campaign.getBrandId()));
+                List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                ? new java.util.ArrayList<>()
+                                : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                updatedAppliedInfluencerIds.add(influencerId);
+                campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
+                campaignRepository.save(campaign);
                 return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                                 request.getRequestURI());
         }
@@ -93,7 +100,19 @@ public class ApplicationService {
                         return ApiResponse.sendError(404, "id: " + applicationId + " not found",
                                         request.getRequestURI());
                 }
+                Optional<Campaign> campaignOpt = campaignRepository.findById(applicationOpt.get().getCampaignId());
+                if (!campaignOpt.isPresent()) {
+                        return ApiResponse.sendError(404, "id: " + applicationOpt.get().getCampaignId() + " not found",
+                                        request.getRequestURI());
+                }
+                Campaign campaign = campaignOpt.get();
                 applicationRepository.delete(applicationOpt.get());
+                List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                ? new java.util.ArrayList<>()
+                                : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                updatedAppliedInfluencerIds.remove(influencerId);
+                campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
+                campaignRepository.save(campaign);
                 return ApiResponse.sendSuccess(204, "Delete application successfully", null, request.getRequestURI());
         }
 
@@ -117,10 +136,17 @@ public class ApplicationService {
                         return ApiResponse.sendError(403, "Access is denied.",
                                         request.getRequestURI());
                 }
-                if (campaign.getAppliedInfluencerIds().contains(influencerId)) {
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)
+                                || applicationRepository.existsByInfluencerIdAndCampaignId(influencerId,
+                                                campaign.getCampaignId())) {
                         return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
                 }
+                List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                ? new java.util.ArrayList<>()
+                                : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                updatedAppliedInfluencerIds.add(influencerId);
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
+                campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
                 campaignRepository.save(campaign);
                 application.setLimited(application.getLimited() - 1);
                 applicationRepository.save(application);
@@ -297,6 +323,12 @@ public class ApplicationService {
                         roomMate.remove(application.getInfluencerId());
                         chatRoom.setMembers(roomMate);
                         chatRoomRepository.save(chatRoom);
+                        List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                        ? new java.util.ArrayList<>()
+                                        : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                        updatedAppliedInfluencerIds.remove(application.getInfluencerId());
+                        campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
+                        campaignRepository.save(campaign);
                 }
                 applicationRepository.save(application);
                 User user = userRepository.findById(application.getInfluencerId()).orElse(null);
