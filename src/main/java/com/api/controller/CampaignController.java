@@ -80,6 +80,13 @@ public class CampaignController {
             HttpServletRequest request) {
         return campaignService.getAllCampaignOfBrand(userDetails, page, size, request);
     }
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    @GetMapping("/brandNoPage")
+    public ResponseEntity<?> getAllCampaignOfBrandNoPage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.getAllCampaignOfBrandNoPage(userDetails, request);
+    }
 
     @PutMapping("/{campaignId}")
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
