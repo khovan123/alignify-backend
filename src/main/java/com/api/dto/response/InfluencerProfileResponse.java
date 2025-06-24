@@ -1,13 +1,14 @@
 package com.api.dto.response;
 
-import com.api.model.Category;
-import com.api.model.Influencer;
-import com.api.model.User;
-import com.api.repository.CategoryRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import com.api.model.Category;
+import com.api.model.Influencer;
+import com.api.model.User;
+import com.api.repository.CategoryRepository;
 
 public class InfluencerProfileResponse {
 
@@ -25,8 +26,11 @@ public class InfluencerProfileResponse {
     private List<Category> categories;
     private int follower;
     private boolean isPublic;
+    private int completedCampaign;
 
-    public InfluencerProfileResponse(User user, Influencer influencer, boolean isOwner, CategoryRepository categoryRepository) {
+    public InfluencerProfileResponse(User user, Influencer influencer, int completedCampaign, boolean isOwner,
+            CategoryRepository categoryRepository) {
+        this.completedCampaign = completedCampaign;
         this.userId = user.getUserId();
         this.name = user.getName();
         this.roleId = user.getRoleId();
@@ -158,6 +162,14 @@ public class InfluencerProfileResponse {
 
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    public int getCompletedCampaign() {
+        return completedCampaign;
+    }
+
+    public void setCompletedCampaign(int completedCampaign) {
+        this.completedCampaign = completedCampaign;
     }
 
 }
