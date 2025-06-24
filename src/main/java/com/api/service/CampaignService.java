@@ -150,7 +150,7 @@ public class CampaignService {
      
     public ResponseEntity<?> getCampaignsTop( HttpServletRequest request) {
 
-        List<Campaign> campaigns = campaignRepo.findAllByOrderByApplicationTotalDesc();
+        List<Campaign> campaigns = campaignRepo.findTop3ByOrderByApplicationTotalDescCreatedAtDesc();
 
         Set<String> brandIds = campaigns.stream()
                 .map(Campaign::getBrandId)
