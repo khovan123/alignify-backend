@@ -83,6 +83,7 @@ public class ApplicationService {
                 updatedAppliedInfluencerIds.add(influencerId);
                 campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
+                campaignRepository.save(campaign);
                 return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                                 request.getRequestURI());
         }
