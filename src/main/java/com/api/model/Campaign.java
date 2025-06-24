@@ -33,12 +33,14 @@ public class Campaign {
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
+    private List<String> appliedInfluencerIds;
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
-        this.status = "RECRUITING";
+        this.status = "DRAFT";
         this.influencerCountCurrent = 0;
         this.applicationTotal = 0;
+        this.appliedInfluencerIds = new ArrayList<>();
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
@@ -81,7 +83,8 @@ public class Campaign {
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
             List<String> categoryIds, LocalDateTime createdAt, LocalDateTime dueAt, LocalDateTime startAt,
             String status, int budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements,
-            int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+            int influencerCountExpected, int influencerCountCurrent, int applicationTotal,
+            List<String> appliedInfluencerIds) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.campaignName = campaignName;
@@ -98,6 +101,7 @@ public class Campaign {
         this.influencerCountExpected = influencerCountExpected;
         this.influencerCountCurrent = influencerCountCurrent;
         this.applicationTotal = applicationTotal;
+        this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
 
     public LocalDateTime getCreatedAt() {
@@ -226,6 +230,14 @@ public class Campaign {
 
     public void setApplicationTotal(int applicationTotal) {
         this.applicationTotal = applicationTotal;
+    }
+
+    public List<String> getAppliedInfluencerIds() {
+        return appliedInfluencerIds;
+    }
+
+    public void setAppliedInfluencerIds(List<String> appliedInfluencerIds) {
+        this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
 
 }
