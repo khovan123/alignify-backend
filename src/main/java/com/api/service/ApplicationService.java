@@ -72,7 +72,8 @@ public class ApplicationService {
                 if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
                 }
-                if (campaign.getAppliedInfluencerIds().contains(influencerId)) {
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)
+                                || applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
                         return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
                 }
                 Application application = applicationRepository
@@ -135,7 +136,9 @@ public class ApplicationService {
                         return ApiResponse.sendError(403, "Access is denied.",
                                         request.getRequestURI());
                 }
-                if (campaign.getAppliedInfluencerIds().contains(influencerId)) {
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)
+                                || applicationRepository.existsByInfluencerIdAndCampaignId(influencerId,
+                                                campaign.getCampaignId())) {
                         return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
                 }
                 List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
