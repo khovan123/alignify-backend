@@ -311,7 +311,7 @@ public class ApplicationService {
                         campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
                         campaignRepository.save(campaign);
                         ChatMessage chatMessage = new ChatMessage();
-                        User user = userRepository.findById(brandId).get();
+                        User user = userRepository.findById(applicationOpt.get().getInfluencerId()).get();
                         chatMessage.setMessage("Xin chào " + user.getName() + " !");
                         chatMessage.setName(user.getName());
                         chatMessage.setSendAt(LocalDateTime.now());

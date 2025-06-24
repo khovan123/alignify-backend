@@ -90,7 +90,7 @@ public class CampaignService {
                 .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
         brand.setTotalCampaign(brand.getTotalCampaign() + 1);
         brandRepository.save(brand);
-        
+
         chatRoomRepository.save(
                 new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(), campaign.getImageUrl()));
         User user = userRepository.findById(brandId).get();
@@ -237,7 +237,8 @@ public class CampaignService {
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
-    public ResponseEntity<?> getAllCampaignOfBrandNoPage(CustomUserDetails userDetails,HttpServletRequest request) {
+
+    public ResponseEntity<?> getAllCampaignOfBrandNoPage(CustomUserDetails userDetails, HttpServletRequest request) {
 
         List<Campaign> campaigns = campaignRepo.findAllByBrandId(userDetails.getUserId());
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
