@@ -19,11 +19,15 @@ import com.api.dto.request.BrandProfileRequest;
 import com.api.dto.request.InfluencerProfileRequest;
 import com.api.dto.response.BrandProfileResponse;
 import com.api.dto.response.InfluencerProfileResponse;
+import com.api.model.Application;
 import com.api.model.Brand;
+import com.api.model.Campaign;
 import com.api.model.Influencer;
 import com.api.model.Role;
 import com.api.model.User;
+import com.api.repository.ApplicationRepository;
 import com.api.repository.BrandRepository;
+import com.api.repository.CampaignRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.RoleRepository;
@@ -53,6 +57,10 @@ public class ProfileService {
     private String uploadPreset;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private CampaignRepository campaignRepository;
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -101,7 +109,8 @@ public class ProfileService {
         Role role = roleRepository.findById(user.getRoleId()).get();
         if (role.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Influencer influencer = influencerRepository.findById(id).get();
-            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer, true,
+            InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer,
+                    getCompleteCampaign(id), true,
                     categoryRepository);
             return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse,
                     request.getRequestURI());
@@ -113,12 +122,24 @@ public class ProfileService {
         return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
     }
 
+    public int getCompleteCampaign(String influencerId) {
+        List<Application> applications = applicationRepository.findAllByInfluencerIdAndStatus(influencerId, "ACCEPTED");
+        List<String> appliedCampaignIds = applications.stream()
+                .map(Application::getCampaignId)
+                .toList();
+        List<Campaign> campaigns = campaignRepository.findAllByCampaignIdInAndStatus(appliedCampaignIds,
+                "COMPLETED");
+        return campaigns.size();
+    }
+
     public ResponseEntity<?> getProfileById(String id, CustomUserDetails userDetails, HttpServletRequest request) {
         String userId = userDetails.getUserId();
         User user = userRepository.findById(id).get();
         if (user.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Influencer influencer = influencerRepository.findById(id).get();
+
             InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer,
+                    getCompleteCampaign(userId),
                     userId.equals(id), categoryRepository);
             return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse,
                     request.getRequestURI());
