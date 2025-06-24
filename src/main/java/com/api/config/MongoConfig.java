@@ -48,7 +48,7 @@ public class MongoConfig {
     // this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
     // this.create_accountVerifiedsCollection(db);
-    this.create_campaignsCollection(db);
+    // this.create_campaignsCollection(db);
     // this.create_contentPostingsCollection(db);
     // this.create_likesCollection(db);
     // this.create_applicationsCollection(db);
@@ -56,7 +56,7 @@ public class MongoConfig {
     // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
     // this.create_messagesCollection(db);
-    this.create_notificationsCollection(db);
+    // this.create_notificationsCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
