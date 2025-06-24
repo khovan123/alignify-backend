@@ -25,4 +25,5 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     Page<User> findByNameContainingIgnoreCaseAndRoleId(String name, String roleId, Pageable pageable);
 
+    List<User> findByNameContainingIgnoreCase(String name);
 }
