@@ -7,7 +7,7 @@ import java.util.*;
 import org.springframework.data.annotation.CreatedDate;
 
 @Document(collection = "influencers")
-public class Influencer {
+public class Influencer{
 
     @Id
     private String userId;
