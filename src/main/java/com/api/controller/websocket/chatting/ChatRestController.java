@@ -101,7 +101,7 @@ public class ChatRestController {
                 List<String> readBy = new ArrayList<>();
                 ChatMessage newMsg = new ChatMessage();
                 // readBy.add(userId);
-                newMsg.setMessage("Xin chào " + user.getName() + " !");
+                newMsg.setMessage(user.getName() + " đã vào phòng chat.");
                 newMsg.setChatRoomId(room.getChatRoomId());
                 newMsg.setName(user.getName());
                 newMsg.setReadBy(readBy);
