@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,15 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.UserDTO;
 import com.api.dto.response.ChatMessageResponse;
 import com.api.dto.response.ChatRoomResponse;
-import com.api.model.Brand;
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
-import com.api.model.Influencer;
 import com.api.model.User;
 import com.api.repository.BrandRepository;
 import com.api.repository.ChatMessageRepository;
@@ -72,9 +70,9 @@ public class ChatRestController {
             } else {
                 User user = userRepository.findById(msg.getUserId())
                         .orElseThrow(() -> new IllegalArgumentException("User not found: " + msg.getUserId()));
-                    avatarUrl = userRepository.findById(msg.getUserId())
-                            .map(User::getAvatarUrl)
-                            .orElse(null);
+                avatarUrl = userRepository.findById(msg.getUserId())
+                        .map(User::getAvatarUrl)
+                        .orElse(null);
 
                 userDTO = new UserDTO(msg.getUserId(), user.getName(), avatarUrl);
             }
@@ -90,7 +88,7 @@ public class ChatRestController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         String userId = userDetails.getUserId();
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         List<ChatRoom> chatRooms = chatRoomRepository.findAllByRoomOwnerIdOrMember(userId, pageable).toList();
         System.out.println(chatRooms.size());
         List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();

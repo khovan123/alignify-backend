@@ -12,8 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Category;
@@ -28,6 +28,9 @@ import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
 import com.api.util.JwtUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -44,16 +47,23 @@ public class ContentPostingService {
     private CommentRepository commentRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
 
-
-    public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, CustomUserDetails userDetails, HttpServletRequest request) {
-        if (userDetails.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
-            contentPosting.setUserId(userDetails.getUserId());
-            contentPosting = contentPostingRepo.save(contentPosting);
-            return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
-                    request.getRequestURI());
+    public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, MultipartFile file,
+            CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String imageUrl;
+        try {
+            imageUrl = fileStorageService.storeFile(file);
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendError(403, "Content Posting only create by Influencer", request.getRequestURI());
+        contentPosting.setUserId(userDetails.getUserId());
+        contentPosting.setImageUrl(imageUrl);
+        contentPosting = contentPostingRepo.save(contentPosting);
+        return ApiResponse.sendSuccess(201, "Content posting created successfully", mapToDTO(contentPosting),
+                request.getRequestURI());
     }
 
     public ContentPostingResponse mapToDTO(ContentPosting post) {
@@ -239,6 +249,16 @@ public class ContentPostingService {
                 message,
                 Map.of("likeCount", likeCount),
                 request.getRequestURI());
+    }
+
+    public ContentPosting convertToContentPosting(String obj) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            return mapper.readValue(obj, ContentPosting.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid campaign JSON: " + e.getMessage(), e);
+        }
     }
 
 }
