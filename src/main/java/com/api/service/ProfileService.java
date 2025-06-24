@@ -6,10 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +45,6 @@ import com.cloudinary.Cloudinary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.springframework.data.domain.PageRequest;
 
 @Service
 public class ProfileService {
@@ -230,14 +230,15 @@ public class ProfileService {
         if (!userOpt.isPresent()) {
             return ApiResponse.sendError(404, id + " does not exist", request.getRequestURI());
         }
+        User user = userOpt.get();
         String imageUrl;
         try {
             imageUrl = fileStorageService.storeFile(file);
         } catch (Exception e) {
             return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
         }
-        userOpt.get().setAvatarUrl(imageUrl);
-
+        user.setAvatarUrl(imageUrl);
+        userRepository.save(user);
         return ApiResponse.sendSuccess(200, "Change avatar successfully", imageUrl, request.getRequestURI());
     }
 
@@ -261,7 +262,8 @@ public class ProfileService {
                 })
                 .toList();
 
-        return ApiResponse.sendSuccess(200, "Top influencers retrieved successfully", responseList, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Top influencers retrieved successfully", responseList,
+                request.getRequestURI());
     }
 
     public ResponseEntity<?> searchBrandByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
@@ -302,9 +304,11 @@ public class ProfileService {
         return ApiResponse.sendSuccess(200, "Search brand success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> searchInfluencerByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
+    public ResponseEntity<?> searchInfluencerByTerm(String term, int pageNumber, int pageSize,
+            HttpServletRequest request) {
         if (term == null || term.trim().isEmpty()) {
-            return ApiResponse.sendSuccess(200, "No influencers found", Collections.emptyList(), request.getRequestURI());
+            return ApiResponse.sendSuccess(200, "No influencers found", Collections.emptyList(),
+                    request.getRequestURI());
         }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<User> influencerPage = userRepository.findByNameContainingIgnoreCaseAndRoleId(
