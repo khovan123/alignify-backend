@@ -21,8 +21,6 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     Page<Campaign> findAllByBrandIdAndStatusOrderByCreatedAtDesc(String brandId, String status, Pageable pageable);
 
-    List<Campaign> findAllByCampaignIdInAndStatus(List<String> campaignIds, String status);
-
     Page<Campaign> findAllByBrandId(String userId, Pageable pageable);
 
     Page<Campaign> findAllByCampaignIdIn(List<String> campaignIds, Pageable pageable);
@@ -31,10 +29,15 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     List<Campaign> findAllByCampaignIdIn(Set<String> campaignIds);
 
-    Page<Campaign> findByCategoryIdsInAndStatusOrderByCreatedAtDesc(String category, String status, Pageable pageable);
+    List<Campaign> findAllByCampaignIdInAndStatus(List<String> campaignIds, String status);
+    
+    List<Campaign> findByBrandIdIn(List<String> brandIds);
+
+    Page<Campaign> findByBrandIdIn(List<String> brandIds, Pageable pageable);
 
     Page<Campaign> findByCampaignNameContainingIgnoreCase(String campaignName, Pageable pageable);
 
-    Page<Campaign> findAllByBrandIdIn(List<String> brandIds, Pageable pageable);
+    Page<Campaign> findByCategoryIdsInAndStatusOrderByCreatedAtDesc(String category, String status, Pageable pageable);
 
+    Page<Campaign> findByBrandIdInOrCampaignNameContainingIgnoreCase(List<String> brandIds, String campaignName, Pageable pageable);
 }

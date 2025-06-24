@@ -44,9 +44,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class CampaignService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CampaignService.class);
 
     @Autowired
     private CampaignRepository campaignRepo;
@@ -404,39 +410,31 @@ public class CampaignService {
     // }
     // }
     public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-
-        List<User> brands = userRepository.findByBrandNameContainingIgnoreCase(term);
-        Page<Campaign> campaignPage;
-
-        if (!brands.isEmpty()) {
-            List<String> brandIds = brands.stream().map(User::getUserId).toList();
-            campaignPage = campaignRepo.findAllByBrandIdIn(brandIds, pageable);
-        } else {
-            campaignPage = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+        if (term.isBlank() || term.isEmpty()) {
+            return this.getAllCampaign(pageNumber, pageSize, request);
         }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<User> matchedBrands = userRepository.findByNameContainingIgnoreCaseAndRoleId(term, "68485dcedda6867ca0d23e8a");
+        List<String> matchedBrandIds = matchedBrands.stream()
+                .map(User::getUserId)
+                .toList();
 
-        Set<String> brandIds = campaignPage.getContent().stream()
-                .map(Campaign::getBrandId)
-                .collect(Collectors.toSet());
+        Page<Campaign> matchedCampaigns;
 
-        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
-                .collect(Collectors.toMap(User::getUserId, Function.identity()));
-
-        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+        if (!matchedBrandIds.isEmpty()) {
+            matchedCampaigns = campaignRepo.findByBrandIdIn(matchedBrandIds, pageable);
+        } else {
+            matchedCampaigns = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+        }
+        List<CampaignResponse> dtoList = matchedCampaigns.getContent().stream()
                 .map(campaign -> {
-                    User user = brandMap.get(campaign.getBrandId());
-                    return new CampaignResponse(user, campaign, categoryRepo);
+                    User brand = userRepository.findById(campaign.getBrandId())
+                            .orElseThrow(() -> new IllegalArgumentException("Brand not found for campaign: " + campaign.getCampaignId()));
+                    return new CampaignResponse(brand, campaign, categoryRepo);
                 })
                 .toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", campaignPage.getNumber());
-        responseData.put("totalPages", campaignPage.getTotalPages());
-        responseData.put("totalItems", campaignPage.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Response success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Response success", dtoList, request.getRequestURI());
     }
 
     public Campaign convertToCampaign(String obj) {

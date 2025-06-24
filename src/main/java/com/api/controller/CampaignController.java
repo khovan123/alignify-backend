@@ -127,7 +127,7 @@ public class CampaignController {
 
     @PostMapping("/search")
     public ResponseEntity<?> search(
-            @RequestParam("term") String term,
+            @RequestParam(defaultValue = "all",name="term") String term,
             @RequestParam(defaultValue = "0", name = "pageNumber") int pageNumber,
             @RequestParam(defaultValue = "10", name = "pageSize") int pageSize,
             @AuthenticationPrincipal CustomUserDetails userDetails,
