@@ -25,6 +25,7 @@ import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
 import com.api.dto.response.CampaignResponse;
 import com.api.model.Application;
+import com.api.model.Brand;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
 import com.api.model.Category;
@@ -32,6 +33,7 @@ import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
+import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
@@ -64,6 +66,8 @@ public class CampaignService {
     private UserRepository userRepository;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private BrandRepository brandRepository;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -82,6 +86,11 @@ public class CampaignService {
         campaign.setBrandId(brandId);
         campaign.setImageUrl(imageUrl);
         campaign = campaignRepo.save(campaign);
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
+        brand.setTotalCampaign(brand.getTotalCampaign() + 1);
+        brandRepository.save(brand);
+        
         chatRoomRepository.save(
                 new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(), campaign.getImageUrl()));
         User user = userRepository.findById(brandId).get();
@@ -149,6 +158,31 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
+    public ResponseEntity<?> getCampaignsTop(HttpServletRequest request) {
+
+        List<Campaign> campaigns = campaignRepo.findTop3ByOrderByApplicationTotalDescCreatedAtDesc();
+
+        Set<String> brandIds = campaigns.stream()
+                .map(Campaign::getBrandId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        List<CampaignResponse> dtoList = campaigns.stream()
+                .map(campaign -> {
+                    User user = brandMap.get(campaign.getBrandId());
+                    if (user == null) {
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
+                    }
+                    return new CampaignResponse(user, campaign, categoryRepo);
+                })
+                .toList();
+
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
+    }
+
     public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         User user = userRepository.findById(campaignOpt.get().getBrandId()).get();
@@ -202,6 +236,16 @@ public class CampaignService {
         responseData.put("totalItems", campaignPage.getTotalElements());
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+    public ResponseEntity<?> getAllCampaignOfBrandNoPage(CustomUserDetails userDetails,HttpServletRequest request) {
+
+        List<Campaign> campaigns = campaignRepo.findAllByBrandId(userDetails.getUserId());
+        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
+
+        List<CampaignResponse> dtoList = campaigns.stream()
+                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
+                .toList();
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
     public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,

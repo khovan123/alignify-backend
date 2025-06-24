@@ -22,6 +22,7 @@ public class BrandProfileResponse {
     private Map<String, String> contacts;
     private Map<String, String> socialMediaLinks;
     private LocalDateTime establishDate;
+    private int totalCampaign;
 
     public BrandProfileResponse(User user, Brand brand, CategoryRepository categoryRepository) {
         this.userId = user.getUserId();
@@ -37,6 +38,15 @@ public class BrandProfileResponse {
         this.contacts = brand.getContacts();
         this.socialMediaLinks = brand.getSocialMediaLinks();
         this.establishDate = brand.getEstablishDate();
+        this.totalCampaign = brand.getTotalCampaign();
+    }
+
+    public int getTotalCampaign() {
+        return totalCampaign;
+    }
+
+    public void setTotalCampaign(int totalCampaign) {
+        this.totalCampaign = totalCampaign;
     }
 
     public String getUserId() {
