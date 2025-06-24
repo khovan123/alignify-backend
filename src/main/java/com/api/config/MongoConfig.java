@@ -56,6 +56,7 @@ public class MongoConfig {
     // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
     // this.create_messagesCollection(db);
+    // this.create_notificationsCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -623,7 +624,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal"],
+                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal", "appliedInfluencerIds"],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -679,6 +680,12 @@ public class MongoConfig {
                     },
                     "applicationTotal": {
                         "bsonType": "int"
+                    },
+                    "appliedInfluencerIds": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     }
                 }
             }
@@ -942,6 +949,46 @@ public class MongoConfig {
 
     db.createCollection("chatRooms", options);
   }
+
+  public void create_notificationsCollection(MongoDatabase db) {
+    if (db.getCollection("notifications") != null) {
+      db.getCollection("notifications").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["userId", "name", "content"],
+                "properties": {
+                    "userId": {
+                        "bsonType": "string"
+                    },
+                    "name": {
+                        "bsonType": "string"
+                    },
+                    "content": {
+                        "bsonType": "string"
+                    },
+                    "createdAt": {
+                        "bsonType": "date"
+                    },
+                    "isRead": {
+                        "bsonType": "bool"
+                    }
+                }
+            }
+            """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("notifications", options);
+  }
+
   // public void create_campaignTrackingsCollection(MongoDatabase db) {
   // if (db.getCollection("campaignTrackings") != null) {
   // db.getCollection("campaignTrackings").drop();

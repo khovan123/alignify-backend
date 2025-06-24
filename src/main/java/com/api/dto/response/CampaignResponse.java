@@ -1,6 +1,7 @@
 package com.api.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public class CampaignResponse {
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
+    private List<String> appliedInfluencerIds;
 
     public CampaignResponse() {
     }
@@ -50,6 +52,8 @@ public class CampaignResponse {
         this.influencerCountExpected = campaign.getInfluencerCountExpected();
         this.influencerCountCurrent = campaign.getInfluencerCountCurrent();
         this.applicationTotal = campaign.getApplicationTotal();
+        this.appliedInfluencerIds = campaign.getAppliedInfluencerIds() != null ? campaign.getAppliedInfluencerIds()
+                : List.of();
     }
 
     public String getStatus() {
@@ -84,7 +88,6 @@ public class CampaignResponse {
         this.brandName = brandName;
     }
 
-    
     public String getContent() {
         return content;
     }
@@ -148,7 +151,7 @@ public class CampaignResponse {
     public void setCampaignName(String campaignName) {
         this.campaignName = campaignName;
     }
-    
+
     public long getBudget() {
         return budget;
     }
@@ -187,6 +190,14 @@ public class CampaignResponse {
 
     public void setApplicationTotal(int applicationTotal) {
         this.applicationTotal = applicationTotal;
+    }
+
+    public List<String> getAppliedInfluencerIds() {
+        return appliedInfluencerIds;
+    }
+
+    public void setAppliedInfluencerIds(List<String> appliedInfluencerIds) {
+        this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
 
 }
