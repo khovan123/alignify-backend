@@ -1,5 +1,6 @@
 package com.api.service;
 
+import com.api.config.EnvConfig;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,9 +47,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class CampaignService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CampaignService.class);
 
     @Autowired
     private CampaignRepository campaignRepo;
@@ -448,6 +455,38 @@ public class CampaignService {
     // e.getMessage());
     // }
     // }
+    
+    public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
+        if (term.isBlank() || term.isEmpty()) {
+            return this.getAllCampaign(pageNumber, pageSize, request);
+        }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<User> matchedBrands = userRepository.findByNameContainingIgnoreCaseAndRoleId(term, EnvConfig.BRAND_ROLE_ID);
+        List<String> matchedBrandIds = matchedBrands.stream()
+                .map(User::getUserId)
+                .toList();
+
+        Page<Campaign> matchedCampaigns;
+
+        if (!matchedBrandIds.isEmpty()) {
+            matchedCampaigns = campaignRepo.findByBrandIdIn(matchedBrandIds, pageable);
+        } else {
+            matchedCampaigns = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+        }
+        if( matchedCampaigns.isEmpty()) {
+            return ApiResponse.sendSuccess(200, "No campaigns found", Collections.emptyList(), request.getRequestURI());
+        }
+        List<CampaignResponse> dtoList = matchedCampaigns.getContent().stream()
+                .map(campaign -> {
+                    User brand = userRepository.findById(campaign.getBrandId())
+                            .orElseThrow(() -> new IllegalArgumentException("Brand not found for campaign: " + campaign.getCampaignId()));
+                    return new CampaignResponse(brand, campaign, categoryRepo);
+                })
+                .toList();
+
+        return ApiResponse.sendSuccess(200, "Response success", dtoList, request.getRequestURI());
+    }
+
     public Campaign convertToCampaign(String obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();
