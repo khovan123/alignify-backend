@@ -29,4 +29,6 @@ public interface ApplicationRepository extends MongoRepository<Application, Stri
 
     void deleteAllByCampaignId(String campaignId);
 
+    List<Application> findAllByInfluencerIdAndStatus(String influencerId, String status);
+
 }

@@ -1,7 +1,7 @@
 package com.api.model;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -30,9 +30,11 @@ public class ContentPosting {
         this.likeCount = 0;
         this.commentCount = 0;
         this.isPublic = true;
+        this.categoryIds = new ArrayList<>();
     }
 
-    public ContentPosting(String contentId, String contentName, String userId, String content, String imageUrl, List<String> categoryIds, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
+    public ContentPosting(String contentId, String contentName, String userId, String content, String imageUrl,
+            List<String> categoryIds, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
         this.contentName = contentName;
         this.userId = userId;
@@ -52,8 +54,6 @@ public class ContentPosting {
     public void setContentName(String contentName) {
         this.contentName = contentName;
     }
-
-  
 
     public String getContentId() {
         return contentId;
