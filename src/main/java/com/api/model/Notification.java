@@ -26,5 +26,5 @@ public class Notification {
   private String content;
   @CreatedDate
   private LocalDateTime createdAt;
-  private boolean isRead;
+  private boolean isRead = false;
 }
