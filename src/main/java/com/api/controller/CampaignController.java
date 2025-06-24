@@ -45,7 +45,13 @@ public class CampaignController {
             HttpServletRequest request) {
         return campaignService.getAllCampaign(page, size, request);
     }
-
+    
+    @GetMapping("/top")
+    public ResponseEntity<?> getCampaignsTop(HttpServletRequest request){
+        return campaignService.getCampaignsTop(request);
+    }
+            
+    
     // @GetMapping("/brands/{brandId}")
     // public ResponseEntity<?> getCampaignsByBrandId(
     // @PathVariable("brandId") String userId,
@@ -73,6 +79,13 @@ public class CampaignController {
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
         return campaignService.getAllCampaignOfBrand(userDetails, page, size, request);
+    }
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    @GetMapping("/brandNoPage")
+    public ResponseEntity<?> getAllCampaignOfBrandNoPage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.getAllCampaignOfBrandNoPage(userDetails, request);
     }
 
     @PutMapping("/{campaignId}")

@@ -61,6 +61,11 @@ public class ProfileController {
             @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.saveAvatarUrl(image, userDetails, request);
     }
+    
+    @GetMapping("/topInfluencer")
+    public ResponseEntity<?> getTopInfluencers(HttpServletRequest request){
+        return profileService.getTopInfluencers(request);
+    }
 
     @PostMapping("/brands/search")
     public ResponseEntity<?> searchBrand(

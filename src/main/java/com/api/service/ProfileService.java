@@ -41,6 +41,9 @@ import com.cloudinary.Cloudinary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 
 @Service
@@ -87,8 +90,9 @@ public class ProfileService {
                     map.put("rating", profile.getRating());
                     map.put("isPublic", profile.isPublic());
                     map.put("follower", profile.getFollower());
-                    if (!profile.getCategoryIds().isEmpty())
+                    if (!profile.getCategoryIds().isEmpty()) {
                         map.put("category", categoryRepository.findAllByCategoryIdIn(profile.getCategoryIds()));
+                    }
                 }
             } else if (user.getRoleId().equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
                 Optional<Brand> profileOtp = brandRepository.findById(user.getUserId());
@@ -99,8 +103,9 @@ public class ProfileService {
                     map.put("socialMediaLinks", profile.getSocialMediaLinks());
                     map.put("establishDate", profile.getEstablishDate());
                     map.put("totalCampaign", profile.getTotalCampaign());
-                    if (!profile.getCategoryIds().isEmpty())
+                    if (!profile.getCategoryIds().isEmpty()) {
                         map.put("category", categoryRepository.findAllByCategoryIdIn(profile.getCategoryIds()));
+                    }
                 }
             }
             userList.add(map);
@@ -236,6 +241,29 @@ public class ProfileService {
         return ApiResponse.sendSuccess(200, "Change avatar successfully", imageUrl, request.getRequestURI());
     }
 
+    public ResponseEntity<?> getTopInfluencers(HttpServletRequest request) {
+        List<Influencer> influencers = influencerRepository.findTop2ByOrderByFollowerDesc();
+
+        Set<String> userIds = influencers.stream()
+                .map(Influencer::getUserId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> userMap = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        List<InfluencerProfileResponse> responseList = influencers.stream()
+                .map(influencer -> {
+                    User user = userMap.get(influencer.getUserId());
+                    if (user == null) {
+                        throw new IllegalStateException("User not found for influencerId: " + influencer.getUserId());
+                    }
+                    return new InfluencerProfileResponse(user, influencer, 0, true, categoryRepository);
+                })
+                .toList();
+
+        return ApiResponse.sendSuccess(200, "Top influencers retrieved successfully", responseList, request.getRequestURI());
+    }
+
     public ResponseEntity<?> searchBrandByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
         if (term == null || term.trim().isEmpty()) {
             return ApiResponse.sendSuccess(200, "No brands found", Collections.emptyList(), request.getRequestURI());
@@ -331,4 +359,5 @@ public class ProfileService {
             throw new IllegalArgumentException("Failed to convert to BrandProfileRequest: " + e.getMessage());
         }
     }
+
 }

@@ -23,6 +23,8 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     Page<Campaign> findAllByBrandId(String userId, Pageable pageable);
 
+    List<Campaign> findAllByBrandId(String userId);
+
     Page<Campaign> findAllByCampaignIdIn(List<String> campaignIds, Pageable pageable);
 
     Optional<Campaign> findByCampaignIdAndBrandId(String campaignId, String brandId);
@@ -39,5 +41,6 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     Page<Campaign> findByCategoryIdsInAndStatusOrderByCreatedAtDesc(String category, String status, Pageable pageable);
 
+    List<Campaign> findTop3ByOrderByApplicationTotalDescCreatedAtDesc();
     Page<Campaign> findByBrandIdInOrCampaignNameContainingIgnoreCase(List<String> brandIds, String campaignName, Pageable pageable);
 }
