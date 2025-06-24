@@ -45,7 +45,13 @@ public class CampaignController {
             HttpServletRequest request) {
         return campaignService.getAllCampaign(page, size, request);
     }
-
+    
+    @GetMapping("/top")
+    public ResponseEntity<?> getCampaignsTop(HttpServletRequest request){
+        return campaignService.getCampaignsTop(request);
+    }
+            
+    
     // @GetMapping("/brands/{brandId}")
     // public ResponseEntity<?> getCampaignsByBrandId(
     // @PathVariable("brandId") String userId,
