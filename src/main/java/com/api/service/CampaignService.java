@@ -405,7 +405,16 @@ public class CampaignService {
     // }
     public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Campaign> campaignPage = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+
+        List<User> brands = userRepository.findByBrandNameContainingIgnoreCase(term);
+        Page<Campaign> campaignPage;
+
+        if (!brands.isEmpty()) {
+            List<String> brandIds = brands.stream().map(User::getUserId).toList();
+            campaignPage = campaignRepo.findAllByBrandIdIn(brandIds, pageable);
+        } else {
+            campaignPage = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+        }
 
         Set<String> brandIds = campaignPage.getContent().stream()
                 .map(Campaign::getBrandId)
