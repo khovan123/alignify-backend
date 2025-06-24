@@ -623,7 +623,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal"],
+                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal", "appliedInfluencerIds],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -679,6 +679,12 @@ public class MongoConfig {
                     },
                     "applicationTotal": {
                         "bsonType": "int"
+                    },
+                    "appliedInfluencerIds": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     }
                 }
             }

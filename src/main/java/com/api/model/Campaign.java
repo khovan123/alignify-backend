@@ -37,7 +37,7 @@ public class Campaign {
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
-        this.status = "RECRUITING";
+        this.status = "DRAFT";
         this.influencerCountCurrent = 0;
         this.applicationTotal = 0;
         this.appliedInfluencerIds = new ArrayList<>();
