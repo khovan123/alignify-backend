@@ -28,6 +28,15 @@ public class InfluencerProfileResponse {
     private boolean isPublic;
     private int completedCampaign;
 
+    public InfluencerProfileResponse(User user,Influencer influencer) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.avatarUrl = user.getAvatarUrl();
+        this.follower = influencer.getFollower();
+    }
+    
+   
+    
     public InfluencerProfileResponse(User user, Influencer influencer, int completedCampaign, boolean isOwner,
             CategoryRepository categoryRepository) {
         this.completedCampaign = completedCampaign;
