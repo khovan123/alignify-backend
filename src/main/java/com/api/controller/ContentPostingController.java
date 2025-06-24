@@ -21,6 +21,7 @@ import com.api.security.CustomUserDetails;
 import com.api.service.ContentPostingService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @RequestMapping("/api/v1/contentPosting")
@@ -89,6 +90,16 @@ public class ContentPostingController {
     public ResponseEntity<?> toggleLike(@PathVariable("contentId") String contentId,
             HttpServletRequest request) {
         return contentPostingSer.toggleLike(contentId, request);
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/search")
+    public ResponseEntity<?> searchContent(
+            @RequestParam("term") String term,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        return contentPostingSer.findContentByTerm(term, pageNumber, pageSize, request);
     }
 
 }
