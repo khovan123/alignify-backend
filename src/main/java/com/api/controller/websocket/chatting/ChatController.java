@@ -1,4 +1,4 @@
-package com.api.controller;
+package com.api.controller.websocket.chatting;
 
 import java.security.Principal;
 import java.time.LocalDateTime;

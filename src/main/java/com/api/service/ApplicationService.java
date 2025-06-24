@@ -72,7 +72,7 @@ public class ApplicationService {
                 if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
                 }
-                if (applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)) {
                         return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
                 }
                 Application application = applicationRepository
@@ -116,6 +116,9 @@ public class ApplicationService {
                 if (application.getLimited() <= 0) {
                         return ApiResponse.sendError(403, "Access is denied.",
                                         request.getRequestURI());
+                }
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)) {
+                        return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
                 }
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
                 campaignRepository.save(campaign);
