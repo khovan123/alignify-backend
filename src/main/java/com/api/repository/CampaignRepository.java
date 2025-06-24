@@ -32,5 +32,6 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
     List<Campaign> findAllByCampaignIdIn(Set<String> campaignIds);
 
     Page<Campaign> findByCategoryIdsInAndStatusOrderByCreatedAtDesc(String category, String status, Pageable pageable);
-
+    
+    List<Campaign> findAllByOrderByApplicationTotalDesc();
 }

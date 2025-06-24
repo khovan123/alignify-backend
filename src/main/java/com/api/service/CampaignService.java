@@ -107,8 +107,7 @@ public class CampaignService {
             }
         }
     }
-
-    public ResponseEntity<?> getCampaignsByCategoryIds(
+     public ResponseEntity<?> getCampaignsByCategoryIds(
             int pageNumber,
             int pageSize,
             String categoryIds,
@@ -147,6 +146,32 @@ public class CampaignService {
         responseData.put("totalItems", campaignPage.getTotalElements());
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+     
+    public ResponseEntity<?> getCampaignsTop( HttpServletRequest request) {
+
+        List<Campaign> campaigns = campaignRepo.findAllByOrderByApplicationTotalDesc();
+
+        Set<String> brandIds = campaigns.stream()
+                .map(Campaign::getBrandId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        List<CampaignResponse> dtoList = campaigns.stream()
+                .map(campaign -> {
+                    User user = brandMap.get(campaign.getBrandId());
+                    if (user == null) {
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
+                    }
+                    return new CampaignResponse(user, campaign, categoryRepo);
+                })
+                .toList();
+
+   
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
     public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
