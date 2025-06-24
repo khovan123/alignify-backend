@@ -62,4 +62,22 @@ public class ProfileController {
         return profileService.saveAvatarUrl(image, userDetails, request);
     }
 
+    @PostMapping("/brands/search")
+    public ResponseEntity<?> searchBrand(
+            @RequestParam("term") String term,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        return profileService.searchBrandByTerm(term, pageNumber, pageSize, request);
+    }
+
+    @PostMapping("/influencers/search")
+    public ResponseEntity<?> searchInfluencer(
+            @RequestParam("term") String term,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        return profileService.searchInfluencerByTerm(term, pageNumber, pageSize, request);
+    }
+
 }

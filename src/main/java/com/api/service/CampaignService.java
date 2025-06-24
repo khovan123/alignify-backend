@@ -1,5 +1,6 @@
 package com.api.service;
 
+import com.api.config.EnvConfig;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -409,12 +410,13 @@ public class CampaignService {
     // e.getMessage());
     // }
     // }
+    
     public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails, HttpServletRequest request) {
         if (term.isBlank() || term.isEmpty()) {
             return this.getAllCampaign(pageNumber, pageSize, request);
         }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        List<User> matchedBrands = userRepository.findByNameContainingIgnoreCaseAndRoleId(term, "68485dcedda6867ca0d23e8a");
+        List<User> matchedBrands = userRepository.findByNameContainingIgnoreCaseAndRoleId(term, EnvConfig.BRAND_ROLE_ID);
         List<String> matchedBrandIds = matchedBrands.stream()
                 .map(User::getUserId)
                 .toList();
@@ -425,6 +427,9 @@ public class CampaignService {
             matchedCampaigns = campaignRepo.findByBrandIdIn(matchedBrandIds, pageable);
         } else {
             matchedCampaigns = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+        }
+        if( matchedCampaigns.isEmpty()) {
+            return ApiResponse.sendSuccess(200, "No campaigns found", Collections.emptyList(), request.getRequestURI());
         }
         List<CampaignResponse> dtoList = matchedCampaigns.getContent().stream()
                 .map(campaign -> {

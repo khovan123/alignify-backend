@@ -1,6 +1,7 @@
 package com.api.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,9 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
@@ -37,6 +41,7 @@ import com.cloudinary.Cloudinary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 public class ProfileService {
@@ -229,6 +234,84 @@ public class ProfileService {
         userOpt.get().setAvatarUrl(imageUrl);
 
         return ApiResponse.sendSuccess(200, "Change avatar successfully", imageUrl, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> searchBrandByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
+        if (term == null || term.trim().isEmpty()) {
+            return ApiResponse.sendSuccess(200, "No brands found", Collections.emptyList(), request.getRequestURI());
+        }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<User> brandPage = userRepository.findByNameContainingIgnoreCaseAndRoleId(
+                term, EnvConfig.BRAND_ROLE_ID, pageable);
+
+        List<Map<String, Object>> brandList = brandPage.getContent().stream().map(user -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", user.getUserId());
+            map.put("name", user.getName());
+            map.put("avatarUrl", user.getAvatarUrl());
+            map.put("backgroundUrl", user.getBackgroundUrl());
+            Optional<Brand> brandOpt = brandRepository.findById(user.getUserId());
+            if (brandOpt.isPresent()) {
+                Brand brand = brandOpt.get();
+                map.put("bio", brand.getBio());
+                map.put("contacts", brand.getContacts());
+                map.put("socialMediaLinks", brand.getSocialMediaLinks());
+                map.put("establishDate", brand.getEstablishDate());
+                map.put("totalCampaign", brand.getTotalCampaign());
+                if (brand.getCategoryIds() != null && !brand.getCategoryIds().isEmpty()) {
+                    map.put("category", categoryRepository.findAllByCategoryIdIn(brand.getCategoryIds()));
+                }
+            }
+            return map;
+        }).toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("brands", brandList);
+        responseData.put("currentPage", brandPage.getNumber());
+        responseData.put("totalPages", brandPage.getTotalPages());
+        responseData.put("totalItems", brandPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Search brand success", responseData, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> searchInfluencerByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
+        if (term == null || term.trim().isEmpty()) {
+            return ApiResponse.sendSuccess(200, "No influencers found", Collections.emptyList(), request.getRequestURI());
+        }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<User> influencerPage = userRepository.findByNameContainingIgnoreCaseAndRoleId(
+                term, EnvConfig.INFLUENCER_ROLE_ID, pageable);
+
+        List<Map<String, Object>> influencerList = influencerPage.getContent().stream().map(user -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", user.getUserId());
+            map.put("name", user.getName());
+            map.put("avatarUrl", user.getAvatarUrl());
+            map.put("backgroundUrl", user.getBackgroundUrl());
+            Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
+            if (influencerOpt.isPresent()) {
+                Influencer influencer = influencerOpt.get();
+                map.put("bio", influencer.getBio());
+                map.put("follower", influencer.getFollower());
+                map.put("rating", influencer.getRating());
+                map.put("isPublic", influencer.isPublic());
+                map.put("gender", influencer.getGender());
+                map.put("dob", influencer.getDoB());
+                if (influencer.getCategoryIds() != null && !influencer.getCategoryIds().isEmpty()) {
+                    map.put("category", categoryRepository.findAllByCategoryIdIn(influencer.getCategoryIds()));
+                }
+                map.put("socialMediaLinks", influencer.getSocialMediaLinks());
+            }
+            return map;
+        }).toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("influencers", influencerList);
+        responseData.put("currentPage", influencerPage.getNumber());
+        responseData.put("totalPages", influencerPage.getTotalPages());
+        responseData.put("totalItems", influencerPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Search influencer success", responseData, request.getRequestURI());
     }
 
     private InfluencerProfileRequest convertToInfluencerProfileRequest(Object profile) {
