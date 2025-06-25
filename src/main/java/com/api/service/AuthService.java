@@ -92,6 +92,7 @@ public class AuthService {
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
             String name = (String) payload.get("name");
+            String avatar = (String) payload.get("picture");
 
             User user;
             if (!userRepository.existsByEmail(email)) {
@@ -104,11 +105,13 @@ public class AuthService {
             } else {
                 user = userRepository.findByEmail(email).get();
             }
-            return ApiResponse.sendSuccess(200, "Login successful",
-                    Map.of(
-                            "token", JwtUtil.createToken(user),
-                            "id", user.getUserId()),
-                    request.getRequestURI());
+            Role role = roleRepository.findById(user.getRoleId()).get();
+            UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatar);
+
+            return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                    "token", JwtUtil.createToken(user),
+                    "role", role.getRoleName(),
+                    "user", userDTO), request.getRequestURI());
         } catch (IOException e) {
             return ApiResponse.sendError(401, "Invalid Google authentication code", request.getRequestURI());
         }
