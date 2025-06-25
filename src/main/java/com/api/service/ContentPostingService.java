@@ -21,6 +21,7 @@ import com.api.model.Category;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
 import com.api.model.Likes;
+import com.api.model.User;
 import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
 import com.api.repository.ContentPostingRepository;
@@ -80,13 +81,15 @@ public class ContentPostingService {
                 .toList();
 
         List<Comment> comments = commentRepository.findAllByContentId(post.getContentId());
-
+        User user = userRepository.findByUserId(post.getUserId()).orElse(null);
         ContentPostingResponse dto = new ContentPostingResponse();
         dto.setContentId(post.getContentId());
         dto.setContentName(post.getContentName());
-        dto.setUserAvatar(userRepository.findByUserId(post.getUserId()).getAvatarUrl());
+        if (user != null) {
+            dto.setUserAvatar(user.getAvatarUrl());
+            dto.setUserName(user.getName());
+        }
         dto.setUserId(post.getUserId());
-        dto.setUserName(userRepository.findByUserId(post.getUserId()).getName());
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
@@ -295,5 +298,4 @@ public class ContentPostingService {
         }
     }
 
-    
 }
