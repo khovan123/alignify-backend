@@ -102,6 +102,14 @@ public class AuthService {
                 user.setRoleId(EnvConfig.INFLUENCER_ROLE_ID);
                 user.setPassword(JwtUtil.hashPassword(email));
                 user = userRepository.save(user);
+                Influencer influencer = new Influencer();
+                influencer.setUserId(user.getUserId());
+                influencer.setCreatedAt(user.getCreatedAt());
+                Gallery gallery = new Gallery();
+                gallery.setGalleryId(user.getUserId());
+                gallery.setCreatedAt(user.getCreatedAt());
+                influencerRepository.save(influencer);
+                galleryRepository.save(gallery);
             } else {
                 user = userRepository.findByEmail(email).get();
             }
