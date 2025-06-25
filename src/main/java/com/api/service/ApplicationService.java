@@ -383,7 +383,8 @@ public class ApplicationService {
                 }
                 ChatRoom chatRoom = chatRoomRepository.findById(application.getCampaignId()).orElse(null);
                 if (chatRoom == null) {
-                        return ApiResponse.sendError(404, "Chat room not found", request.getRequestURI());
+                        chatRoom = new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(),
+                                        campaign.getImageUrl());
                 }
                 List<String> roomMate = chatRoom.getMembers() == null ? new java.util.ArrayList<>()
                                 : new java.util.ArrayList<>(chatRoom.getMembers());
@@ -413,7 +414,6 @@ public class ApplicationService {
                         application.setStatus("REJECTED");
                         roomMate.remove(application.getInfluencerId());
                         chatRoom.setMembers(roomMate);
-                        chatRoomRepository.save(chatRoom);
                         List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
                                         ? new java.util.ArrayList<>()
                                         : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
@@ -425,6 +425,7 @@ public class ApplicationService {
                         }
                         campaignRepository.save(campaign);
                 }
+                chatRoomRepository.save(chatRoom);
                 applicationRepository.save(application);
                 User user = userRepository.findById(application.getInfluencerId()).orElse(null);
                 Influencer influencer = influencerRepository.findById(application.getInfluencerId()).orElse(null);
