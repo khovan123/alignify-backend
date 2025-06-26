@@ -164,6 +164,9 @@ public class ProfileService {
             Influencer influencer = influencerRepository.findById(id).get();
             // InfluencerProfileRequest newInfluencer = (InfluencerProfileRequest) profile;
             InfluencerProfileRequest newInfluencer = convertToInfluencerProfileRequest(profile);
+            if (newInfluencer.getName() != null) {
+                user.setName(newInfluencer.getName());
+            }
             if (newInfluencer.getBio() != null) {
                 influencer.setBio(newInfluencer.getBio());
             }
@@ -175,6 +178,9 @@ public class ProfileService {
             if (newInfluencer.getGender() != null) {
                 influencer.setGender(newInfluencer.getGender().toUpperCase());
             }
+            if (newInfluencer.getIsPublic() != null) {
+                influencer.setPublic(newInfluencer.getIsPublic());
+            }
 
             if (newInfluencer.getCategoryIds() != null && !newInfluencer.getCategoryIds().isEmpty()) {
                 influencer.setCategoryIds(newInfluencer.getCategoryIds());
@@ -183,12 +189,17 @@ public class ProfileService {
             if (newInfluencer.getSocialMediaLinks() != null && !newInfluencer.getSocialMediaLinks().isEmpty()) {
                 influencer.setSocialMediaLinks(newInfluencer.getSocialMediaLinks());
             }
+            userRepository.save(user);
             influencerRepository.save(influencer);
-            return ApiResponse.sendSuccess(200, "Update successfully", influencer, request.getRequestURI());
+            InfluencerProfileResponse influencerProfile = new InfluencerProfileResponse(user, influencer, categoryRepository);
+            return ApiResponse.sendSuccess(200, "Update successfully", influencerProfile, request.getRequestURI());
         } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             Brand brand = brandRepository.findById(id).get();
             // BrandProfileRequest newBrand = (BrandProfileRequest) profile;
             BrandProfileRequest newBrand = convertToBrandProfileRequest(profile);
+            if (newBrand.getName() != null) {
+                user.setName(newBrand.getName());
+            }
             if (newBrand.getBio() != null) {
                 brand.setBio(newBrand.getBio());
             }
@@ -204,6 +215,7 @@ public class ProfileService {
             if (newBrand.getCategoryIds() != null && !newBrand.getCategoryIds().isEmpty()) {
                 brand.setCategoryIds(newBrand.getCategoryIds());
             }
+            userRepository.save(user);
             brandRepository.save(brand);
             return ApiResponse.sendSuccess(200, "Update successfully", brand, request.getRequestURI());
         }

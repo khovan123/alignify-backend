@@ -28,15 +28,34 @@ public class InfluencerProfileResponse {
     private boolean isPublic;
     private int completedCampaign;
 
-    public InfluencerProfileResponse(User user,Influencer influencer) {
+    public InfluencerProfileResponse(User user, Influencer influencer) {
         this.userId = user.getUserId();
         this.name = user.getName();
         this.avatarUrl = user.getAvatarUrl();
         this.follower = influencer.getFollower();
     }
-    
-   
-    
+
+    public InfluencerProfileResponse(User user, Influencer influencer, CategoryRepository categoryRepository) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.roleId = user.getRoleId();
+        this.avatarUrl = user.getAvatarUrl();
+        this.backgroundUrl = user.getBackgroundUrl();
+        this.bio = influencer.getBio();
+        this.isPublic = influencer.isPublic();
+        this.email = user.getEmail();
+        this.DoB = influencer.getDoB();
+        this.gender = influencer.getGender();
+        this.bio = influencer.getBio();
+        this.socialMediaLinks = influencer.getSocialMediaLinks();
+        this.rating = influencer.getRating();
+        this.categories = (influencer.getCategoryIds() != null && !influencer.getCategoryIds().contains(null))
+                ? categoryRepository.findAllById(influencer.getCategoryIds())
+                : Collections.emptyList();
+        this.follower = influencer.getFollower();
+
+    }
+
     public InfluencerProfileResponse(User user, Influencer influencer, int completedCampaign, boolean isOwner,
             CategoryRepository categoryRepository) {
         this.completedCampaign = completedCampaign;
