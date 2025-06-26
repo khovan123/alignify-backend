@@ -107,11 +107,6 @@ public class ContentPostingService {
         List<ContentPostingResponse> dtoList = posts.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", posts.getNumber());
-        responseData.put("totalPages", posts.getTotalPages());
-        responseData.put("totalItems", posts.getTotalElements());
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
@@ -261,7 +256,6 @@ public class ContentPostingService {
         }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        // Ưu tiên tìm kiếm theo tên người đăng
         List<String> userIds = userRepository.findByNameContainingIgnoreCase(term)
                 .stream()
                 .map(user -> user.getUserId())
@@ -271,7 +265,6 @@ public class ContentPostingService {
         if (!userIds.isEmpty()) {
             contentPage = contentPostingRepo.findByUserIdInAndIsPublicTrue(userIds, pageable);
         } else {
-            // Nếu không có user nào khớp, tìm theo tên bài đăng
             contentPage = contentPostingRepo.findByContentNameContainingIgnoreCaseAndIsPublicTrue(term, pageable);
         }
 
@@ -279,13 +272,7 @@ public class ContentPostingService {
                 .map(this::mapToDTO)
                 .toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("contents", dtoList);
-        responseData.put("currentPage", contentPage.getNumber());
-        responseData.put("totalPages", contentPage.getTotalPages());
-        responseData.put("totalItems", contentPage.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Search content success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Search content success", dtoList, request.getRequestURI());
     }
 
     public ContentPosting convertToContentPosting(String obj) {

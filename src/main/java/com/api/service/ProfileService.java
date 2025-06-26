@@ -288,20 +288,11 @@ public class ProfileService {
                 map.put("socialMediaLinks", brand.getSocialMediaLinks());
                 map.put("establishDate", brand.getEstablishDate());
                 map.put("totalCampaign", brand.getTotalCampaign());
-                if (brand.getCategoryIds() != null && !brand.getCategoryIds().isEmpty()) {
-                    map.put("category", categoryRepository.findAllByCategoryIdIn(brand.getCategoryIds()));
-                }
             }
             return map;
         }).toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("brands", brandList);
-        responseData.put("currentPage", brandPage.getNumber());
-        responseData.put("totalPages", brandPage.getTotalPages());
-        responseData.put("totalItems", brandPage.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Search brand success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Search brand success", brandList, request.getRequestURI());
     }
 
     public ResponseEntity<?> searchInfluencerByTerm(String term, int pageNumber, int pageSize,
@@ -329,21 +320,11 @@ public class ProfileService {
                 map.put("isPublic", influencer.isPublic());
                 map.put("gender", influencer.getGender());
                 map.put("dob", influencer.getDoB());
-                if (influencer.getCategoryIds() != null && !influencer.getCategoryIds().isEmpty()) {
-                    map.put("category", categoryRepository.findAllByCategoryIdIn(influencer.getCategoryIds()));
-                }
-                map.put("socialMediaLinks", influencer.getSocialMediaLinks());
             }
             return map;
         }).toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("influencers", influencerList);
-        responseData.put("currentPage", influencerPage.getNumber());
-        responseData.put("totalPages", influencerPage.getTotalPages());
-        responseData.put("totalItems", influencerPage.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Search influencer success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Search influencer success", influencerList, request.getRequestURI());
     }
 
     private InfluencerProfileRequest convertToInfluencerProfileRequest(Object profile) {
