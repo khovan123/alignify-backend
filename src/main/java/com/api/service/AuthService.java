@@ -280,9 +280,10 @@ public class AuthService {
         }
         String resetURL = JwtUtil.createURLResetPassword(recoveryPasswordRequest.getUrl(),
                 recoveryPasswordRequest.getEmail());
-        String subject = "Reset your password";
-        String message = "Click this url: " + resetURL + " to reset your password.";
-        emailService.sendSimpleEmail(recoveryPasswordRequest.getEmail(), subject, message);
+        // String subject = "Reset your password";
+        // String message = "Click this url: " + + " to reset your password.";
+        emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(), user.get().getName(),
+                user.get().getAvatarUrl(), resetURL);
         // emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(),
         // resetURL);
         return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null,
