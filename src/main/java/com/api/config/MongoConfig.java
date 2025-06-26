@@ -959,13 +959,16 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["userId", "name", "content"],
+                "required": ["userId", "name", "content", "avatarUrl"],
                 "properties": {
                     "userId": {
                         "bsonType": "string"
                     },
                     "name": {
                         "bsonType": "string"
+                    },
+                    "avatarUrl":{
+                      "bsonType": "string"
                     },
                     "content": {
                         "bsonType": "string"

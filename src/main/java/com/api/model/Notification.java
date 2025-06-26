@@ -22,6 +22,7 @@ public class Notification {
   @Id
   private String notificationId;
   private String userId;
+  private String avatarUrl;
   private String name;
   private String content;
   @CreatedDate

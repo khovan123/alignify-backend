@@ -31,4 +31,5 @@ public interface ApplicationRepository extends MongoRepository<Application, Stri
 
     List<Application> findAllByInfluencerIdAndStatus(String influencerId, String status);
 
+    List<Application> findAllByCampaignIdAndInfluencerIdIn(String campaignId, List<String> applicationIds);
 }

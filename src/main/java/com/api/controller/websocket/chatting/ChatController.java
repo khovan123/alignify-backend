@@ -10,10 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.api.dto.UserDTO;
 import com.api.dto.response.ChatMessageResponse;
@@ -36,11 +34,11 @@ public class ChatController {
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat/{roomId}")
-    @SendTo("/topic/messages/{roomId}")
-    public ChatMessageResponse sendMessage(
+    // @SendTo("/topic/messages/{roomId}")
+    public void sendMessage(
             @Payload ChatMessage chatMessage,
-            @RequestParam(defaultValue = "0", name = "pageNumber") int pageNumber,
-            @RequestParam(defaultValue = "10", name = "pageSize") int pageSize,
+            // @RequestParam(defaultValue = "0", name = "pageNumber") int pageNumber,
+            // @RequestParam(defaultValue = "10", name = "pageSize") int pageSize,
             @DestinationVariable("roomId") String roomId,
             Principal principal) {
         if (principal == null || principal.getName() == null) {
@@ -62,7 +60,8 @@ public class ChatController {
             ChatRoom chatRoom = roomOpt.get();
             chatRoom.setCreatedAt(LocalDateTime.now());
             chatRoomRepository.save(chatRoom);
-            return new ChatMessageResponse(userDTO, chatMessage);
+            messagingTemplate.convertAndSend("/topic/messages/" + roomId, new ChatMessageResponse(userDTO, chatMessage));
+
         }
         throw new SecurityException("Invalid principal type");
     }

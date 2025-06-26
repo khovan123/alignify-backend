@@ -56,6 +56,7 @@ public class InfluencerProfileResponse {
 
     }
 
+ 
     public InfluencerProfileResponse(User user, Influencer influencer, int completedCampaign, boolean isOwner,
             CategoryRepository categoryRepository) {
         this.completedCampaign = completedCampaign;

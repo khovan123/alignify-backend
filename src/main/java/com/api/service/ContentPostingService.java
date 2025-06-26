@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -251,6 +252,39 @@ public class ContentPostingService {
                 request.getRequestURI());
     }
 
+    public ResponseEntity<?> findContentByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
+        if (term == null || term.trim().isEmpty()) {
+            return ApiResponse.sendSuccess(200, "No content found", Collections.emptyList(), request.getRequestURI());
+        }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        // Ưu tiên tìm kiếm theo tên người đăng
+        List<String> userIds = userRepository.findByNameContainingIgnoreCase(term)
+                .stream()
+                .map(user -> user.getUserId())
+                .toList();
+
+        Page<ContentPosting> contentPage;
+        if (!userIds.isEmpty()) {
+            contentPage = contentPostingRepo.findByUserIdInAndIsPublicTrue(userIds, pageable);
+        } else {
+            // Nếu không có user nào khớp, tìm theo tên bài đăng
+            contentPage = contentPostingRepo.findByContentNameContainingIgnoreCaseAndIsPublicTrue(term, pageable);
+        }
+
+        List<ContentPostingResponse> dtoList = contentPage.getContent().stream()
+                .map(this::mapToDTO)
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("contents", dtoList);
+        responseData.put("currentPage", contentPage.getNumber());
+        responseData.put("totalPages", contentPage.getTotalPages());
+        responseData.put("totalItems", contentPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Search content success", responseData, request.getRequestURI());
+    }
+
     public ContentPosting convertToContentPosting(String obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -261,4 +295,5 @@ public class ContentPostingService {
         }
     }
 
+    
 }
