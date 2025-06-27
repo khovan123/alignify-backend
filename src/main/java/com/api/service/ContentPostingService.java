@@ -152,12 +152,14 @@ public class ContentPostingService {
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
 
-            if (!contentPosting.getUserId().equals(userDetails)) {
+            if (!contentPosting.getUserId().equals(userDetails.getUserId())) {
                 return ResponseEntity.status(403).body(
                         Map.of("error", "Access denied. You are not the owner of this content."));
             }
 
             contentPostingRepo.deleteById(contentId);
+            likesRepo.deleteAllByContentId(contentId);
+            commentRepository.deleteAllByContentId(contentId);
             return ApiResponse.sendSuccess(
                     204,
                     "Content posting deleted successfully",
