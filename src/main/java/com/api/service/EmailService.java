@@ -1,8 +1,7 @@
 package com.api.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -36,62 +35,50 @@ public class EmailService {
             helper.setFrom(fromEmail);
             helper.setSubject("Alignify: Verify Your Email");
 
-            // Sanitize inputs to prevent unexpected characters
-            String safeDate = LocalDateTime.now()
-                    .format(DateTimeFormatter.ofPattern("dd MMMM yyyy | hh:mm a"))
-                    .replaceAll("[^a-zA-Z0-9\\s|:]", ""); // Safe date format
-
-            // Construct HTML content using + concatenation
             String htmlContent = "<!DOCTYPE html>"
                     + "<html lang=\"en\">"
                     + "<head>"
-                    + "<meta charset=\"UTF-8\">"
-                    + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-                    + "<title>Alignify: Verify Your Email</title>"
-                    + "<style>"
-                    + "body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f5e8df; color: #333 }"
-                    + ".container { max-width: 600px; margin: 20px auto; background-color: #fff3e6; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1) }"
-                    + ".header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background-color: #fff3e6 }"
-                    + ".header img { max-width: 150px }"
-                    + ".header .date { font-size: 14px; color: #666 }"
-                    + ".content { padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px }"
-                    + ".otp-code { font-size: 32px; font-weight: bold; color: #d35400; letter-spacing: 4px; padding: 10px 20px; background-color: #fff; border-radius: 4px; border: 1px solid #e0e0e0 }"
-                    + ".instructions { font-size: 16px; line-height: 1.6; color: #666 }"
-                    + ".button { display: inline-block; padding: 12px 30px; background-color: #f4a261; color: #fff; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold }"
-                    + ".cancel-link { color: #e74c3c; text-decoration: underline }"
-                    + ".footer { padding: 20px; text-align: center; background-color: #fff3e6; font-size: 12px; color: #666 }"
-                    + ".footer .social-icons img { width: 24px; margin: 0 5px }"
-                    + "@media only screen and (max-width: 600px) { .container { margin: 10px } .header { flex-direction: column; text-align: center } .content { padding: 20px } .otp-code { font-size: 24px } .button { width: 100%; box-sizing: border-box } }"
-                    + "</style>"
+                    + "<meta charset=\"UTF-8\" />"
+                    + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
+                    + "<title>Verify Account</title>"
+                    + "<link href=\"https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css\" rel=\"stylesheet\" />"
                     + "</head>"
-                    + "<body>"
-                    + "<div class=\"container\">"
-                    + "<div class=\"header\">"
-                    + "<img src=\"https://img.icons8.com/?size=100&id=Qr3ggQTcZ4PM&format=png&color=000000\" alt=\"Alignify Logo\">"
-                    + "<div class=\"date\">Alignify | " + safeDate + "</div>"
+                    + "<body class=\"flex items-center justify-center min-h-screen min-h-screen\">"
+                    + "<div class=\"w-1/3\">"
+                    + "<div class=\"flex items-center justify-between mb-4\">"
+                    + "<img width=\"32\" src=\"https://ci3.googleusercontent.com/meips/ADKq_NbWe7fsWlEs_rpn43XN33-ZFxOxQFsnVpaxTJ8s5l52pgt1QxMyaQle_ZsYwPq4tLPsGTgbVPocYESX4Qt2gXoBLek90hz8X-yoBKvjwTJEtb0=s0-d-e1-ft#https://static.xx.fbcdn.net/rsrc.php/v4/yS/r/ZirYDPWh0YD.png\" height=\"32\" style=\"border: 0\" class=\"CToWUd\" data-bit=\"iit\" />"
+                    + "<div class=\"font-semibold flex items-center gap-2\">"
+                    + "<span>" + to + "</span>"
+                    + "<img width=\"32\" src=\"https://ci3.googleusercontent.com/meips/ADKq_NY8CsqjtlrfnBSny6yaH7QrWA-vuo4ZRZ4ovmjyae4WTecWsPPKwv7jMsERbRwqswyeBDAh7VO3zKDsL0xzRhgc-FTClRdU5GJrtA9SvX-f08vmWw-pjgaaKsWVOTGNsXl6EYM0yM_50WmZ_Q2S_FuvvWabk6hBLkS_l20bmmwxGTmsz7iMWUr75QUyk2FZk0QjBWe7313W5Rh2VjK14h5CxBfFyvQ7sv9R968dA0Z9Er0z147Bg0gch5bSmssnAymbSCmpnn4_9X7azt_q4GAxpD18rk3PHNw1q89kRLxxDDc1JknhnXUjPGKlUl6h9BaktKjqDjhxNItuvolXPzBm2myFH7UuxafKHgf4503eyPy4Fj_ZrMIshJhthYjKKJQTdW1FDe79nAZ0BnLQvZue8UGgCh-TilB2JbNZI2JQBWR-1qeUKAQf3LwAaYTS-WKu4caumK3qo27tSghy832cB2mF27Vaj4HgtRe08IIUa55nMDVk2CP4p1dsbTa0VCZ7Ity7Jp5wMRLPsSAs2qD0bf7YUhNZRc02as4O6TO94o1V6uEE71Sv9LJUaeccnw=s0-d-e1-ft#https://scontent.xx.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_mk1-ffffff-0.00_s64x64&amp;_nc_cat=1&amp;ccb=1-7&amp;_nc_sid=08a855&amp;_nc_ohc=LKYJxVlGs68Q7kNvwGaVFXu&amp;_nc_oc=AdmfjCudF_Kk0U1LVOBXqR8YR9F66189oDVxIT0CgQCBtOms_xd4YWqQTGwryakZc58qpPOmk6XT5sqelbeW4IyY&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zt=24&amp;_nc_ht=scontent.xx&amp;oh=00_AfOxR3RubB2F5Jia1o5w8LTrOf9dFztzdZZ-AUTBxP1ctw&amp;oe=6885083A\" height=\"32\" style=\"border: 0\" class=\"CToWUd\" data-bit=\"iit\" />"
                     + "</div>"
-                    + "<div class=\"content\">"
-                    + "<p class=\"instructions\">Please use the OTP code below to verify your email address.</p>"
-                    + "<div class=\"otp-code\">" + otp + "</div>"
-                    + "<p class=\"instructions\">If you did not make this request, <a href=\"#\" class=\"cancel-link\">click here to cancel</a>.</p>"
-                    + "<a href=\"https://alignify.com/verify\" class=\"button\">Verify</a>"
                     + "</div>"
-                    + "<div class=\"footer\">"
-                    + "<div class=\"social-icons\">"
-                    + "<img src=\"https://img.icons8.com/?size=100&id=uLWV5A9vXIPu&format=png&color=000000\" alt=\"Facebook\">"
-                    + "<img src=\"https://img.icons8.com/?size=100&id=Xy10Jcu1L2Su&format=png&color=000000\" alt=\"Instagram\">"
+                    + "<div class=\"border-t border-b border-black\">"
+                    + "<h2 class=\"text-3xl font-semibold text-left my-4\">One more step to register account</h2>"
+                    + "<div class=\"flex flex-col gap-4\">"
+                    + "<p>Hi,</p>"
+                    + "<p>We got your request to verify your email. Enter this code in Alignify:</p>"
+                    + "<div class=\"bg-blue-100 border border-blue-500 w-full p-4 rounded-lg\">"
+                    + "<p class=\"text-xl font-semibold text-center\">" + otp + "</p>"
                     + "</div>"
-                    + "<p>Terms and Conditions | Privacy Policy | Support</p>"
-                    + "<p>This email was sent to you by Alignify.<br>You are receiving this email because you registered for \"Alignify\".<br>If you wish to unsubscribe from all future emails, please <a href=\"#\">click here</a>.</p>"
+                    + "<p class=\"text-sm text-center\">Don't share this code with anyone.</p>"
+                    + "<div>"
+                    + "<p class=\"font-semibold\">If someone asks for this code</p>"
+                    + "<p>Don't share this code with anyone, especially if they tell you they work for <b class=\"text-blue-600\">Alignify</b>. They may be trying to hack your account.</p>"
+                    + "</div>"
+                    + "<div>"
+                    + "<p class=\"font-semibold\">Didn't request this?</p>"
+                    + "<p>If you got this email but aren't trying to verify, let us know. You don't need to take any further steps, as long as you don't share this code with anyone. If you like to make your account more secure, visit Security Checkup.</p>"
+                    + "</div>"
+                    + "<div class=\"font-semibold mb-4\">"
+                    + "<p>Thanks,</p>"
+                    + "<p>Alignify Security</p>"
+                    + "</div>"
+                    + "</div>"
                     + "</div>"
                     + "</div>"
                     + "</body>"
                     + "</html>";
 
-            // Validate no unexpected semicolons outside CSS
-            if (htmlContent.contains(";") && !htmlContent.contains("style>")) {
-                throw new IllegalStateException("Unexpected semicolon detected in HTML content: " + htmlContent);
-            }
             helper.setText(htmlContent, true);
             javaMailSender.send(message);
         } catch (MessagingException | IllegalStateException e) {
@@ -99,108 +86,60 @@ public class EmailService {
         }
     }
 
-    public void sendResetPasswordEmail(String to, String resetUrl) {
+    public void sendResetPasswordEmail(String to, String name, String avatar, String resetUrl) {
         MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
         try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
             helper.setTo(to);
             helper.setFrom(fromEmail);
-            helper.setSubject("Alignify: Reset Your Password");
-            String htmlContent = """
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                            body {
-                                margin: 0;
-                                padding: 0;
-                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                                background-color: #f4f4f4;
-                                color: #333;
-                            }
-                            .container {
-                                max-width: 600px;
-                                margin: 20px auto;
-                                background-color: #ffffff;
-                                border-radius: 8px;
-                                overflow: hidden;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                            }
-                            .header {
-                                background-color: #4a90e2;
-                                padding: 20px;
-                                text-align: center;
-                            }
-                            .header img {
-                                max-width: 150px;
-                            }
-                            .content {
-                                padding: 30px;
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                gap: 20px;
-                            }
-                            .instructions {
-                                font-size: 16px;
-                                line-height: 1.6;
-                                color: #555;
-                                text-align: center;
-                            }
-                            .button {
-                                display: inline-block;
-                                padding: 12px 30px;
-                                background-color: #4a90e2;
-                                color: #ffffff;
-                                text-decoration: none;
-                                border-radius: 6px;
-                                font-size: 16px;
-                                font-weight: bold;
-                                transition: background-color 0.3s;
-                            }
-                            .button:hover {
-                                background-color: #357abd;
-                            }
-                            .footer {
-                                background-color: #f4f4f4;
-                                padding: 20px;
-                                text-align: center;
-                                font-size: 14px;
-                                color: #777;
-                            }
-                            @media only screen and (max-width: 600px) {
-                                .content {
-                                    padding: 20px;
-                                }
-                                .button {
-                                    width: 100%;
-                                    box-sizing: border-box;
-                                }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <div class="header">
-                                <img src="https://via.placeholder.com/150x50?text=Alignify+Logo" alt="Alignify Logo">
-                            </div>
-                            <div class="content">
-                                <h1>Reset Your Alignify Password</h1>
-                                <p class="instructions">Click the button below to reset your password. This link is valid for 1 hour.</p>
-                                <a href="%s" class="button">Reset Password</a>
-                                <p class="instructions">If you didn’t request a password reset, please secure your account or contact our support team.</p>
-                            </div>
-                            <div class="footer">
-                                <p>Contact support at <a href="mailto:support@alignify.com">support@alignify.com</a> if you need assistance.</p>
-                                <p>© 2025 Alignify. All rights reserved.</p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                    """
-                    .formatted(resetUrl);
+            helper.setSubject("Alignify: Verify Your Email");
+            String htmlContent = "<!DOCTYPE html>"
+                    + "<html lang=\"en\">"
+                    + "<head>"
+                    + "<meta charset=\"UTF-8\" />"
+                    + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
+                    + "<title>Reset Account</title>"
+                    + "<link href=\"https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css\" rel=\"stylesheet\" />"
+                    + "</head>"
+                    + "<body class=\"flex items-center justify-center min-h-screen min-h-screen\">"
+                    + "<div class=\"w-1/3\">"
+                    + "<div class=\"flex items-center justify-between mb-4\">"
+                    + "<img width=\"32\" src=\"https://ci3.googleusercontent.com/meips/ADKq_NbWe7fsWlEs_rpn43XN33-ZFxOxQFsnVpaxTJ8s5l52pgt1QxMyaQle_ZsYwPq4tLPsGTgbVPocYESX4Qt2gXoBLek90hz8X-yoBKvjwTJEtb0=s0-d-e1-ft#https://static.xx.fbcdn.net/rsrc.php/v4/yS/r/ZirYDPWh0YD.png\" height=\"32\" style=\"border: 0\" class=\"CToWUd\" data-bit=\"iit\" />"
+                    + "<div class=\"font-semibold flex items-center gap-2\">"
+                    + "<span>" + name + "</span>"
+                    + "<img width=\"32\" src=\""
+                    + (avatar == null || avatar.isEmpty() || avatar.isBlank()
+                            ? "https://ci3.googleusercontent.com/meips/ADKq_NY8CsqjtlrfnBSny6yaH7QrWA-vuo4ZRZ4ovmjyae4WTecWsPPKwv7jMsERbRwqswyeBDAh7VO3zKDsL0xzRhgc-FTClRdU5GJrtA9SvX-f08vmWw-pjgaaKsWVOTGNsXl6EYM0yM_50WmZ_Q2S_FuvvWabk6hBLkS_l20bmmwxGTmsz7iMWUr75QUyk2FZk0QjBWe7313W5Rh2VjK14h5CxBfFyvQ7sv9R968dA0Z9Er0z147Bg0gch5bSmssnAymbSCmpnn4_9X7azt_q4GAxpD18rk3PHNw1q89kRLxxDDc1JknhnXUjPGKlUl6h9BaktKjqDjhxNItuvolXPzBm2myFH7UuxafKHgf4503eyPy4Fj_ZrMIshJhthYjKKJQTdW1FDe79nAZ0BnLQvZue8UGgCh-TilB2JbNZI2JQBWR-1qeUKAQf3LwAaYTS-WKu4caumK3qo27tSghy832cB2mF27Vaj4HgtRe08IIUa55nMDVk2CP4p1dsbTa0VCZ7Ity7Jp5wMRLPsSAs2qD0bf7YUhNZRc02as4O6TO94o1V6uEE71Sv9LJUaeccnw=s0-d-e1-ft#https://scontent.xx.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_mk1-ffffff-0.00_s64x64&amp;_nc_cat=1&amp;ccb=1-7&amp;_nc_sid=08a855&amp;_nc_ohc=LKYJxVlGs68Q7kNvwGaVFXu&amp;_nc_oc=AdmfjCudF_Kk0U1LVOBXqR8YR9F66189oDVxIT0CgQCBtOms_xd4YWqQTGwryakZc58qpPOmk6XT5sqelbeW4IyY&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zt=24&amp;_nc_ht=scontent.xx&amp;oh=00_AfOxR3RubB2F5Jia1o5w8LTrOf9dFztzdZZ-AUTBxP1ctw&amp;oe=6885083A"
+                            : avatar)
+                    + "\" height=\"32\" style=\"border: 0\" class=\"CToWUd\" data-bit=\"iit\" />"
+                    + "</div>"
+                    + "</div>"
+                    + "<div class=\"border-t border-b border-black\">"
+                    + "<h2 class=\"text-3xl font-semibold text-left my-4\">One more step to reset your account</h2>"
+                    + "<div class=\"flex flex-col gap-4\">"
+                    + "<p>Hi,</p>"
+                    + "<p>We got your request to reset your account. Access this token url to redirect to change new password:</p>"
+                    + "<div class=\"bg-blue-100 border border-blue-500 w-full p-4 rounded-lg\">"
+                    + "<p class=\"text-xl font-semibold text-center\">" + resetUrl + "</p>"
+                    + "</div>"
+                    + "<p class=\"text-sm text-center\">Don't share this code with anyone.</p>"
+                    + "<div>"
+                    + "<p class=\"font-semibold\">If someone asks for this code</p>"
+                    + "<p>Don't share this token with anyone, especially if they tell you they work for <b class=\"text-blue-600\">Alignify</b>. They may be trying to hack your account.</p>"
+                    + "</div>"
+                    + "<div>"
+                    + "<p class=\"font-semibold\">Didn't request this?</p>"
+                    + "<p>If you got this email but aren't trying to reset account, let us know. You don't need to take any further steps, as long as you don't share this code with anyone. If you like to make your account more secure, visit Security Checkup.</p>"
+                    + "</div>"
+                    + "<div class=\"font-semibold mb-4\">"
+                    + "<p>Thanks,</p>"
+                    + "<p>Alignify Security</p>"
+                    + "</div>"
+                    + "</div>"
+                    + "</div>"
+                    + "</div>"
+                    + "</body>"
+                    + "</html>";
             helper.setText(htmlContent, true);
             javaMailSender.send(message);
         } catch (MessagingException e) {

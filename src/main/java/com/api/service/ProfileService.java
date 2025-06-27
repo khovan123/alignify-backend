@@ -72,14 +72,16 @@ public class ProfileService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails,
+    public ResponseEntity<?> getAllProfileByRoleId(String roleId, int pageNumber, int pageSize,
+            CustomUserDetails userDetails,
             HttpServletRequest request) {
         String userId = userDetails.getUserId();
+        PageRequest page = PageRequest.of(pageNumber, pageSize);
         List<Map<String, Object>> userList = new ArrayList<>();
         if (roleId.equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
             return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
-        userRepository.findByRoleIdAndUserIdNot(roleId, userId).forEach(user -> {
+        userRepository.findByRoleIdAndUserIdNotAndIsActiveTrue(roleId, userId, page).forEach(user -> {
             Map<String, Object> map = new HashMap<>();
             map.put("name", user.getName());
             map.put("id", user.getUserId());
@@ -302,20 +304,11 @@ public class ProfileService {
                 map.put("socialMediaLinks", brand.getSocialMediaLinks());
                 map.put("establishDate", brand.getEstablishDate());
                 map.put("totalCampaign", brand.getTotalCampaign());
-                if (brand.getCategoryIds() != null && !brand.getCategoryIds().isEmpty()) {
-                    map.put("category", categoryRepository.findAllByCategoryIdIn(brand.getCategoryIds()));
-                }
             }
             return map;
         }).toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("brands", brandList);
-        responseData.put("currentPage", brandPage.getNumber());
-        responseData.put("totalPages", brandPage.getTotalPages());
-        responseData.put("totalItems", brandPage.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Search brand success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Search brand success", brandList, request.getRequestURI());
     }
 
     public ResponseEntity<?> searchInfluencerByTerm(String term, int pageNumber, int pageSize,
@@ -351,13 +344,7 @@ public class ProfileService {
             return map;
         }).toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("influencers", influencerList);
-        responseData.put("currentPage", influencerPage.getNumber());
-        responseData.put("totalPages", influencerPage.getTotalPages());
-        responseData.put("totalItems", influencerPage.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Search influencer success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Search influencer success", influencerList, request.getRequestURI());
     }
 
     private InfluencerProfileRequest convertToInfluencerProfileRequest(Object profile) {
