@@ -1,11 +1,14 @@
 package com.api.config;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 import com.api.model.Category;
 import com.api.model.Role;
@@ -34,6 +37,13 @@ public class MongoConfig {
 
   @Value("${spring.data.mongodb.database}")
   private String databaseName;
+
+  @Bean
+  public MongoCustomConversions mongoCustomConversions() {
+    return new MongoCustomConversions(Arrays.asList(
+        new LocalDateTimeToDateConverter(),
+        new DateToLocalDateTimeConverter()));
+  }
 
   @PostConstruct
   public void init() {
