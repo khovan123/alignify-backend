@@ -69,6 +69,8 @@ public class ProfileService {
     private CampaignRepository campaignRepository;
     @Autowired
     private ApplicationRepository applicationRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public ResponseEntity<?> getAllProfileByRoleId(String roleId, int pageNumber, int pageSize,
             CustomUserDetails userDetails,
@@ -171,6 +173,9 @@ public class ProfileService {
             Influencer influencer = influencerRepository.findById(id).get();
             // InfluencerProfileRequest newInfluencer = (InfluencerProfileRequest) profile;
             InfluencerProfileRequest newInfluencer = convertToInfluencerProfileRequest(profile);
+            if (newInfluencer.getName() != null) {
+                user.setName(newInfluencer.getName());
+            }
             if (newInfluencer.getBio() != null) {
                 influencer.setBio(newInfluencer.getBio());
             }
@@ -182,6 +187,9 @@ public class ProfileService {
             if (newInfluencer.getGender() != null) {
                 influencer.setGender(newInfluencer.getGender().toUpperCase());
             }
+            if (newInfluencer.getIsPublic() != null) {
+                influencer.setPublic(newInfluencer.getIsPublic());
+            }
 
             if (newInfluencer.getCategoryIds() != null && !newInfluencer.getCategoryIds().isEmpty()) {
                 influencer.setCategoryIds(newInfluencer.getCategoryIds());
@@ -190,12 +198,18 @@ public class ProfileService {
             if (newInfluencer.getSocialMediaLinks() != null && !newInfluencer.getSocialMediaLinks().isEmpty()) {
                 influencer.setSocialMediaLinks(newInfluencer.getSocialMediaLinks());
             }
+            userRepository.save(user);
             influencerRepository.save(influencer);
-            return ApiResponse.sendSuccess(200, "Update successfully", influencer, request.getRequestURI());
+            InfluencerProfileResponse influencerProfile = new InfluencerProfileResponse(user, influencer,
+                    categoryRepository);
+            return ApiResponse.sendSuccess(200, "Update successfully", influencerProfile, request.getRequestURI());
         } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             Brand brand = brandRepository.findById(id).get();
             // BrandProfileRequest newBrand = (BrandProfileRequest) profile;
             BrandProfileRequest newBrand = convertToBrandProfileRequest(profile);
+            if (newBrand.getName() != null) {
+                user.setName(newBrand.getName());
+            }
             if (newBrand.getBio() != null) {
                 brand.setBio(newBrand.getBio());
             }
@@ -211,6 +225,7 @@ public class ProfileService {
             if (newBrand.getCategoryIds() != null && !newBrand.getCategoryIds().isEmpty()) {
                 brand.setCategoryIds(newBrand.getCategoryIds());
             }
+            userRepository.save(user);
             brandRepository.save(brand);
             return ApiResponse.sendSuccess(200, "Update successfully", brand, request.getRequestURI());
         }
@@ -321,7 +336,11 @@ public class ProfileService {
                 map.put("rating", influencer.getRating());
                 map.put("isPublic", influencer.isPublic());
                 map.put("gender", influencer.getGender());
-                map.put("dob", influencer.getDoB());
+                map.put("DoB", influencer.getDoB());
+                if (influencer.getCategoryIds() != null && !influencer.getCategoryIds().isEmpty()) {
+                    map.put("category", categoryRepository.findAllByCategoryIdIn(influencer.getCategoryIds()));
+                }
+                map.put("socialMediaLinks", influencer.getSocialMediaLinks());
             }
             return map;
         }).toList();
@@ -330,18 +349,16 @@ public class ProfileService {
     }
 
     private InfluencerProfileRequest convertToInfluencerProfileRequest(Object profile) {
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.convertValue(profile, InfluencerProfileRequest.class);
+            return objectMapper.convertValue(profile, InfluencerProfileRequest.class);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Failed to convert to InfluencerProfileRequest: " + e.getMessage());
         }
     }
 
     private BrandProfileRequest convertToBrandProfileRequest(Object profile) {
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.convertValue(profile, BrandProfileRequest.class);
+            return objectMapper.convertValue(profile, BrandProfileRequest.class);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Failed to convert to BrandProfileRequest: " + e.getMessage());
         }
