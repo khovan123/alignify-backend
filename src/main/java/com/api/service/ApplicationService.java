@@ -1,6 +1,6 @@
 package com.api.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +24,7 @@ import com.api.model.Influencer;
 import com.api.model.Status;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
-import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
-import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
@@ -42,15 +40,11 @@ public class ApplicationService {
         @Autowired
         private UserRepository userRepository;
         @Autowired
-        private BrandRepository brandRepository;
-        @Autowired
         private InfluencerRepository influencerRepository;
         @Autowired
         private ApplicationRepository applicationRepository;
         @Autowired
         private CampaignRepository campaignRepository;
-        @Autowired
-        private CampaignTrackingRepository campaignTrackingRepository;
         @Autowired
         private CategoryRepository categoryRepository;
         @Autowired
@@ -320,7 +314,7 @@ public class ApplicationService {
         // userRepository.findById(applicationOpt.get().getInfluencerId()).get();
         // chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
         // chatMessage.setName(user.getName());
-        // chatMessage.setSendAt(LocalDateTime.now());
+        // chatMessage.setSendAt(ZonedDateTime.now());
         // chatMessage.setChatRoomId(chatRoom.getChatRoomId());
         // chatMessage.setUserId("#SYS");
         // chatMessageRepository.save(chatMessage);
@@ -400,7 +394,7 @@ public class ApplicationService {
                                 chatMessage.setMessage("Influencer đã vào phòng chat.");
                                 chatMessage.setName("Influencer");
                         }
-                        chatMessage.setSendAt(LocalDateTime.now());
+                        chatMessage.setSendAt(ZonedDateTime.now());
                         chatMessage.setChatRoomId(chatRoom.getChatRoomId());
                         chatMessage.setUserId("#SYS");
                         chatMessageRepository.save(chatMessage);

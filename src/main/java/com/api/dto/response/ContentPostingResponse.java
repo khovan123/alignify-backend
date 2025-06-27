@@ -1,6 +1,6 @@
 package com.api.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +14,7 @@ public class ContentPostingResponse {
     private String content;
     private String imageUrl;
     private List<Map<String, String>> categories;
-    private LocalDateTime createdDate;
+    private ZonedDateTime createdDate;
     private boolean isPublic;
     private int commentCount;
     private int likeCount;
@@ -22,7 +22,9 @@ public class ContentPostingResponse {
     public ContentPostingResponse() {
     }
 
-    public ContentPostingResponse(String contentId, String contentName, String userId, String userName, String userAvatar, String content, String imageUrl, List<Map<String, String>> categories, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
+    public ContentPostingResponse(String contentId, String contentName, String userId, String userName,
+            String userAvatar, String content, String imageUrl, List<Map<String, String>> categories,
+            ZonedDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
         this.contentName = contentName;
         this.userId = userId;
@@ -44,7 +46,6 @@ public class ContentPostingResponse {
     public void setUserAvatar(String userAvatar) {
         this.userAvatar = userAvatar;
     }
-
 
     public String getContentName() {
         return contentName;
@@ -69,8 +70,6 @@ public class ContentPostingResponse {
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
-
- 
 
     public String getContentId() {
         return contentId;
@@ -112,11 +111,11 @@ public class ContentPostingResponse {
         this.categories = categories;
     }
 
-    public LocalDateTime getCreatedDate() {
+    public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
+    public void setCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
     }
 

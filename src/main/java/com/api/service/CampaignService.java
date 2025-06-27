@@ -1,6 +1,6 @@
 package com.api.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,7 +102,7 @@ public class CampaignService {
         chatMessage.setName(user.getName());
         chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
         chatMessage.setUserId("#SYS");
-        chatMessage.setSendAt(LocalDateTime.now());
+        chatMessage.setSendAt(ZonedDateTime.now());
         chatMessageRepository.save(chatMessage);
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(user, campaign, categoryRepo),
@@ -220,22 +220,18 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails, int pageNumber, int pageSize,
+    public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails,
             HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId(), pageable);
+        List<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId());
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
 
-        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+        List<CampaignResponse> dtoList = campaignPage.stream()
                 .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", campaignPage.getNumber());
-        responseData.put("totalPages", campaignPage.getTotalPages());
-        responseData.put("totalItems", campaignPage.getTotalElements());
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
@@ -251,22 +247,18 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
+    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails,
             HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<String> campaignIdsPage = campaignTrackingRepository.findCampaignIdsByInfluencerId(userDetails.getUserId(),
-                pageable);
+        List<String> campaignIdsPage = campaignTrackingRepository
+                .findCampaignIdsByInfluencerId(userDetails.getUserId());
         Optional<User> user = userRepository.findById(userDetails.getUserId());
-        Page<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage.getContent(), pageable);
-        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+        List<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage);
+        List<CampaignResponse> dtoList = campaignPage.stream()
                 .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", campaignPage.getNumber());
-        responseData.put("totalPages", campaignPage.getTotalPages());
-        responseData.put("totalItems", campaignPage.getTotalElements());
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
@@ -378,7 +370,7 @@ public class CampaignService {
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
             }
-            campaign.setCreatedAt(LocalDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
+            campaign.setCreatedAt(ZonedDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
 

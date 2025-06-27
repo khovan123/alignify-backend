@@ -2,7 +2,7 @@ package com.api.dto.response;
 
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public class ChatRoomResponse {
@@ -13,7 +13,7 @@ public class ChatRoomResponse {
     private String name;
     private String lastMessage;
     private List<String> readBy;
-    private LocalDateTime sendAt;
+    private ZonedDateTime sendAt;
 
     public ChatRoomResponse(ChatRoom chatRoom, ChatMessage chatMessage) {
         this.roomAvatarUrl = chatRoom.getRoomAvatarUrl();
@@ -73,11 +73,11 @@ public class ChatRoomResponse {
         this.readBy = readBy;
     }
 
-    public LocalDateTime getSendAt() {
+    public ZonedDateTime getSendAt() {
         return sendAt;
     }
 
-    public void setSendAt(LocalDateTime sendAt) {
+    public void setSendAt(ZonedDateTime sendAt) {
         this.sendAt = sendAt;
     }
 

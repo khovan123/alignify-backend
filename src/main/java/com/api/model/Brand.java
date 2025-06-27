@@ -1,13 +1,17 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import org.springframework.data.annotation.CreatedDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "brands")
-public class Brand{
+public class Brand {
 
     @Id
     private String userId;
@@ -15,20 +19,21 @@ public class Brand{
     private List<String> categoryIds;
     private Map<String, String> contacts;
     private Map<String, String> socialMediaLinks;
-    private LocalDateTime establishDate;
+    private ZonedDateTime establishDate;
     private int totalCampaign;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Brand() {
         this.totalCampaign = 0;
         this.categoryIds = new ArrayList<>();
         this.contacts = new HashMap<>();
         this.socialMediaLinks = new HashMap<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Brand(String userId, String bio, List<String> categoryIds, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate, int totalCampaign, LocalDateTime createdAt) {
+    public Brand(String userId, String bio, List<String> categoryIds, Map<String, String> contacts,
+            Map<String, String> socialMediaLinks, ZonedDateTime establishDate, int totalCampaign,
+            ZonedDateTime createdAt) {
         this.userId = userId;
         this.bio = bio;
         this.categoryIds = categoryIds;
@@ -87,19 +92,19 @@ public class Brand{
         this.socialMediaLinks = socialMediaLinks;
     }
 
-    public LocalDateTime getEstablishDate() {
+    public ZonedDateTime getEstablishDate() {
         return establishDate;
     }
 
-    public void setEstablishDate(LocalDateTime establishDate) {
+    public void setEstablishDate(ZonedDateTime establishDate) {
         this.establishDate = establishDate;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

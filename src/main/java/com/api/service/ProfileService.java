@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +40,6 @@ import com.api.repository.InfluencerRepository;
 import com.api.repository.RoleRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
-import com.cloudinary.Cloudinary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,10 +57,6 @@ public class ProfileService {
     private CategoryRepository categoryRepository;
     @Autowired
     private BrandRepository brandRepository;
-    @Autowired
-    private Cloudinary cloudinary;
-    @Value("${cloudinary.upload-preset}")
-    private String uploadPreset;
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
@@ -200,7 +194,8 @@ public class ProfileService {
             }
             userRepository.save(user);
             influencerRepository.save(influencer);
-            InfluencerProfileResponse influencerProfile = new InfluencerProfileResponse(user, influencer, categoryRepository);
+            InfluencerProfileResponse influencerProfile = new InfluencerProfileResponse(user, influencer,
+                    categoryRepository);
             return ApiResponse.sendSuccess(200, "Update successfully", influencerProfile, request.getRequestURI());
         } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             Brand brand = brandRepository.findById(id).get();
