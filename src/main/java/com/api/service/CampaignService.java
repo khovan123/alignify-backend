@@ -1,6 +1,6 @@
 package com.api.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,7 +102,7 @@ public class CampaignService {
         chatMessage.setName(user.getName());
         chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
         chatMessage.setUserId("#SYS");
-        chatMessage.setSendAt(LocalDateTime.now());
+        chatMessage.setSendAt(ZonedDateTime.now());
         chatMessageRepository.save(chatMessage);
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(user, campaign, categoryRepo),
@@ -378,7 +378,7 @@ public class CampaignService {
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
             }
-            campaign.setCreatedAt(LocalDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
+            campaign.setCreatedAt(ZonedDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
 

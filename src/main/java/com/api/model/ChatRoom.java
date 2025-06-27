@@ -1,9 +1,10 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.data.annotation.CreatedDate;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,8 +17,7 @@ public class ChatRoom {
     private String roomAvatarUrl;
     private String roomOwnerId;
     private List<String> members;
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public ChatRoom() {
         this.members = new ArrayList<>();
@@ -29,9 +29,11 @@ public class ChatRoom {
         this.roomName = roomName;
         this.roomAvatarUrl = roomAvatarUrl;
         this.members = new ArrayList<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public ChatRoom(String chatRoomId, String roomName, String roomAvatarUrl, String roomOwnerId, List<String> members, LocalDateTime createdAt) {
+    public ChatRoom(String chatRoomId, String roomName, String roomAvatarUrl, String roomOwnerId, List<String> members,
+            ZonedDateTime createdAt) {
         this.chatRoomId = chatRoomId;
         this.roomName = roomName;
         this.roomAvatarUrl = roomAvatarUrl;
@@ -80,11 +82,11 @@ public class ChatRoom {
         this.members = members;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

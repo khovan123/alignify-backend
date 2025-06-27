@@ -1,7 +1,8 @@
 package com.api.controller.websocket.chatting;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -53,14 +54,18 @@ public class ChatController {
             UserDTO userDTO = new UserDTO(stompPrincipal.getUserId(), stompPrincipal.getName(),
                     stompPrincipal.getAvatarUrl());
             chatMessage.setName(stompPrincipal.getName());
-            // chatMessage.setSendAt(LocalDateTime.now(ZoneId.of("+07:00")));
+            // chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            if (chatMessage.getSendAt() == null) {
+                chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            }
             chatMessage.setChatRoomId(roomId);
             chatMessage.setUserId(userId);
             chatMessageRepository.save(chatMessage);
             ChatRoom chatRoom = roomOpt.get();
-            chatRoom.setCreatedAt(LocalDateTime.now());
+            chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatRoomRepository.save(chatRoom);
-            messagingTemplate.convertAndSend("/topic/messages/" + roomId, new ChatMessageResponse(userDTO, chatMessage));
+            messagingTemplate.convertAndSend("/topic/messages/" + roomId,
+                    new ChatMessageResponse(userDTO, chatMessage));
 
         }
         throw new SecurityException("Invalid principal type");

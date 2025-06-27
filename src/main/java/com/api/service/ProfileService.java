@@ -60,10 +60,6 @@ public class ProfileService {
     @Autowired
     private BrandRepository brandRepository;
     @Autowired
-    private Cloudinary cloudinary;
-    @Value("${cloudinary.upload-preset}")
-    private String uploadPreset;
-    @Autowired
     private FileStorageService fileStorageService;
     @Autowired
     private CampaignRepository campaignRepository;

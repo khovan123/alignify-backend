@@ -1,12 +1,12 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -21,14 +21,13 @@ public class CampaignTracking {
     private Map<String, List<CampaignRequirement>> campaignRequirementTrackings;
     private double process;
     private String status;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public CampaignTracking() {
         this.campaignRequirementTrackings = new HashMap<>();
         this.process = 0.0;
         this.status = "PENDING";
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignTracking(String applicationId, String campaignId, String brandId, String influencerId,
@@ -47,6 +46,7 @@ public class CampaignTracking {
             campaignRequirementTrackings.put(key, requirements);
         });
         this.status = "PENDING";
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public String getCampaignTrackingId() {
@@ -84,7 +84,7 @@ public class CampaignTracking {
     public Map<String, List<CampaignRequirement>> getCampaignRequirementTrackings() {
         return campaignRequirementTrackings;
     }
-    
+
     public void setCampaignRequirementTrackings(Map<String, List<CampaignRequirement>> campaignRequirementTrackings) {
         this.campaignRequirementTrackings = campaignRequirementTrackings;
     }
@@ -105,11 +105,11 @@ public class CampaignTracking {
         return status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
