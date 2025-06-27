@@ -34,7 +34,6 @@ public class NotificationController {
             @Payload Notification notification,
             @DestinationVariable("userId") String userId,
             Principal principal) {
-        System.out.println("Received notification: " + notification);
         if (principal == null || principal.getName() == null) {
             throw new SecurityException("Access is denied for: " + userId);
         }
