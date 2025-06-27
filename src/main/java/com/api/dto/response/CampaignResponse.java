@@ -13,6 +13,7 @@ import com.api.repository.CategoryRepository;
 public class CampaignResponse {
 
     private String campaignId;
+    private String brandId;
     private String brandName;
     private String brandAvartar;
     private String campaignName;
@@ -36,6 +37,7 @@ public class CampaignResponse {
 
     public CampaignResponse(User user, Campaign campaign, CategoryRepository categoryRepository) {
         this.campaignId = campaign.getCampaignId();
+        this.brandId = campaign.getBrandId();
         this.brandName = user.getName();
         this.content = campaign.getContent();
         this.brandAvartar = user.getAvatarUrl();
@@ -54,6 +56,14 @@ public class CampaignResponse {
         this.applicationTotal = campaign.getApplicationTotal();
         this.appliedInfluencerIds = campaign.getAppliedInfluencerIds() != null ? campaign.getAppliedInfluencerIds()
                 : List.of();
+    }
+
+    public String getBrandId() {
+        return brandId;
+    }
+
+    public void setBrandId(String brandId) {
+        this.brandId = brandId;
     }
 
     public String getStatus() {

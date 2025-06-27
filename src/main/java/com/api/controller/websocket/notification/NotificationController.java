@@ -40,8 +40,10 @@ public class NotificationController {
 
             if (userId.equals(((StompPrincipal) principal).getUserId())) {
                 notification.setUserId(userId);
-                notification.setAvatarUrl(stompPrincipal.getAvatarUrl());
-                notification.setName(stompPrincipal.getName());
+                if (notification.getAvatarUrl().isEmpty())
+                    notification.setAvatarUrl(stompPrincipal.getAvatarUrl());
+                if (notification.getName().isEmpty())
+                    notification.setName(stompPrincipal.getName());
                 notification.setRead(false);
             } else {
                 Optional<User> userOpt = userRepository.findById(userId);
@@ -50,8 +52,10 @@ public class NotificationController {
                 }
                 User user = userOpt.get();
                 notification.setUserId(user.getUserId());
-                notification.setAvatarUrl(user.getAvatarUrl());
-                notification.setName(user.getName());
+                if (notification.getAvatarUrl().isEmpty())
+                    notification.setAvatarUrl(user.getAvatarUrl());
+                if (notification.getName().isEmpty())
+                    notification.setName(user.getName());
                 notification.setRead(false);
             }
             notificationRepository.save(notification);

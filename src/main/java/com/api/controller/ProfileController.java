@@ -28,9 +28,13 @@ public class ProfileController {
     private ProfileService profileService;
 
     @GetMapping("")
-    public ResponseEntity<?> getAllProfileByRoleId(@RequestParam("roleId") String roleId,
-            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        return profileService.getAllProfileByRoleId(roleId, userDetails, request);
+    public ResponseEntity<?> getAllProfileByRoleId(
+            @RequestParam("roleId") String roleId,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return profileService.getAllProfileByRoleId(roleId, pageNumber, pageSize, userDetails, request);
     }
 
     @GetMapping("/me")
@@ -61,9 +65,9 @@ public class ProfileController {
             @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.saveAvatarUrl(image, userDetails, request);
     }
-    
+
     @GetMapping("/topInfluencer")
-    public ResponseEntity<?> getTopInfluencers(HttpServletRequest request){
+    public ResponseEntity<?> getTopInfluencers(HttpServletRequest request) {
         return profileService.getTopInfluencers(request);
     }
 
