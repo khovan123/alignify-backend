@@ -20,7 +20,6 @@ import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Category;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
-import com.api.model.Likes;
 import com.api.model.User;
 import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
@@ -29,7 +28,6 @@ import com.api.repository.LikesRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.Helper;
-import com.api.util.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -213,44 +211,48 @@ public class ContentPostingService {
         }
     }
 
-    public ResponseEntity<?> toggleLike(String contentId, HttpServletRequest request) {
-        Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
-        if (contentPostingOpt.isEmpty()) {
-            return ApiResponse.sendError(404, "Content posting not found", request.getRequestURI());
-        }
+    // public ResponseEntity<?> toggleLike(String contentId, HttpServletRequest
+    // request) {
+    // Optional<ContentPosting> contentPostingOpt =
+    // contentPostingRepo.findById(contentId);
+    // if (contentPostingOpt.isEmpty()) {
+    // return ApiResponse.sendError(404, "Content posting not found",
+    // request.getRequestURI());
+    // }
 
-        ContentPosting content = contentPostingOpt.get();
-        String userId = JwtUtil.decodeToken(request).getSubject();
+    // ContentPosting content = contentPostingOpt.get();
+    // String userId = JwtUtil.decodeToken(request).getSubject();
 
-        boolean isOwner = content.getUserId().equals(userId);
-        boolean isPublic = content.isIsPublic();
+    // boolean isOwner = content.getUserId().equals(userId);
+    // boolean isPublic = content.isIsPublic();
 
-        if (!isPublic && !isOwner) {
-            return ResponseEntity.status(403).body(
-                    Map.of("error", "You do not have permission to like this private content."));
-        }
+    // if (!isPublic && !isOwner) {
+    // return ResponseEntity.status(403).body(
+    // Map.of("error", "You do not have permission to like this private content."));
+    // }
 
-        Optional<Likes> existingLike = likesRepo.findByUserIdAndContentId(userId, contentId);
+    // Optional<Likes> existingLike = likesRepo.findByUserIdAndContentId(userId,
+    // contentId);
 
-        if (existingLike.isPresent()) {
-            likesRepo.deleteByUserIdAndContentId(userId, contentId);
-        } else {
-            Likes newLike = new Likes(userId, contentId);
-            likesRepo.save(newLike);
-        }
+    // if (existingLike.isPresent()) {
+    // likesRepo.deleteByUserIdAndContentId(userId, contentId);
+    // } else {
+    // Likes newLike = new Likes(userId, contentId);
+    // likesRepo.save(newLike);
+    // }
 
-        long likeCount = likesRepo.countByContentId(contentId);
-        content.setLikeCount((int) likeCount);
-        contentPostingRepo.save(content);
+    // long likeCount = likesRepo.countByContentId(contentId);
+    // content.setLikeCount((int) likeCount);
+    // contentPostingRepo.save(content);
 
-        String message = existingLike.isPresent() ? "Like removed" : "Like added";
+    // String message = existingLike.isPresent() ? "Like removed" : "Like added";
 
-        return ApiResponse.sendSuccess(
-                200,
-                message,
-                Map.of("likeCount", likeCount),
-                request.getRequestURI());
-    }
+    // return ApiResponse.sendSuccess(
+    // 200,
+    // message,
+    // Map.of("likeCount", likeCount),
+    // request.getRequestURI());
+    // }
 
     public ResponseEntity<?> findContentByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
         if (term == null || term.trim().isEmpty()) {
