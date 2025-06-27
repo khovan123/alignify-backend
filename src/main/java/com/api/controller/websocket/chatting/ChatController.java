@@ -2,6 +2,7 @@ package com.api.controller.websocket.chatting;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +59,7 @@ public class ChatController {
             chatMessage.setUserId(userId);
             chatMessageRepository.save(chatMessage);
             ChatRoom chatRoom = roomOpt.get();
-            chatRoom.setCreatedAt(LocalDateTime.now());
+            chatRoom.setCreatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatRoomRepository.save(chatRoom);
             messagingTemplate.convertAndSend("/topic/messages/" + roomId,
                     new ChatMessageResponse(userDTO, chatMessage));
