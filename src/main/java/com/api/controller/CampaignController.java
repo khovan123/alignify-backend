@@ -45,13 +45,12 @@ public class CampaignController {
             HttpServletRequest request) {
         return campaignService.getAllCampaign(page, size, request);
     }
-    
+
     @GetMapping("/top")
-    public ResponseEntity<?> getCampaignsTop(HttpServletRequest request){
+    public ResponseEntity<?> getCampaignsTop(HttpServletRequest request) {
         return campaignService.getCampaignsTop(request);
     }
-            
-    
+
     // @GetMapping("/brands/{brandId}")
     // public ResponseEntity<?> getCampaignsByBrandId(
     // @PathVariable("brandId") String userId,
@@ -78,8 +77,9 @@ public class CampaignController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
-        return campaignService.getAllCampaignOfBrand(userDetails, page, size, request);
+        return campaignService.getAllCampaignOfBrand(userDetails, request);
     }
+
     @PreAuthorize("hasRole('ROLE_BRAND')")
     @GetMapping("/brandNoPage")
     public ResponseEntity<?> getAllCampaignOfBrandNoPage(
@@ -125,7 +125,7 @@ public class CampaignController {
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
 
-        return campaignService.getAllCampaignOfInfluencer(userDetails, page, size, request);
+        return campaignService.getAllCampaignOfInfluencer(userDetails, request);
     }
 
     @GetMapping("/filterByCategory/{categoryId}")
@@ -140,7 +140,7 @@ public class CampaignController {
 
     @PostMapping("/search")
     public ResponseEntity<?> search(
-            @RequestParam(defaultValue = "all",name="term") String term,
+            @RequestParam(defaultValue = "all", name = "term") String term,
             @RequestParam(defaultValue = "0", name = "pageNumber") int pageNumber,
             @RequestParam(defaultValue = "10", name = "pageSize") int pageSize,
             @AuthenticationPrincipal CustomUserDetails userDetails,
