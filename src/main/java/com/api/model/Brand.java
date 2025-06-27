@@ -1,12 +1,12 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -21,8 +21,6 @@ public class Brand {
     private Map<String, String> socialMediaLinks;
     private ZonedDateTime establishDate;
     private int totalCampaign;
-
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public Brand() {
@@ -30,6 +28,7 @@ public class Brand {
         this.categoryIds = new ArrayList<>();
         this.contacts = new HashMap<>();
         this.socialMediaLinks = new HashMap<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Brand(String userId, String bio, List<String> categoryIds, Map<String, String> contacts,

@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,7 +22,6 @@ public class Otp {
 
     private int attemptCount;
 
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public Otp() {
@@ -32,7 +32,7 @@ public class Otp {
         this.otpCode = otpCode;
         this.requestCount = 1;
         this.attemptCount = 0;
-        this.createdAt = ZonedDateTime.now();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Otp(String email, String otpCode, int requestCount, ZonedDateTime createdAt) {

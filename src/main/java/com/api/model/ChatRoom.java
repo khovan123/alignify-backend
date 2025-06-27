@@ -1,10 +1,10 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,7 +17,6 @@ public class ChatRoom {
     private String roomAvatarUrl;
     private String roomOwnerId;
     private List<String> members;
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public ChatRoom() {
@@ -30,6 +29,7 @@ public class ChatRoom {
         this.roomName = roomName;
         this.roomAvatarUrl = roomAvatarUrl;
         this.members = new ArrayList<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public ChatRoom(String chatRoomId, String roomName, String roomAvatarUrl, String roomOwnerId, List<String> members,

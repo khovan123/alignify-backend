@@ -1,6 +1,8 @@
 package com.api.controller.websocket.notification;
 
 import java.security.Principal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +46,6 @@ public class NotificationController {
                     notification.setAvatarUrl(stompPrincipal.getAvatarUrl());
                 if (notification.getName().isEmpty())
                     notification.setName(stompPrincipal.getName());
-                notification.setRead(false);
             } else {
                 Optional<User> userOpt = userRepository.findById(userId);
                 if (!userOpt.isPresent()) {
@@ -56,8 +57,9 @@ public class NotificationController {
                     notification.setAvatarUrl(user.getAvatarUrl());
                 if (notification.getName().isEmpty())
                     notification.setName(user.getName());
-                notification.setRead(false);
             }
+            notification.setRead(false);
+            notification.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             notificationRepository.save(notification);
             messagingTemplate.convertAndSend("/topic/notifications/" + userId, notification);
         } else {

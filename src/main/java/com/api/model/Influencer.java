@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,8 +20,6 @@ public class Influencer {
     private List<String> categoryIds;
     private int follower;
     private boolean isPublic;
-
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public Influencer() {
@@ -30,12 +29,12 @@ public class Influencer {
         this.gender = "NONE";
         this.categoryIds = new ArrayList<>();
         this.socialMediaLinks = new HashMap<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Influencer(String userId, ZonedDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks,
             double rating, List<String> categoryIds, int follower, boolean isPublic, ZonedDateTime createdAt) {
         this.userId = userId;
-
         this.DoB = DoB;
         this.gender = gender;
         this.bio = bio;

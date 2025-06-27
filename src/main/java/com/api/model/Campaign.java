@@ -1,11 +1,11 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -22,7 +22,6 @@ public class Campaign {
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
-    @CreatedDate
     private ZonedDateTime createdAt;
     private ZonedDateTime dueAt;
     private ZonedDateTime startAt;
@@ -41,6 +40,7 @@ public class Campaign {
         this.influencerCountCurrent = 0;
         this.applicationTotal = 0;
         this.appliedInfluencerIds = new ArrayList<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
@@ -57,6 +57,7 @@ public class Campaign {
         this.campaignRequirements = campaignRequirements;
         this.influencerRequirements = influencerRequirements;
         this.influencerCountExpected = influencerCountExpected;
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,

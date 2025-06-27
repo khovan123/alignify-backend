@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class CampaignRequirement {
@@ -15,7 +16,7 @@ public class CampaignRequirement {
         this.imageUrl = null;
         this.postUrl = null;
         this.status = null;
-        this.uploadedAt = ZonedDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(int index) {
@@ -23,7 +24,7 @@ public class CampaignRequirement {
         this.imageUrl = null;
         this.postUrl = null;
         this.status = null;
-        this.uploadedAt = ZonedDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(CampaignRequirement cr) {
@@ -32,7 +33,7 @@ public class CampaignRequirement {
         this.status = cr.status;
         this.postUrl = cr.postUrl;
         this.status = cr.status;
-        this.uploadedAt = cr.uploadedAt != null ? cr.uploadedAt : ZonedDateTime.now();
+        this.uploadedAt = cr.uploadedAt != null ? cr.uploadedAt : ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(int index, String imageUrl, String postUrl) {
@@ -40,12 +41,12 @@ public class CampaignRequirement {
         this.imageUrl = imageUrl;
         this.postUrl = postUrl;
         this.status = "PENDING";
-        this.uploadedAt = ZonedDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(String status) {
         this.status = status;
-        this.uploadedAt = ZonedDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public int getIndex() {

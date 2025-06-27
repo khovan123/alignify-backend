@@ -1,10 +1,10 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,8 +19,6 @@ public class ContentPosting {
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
-
-    @CreatedDate
     private ZonedDateTime createdDate;
     private boolean isPublic;
     private int commentCount;
@@ -31,6 +29,7 @@ public class ContentPosting {
         this.commentCount = 0;
         this.isPublic = true;
         this.categoryIds = new ArrayList<>();
+        this.createdDate = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public ContentPosting(String contentId, String contentName, String userId, String content, String imageUrl,

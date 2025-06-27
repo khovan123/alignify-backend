@@ -1,8 +1,8 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,12 +12,11 @@ public class Gallery {
     @Id
     private String galleryId;
     private List<String> images;
-
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public Gallery() {
         this.images = new ArrayList<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Gallery(String galleryId, List<String> images, ZonedDateTime createdAt) {

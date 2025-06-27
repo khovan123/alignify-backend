@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -15,10 +16,10 @@ public class Invitation {
     private String influencerId;
     private String message;
     private String status;
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public Invitation() {
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Invitation(String brandId, String campaignId, String influencerId, String message) {
@@ -27,6 +28,7 @@ public class Invitation {
         this.influencerId = influencerId;
         this.message = message;
         this.status = "PENDING";
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Invitation(String invitationId, String brandId, String campaignId, String influencerId, String message,

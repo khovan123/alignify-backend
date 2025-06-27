@@ -23,10 +23,8 @@ import com.api.dto.response.ChatRoomResponse;
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.User;
-import com.api.repository.BrandRepository;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
-import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 
@@ -42,10 +40,6 @@ public class ChatRestController {
     private ChatRoomRepository chatRoomRepository;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private BrandRepository brandRepository;
-    @Autowired
-    private InfluencerRepository influencerRepository;
 
     @GetMapping("/{roomId}")
     public ResponseEntity<?> getMessages(

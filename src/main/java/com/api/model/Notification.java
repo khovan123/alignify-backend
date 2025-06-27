@@ -2,7 +2,6 @@ package com.api.model;
 
 import java.time.ZonedDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,7 +24,6 @@ public class Notification {
   private String avatarUrl;
   private String name;
   private String content;
-  @CreatedDate
   private ZonedDateTime createdAt;
   private boolean isRead = false;
 }

@@ -1,9 +1,10 @@
 
 package com.api.model;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,18 +14,19 @@ public class Likes {
     private String likeId;
     private String userId;
     private String contentId;
-    @CreatedDate
-    private Date createdAt;
+    private ZonedDateTime createdAt;
 
     public Likes() {
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Likes(String userId, String contentId) {
         this.userId = userId;
         this.contentId = contentId;
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Likes(String likeId, String userId, String contentId, Date createdAt) {
+    public Likes(String likeId, String userId, String contentId, ZonedDateTime createdAt) {
         this.likeId = likeId;
         this.userId = userId;
         this.contentId = contentId;
@@ -55,13 +57,12 @@ public class Likes {
         this.contentId = contentId;
     }
 
-    public Date getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
-    
-    
+
 }

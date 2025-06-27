@@ -1,8 +1,8 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,11 +15,10 @@ public class Admin {
     private String email;
     private String password;
     private String roleId;
-
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public Admin() {
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Admin(String userId, String name, String email, String password, String roleId, ZonedDateTime createdAt) {

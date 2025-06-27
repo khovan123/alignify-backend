@@ -1,7 +1,7 @@
 package com.api.model;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,11 +17,11 @@ public class User {
     private boolean isActive;
     private String avatarUrl;
     private String backgroundUrl;
-    @CreatedDate
     private ZonedDateTime createdAt;
 
     public User() {
         this.isActive = true;
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public User(String userId, String name, String email, String password, String roleId, boolean isActive,
