@@ -21,6 +21,7 @@ import com.api.model.Category;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
 import com.api.model.Likes;
+import com.api.model.User;
 import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
 import com.api.repository.ContentPostingRepository;
@@ -80,13 +81,15 @@ public class ContentPostingService {
                 .toList();
 
         List<Comment> comments = commentRepository.findAllByContentId(post.getContentId());
-
+        User user = userRepository.findByUserId(post.getUserId()).orElse(null);
         ContentPostingResponse dto = new ContentPostingResponse();
         dto.setContentId(post.getContentId());
         dto.setContentName(post.getContentName());
-        dto.setUserAvatar(userRepository.findByUserId(post.getUserId()).getAvatarUrl());
+        if (user != null) {
+            dto.setUserAvatar(user.getAvatarUrl());
+            dto.setUserName(user.getName());
+        }
         dto.setUserId(post.getUserId());
-        dto.setUserName(userRepository.findByUserId(post.getUserId()).getName());
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
@@ -104,11 +107,6 @@ public class ContentPostingService {
         List<ContentPostingResponse> dtoList = posts.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", posts.getNumber());
-        responseData.put("totalPages", posts.getTotalPages());
-        responseData.put("totalItems", posts.getTotalElements());
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
@@ -154,12 +152,14 @@ public class ContentPostingService {
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
 
-            if (!contentPosting.getUserId().equals(userDetails)) {
+            if (!contentPosting.getUserId().equals(userDetails.getUserId())) {
                 return ResponseEntity.status(403).body(
                         Map.of("error", "Access denied. You are not the owner of this content."));
             }
 
             contentPostingRepo.deleteById(contentId);
+            likesRepo.deleteAllByContentId(contentId);
+            commentRepository.deleteAllByContentId(contentId);
             return ApiResponse.sendSuccess(
                     204,
                     "Content posting deleted successfully",
@@ -258,7 +258,6 @@ public class ContentPostingService {
         }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        // Ưu tiên tìm kiếm theo tên người đăng
         List<String> userIds = userRepository.findByNameContainingIgnoreCase(term)
                 .stream()
                 .map(user -> user.getUserId())
@@ -268,7 +267,6 @@ public class ContentPostingService {
         if (!userIds.isEmpty()) {
             contentPage = contentPostingRepo.findByUserIdInAndIsPublicTrue(userIds, pageable);
         } else {
-            // Nếu không có user nào khớp, tìm theo tên bài đăng
             contentPage = contentPostingRepo.findByContentNameContainingIgnoreCaseAndIsPublicTrue(term, pageable);
         }
 
@@ -276,13 +274,7 @@ public class ContentPostingService {
                 .map(this::mapToDTO)
                 .toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("contents", dtoList);
-        responseData.put("currentPage", contentPage.getNumber());
-        responseData.put("totalPages", contentPage.getTotalPages());
-        responseData.put("totalItems", contentPage.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Search content success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Search content success", dtoList, request.getRequestURI());
     }
 
     public ContentPosting convertToContentPosting(String obj) {
@@ -295,5 +287,4 @@ public class ContentPostingService {
         }
     }
 
-    
 }

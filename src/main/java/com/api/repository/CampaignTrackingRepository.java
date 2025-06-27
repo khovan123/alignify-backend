@@ -25,4 +25,6 @@ public interface CampaignTrackingRepository extends MongoRepository<CampaignTrac
         return findAllByInfluencerId(influencerId, pageable)
                 .map(CampaignTracking::getCampaignId);
     }
+
+    void deleteAllByCampaignId(String campaignId);
 }
