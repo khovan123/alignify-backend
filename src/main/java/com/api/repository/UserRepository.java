@@ -28,4 +28,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     Page<User> findByNameContainingIgnoreCaseAndRoleId(String name, String roleId, Pageable pageable);
 
     List<User> findByNameContainingIgnoreCase(String name);
+
+    @Query("{ 'roleId': ?0, '_id': { $ne: ?1 }, 'isActive': true }")
+    Page<User> findByRoleIdAndUserIdNotAndIsActiveTrue(String roleId, String excludedId, Pageable pageable);
 }

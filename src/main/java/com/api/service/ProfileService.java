@@ -70,14 +70,16 @@ public class ProfileService {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails,
+    public ResponseEntity<?> getAllProfileByRoleId(String roleId, int pageNumber, int pageSize,
+            CustomUserDetails userDetails,
             HttpServletRequest request) {
         String userId = userDetails.getUserId();
+        PageRequest page = PageRequest.of(pageNumber, pageSize);
         List<Map<String, Object>> userList = new ArrayList<>();
         if (roleId.equalsIgnoreCase(EnvConfig.ADMIN_ROLE_ID)) {
             return ApiResponse.sendError(403, "Access denied: Insufficient permissions", request.getRequestURI());
         }
-        userRepository.findByRoleIdAndUserIdNot(roleId, userId).forEach(user -> {
+        userRepository.findByRoleIdAndUserIdNotAndIsActiveTrue(roleId, userId, page).forEach(user -> {
             Map<String, Object> map = new HashMap<>();
             map.put("name", user.getName());
             map.put("id", user.getUserId());
