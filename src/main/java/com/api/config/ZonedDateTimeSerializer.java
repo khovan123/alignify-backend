@@ -15,6 +15,6 @@ public class ZonedDateTimeSerializer extends StdSerializer<ZonedDateTime> {
   @Override
   public void serialize(ZonedDateTime value, JsonGenerator gen, SerializerProvider provider) throws IOException {
     // Định dạng ISO chuẩn, có offset
-    gen.writeString(value.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+    gen.writeString(value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
   }
 }
