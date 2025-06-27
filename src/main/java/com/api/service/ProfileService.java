@@ -69,6 +69,8 @@ public class ProfileService {
     private CampaignRepository campaignRepository;
     @Autowired
     private ApplicationRepository applicationRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public ResponseEntity<?> getAllProfileByRoleId(String roleId, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -340,7 +342,7 @@ public class ProfileService {
                 map.put("rating", influencer.getRating());
                 map.put("isPublic", influencer.isPublic());
                 map.put("gender", influencer.getGender());
-                map.put("dob", influencer.getDoB());
+                map.put("DoB", influencer.getDoB());
                 if (influencer.getCategoryIds() != null && !influencer.getCategoryIds().isEmpty()) {
                     map.put("category", categoryRepository.findAllByCategoryIdIn(influencer.getCategoryIds()));
                 }
@@ -359,18 +361,16 @@ public class ProfileService {
     }
 
     private InfluencerProfileRequest convertToInfluencerProfileRequest(Object profile) {
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.convertValue(profile, InfluencerProfileRequest.class);
+            return objectMapper.convertValue(profile, InfluencerProfileRequest.class);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Failed to convert to InfluencerProfileRequest: " + e.getMessage());
         }
     }
 
     private BrandProfileRequest convertToBrandProfileRequest(Object profile) {
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.convertValue(profile, BrandProfileRequest.class);
+            return objectMapper.convertValue(profile, BrandProfileRequest.class);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Failed to convert to BrandProfileRequest: " + e.getMessage());
         }

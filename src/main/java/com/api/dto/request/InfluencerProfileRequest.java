@@ -1,19 +1,30 @@
 package com.api.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class InfluencerProfileRequest {
+
+    @JsonProperty("name")
     private String name;
+    @JsonProperty("DoB")
     private LocalDateTime DoB;
+    @JsonProperty("gender")
     private String gender;
+    @JsonProperty("bio")
     private String bio;
+    @JsonProperty("socialMediaLinks")
     private Map<String, String> socialMediaLinks;
+    @JsonProperty("categoryIds")
     private List<String> categoryIds;
+    @JsonProperty("isPublic")
     private Boolean isPublic;
 
-    public InfluencerProfileRequest(String name, LocalDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks, List<String> categoryIds, Boolean isPublic) {
+    public InfluencerProfileRequest(@JsonProperty("name") String name, @JsonProperty("DoB") LocalDateTime DoB, @JsonProperty("gender") String gender, @JsonProperty("bio") String bio, @JsonProperty("socialMediaLinks") Map<String, String> socialMediaLinks, @JsonProperty("categoryIds") List<String> categoryIds, @JsonProperty("isPublic") Boolean isPublic) {
         this.name = name;
         this.DoB = DoB;
         this.gender = gender;
@@ -31,10 +42,6 @@ public class InfluencerProfileRequest {
         this.isPublic = isPublic;
     }
 
-    
-
-    
-
     public String getName() {
         return name;
     }
@@ -42,8 +49,6 @@ public class InfluencerProfileRequest {
     public void setName(String name) {
         this.name = name;
     }
-
-   
 
     public InfluencerProfileRequest() {
     }
