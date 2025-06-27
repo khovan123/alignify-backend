@@ -57,4 +57,19 @@ public class LikesController {
     }
   }
 
+  @MessageMapping("/isLiked/{contentId}")
+  public void isLiked(
+      @DestinationVariable("contentId") String contentId,
+      Principal principal) {
+    if (principal == null || principal.getName() == null) {
+      throw new SecurityException("Access is denied for: " + contentId);
+    }
+
+    if (principal instanceof StompPrincipal stompPrincipal) {
+      messagingTemplate.convertAndSend("/topic/contents/isLiked/" + contentId, Map.of("isLiked",
+          likesRepository.existsByContentIdAndUserId(contentId, stompPrincipal.getUserId())));
+    } else {
+      throw new SecurityException("Invalid principal type");
+    }
+  }
 }
