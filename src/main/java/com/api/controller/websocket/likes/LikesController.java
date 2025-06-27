@@ -1,6 +1,8 @@
 package com.api.controller.websocket.likes;
 
 import java.security.Principal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -30,6 +32,7 @@ public class LikesController {
       if (likesRepository.existsByContentIdAndUserId(contentId, stompPrincipal.getUserId())) {
         likesRepository.deleteByUserIdAndContentId(stompPrincipal.getUserId(), contentId);
       } else {
+        likes.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         likesRepository.save(likes);
       }
       messagingTemplate.convertAndSend("/topic/contents/" + contentId, likes);
