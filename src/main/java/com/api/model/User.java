@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,13 +18,14 @@ public class User {
     private String avatarUrl;
     private String backgroundUrl;
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public User() {
         this.isActive = true;
     }
 
-    public User(String userId, String name, String email, String password, String roleId, boolean isActive, String avatarUrl, String backgroundUrl, LocalDateTime createdAt) {
+    public User(String userId, String name, String email, String password, String roleId, boolean isActive,
+            String avatarUrl, String backgroundUrl, ZonedDateTime createdAt) {
         this.userId = userId;
         this.name = name;
         this.email = email;
@@ -51,7 +52,6 @@ public class User {
     public void setBackgroundUrl(String backgroundUrl) {
         this.backgroundUrl = backgroundUrl;
     }
-
 
     public String getUserId() {
         return userId;
@@ -101,11 +101,11 @@ public class User {
         this.isActive = isActive;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

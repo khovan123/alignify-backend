@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -17,7 +17,7 @@ public class Application {
     private int limited;
     private String status;
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Application() {
         this.limited = 2;
@@ -33,7 +33,7 @@ public class Application {
     }
 
     public Application(String applicationId, String campaignId, String influencerId, String brandId, int limited,
-            String status, LocalDateTime createdAt) {
+            String status, ZonedDateTime createdAt) {
         this.applicationId = applicationId;
         this.campaignId = campaignId;
         this.influencerId = influencerId;
@@ -83,11 +83,11 @@ public class Application {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

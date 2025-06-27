@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,7 +16,7 @@ public class Invitation {
     private String message;
     private String status;
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Invitation() {
     }
@@ -29,7 +29,8 @@ public class Invitation {
         this.status = "PENDING";
     }
 
-    public Invitation(String invitationId, String brandId, String campaignId, String influencerId, String message, String status, LocalDateTime createdAt) {
+    public Invitation(String invitationId, String brandId, String campaignId, String influencerId, String message,
+            String status, ZonedDateTime createdAt) {
         this.invitationId = invitationId;
         this.brandId = brandId;
         this.campaignId = campaignId;
@@ -87,11 +88,11 @@ public class Invitation {
         this.message = message;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

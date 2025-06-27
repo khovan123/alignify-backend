@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -14,13 +14,13 @@ public class Gallery {
     private List<String> images;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Gallery() {
         this.images = new ArrayList<>();
     }
 
-    public Gallery(String galleryId, List<String> images, LocalDateTime createdAt) {
+    public Gallery(String galleryId, List<String> images, ZonedDateTime createdAt) {
         this.galleryId = galleryId;
         this.images = images;
         this.createdAt = createdAt;
@@ -42,11 +42,11 @@ public class Gallery {
         this.images = images;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,7 +12,7 @@ public class GalleryImage {
     private String imageId;
     private String imageUrl;
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public GalleryImage() {
     }
@@ -21,7 +21,7 @@ public class GalleryImage {
         this.imageUrl = imageUrl;
     }
 
-    public GalleryImage(String imageId, String imageUrl, LocalDateTime createdAt) {
+    public GalleryImage(String imageId, String imageUrl, ZonedDateTime createdAt) {
         this.imageId = imageId;
         this.imageUrl = imageUrl;
         this.createdAt = createdAt;
@@ -43,11 +43,11 @@ public class GalleryImage {
         this.imageUrl = imageUrl;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

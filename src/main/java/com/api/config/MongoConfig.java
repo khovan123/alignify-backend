@@ -36,8 +36,8 @@ public class MongoConfig {
   @Bean
   public MongoCustomConversions mongoCustomConversions() {
     return new MongoCustomConversions(Arrays.asList(
-        new LocalDateTimeToDateConverter(),
-        new DateToLocalDateTimeConverter()));
+        new ZonedDateTimeToDateConverter(),
+        new DateToZonedDateTimeConverter()));
   }
 
   @PostConstruct

@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class ContentPosting {
     private List<String> categoryIds;
 
     @CreatedDate
-    private LocalDateTime createdDate;
+    private ZonedDateTime createdDate;
     private boolean isPublic;
     private int commentCount;
     private int likeCount;
@@ -34,7 +34,7 @@ public class ContentPosting {
     }
 
     public ContentPosting(String contentId, String contentName, String userId, String content, String imageUrl,
-            List<String> categoryIds, LocalDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
+            List<String> categoryIds, ZonedDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
         this.contentId = contentId;
         this.contentName = contentName;
         this.userId = userId;
@@ -79,11 +79,11 @@ public class ContentPosting {
         this.content = content;
     }
 
-    public LocalDateTime getCreatedDate() {
+    public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
+    public void setCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
     }
 

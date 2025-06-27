@@ -1,6 +1,6 @@
 package com.api.controller.websocket.chatting;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,7 +107,7 @@ public class ChatRestController {
                 newMsg.setReadBy(readBy);
                 newMsg.setUserId("#SYS");
                 // newMsg.setUserId(user.getUserId());
-                newMsg.setSendAt(LocalDateTime.now());
+                newMsg.setSendAt(ZonedDateTime.now());
                 chatMessageRepository.save(newMsg);
                 chatMessage = newMsg;
             }

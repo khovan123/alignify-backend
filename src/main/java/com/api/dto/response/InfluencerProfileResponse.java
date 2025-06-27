@@ -1,6 +1,6 @@
 package com.api.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class InfluencerProfileResponse {
     private String roleId;
     private String avatarUrl;
     private String backgroundUrl;
-    private LocalDateTime DoB;
+    private ZonedDateTime DoB;
     private String gender;
     private String bio;
     private Map<String, String> socialMediaLinks;
@@ -56,7 +56,6 @@ public class InfluencerProfileResponse {
 
     }
 
- 
     public InfluencerProfileResponse(User user, Influencer influencer, int completedCampaign, boolean isOwner,
             CategoryRepository categoryRepository) {
         this.completedCampaign = completedCampaign;
@@ -129,11 +128,11 @@ public class InfluencerProfileResponse {
         this.backgroundUrl = backgroundUrl;
     }
 
-    public LocalDateTime getDoB() {
+    public ZonedDateTime getDoB() {
         return DoB;
     }
 
-    public void setDoB(LocalDateTime DoB) {
+    public void setDoB(ZonedDateTime DoB) {
         this.DoB = DoB;
     }
 

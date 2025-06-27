@@ -1,6 +1,7 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,12 +17,12 @@ public class Admin {
     private String roleId;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Admin() {
     }
 
-    public Admin(String userId, String name, String email, String password, String roleId, LocalDateTime createdAt) {
+    public Admin(String userId, String name, String email, String password, String roleId, ZonedDateTime createdAt) {
         this.userId = userId;
         this.name = name;
         this.email = email;
@@ -70,11 +71,11 @@ public class Admin {
         this.roleId = roleId;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

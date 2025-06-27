@@ -1,6 +1,6 @@
 package com.api.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -320,7 +320,7 @@ public class ApplicationService {
         // userRepository.findById(applicationOpt.get().getInfluencerId()).get();
         // chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
         // chatMessage.setName(user.getName());
-        // chatMessage.setSendAt(LocalDateTime.now());
+        // chatMessage.setSendAt(ZonedDateTime.now());
         // chatMessage.setChatRoomId(chatRoom.getChatRoomId());
         // chatMessage.setUserId("#SYS");
         // chatMessageRepository.save(chatMessage);
@@ -400,7 +400,7 @@ public class ApplicationService {
                                 chatMessage.setMessage("Influencer đã vào phòng chat.");
                                 chatMessage.setName("Influencer");
                         }
-                        chatMessage.setSendAt(LocalDateTime.now());
+                        chatMessage.setSendAt(ZonedDateTime.now());
                         chatMessage.setChatRoomId(chatRoom.getChatRoomId());
                         chatMessage.setUserId("#SYS");
                         chatMessageRepository.save(chatMessage);

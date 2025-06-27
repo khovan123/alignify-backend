@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.annotation.Id;
@@ -20,9 +20,9 @@ public class Otp {
     private int requestCount;
 
     private int attemptCount;
-    
+
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Otp() {
     }
@@ -32,17 +32,17 @@ public class Otp {
         this.otpCode = otpCode;
         this.requestCount = 1;
         this.attemptCount = 0;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = ZonedDateTime.now();
     }
 
-    public Otp(String email, String otpCode, int requestCount, LocalDateTime createdAt) {
+    public Otp(String email, String otpCode, int requestCount, ZonedDateTime createdAt) {
         this.email = email;
         this.otpCode = otpCode;
         this.requestCount = requestCount;
         this.createdAt = createdAt;
     }
 
-    public Otp(String id, String email, String otpCode, int requestCount, int attemptCount, LocalDateTime createdAt) {
+    public Otp(String id, String email, String otpCode, int requestCount, int attemptCount, ZonedDateTime createdAt) {
         this.id = id;
         this.email = email;
         this.otpCode = otpCode;
@@ -91,11 +91,11 @@ public class Otp {
         this.attemptCount = attemptCount;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

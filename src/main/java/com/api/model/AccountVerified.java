@@ -1,6 +1,7 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,7 +13,7 @@ public class AccountVerified {
     private String verification_id;
     private String email;
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public AccountVerified() {
     }
@@ -21,7 +22,7 @@ public class AccountVerified {
         this.email = email;
     }
 
-    public AccountVerified(String verification_id, String email, LocalDateTime createdAt) {
+    public AccountVerified(String verification_id, String email, ZonedDateTime createdAt) {
         this.verification_id = verification_id;
         this.email = email;
         this.createdAt = createdAt;
@@ -43,11 +44,11 @@ public class AccountVerified {
         this.email = email;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

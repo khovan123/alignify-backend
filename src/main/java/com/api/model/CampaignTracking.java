@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,7 @@ public class CampaignTracking {
     private String status;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public CampaignTracking() {
         this.campaignRequirementTrackings = new HashMap<>();
@@ -84,7 +84,7 @@ public class CampaignTracking {
     public Map<String, List<CampaignRequirement>> getCampaignRequirementTrackings() {
         return campaignRequirementTrackings;
     }
-    
+
     public void setCampaignRequirementTrackings(Map<String, List<CampaignRequirement>> campaignRequirementTrackings) {
         this.campaignRequirementTrackings = campaignRequirementTrackings;
     }
@@ -105,11 +105,11 @@ public class CampaignTracking {
         return status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

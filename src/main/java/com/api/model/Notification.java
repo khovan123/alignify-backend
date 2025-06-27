@@ -1,6 +1,6 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -26,6 +26,6 @@ public class Notification {
   private String name;
   private String content;
   @CreatedDate
-  private LocalDateTime createdAt;
+  private ZonedDateTime createdAt;
   private boolean isRead = false;
 }

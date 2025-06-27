@@ -1,7 +1,7 @@
 package com.api.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public class InfluencerProfileRequest {
     @JsonProperty("name")
     private String name;
     @JsonProperty("DoB")
-    private LocalDateTime DoB;
+    private ZonedDateTime DoB;
     @JsonProperty("gender")
     private String gender;
     @JsonProperty("bio")
@@ -24,7 +24,10 @@ public class InfluencerProfileRequest {
     @JsonProperty("isPublic")
     private Boolean isPublic;
 
-    public InfluencerProfileRequest(@JsonProperty("name") String name, @JsonProperty("DoB") LocalDateTime DoB, @JsonProperty("gender") String gender, @JsonProperty("bio") String bio, @JsonProperty("socialMediaLinks") Map<String, String> socialMediaLinks, @JsonProperty("categoryIds") List<String> categoryIds, @JsonProperty("isPublic") Boolean isPublic) {
+    public InfluencerProfileRequest(@JsonProperty("name") String name, @JsonProperty("DoB") ZonedDateTime DoB,
+            @JsonProperty("gender") String gender, @JsonProperty("bio") String bio,
+            @JsonProperty("socialMediaLinks") Map<String, String> socialMediaLinks,
+            @JsonProperty("categoryIds") List<String> categoryIds, @JsonProperty("isPublic") Boolean isPublic) {
         this.name = name;
         this.DoB = DoB;
         this.gender = gender;
@@ -53,11 +56,11 @@ public class InfluencerProfileRequest {
     public InfluencerProfileRequest() {
     }
 
-    public LocalDateTime getDoB() {
+    public ZonedDateTime getDoB() {
         return DoB;
     }
 
-    public void setDoB(LocalDateTime DoB) {
+    public void setDoB(ZonedDateTime DoB) {
         this.DoB = DoB;
     }
 
