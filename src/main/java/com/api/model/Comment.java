@@ -1,7 +1,8 @@
 package com.api.model;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,14 +14,13 @@ public class Comment {
     private String userId;
     private String contentId;
     private String content;
-
-    @CreatedDate
-    private Date createdDate;
+    private ZonedDateTime createdDate;
 
     public Comment() {
+        this.createdDate = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Comment(String commentId, String content, String userId, String contentId, Date createdDate) {
+    public Comment(String commentId, String content, String userId, String contentId, ZonedDateTime createdDate) {
         this.commentId = commentId;
         this.content = content;
         this.userId = userId;
@@ -60,11 +60,11 @@ public class Comment {
         this.contentId = contentId;
     }
 
-    public Date getCreatedDate() {
+    public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
     }
 

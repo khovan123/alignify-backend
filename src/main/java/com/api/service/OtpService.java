@@ -1,11 +1,14 @@
 package com.api.service;
 
-import com.api.model.Otp;
-import com.api.repository.OtpRepository;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.api.model.Otp;
+import com.api.repository.OtpRepository;
 
 @Service
 public class OtpService {
@@ -18,14 +21,14 @@ public class OtpService {
         if (existingOtp.isPresent()) {
             Otp otp = existingOtp.get();
             otpRepository.delete(otp);
-            if (otp.getRequestCount() >= 5 && otp.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(30))) {
+            if (otp.getRequestCount() >= 5 && otp.getCreatedAt().isAfter(ZonedDateTime.now().minusMinutes(30))) {
                 throw new RuntimeException("Too many OTP requests. Please try again after 1 hour.");
             }
-            if (otp.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(30))) {
+            if (otp.getCreatedAt().isAfter(ZonedDateTime.now().minusMinutes(30))) {
                 otp.setRequestCount(otp.getRequestCount() + 1);
             } else {
                 otp.setRequestCount(1);
-                otp.setCreatedAt(LocalDateTime.now());
+                otp.setCreatedAt(ZonedDateTime.now());
             }
         }
 

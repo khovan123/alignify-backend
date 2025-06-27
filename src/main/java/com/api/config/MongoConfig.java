@@ -1,7 +1,6 @@
 package com.api.config;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
-import com.api.model.Category;
-import com.api.model.Role;
-import com.api.repository.CategoryRepository;
-import com.api.repository.RoleRepository;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -29,11 +24,11 @@ public class MongoConfig {
   @Autowired
   private MongoClient mongoClient;
 
-  @Autowired
-  private RoleRepository roleRepository;
+  // @Autowired
+  // private RoleRepository roleRepository;
 
-  @Autowired
-  private CategoryRepository categoryRepository;
+  // @Autowired
+  // private CategoryRepository categoryRepository;
 
   @Value("${spring.data.mongodb.database}")
   private String databaseName;
@@ -41,8 +36,8 @@ public class MongoConfig {
   @Bean
   public MongoCustomConversions mongoCustomConversions() {
     return new MongoCustomConversions(Arrays.asList(
-        new LocalDateTimeToDateConverter(),
-        new DateToLocalDateTimeConverter()));
+        new ZonedDateTimeToDateConverter(),
+        new DateToZonedDateTimeConverter()));
   }
 
   @PostConstruct
@@ -201,14 +196,14 @@ public class MongoConfig {
 
     db.createCollection("roles", options);
 
-    if (roleRepository.count() == 0) {
-      Role adminRole = roleRepository.save(new Role("ADMIN"));
-      Role brandRole = roleRepository.save(new Role("BRAND"));
-      Role influencerRole = roleRepository.save(new Role("INFLUENCER"));
-      EnvConfig.ADMIN_ROLE_ID = adminRole.getRoleId();
-      EnvConfig.BRAND_ROLE_ID = brandRole.getRoleId();
-      EnvConfig.INFLUENCER_ROLE_ID = influencerRole.getRoleId();
-    }
+    // if (roleRepository.count() == 0) {
+    // Role adminRole = roleRepository.save(new Role("ADMIN"));
+    // Role brandRole = roleRepository.save(new Role("BRAND"));
+    // Role influencerRole = roleRepository.save(new Role("INFLUENCER"));
+    // EnvConfig.ADMIN_ROLE_ID = adminRole.getRoleId();
+    // EnvConfig.BRAND_ROLE_ID = brandRole.getRoleId();
+    // EnvConfig.INFLUENCER_ROLE_ID = influencerRole.getRoleId();
+    // }
   }
 
   public void create_categoriesCollection(MongoDatabase db) {
@@ -235,25 +230,25 @@ public class MongoConfig {
 
     db.createCollection("categories", options);
 
-    if (categoryRepository.count() == 0) {
-      categoryRepository.saveAll(
-          List.of(
-              new Category("thời trang"),
-              new Category("mỹ phẩm"),
-              new Category("công nghệ"),
-              new Category("nghệ thuật"),
-              new Category("thể thao"),
-              new Category("ăn uống"),
-              new Category("du lịch"),
-              new Category("lối sống"),
-              new Category("âm nhạc"),
-              new Category("trò chơi điện tử"),
-              new Category("handmade"),
-              new Category("phong tục và văn hóa"),
-              new Category("khởi nghiệp"),
-              new Category("kĩ năng mềm"),
-              new Category("mẹ và bé")));
-    }
+    // if (categoryRepository.count() == 0) {
+    // categoryRepository.saveAll(
+    // List.of(
+    // new Category("thời trang"),
+    // new Category("mỹ phẩm"),
+    // new Category("công nghệ"),
+    // new Category("nghệ thuật"),
+    // new Category("thể thao"),
+    // new Category("ăn uống"),
+    // new Category("du lịch"),
+    // new Category("lối sống"),
+    // new Category("âm nhạc"),
+    // new Category("trò chơi điện tử"),
+    // new Category("handmade"),
+    // new Category("phong tục và văn hóa"),
+    // new Category("khởi nghiệp"),
+    // new Category("kĩ năng mềm"),
+    // new Category("mẹ và bé")));
+    // }
   }
 
   public void create_brandsCollection(MongoDatabase db) {

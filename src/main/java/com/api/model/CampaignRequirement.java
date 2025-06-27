@@ -1,6 +1,7 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 public class CampaignRequirement {
 
@@ -8,14 +9,14 @@ public class CampaignRequirement {
     private String imageUrl;
     private String postUrl;
     private String status;
-    private LocalDateTime uploadedAt;
+    private ZonedDateTime uploadedAt;
 
     public CampaignRequirement() {
         this.index = 0;
         this.imageUrl = null;
         this.postUrl = null;
         this.status = null;
-        this.uploadedAt = LocalDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(int index) {
@@ -23,7 +24,7 @@ public class CampaignRequirement {
         this.imageUrl = null;
         this.postUrl = null;
         this.status = null;
-        this.uploadedAt = LocalDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(CampaignRequirement cr) {
@@ -32,7 +33,7 @@ public class CampaignRequirement {
         this.status = cr.status;
         this.postUrl = cr.postUrl;
         this.status = cr.status;
-        this.uploadedAt = cr.uploadedAt != null ? cr.uploadedAt : LocalDateTime.now();
+        this.uploadedAt = cr.uploadedAt != null ? cr.uploadedAt : ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(int index, String imageUrl, String postUrl) {
@@ -40,12 +41,12 @@ public class CampaignRequirement {
         this.imageUrl = imageUrl;
         this.postUrl = postUrl;
         this.status = "PENDING";
-        this.uploadedAt = LocalDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignRequirement(String status) {
         this.status = status;
-        this.uploadedAt = LocalDateTime.now();
+        this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public int getIndex() {
@@ -80,11 +81,11 @@ public class CampaignRequirement {
         this.status = status;
     }
 
-    public LocalDateTime getUploadedAt() {
+    public ZonedDateTime getUploadedAt() {
         return uploadedAt;
     }
 
-    public void setUploadedAt(LocalDateTime uploadedAt) {
+    public void setUploadedAt(ZonedDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
     }
 

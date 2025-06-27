@@ -1,6 +1,6 @@
 package com.api.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +20,9 @@ public class CampaignResponse {
     private String content;
     private String imageUrl;
     private List<Category> categories;
-    private LocalDateTime createdAt;
-    private LocalDateTime dueAt;
-    private LocalDateTime startAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime dueAt;
+    private ZonedDateTime startAt;
     private String status;
     private long budget;
     private Map<String, Integer> campaignRequirements;
@@ -122,27 +122,27 @@ public class CampaignResponse {
         this.categories = categories;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getDueAt() {
+    public ZonedDateTime getDueAt() {
         return dueAt;
     }
 
-    public void setDueAt(LocalDateTime dueAt) {
+    public void setDueAt(ZonedDateTime dueAt) {
         this.dueAt = dueAt;
     }
 
-    public LocalDateTime getStartAt() {
+    public ZonedDateTime getStartAt() {
         return startAt;
     }
 
-    public void setStartAt(LocalDateTime startAt) {
+    public void setStartAt(ZonedDateTime startAt) {
         this.startAt = startAt;
     }
 
