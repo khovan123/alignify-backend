@@ -200,7 +200,8 @@ public class ProfileService {
             }
             userRepository.save(user);
             influencerRepository.save(influencer);
-            InfluencerProfileResponse influencerProfile = new InfluencerProfileResponse(user, influencer, categoryRepository);
+            InfluencerProfileResponse influencerProfile = new InfluencerProfileResponse(user, influencer,
+                    categoryRepository);
             return ApiResponse.sendSuccess(200, "Update successfully", influencerProfile, request.getRequestURI());
         } else if (user.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
             Brand brand = brandRepository.findById(id).get();
