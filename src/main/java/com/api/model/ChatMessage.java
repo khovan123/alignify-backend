@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -28,7 +27,6 @@ public class ChatMessage {
     private String name;
     private String chatRoomId;
     private String message;
-    @CreatedDate
     private ZonedDateTime sendAt;
     private String tempId;
     private List<String> readBy = new ArrayList<>();

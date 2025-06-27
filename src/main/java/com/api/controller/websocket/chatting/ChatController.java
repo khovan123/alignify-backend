@@ -55,6 +55,9 @@ public class ChatController {
                     stompPrincipal.getAvatarUrl());
             chatMessage.setName(stompPrincipal.getName());
             // chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            if (chatMessage.getSendAt() == null) {
+                chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            }
             chatMessage.setChatRoomId(roomId);
             chatMessage.setUserId(userId);
             chatMessageRepository.save(chatMessage);
