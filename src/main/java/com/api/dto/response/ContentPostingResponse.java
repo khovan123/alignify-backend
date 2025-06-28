@@ -17,14 +17,14 @@ public class ContentPostingResponse {
     private ZonedDateTime createdDate;
     private boolean isPublic;
     private int commentCount;
-    private int likeCount;
+    private long likeCount;
 
     public ContentPostingResponse() {
     }
 
     public ContentPostingResponse(String contentId, String contentName, String userId, String userName,
             String userAvatar, String content, String imageUrl, List<Map<String, String>> categories,
-            ZonedDateTime createdDate, boolean isPublic, int commentCount, int likeCount) {
+            ZonedDateTime createdDate, boolean isPublic, int commentCount, long likeCount) {
         this.contentId = contentId;
         this.contentName = contentName;
         this.userId = userId;
@@ -135,11 +135,11 @@ public class ContentPostingResponse {
         this.commentCount = commentCount;
     }
 
-    public int getLikeCount() {
+    public long getLikeCount() {
         return likeCount;
     }
 
-    public void setLikeCount(int likeCount) {
+    public void setLikeCount(long likeCount) {
         this.likeCount = likeCount;
     }
 
