@@ -3,20 +3,28 @@ package com.api.controller.websocket.comment;
 import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.api.dto.response.CommentResponse;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
+import com.api.model.User;
 import com.api.repository.CommentRepository;
 import com.api.repository.ContentPostingRepository;
+import com.api.repository.UserRepository;
 import com.api.security.StompPrincipal;
 
 @Controller
@@ -27,6 +35,8 @@ public class CommentController {
   private SimpMessagingTemplate messagingTemplate;
   @Autowired
   private ContentPostingRepository contentPostingRepository;
+  @Autowired
+  private UserRepository userRepository;
 
   @MessageMapping("/comment/{contentId}")
   public void sendComment(
@@ -50,6 +60,41 @@ public class CommentController {
       commentRepository.save(comment);
       messagingTemplate.convertAndSend("/topic/comments/" + contentId,
           new CommentResponse(stompPrincipal.getName(), stompPrincipal.getAvatarUrl(), comment));
+    }
+    throw new SecurityException("Invalid principal type");
+  }
+
+  @MessageMapping("/comment/{contentId}/select")
+  public void getComments(
+      @DestinationVariable("contentId") String contentId,
+      @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+      Principal principal) {
+    if (principal == null || principal.getName() == null) {
+      throw new SecurityException("Access is denied at: " + contentId);
+    }
+    if (principal instanceof StompPrincipal stompPrincipal) {
+      Optional<ContentPosting> contentOpt = contentPostingRepository.findById(contentId);
+      if (!contentOpt.isPresent()) {
+        throw new SecurityException("Access is denied at: " + contentId);
+      }
+      PageRequest pagerequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+      Page<Comment> commentPage = commentRepository.findAllByContentId(contentId, pagerequest);
+      List<CommentResponse> commentResponses = commentPage.getContent().stream()
+          .map(comment -> {
+            Optional<User> userOpt = userRepository.findByUserId(comment.getUserId());
+            if (userOpt.isPresent()) {
+              User user = userOpt.get();
+              return new CommentResponse(user.getName(), user.getAvatarUrl(), comment);
+            }
+            return null;
+          })
+          .filter(
+              Objects::nonNull)
+          .toList();
+
+      messagingTemplate.convertAndSend("/topic/comments/" + contentId + "/select", commentResponses);
+      return;
     }
     throw new SecurityException("Invalid principal type");
   }
