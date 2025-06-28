@@ -28,7 +28,7 @@ public class CommentController {
   @Autowired
   private ContentPostingRepository contentPostingRepository;
 
-  @MessageMapping("/comment/{contentI}")
+  @MessageMapping("/comment/{contentId}")
   public void sendComment(
       @Payload Comment comment,
       @DestinationVariable("contentId") String contentId,
