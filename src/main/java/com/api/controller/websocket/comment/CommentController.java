@@ -64,7 +64,7 @@ public class CommentController {
     throw new SecurityException("Invalid principal type");
   }
 
-  @MessageMapping("/comment/{contentId}/select")
+  @MessageMapping("/comment/select/{contentId}")
   public void getComments(
       @DestinationVariable("contentId") String contentId,
       @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
@@ -93,7 +93,7 @@ public class CommentController {
               Objects::nonNull)
           .toList();
 
-      messagingTemplate.convertAndSend("/topic/comments/" + contentId + "/select", commentResponses);
+      messagingTemplate.convertAndSend("/topic/comments/select/" + contentId, commentResponses);
       return;
     }
     throw new SecurityException("Invalid principal type");
