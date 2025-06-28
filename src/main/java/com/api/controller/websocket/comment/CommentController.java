@@ -18,6 +18,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.api.dto.CommonPageRequest;
 import com.api.dto.response.CommentResponse;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
@@ -67,8 +68,7 @@ public class CommentController {
   @MessageMapping("/comment/select/{contentId}")
   public void getComments(
       @DestinationVariable("contentId") String contentId,
-      @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+      @Payload CommonPageRequest pageRequest,
       Principal principal) {
     if (principal == null || principal.getName() == null) {
       throw new SecurityException("Access is denied at: " + contentId);
@@ -78,6 +78,8 @@ public class CommentController {
       if (!contentOpt.isPresent()) {
         throw new SecurityException("Access is denied at: " + contentId);
       }
+      int pageNumber = pageRequest.getPageNumber();
+      int pageSize = pageRequest.getPageSize();
       PageRequest pagerequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
       Page<Comment> commentPage = commentRepository.findAllByContentId(contentId, pagerequest);
       List<CommentResponse> commentResponses = commentPage.getContent().stream()
