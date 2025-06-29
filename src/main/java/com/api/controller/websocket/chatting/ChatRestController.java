@@ -95,14 +95,12 @@ public class ChatRestController {
         List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();
 
         if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-            if (campaignRepository.countByBrandIdAndStatusNot(userId) != chatRoomRepository
+            if (campaignRepository.countByBrandIdAndStatusNot(userId, "DRAFT") != chatRoomRepository
                     .countByRoomOwnerId(userId)) {
                 List<Campaign> campaigns = campaignRepository
-                        .findAllByBrandIdAndStatusNotOrderByCreatedAtDesc(userId, "DRAFT", pageable)
-                        .getContent();
+                        .findAllByBrandIdAndStatusNot(userId, "DRAFT");
                 campaigns.forEach(campaign -> {
                     Optional<ChatRoom> roomOpt = chatRoomRepository.findById(campaign.getCampaignId());
-                    ChatRoom room;
                     if (!roomOpt.isPresent()) {
                         ChatRoom chatRoom = new ChatRoom();
                         chatRoom.setChatRoomId(campaign.getCampaignId());
@@ -111,11 +109,8 @@ public class ChatRestController {
                         chatRoom.setRoomOwnerId(campaign.getBrandId());
                         chatRoom.setRoomName(campaign.getCampaignName());
                         chatRoom.setMembers(new ArrayList<>(Arrays.asList(campaign.getBrandId())));
-                        room = chatRoomRepository.save(chatRoom);
-                    } else {
-                        room = roomOpt.get();
+                        chatRoomRepository.save(chatRoom);
                     }
-                    ChatMessage chatMessage = ensureSystemMessage(room, userId);
                 });
             }
         }
