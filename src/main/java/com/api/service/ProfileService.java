@@ -208,7 +208,7 @@ public class ProfileService {
                 brand.setBio(newBrand.getBio());
             }
             if (newBrand.getContacts() != null && !newBrand.getContacts().isEmpty()) {
-                brand.setCategoryIds(newBrand.getCategoryIds());
+                brand.setContacts(newBrand.getContacts());
             }
             if (newBrand.getSocialMediaLinks() != null && !newBrand.getSocialMediaLinks().isEmpty()) {
                 brand.setSocialMediaLinks(newBrand.getSocialMediaLinks());
@@ -221,7 +221,8 @@ public class ProfileService {
             }
             userRepository.save(user);
             brandRepository.save(brand);
-            return ApiResponse.sendSuccess(200, "Update successfully", brand, request.getRequestURI());
+            BrandProfileResponse brandProfile = new BrandProfileResponse(user, brand, categoryRepository);
+            return ApiResponse.sendSuccess(200, "Update successfully", brandProfile, request.getRequestURI());
         }
         return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
     }
