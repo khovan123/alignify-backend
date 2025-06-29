@@ -54,8 +54,6 @@ public class ChatRestController {
     private UserRepository userRepository;
     @Autowired
     private CampaignRepository campaignRepository;
-    @Autowired
-    private CampaignRepository campaignRepository;
 
     @GetMapping("/{roomId}")
     public ResponseEntity<?> getMessages(
@@ -134,106 +132,6 @@ public class ChatRestController {
 
         return ApiResponse.sendSuccess(200, "Response successfully", chatRoomResponses, request.getRequestURI());
     }
-
-    private ChatMessage ensureSystemMessage(ChatRoom room, String userId) {
-        ChatMessage chatMessage = chatMessageRepository.findTopByChatRoomIdOrderBySendAtDesc(room.getChatRoomId())
-                .orElse(null);
-        if (chatMessage == null) {
-            User user = userRepository.findById(userId).get();
-            List<String> readBy = new ArrayList<>();
-            chatMessage = new ChatMessage();
-            readBy.add(userId);
-            chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
-            chatMessage.setChatRoomId(room.getChatRoomId());
-            chatMessage.setName(user.getName());
-            chatMessage.setReadBy(readBy);
-            chatMessage.setUserId("#SYS");
-            chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-            chatMessage = chatMessageRepository.save(chatMessage);
-        }
-        return chatMessage;
-    }
-
-    // @GetMapping("/rooms")
-    // public ResponseEntity<?> getRoomIds(
-    // @RequestParam(value = "page", defaultValue = "0") int page,
-    // @RequestParam(value = "size", defaultValue = "20") int size,
-    // @AuthenticationPrincipal CustomUserDetails userDetails,
-    // HttpServletRequest request) {
-    // String userId = userDetails.getUserId();
-    // Pageable pageable = PageRequest.of(page, size);
-
-    // if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
-    // if (campaignRepository.countByBrandIdAndStatusNot(userId) !=
-    // chatRoomRepository
-    // .countByRoomOwnerId(userId)) {
-    // List<Campaign> campaigns = campaignRepository
-    // .findAllByBrandIdAndStatusNotOrderByCreatedAtDesc(userId, "DRAFT", pageable)
-    // .getContent();
-    // campaigns.forEach(campaign -> {
-    // Optional<ChatRoom> roomOpt =
-    // chatRoomRepository.findById(campaign.getCampaignId());
-    // ChatRoom room;
-    // if (!roomOpt.isPresent()) {
-    // ChatRoom chatRoom = new ChatRoom();
-    // chatRoom.setChatRoomId(campaign.getCampaignId());
-    // chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-    // chatRoom.setRoomAvatarUrl(campaign.getImageUrl());
-    // chatRoom.setRoomOwnerId(campaign.getBrandId());
-    // chatRoom.setRoomName(campaign.getCampaignName());
-    // chatRoom.setMembers(new ArrayList<>(Arrays.asList(campaign.getBrandId())));
-    // room = chatRoomRepository.save(chatRoom);
-    // } else {
-    // room = roomOpt.get();
-    // }
-    // ChatMessage chatMessage =
-    // chatMessageRepository.findTopByChatRoomIdOrderBySendAtDesc(
-    // campaign.getCampaignId())
-    // .orElse(null);
-    // if (chatMessage == null) {
-    // User user = userRepository.findById(userId).get();
-    // List<String> readBy = new ArrayList<>();
-    // chatMessage = new ChatMessage();
-    // readBy.add(userId);
-    // chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
-    // chatMessage.setChatRoomId(room.getChatRoomId());
-    // chatMessage.setName(user.getName());
-    // chatMessage.setReadBy(readBy);
-    // chatMessage.setUserId("#SYS");
-    // chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-    // chatMessageRepository.save(chatMessage);
-    // }
-    // });
-    // }
-    // }
-    // List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();
-    // List<ChatRoom> rooms =
-    // chatRoomRepository.findAllByRoomOwnerIdOrMemberOrderByCreatedAtDesc(userId,
-    // pageable)
-    // .getContent();
-    // rooms.forEach(room -> {
-    // ChatMessage chatMessage =
-    // chatMessageRepository.findTopByChatRoomIdOrderBySendAtDesc(
-    // room.getChatRoomId())
-    // .orElse(null);
-    // if (chatMessage == null) {
-    // User user = userRepository.findById(userId).get();
-    // List<String> readBy = new ArrayList<>();
-    // chatMessage = new ChatMessage();
-    // readBy.add(userId);
-    // chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
-    // chatMessage.setChatRoomId(room.getChatRoomId());
-    // chatMessage.setName(user.getName());
-    // chatMessage.setReadBy(readBy);
-    // chatMessage.setUserId("#SYS");
-    // chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-    // chatMessage = chatMessageRepository.save(chatMessage);
-    // }
-    // chatRoomResponses.add(new ChatRoomResponse(room, chatMessage));
-    // });
-    // return ApiResponse.sendSuccess(200, "Response successfully",
-    // chatRoomResponses, request.getRequestURI());
-    // }
 
     private ChatMessage ensureSystemMessage(ChatRoom room, String userId) {
         ChatMessage chatMessage = chatMessageRepository.findTopByChatRoomIdOrderBySendAtDesc(room.getChatRoomId())
