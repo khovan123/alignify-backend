@@ -50,4 +50,5 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     Page<Campaign> findAllByBrandIdAndStatusNotOrderByCreatedAtDesc(String brandId, String status, Pageable pageable);
 
+    int countByBrandIdAndStatusNot(String brandId);
 }

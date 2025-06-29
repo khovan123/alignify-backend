@@ -19,4 +19,6 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
 
     @Query("{$or: [{roomOwnerId: ?0}, {members: ?0}]}")
     Page<ChatRoom> findAllByRoomOwnerIdOrMemberOrderByCreatedAtDesc(String userId, Pageable pageable);
+
+    int countByRoomOwnerId(String userId);
 }
