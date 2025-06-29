@@ -81,6 +81,14 @@ public class ContentPostingService {
         List<Comment> comments = commentRepository.findAllByContentId(post.getContentId());
         User user = userRepository.findByUserId(post.getUserId()).orElse(null);
         ContentPostingResponse dto = new ContentPostingResponse();
+        long likeCount = likesRepo.countByContentId(post.getContentId());
+        long commentCount = commentRepository.countByContentId(post.getContentId());
+        if (commentCount != post.getCommentCount()) {
+            post.setCommentCount((int) commentCount);
+        }
+        if (likeCount != post.getLikeCount()) {
+            post.setLikeCount((int) likeCount);
+        }
         dto.setContentId(post.getContentId());
         dto.setContentName(post.getContentName());
         if (user != null) {
@@ -94,7 +102,8 @@ public class ContentPostingService {
         dto.setCreatedDate(post.getCreatedDate());
         dto.setPublic(post.isIsPublic());
         dto.setCommentCount(comments.size());
-        dto.setLikeCount(post.getLikeCount());
+        dto.setLikeCount((long) post.getLikeCount());
+        contentPostingRepo.save(post);
         return dto;
     }
 

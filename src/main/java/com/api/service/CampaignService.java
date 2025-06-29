@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -393,7 +394,24 @@ public class CampaignService {
                 && statusRequest.getStatus().equals("DRAFT")) {
             return ApiResponse.sendError(403, "Access denied.", request.getRequestURI());
         }
+        User user = userRepository.findByUserId(brandId).get();
         if (campaign.getStatus().equals("DRAFT") && statusRequest.getStatus().equals("RECRUITING")) {
+            ChatRoom chatRoom = new ChatRoom();
+            chatRoom.setChatRoomId(campaignId);
+            chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            chatRoom.setRoomAvatarUrl(campaign.getImageUrl());
+            chatRoom.setRoomOwnerId(brandId);
+            chatRoom.setRoomName(campaign.getCampaignName());
+            chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
+            chatRoomRepository.save(chatRoom);
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
+            chatMessage.setChatRoomId(campaign.getCampaignId());
+            chatMessage.setName(user.getName());
+            chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
+            chatMessage.setUserId("#SYS");
+            chatMessage.setSendAt(ZonedDateTime.now());
+            chatMessageRepository.save(chatMessage);
         } else if (campaign.getStatus().equals("RECRUITING") && statusRequest.getStatus().equals("PENDING")) {
             if (campaign.getInfluencerCountCurrent() <= 0) {
                 return ApiResponse.sendError(403, "Please confirm at least one application", request.getRequestURI());
