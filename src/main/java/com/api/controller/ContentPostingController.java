@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +22,6 @@ import com.api.security.CustomUserDetails;
 import com.api.service.ContentPostingService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @RequestMapping("/api/v1/contentPosting")
@@ -86,11 +86,12 @@ public class ContentPostingController {
         return contentPostingSer.deleteContentPosting(contentId, userDetails, request);
     }
 
-    @PutMapping("/{contentId}/like")
-    public ResponseEntity<?> toggleLike(@PathVariable("contentId") String contentId,
-            HttpServletRequest request) {
-        return contentPostingSer.toggleLike(contentId, request);
-    }
+    // @PutMapping("/{contentId}/like")
+    // public ResponseEntity<?> toggleLike(@PathVariable("contentId") String
+    // contentId,
+    // HttpServletRequest request) {
+    // return contentPostingSer.toggleLike(contentId, request);
+    // }
 
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/search")

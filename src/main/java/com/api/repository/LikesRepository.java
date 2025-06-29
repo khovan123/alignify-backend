@@ -17,4 +17,6 @@ public interface LikesRepository extends MongoRepository<Likes, String> {
     void deleteByUserIdAndContentId(String userId, String contentId);
 
     void deleteAllByContentId(String contentId);
+
+    boolean existsByContentIdAndUserId(String contentId, String userId);
 }

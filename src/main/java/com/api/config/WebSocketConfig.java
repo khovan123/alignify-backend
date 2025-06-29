@@ -28,12 +28,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private InfluencerRepository influencerRepository;
-
-    @Autowired
-    private BrandRepository brandRepository;
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic");
