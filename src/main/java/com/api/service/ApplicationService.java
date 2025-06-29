@@ -208,7 +208,6 @@ public class ApplicationService {
                         HttpServletRequest request) {
                 String influencerId = userDetails.getUserId();
                 List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
-                Optional<User> user = userRepository.findById(influencerId);
                 if (applications.isEmpty()) {
                         return ApiResponse.sendSuccess(200, "You dont have any applications yet!", null,
                                         request.getRequestURI());
@@ -219,9 +218,12 @@ public class ApplicationService {
                                 .collect(Collectors.toSet());
 
                 List<Campaign> campaigns = campaignRepository.findAllByCampaignIdIn(campaignIds);
-
                 Map<String, Campaign> campaignMap = campaigns.stream()
                                 .collect(Collectors.toMap(Campaign::getCampaignId, campaign -> campaign));
+
+                Set<String> brandIds = campaigns.stream().map(Campaign::getBrandId).collect(Collectors.toSet());
+                Map<String, User> brandUserMap = userRepository.findAllById(brandIds).stream()
+                                .collect(Collectors.toMap(User::getUserId, u -> u));
 
                 Map<String, List<Application>> applicationsByCampaign = applications.stream()
                                 .collect(Collectors.groupingBy(Application::getCampaignId));
@@ -229,29 +231,31 @@ public class ApplicationService {
                 List<ApplicationsByfInfluencerResponse> applicationsByCampaignResponses = campaignIds.stream()
                                 .map(campaignId -> {
                                         Campaign campaign = campaignMap.get(campaignId);
-                                        List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(
-                                                        campaignId,
-                                                        Collections.emptyList());
-                                        if (campaign.getApplicationTotal() != appsForCampaign.size()) {
-                                                campaign.setApplicationTotal(appsForCampaign.size());
-
-                                                long acceptedCount = appsForCampaign.stream()
-                                                                .filter(app -> Status.ACCEPTED.toString()
-                                                                                .equals(app.getStatus()))
-                                                                .count();
-
-                                                if (campaign.getInfluencerCountCurrent() != acceptedCount) {
-                                                        campaign.setInfluencerCountCurrent((int) acceptedCount);
-                                                }
-
+                                        if (campaign == null)
+                                                return null;
+                                        User brandUser = brandUserMap.get(campaign.getBrandId());
+                                        List<Application> appsForCampaign = applicationsByCampaign
+                                                        .getOrDefault(campaignId, Collections.emptyList());
+                                        int appSize = appsForCampaign.size();
+                                        boolean changed = false;
+                                        if (campaign.getApplicationTotal() != appSize) {
+                                                campaign.setApplicationTotal(appSize);
+                                                changed = true;
+                                        }
+                                        long acceptedCount = appsForCampaign.stream().filter(
+                                                        app -> Status.ACCEPTED.toString().equals(app.getStatus()))
+                                                        .count();
+                                        if (campaign.getInfluencerCountCurrent() != acceptedCount) {
+                                                campaign.setInfluencerCountCurrent((int) acceptedCount);
+                                                changed = true;
+                                        }
+                                        if (changed) {
                                                 campaignRepository.save(campaign);
                                         }
-                                        return new ApplicationsByfInfluencerResponse(
-                                                        user.get(),
-                                                        campaign,
-                                                        appsForCampaign,
-                                                        categoryRepository);
+                                        return new ApplicationsByfInfluencerResponse(brandUser, campaign,
+                                                        appsForCampaign, categoryRepository);
                                 })
+                                .filter(r -> r != null)
                                 .collect(Collectors.toList());
 
                 return ApiResponse.sendSuccess(200, "Response successfully", applicationsByCampaignResponses,
