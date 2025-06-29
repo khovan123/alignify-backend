@@ -84,7 +84,6 @@ public class ChatRestController {
         String userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         List<ChatRoom> chatRooms = chatRoomRepository.findAllByRoomOwnerIdOrMember(userId, pageable).toList();
-        System.out.println(chatRooms.size());
         List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
