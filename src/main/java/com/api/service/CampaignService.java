@@ -401,7 +401,7 @@ public class CampaignService {
             chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatRoom.setRoomAvatarUrl(campaign.getImageUrl());
             chatRoom.setRoomOwnerId(brandId);
-            chatRoom.setRoomName(chatRoom.getRoomName());
+            chatRoom.setRoomName(campaign.getCampaignName());
             chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
             chatRoomRepository.save(chatRoom);
             ChatMessage chatMessage = new ChatMessage();
