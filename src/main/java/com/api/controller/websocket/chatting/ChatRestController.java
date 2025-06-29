@@ -98,8 +98,6 @@ public class ChatRestController {
         String userId = userDetails.getUserId();
         Pageable pageable = PageRequest.of(page, size);
 
-        Pageable pageable = PageRequest.of(page, size);
-
         List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();
 
         if (userDetails.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
