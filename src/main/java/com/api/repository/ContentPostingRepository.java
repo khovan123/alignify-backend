@@ -14,12 +14,14 @@ public interface ContentPostingRepository extends MongoRepository<ContentPosting
     Page<ContentPosting> findByUserId(String userId, Pageable pageable);
 
     Page<ContentPosting> findByUserIdAndIsPublicTrue(String userId, Pageable pageable);
-
+    
     Page<ContentPosting> findByIsPublicTrue(Pageable pageable);
-
+    
     Page<ContentPosting> findByContentNameContainingIgnoreCaseAndIsPublicTrue(String contentName, Pageable pageable);
 
     Page<ContentPosting> findByUserIdInAndIsPublicTrue(List<String> userIds, Pageable pageable);
+    
+Page<ContentPosting> findByCategoryIdsInOrderByCreatedAtDesc(String category, Pageable pageable);
 
     boolean existsByContentId(String contentId);
 

@@ -59,6 +59,16 @@ public class ContentPostingController {
         return contentPostingSer.getContentPostingById(userId, request, pageNumber, pageSize);
     }
 
+    @GetMapping("/category")
+    public ResponseEntity<?> getPostByCategoryId(
+            @PathVariable("categoryId") String categoryId,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request){
+        return contentPostingSer.getPostByCategoryIds(pageNumber, pageSize, categoryId, request);
+    }
+    
+    
     @GetMapping("/me")
     public ResponseEntity<?> getMe(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -85,7 +95,7 @@ public class ContentPostingController {
 
         return contentPostingSer.deleteContentPosting(contentId, userDetails, request);
     }
-
+    
     // @PutMapping("/{contentId}/like")
     // public ResponseEntity<?> toggleLike(@PathVariable("contentId") String
     // contentId,
