@@ -12,8 +12,9 @@ public class CommentResponse {
   private String name;
   private String avatarUrl;
   private ZonedDateTime createdDate;
+  private int count;
 
-  public CommentResponse(String name, String avatarUrl, Comment comment) {
+  public CommentResponse(String name, String avatarUrl, Comment comment, int count) {
     this.commentId = comment.getCommentId();
     this.userId = comment.getUserId();
     this.contentId = comment.getContentId();
@@ -21,6 +22,7 @@ public class CommentResponse {
     this.name = name;
     this.avatarUrl = avatarUrl;
     this.createdDate = comment.getCreatedDate();
+    this.count = count;
   }
 
   public CommentResponse() {
@@ -54,6 +56,10 @@ public class CommentResponse {
     return createdDate;
   }
 
+  public int getCount() {
+    return count;
+  }
+
   public void setCommentId(String commentId) {
     this.commentId = commentId;
   }
@@ -80,5 +86,9 @@ public class CommentResponse {
 
   public void setCreatedDate(ZonedDateTime createdDate) {
     this.createdDate = createdDate;
+  }
+
+  public void setCount(int count) {
+    this.count = count;
   }
 }
