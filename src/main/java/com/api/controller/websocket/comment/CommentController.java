@@ -16,7 +16,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.api.dto.CommonPageRequest;
 import com.api.dto.response.CommentResponse;
@@ -60,7 +59,8 @@ public class CommentController {
       contentPostingRepository.save(content);
       commentRepository.save(comment);
       messagingTemplate.convertAndSend("/topic/comments/" + contentId,
-          new CommentResponse(stompPrincipal.getName(), stompPrincipal.getAvatarUrl(), comment));
+          new CommentResponse(stompPrincipal.getName(), stompPrincipal.getAvatarUrl(), comment,
+              content.getCommentCount()));
     }
     throw new SecurityException("Invalid principal type");
   }
@@ -87,7 +87,8 @@ public class CommentController {
             Optional<User> userOpt = userRepository.findByUserId(comment.getUserId());
             if (userOpt.isPresent()) {
               User user = userOpt.get();
-              return new CommentResponse(user.getName(), user.getAvatarUrl(), comment);
+              return new CommentResponse(user.getName(), user.getAvatarUrl(), comment,
+                  contentOpt.get().getCommentCount());
             }
             return null;
           })
