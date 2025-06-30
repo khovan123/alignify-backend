@@ -33,6 +33,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ContentPostingService {
@@ -127,7 +130,7 @@ public class ContentPostingService {
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
+        responseData.put("post", dtoList);
         responseData.put("currentPage", posts.getNumber());
         responseData.put("totalPages", posts.getTotalPages());
         responseData.put("totalItems", posts.getTotalElements());
@@ -180,6 +183,30 @@ public class ContentPostingService {
         }
     }
 
+    public ResponseEntity<?> getPostByCategoryIds(
+            int pageNumber,
+            int pageSize,
+            String categoryIds,
+            HttpServletRequest request) {
+
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return ApiResponse.sendError(400, "Category list must not be empty", request.getRequestURI());
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<ContentPosting> postPage = contentPostingRepo.findByCategoryIdsInOrderByCreatedDateDesc(categoryIds, pageable);
+
+        List<ContentPostingResponse> dtoList = postPage.getContent().stream()
+                .map(this::mapToDTO)
+                .toList();
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", postPage.getNumber());
+        responseData.put("totalPages", postPage.getTotalPages());
+        responseData.put("totalItems", postPage.getTotalElements());
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
     public ResponseEntity<?> updateContentPosting(String contentId, CustomUserDetails userDetails,
             ContentPosting updatedContentPosting,
             HttpServletRequest request) {
@@ -228,41 +255,32 @@ public class ContentPostingService {
     // return ApiResponse.sendError(404, "Content posting not found",
     // request.getRequestURI());
     // }
-
     // ContentPosting content = contentPostingOpt.get();
     // String userId = JwtUtil.decodeToken(request).getSubject();
-
     // boolean isOwner = content.getUserId().equals(userId);
     // boolean isPublic = content.isIsPublic();
-
     // if (!isPublic && !isOwner) {
     // return ResponseEntity.status(403).body(
     // Map.of("error", "You do not have permission to like this private content."));
     // }
-
     // Optional<Likes> existingLike = likesRepo.findByUserIdAndContentId(userId,
     // contentId);
-
     // if (existingLike.isPresent()) {
     // likesRepo.deleteByUserIdAndContentId(userId, contentId);
     // } else {
     // Likes newLike = new Likes(userId, contentId);
     // likesRepo.save(newLike);
     // }
-
     // long likeCount = likesRepo.countByContentId(contentId);
     // content.setLikeCount((int) likeCount);
     // contentPostingRepo.save(content);
-
     // String message = existingLike.isPresent() ? "Like removed" : "Like added";
-
     // return ApiResponse.sendSuccess(
     // 200,
     // message,
     // Map.of("likeCount", likeCount),
     // request.getRequestURI());
     // }
-
     public ResponseEntity<?> findContentByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
         if (term == null || term.trim().isEmpty()) {
             return ApiResponse.sendSuccess(200, "No content found", Collections.emptyList(), request.getRequestURI());
