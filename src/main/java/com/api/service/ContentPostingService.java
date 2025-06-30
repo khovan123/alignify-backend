@@ -194,7 +194,7 @@ public class ContentPostingService {
         }
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<ContentPosting> postPage = contentPostingRepo.findByCategoryIdsInOrderByCreatedAtDesc(categoryIds, pageable);
+        Page<ContentPosting> postPage = contentPostingRepo.findByCategoryIdsInOrderByCreatedDateDesc(categoryIds, pageable);
 
         List<ContentPostingResponse> dtoList = postPage.getContent().stream()
                 .map(this::mapToDTO)

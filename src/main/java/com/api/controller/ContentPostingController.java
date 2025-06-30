@@ -59,7 +59,7 @@ public class ContentPostingController {
         return contentPostingSer.getContentPostingById(userId, request, pageNumber, pageSize);
     }
 
-    @GetMapping("/category")
+    @GetMapping("/filterByCategory/{categoryId}")
     public ResponseEntity<?> getPostByCategoryId(
             @PathVariable("categoryId") String categoryId,
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -79,7 +79,6 @@ public class ContentPostingController {
     }
 
     @PutMapping("/{contentId}")
-
     public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody ContentPosting contentPosting,
