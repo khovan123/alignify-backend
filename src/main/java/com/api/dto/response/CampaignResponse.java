@@ -1,6 +1,7 @@
 package com.api.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,15 +13,16 @@ import com.api.repository.CategoryRepository;
 public class CampaignResponse {
 
     private String campaignId;
+    private String brandId;
     private String brandName;
     private String brandAvartar;
     private String campaignName;
     private String content;
     private String imageUrl;
     private List<Category> categories;
-    private LocalDateTime createdAt;
-    private LocalDateTime dueAt;
-    private LocalDateTime startAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime dueAt;
+    private ZonedDateTime startAt;
     private String status;
     private long budget;
     private Map<String, Integer> campaignRequirements;
@@ -28,12 +30,14 @@ public class CampaignResponse {
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
+    private List<String> appliedInfluencerIds;
 
     public CampaignResponse() {
     }
 
     public CampaignResponse(User user, Campaign campaign, CategoryRepository categoryRepository) {
         this.campaignId = campaign.getCampaignId();
+        this.brandId = campaign.getBrandId();
         this.brandName = user.getName();
         this.content = campaign.getContent();
         this.brandAvartar = user.getAvatarUrl();
@@ -50,6 +54,16 @@ public class CampaignResponse {
         this.influencerCountExpected = campaign.getInfluencerCountExpected();
         this.influencerCountCurrent = campaign.getInfluencerCountCurrent();
         this.applicationTotal = campaign.getApplicationTotal();
+        this.appliedInfluencerIds = campaign.getAppliedInfluencerIds() != null ? campaign.getAppliedInfluencerIds()
+                : List.of();
+    }
+
+    public String getBrandId() {
+        return brandId;
+    }
+
+    public void setBrandId(String brandId) {
+        this.brandId = brandId;
     }
 
     public String getStatus() {
@@ -84,7 +98,6 @@ public class CampaignResponse {
         this.brandName = brandName;
     }
 
-    
     public String getContent() {
         return content;
     }
@@ -109,27 +122,27 @@ public class CampaignResponse {
         this.categories = categories;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getDueAt() {
+    public ZonedDateTime getDueAt() {
         return dueAt;
     }
 
-    public void setDueAt(LocalDateTime dueAt) {
+    public void setDueAt(ZonedDateTime dueAt) {
         this.dueAt = dueAt;
     }
 
-    public LocalDateTime getStartAt() {
+    public ZonedDateTime getStartAt() {
         return startAt;
     }
 
-    public void setStartAt(LocalDateTime startAt) {
+    public void setStartAt(ZonedDateTime startAt) {
         this.startAt = startAt;
     }
 
@@ -148,7 +161,7 @@ public class CampaignResponse {
     public void setCampaignName(String campaignName) {
         this.campaignName = campaignName;
     }
-    
+
     public long getBudget() {
         return budget;
     }
@@ -187,6 +200,14 @@ public class CampaignResponse {
 
     public void setApplicationTotal(int applicationTotal) {
         this.applicationTotal = applicationTotal;
+    }
+
+    public List<String> getAppliedInfluencerIds() {
+        return appliedInfluencerIds;
+    }
+
+    public void setAppliedInfluencerIds(List<String> appliedInfluencerIds) {
+        this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
 
 }

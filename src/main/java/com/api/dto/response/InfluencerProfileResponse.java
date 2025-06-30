@@ -1,13 +1,14 @@
 package com.api.dto.response;
 
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import com.api.model.Category;
 import com.api.model.Influencer;
 import com.api.model.User;
 import com.api.repository.CategoryRepository;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 public class InfluencerProfileResponse {
 
@@ -17,7 +18,7 @@ public class InfluencerProfileResponse {
     private String roleId;
     private String avatarUrl;
     private String backgroundUrl;
-    private LocalDateTime DoB;
+    private ZonedDateTime DoB;
     private String gender;
     private String bio;
     private Map<String, String> socialMediaLinks;
@@ -25,8 +26,39 @@ public class InfluencerProfileResponse {
     private List<Category> categories;
     private int follower;
     private boolean isPublic;
+    private int completedCampaign;
 
-    public InfluencerProfileResponse(User user, Influencer influencer, boolean isOwner, CategoryRepository categoryRepository) {
+    public InfluencerProfileResponse(User user, Influencer influencer) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.avatarUrl = user.getAvatarUrl();
+        this.follower = influencer.getFollower();
+    }
+
+    public InfluencerProfileResponse(User user, Influencer influencer, CategoryRepository categoryRepository) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.roleId = user.getRoleId();
+        this.avatarUrl = user.getAvatarUrl();
+        this.backgroundUrl = user.getBackgroundUrl();
+        this.bio = influencer.getBio();
+        this.isPublic = influencer.isPublic();
+        this.email = user.getEmail();
+        this.DoB = influencer.getDoB();
+        this.gender = influencer.getGender();
+        this.bio = influencer.getBio();
+        this.socialMediaLinks = influencer.getSocialMediaLinks();
+        this.rating = influencer.getRating();
+        this.categories = (influencer.getCategoryIds() != null && !influencer.getCategoryIds().contains(null))
+                ? categoryRepository.findAllById(influencer.getCategoryIds())
+                : Collections.emptyList();
+        this.follower = influencer.getFollower();
+
+    }
+
+    public InfluencerProfileResponse(User user, Influencer influencer, int completedCampaign, boolean isOwner,
+            CategoryRepository categoryRepository) {
+        this.completedCampaign = completedCampaign;
         this.userId = user.getUserId();
         this.name = user.getName();
         this.roleId = user.getRoleId();
@@ -96,11 +128,11 @@ public class InfluencerProfileResponse {
         this.backgroundUrl = backgroundUrl;
     }
 
-    public LocalDateTime getDoB() {
+    public ZonedDateTime getDoB() {
         return DoB;
     }
 
-    public void setDoB(LocalDateTime DoB) {
+    public void setDoB(ZonedDateTime DoB) {
         this.DoB = DoB;
     }
 
@@ -158,6 +190,14 @@ public class InfluencerProfileResponse {
 
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    public int getCompletedCampaign() {
+        return completedCampaign;
+    }
+
+    public void setCompletedCampaign(int completedCampaign) {
+        this.completedCampaign = completedCampaign;
     }
 
 }

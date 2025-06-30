@@ -28,9 +28,13 @@ public class ProfileController {
     private ProfileService profileService;
 
     @GetMapping("")
-    public ResponseEntity<?> getAllProfileByRoleId(@RequestParam("roleId") String roleId,
-            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
-        return profileService.getAllProfileByRoleId(roleId, userDetails, request);
+    public ResponseEntity<?> getAllProfileByRoleId(
+            @RequestParam("roleId") String roleId,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return profileService.getAllProfileByRoleId(roleId, pageNumber, pageSize, userDetails, request);
     }
 
     @GetMapping("/me")
@@ -60,6 +64,29 @@ public class ProfileController {
     public ResponseEntity<?> changeAvatar(@RequestPart("image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.saveAvatarUrl(image, userDetails, request);
+    }
+
+    @GetMapping("/topInfluencer")
+    public ResponseEntity<?> getTopInfluencers(HttpServletRequest request) {
+        return profileService.getTopInfluencers(request);
+    }
+
+    @PostMapping("/brands/search")
+    public ResponseEntity<?> searchBrand(
+            @RequestParam("term") String term,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        return profileService.searchBrandByTerm(term, pageNumber, pageSize, request);
+    }
+
+    @PostMapping("/influencers/search")
+    public ResponseEntity<?> searchInfluencer(
+            @RequestParam("term") String term,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        return profileService.searchInfluencerByTerm(term, pageNumber, pageSize, request);
     }
 
 }

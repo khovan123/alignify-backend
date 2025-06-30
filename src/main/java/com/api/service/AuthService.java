@@ -92,6 +92,7 @@ public class AuthService {
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
             String name = (String) payload.get("name");
+            String avatar = (String) payload.get("picture");
 
             User user;
             if (!userRepository.existsByEmail(email)) {
@@ -101,14 +102,24 @@ public class AuthService {
                 user.setRoleId(EnvConfig.INFLUENCER_ROLE_ID);
                 user.setPassword(JwtUtil.hashPassword(email));
                 user = userRepository.save(user);
+                Influencer influencer = new Influencer();
+                influencer.setUserId(user.getUserId());
+                influencer.setCreatedAt(user.getCreatedAt());
+                Gallery gallery = new Gallery();
+                gallery.setGalleryId(user.getUserId());
+                gallery.setCreatedAt(user.getCreatedAt());
+                influencerRepository.save(influencer);
+                galleryRepository.save(gallery);
             } else {
                 user = userRepository.findByEmail(email).get();
             }
-            return ApiResponse.sendSuccess(200, "Login successful",
-                    Map.of(
-                            "token", JwtUtil.createToken(user),
-                            "id", user.getUserId()),
-                    request.getRequestURI());
+            Role role = roleRepository.findById(user.getRoleId()).get();
+            UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatar);
+
+            return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                    "token", JwtUtil.createToken(user),
+                    "role", role.getRoleName(),
+                    "user", userDTO), request.getRequestURI());
         } catch (IOException e) {
             return ApiResponse.sendError(401, "Invalid Google authentication code", request.getRequestURI());
         }
@@ -254,7 +265,7 @@ public class AuthService {
         }
 
         user.setPassword(JwtUtil.hashPassword(passwordRequest.getNewPassword()));
-
+        userRepository.save(user);
         return ApiResponse.sendSuccess(200, "Password changed successfully", null, request.getRequestURI());
     }
 
@@ -269,9 +280,10 @@ public class AuthService {
         }
         String resetURL = JwtUtil.createURLResetPassword(recoveryPasswordRequest.getUrl(),
                 recoveryPasswordRequest.getEmail());
-        String subject = "Reset your password";
-        String message = "Click this url: " + resetURL + " to reset your password.";
-        emailService.sendSimpleEmail(recoveryPasswordRequest.getEmail(), subject, message);
+        // String subject = "Reset your password";
+        // String message = "Click this url: " + + " to reset your password.";
+        emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(), user.get().getName(),
+                user.get().getAvatarUrl(), resetURL);
         // emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(),
         // resetURL);
         return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null,

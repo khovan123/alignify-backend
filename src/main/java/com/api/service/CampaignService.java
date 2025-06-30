@@ -1,8 +1,10 @@
 package com.api.service;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +23,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
 import com.api.dto.response.CampaignResponse;
 import com.api.model.Application;
+import com.api.model.Brand;
 import com.api.model.Campaign;
 import com.api.model.CampaignTracking;
 import com.api.model.Category;
@@ -32,6 +36,7 @@ import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
+import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
@@ -64,6 +69,8 @@ public class CampaignService {
     private UserRepository userRepository;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private BrandRepository brandRepository;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -82,16 +89,21 @@ public class CampaignService {
         campaign.setBrandId(brandId);
         campaign.setImageUrl(imageUrl);
         campaign = campaignRepo.save(campaign);
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
+        brand.setTotalCampaign(brand.getTotalCampaign() + 1);
+        brandRepository.save(brand);
+
         chatRoomRepository.save(
                 new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(), campaign.getImageUrl()));
         User user = userRepository.findById(brandId).get();
         ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setMessage("Xin chào " + user.getName() + " !");
+        chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
         chatMessage.setChatRoomId(campaign.getCampaignId());
         chatMessage.setName(user.getName());
         chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
         chatMessage.setUserId("#SYS");
-        chatMessage.setSendAt(LocalDateTime.now());
+        chatMessage.setSendAt(ZonedDateTime.now());
         chatMessageRepository.save(chatMessage);
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(user, campaign, categoryRepo),
@@ -187,6 +199,72 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
+    public ResponseEntity<?> getCampaignsByCategoryIds(
+            int pageNumber,
+            int pageSize,
+            String categoryIds,
+            HttpServletRequest request) {
+
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return ApiResponse.sendError(400, "Category list must not be empty", request.getRequestURI());
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Campaign> campaignPage = campaignRepo.findByCategoryIdsInAndStatusOrderByCreatedAtDesc(
+                categoryIds, "RECRUITING", pageable);
+
+        Set<String> brandIds = campaignPage.getContent().stream()
+                .map(Campaign::getBrandId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+                .map(campaign -> {
+                    User user = brandMap.get(campaign.getBrandId());
+                    if (user == null) {
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
+                    }
+                    return new CampaignResponse(user, campaign, categoryRepo);
+                })
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+        responseData.put("currentPage", campaignPage.getNumber());
+        responseData.put("totalPages", campaignPage.getTotalPages());
+        responseData.put("totalItems", campaignPage.getTotalElements());
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getCampaignsTop(HttpServletRequest request) {
+
+        List<Campaign> campaigns = campaignRepo.findTop3ByOrderByApplicationTotalDescCreatedAtDesc();
+
+        Set<String> brandIds = campaigns.stream()
+                .map(Campaign::getBrandId)
+                .collect(Collectors.toSet());
+
+        Map<String, User> brandMap = userRepository.findAllById(brandIds).stream()
+                .collect(Collectors.toMap(User::getUserId, Function.identity()));
+
+        List<CampaignResponse> dtoList = campaigns.stream()
+                .map(campaign -> {
+                    User user = brandMap.get(campaign.getBrandId());
+                    if (user == null) {
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
+                    }
+                    return new CampaignResponse(user, campaign, categoryRepo);
+                })
+                .toList();
+
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
+    }
+
     public ResponseEntity<?> getCampaignsByCampaignId(String campaignId, HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         User user = userRepository.findById(campaignOpt.get().getBrandId()).get();
@@ -222,42 +300,45 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails, int pageNumber, int pageSize,
+    public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails,
             HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        Page<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId(), pageable);
+        List<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId());
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
 
-        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+        List<CampaignResponse> dtoList = campaignPage.stream()
                 .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", campaignPage.getNumber());
-        responseData.put("totalPages", campaignPage.getTotalPages());
-        responseData.put("totalItems", campaignPage.getTotalElements());
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails, int pageNumber, int pageSize,
+    public ResponseEntity<?> getAllCampaignOfBrandNoPage(CustomUserDetails userDetails, HttpServletRequest request) {
+
+        List<Campaign> campaigns = campaignRepo.findAllByBrandId(userDetails.getUserId());
+        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
+
+        List<CampaignResponse> dtoList = campaigns.stream()
+                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
+                .toList();
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails,
             HttpServletRequest request) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<String> campaignIdsPage = campaignTrackingRepository.findCampaignIdsByInfluencerId(userDetails.getUserId(),
-                pageable);
+        List<String> campaignIdsPage = campaignTrackingRepository
+                .findCampaignIdsByInfluencerId(userDetails.getUserId());
         Optional<User> user = userRepository.findById(userDetails.getUserId());
-        Page<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage.getContent(), pageable);
-        List<CampaignResponse> dtoList = campaignPage.getContent().stream()
+        List<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage);
+        List<CampaignResponse> dtoList = campaignPage.stream()
                 .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", campaignPage.getNumber());
-        responseData.put("totalPages", campaignPage.getTotalPages());
-        responseData.put("totalItems", campaignPage.getTotalElements());
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
@@ -296,10 +377,11 @@ public class CampaignService {
             return ApiResponse.sendError(403, "Access denied",
                     request.getRequestURI());
         }
-        List<CampaignTracking> relatedTrackings = campaignTrackingRepository.findAllByCampaignId(campaignId);
-        campaignTrackingRepository.deleteAll(relatedTrackings);
+        applicationRepository.deleteAllByCampaignId(campaignId);
+        campaignTrackingRepository.deleteAllByCampaignId(campaignId);
         campaignRepo.deleteById(campaignId);
         chatRoomRepository.deleteById(campaignId);
+        chatMessageRepository.deleteAllByChatRoomId(campaignId);
         return ApiResponse.sendSuccess(
                 204,
                 "campaign posting and related trackings deleted successfully",
@@ -368,7 +450,7 @@ public class CampaignService {
             if (updatedCampaign.getInfluencerCountExpected() > 0) {
                 campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
             }
-            campaign.setCreatedAt(LocalDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
+            campaign.setCreatedAt(ZonedDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
 
@@ -391,9 +473,40 @@ public class CampaignService {
                 && statusRequest.getStatus().equals("DRAFT")) {
             return ApiResponse.sendError(403, "Access denied.", request.getRequestURI());
         }
-        campaign.setStatus(statusRequest.getStatus());
+        User user = userRepository.findByUserId(brandId).get();
         if (campaign.getStatus().equals("DRAFT") && statusRequest.getStatus().equals("RECRUITING")) {
+            ChatRoom chatRoom = new ChatRoom();
+            chatRoom.setChatRoomId(campaignId);
+            chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            chatRoom.setRoomAvatarUrl(campaign.getImageUrl());
+            chatRoom.setRoomOwnerId(brandId);
+            chatRoom.setRoomName(campaign.getCampaignName());
+            chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
+            chatRoomRepository.save(chatRoom);
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
+            chatMessage.setChatRoomId(campaign.getCampaignId());
+            chatMessage.setName(user.getName());
+            chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
+            chatMessage.setUserId("#SYS");
+            chatMessage.setSendAt(ZonedDateTime.now());
+            chatMessageRepository.save(chatMessage);
         } else if (campaign.getStatus().equals("RECRUITING") && statusRequest.getStatus().equals("PENDING")) {
+            if (campaign.getInfluencerCountCurrent() <= 0) {
+                return ApiResponse.sendError(403, "Please confirm at least one application", request.getRequestURI());
+            }
+            List<String> influencerIds = campaign.getAppliedInfluencerIds();
+            List<Application> applications = applicationRepository
+                    .findAllByCampaignIdAndInfluencerIdIn(campaign.getCampaignId(), campaign.getAppliedInfluencerIds());
+            applications.forEach(app -> {
+                if (!app.getStatus().equals("ACCEPTED")) {
+                    if (influencerIds.contains(app.getInfluencerId())) {
+                        influencerIds.remove(app.getInfluencerId());
+                    }
+                    app.setStatus("REJECTED");
+                    applicationRepository.save(app);
+                }
+            });
         } else if ((campaign.getStatus().equals("PENDING")) || (campaign.getStatus().equals("RECRUITING"))
                 && statusRequest.getStatus().equals("DRAFT")) {
             applicationRepository.deleteAllByCampaignId(campaignId);
@@ -401,9 +514,11 @@ public class CampaignService {
             chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
             chatRoomRepository.save(chatRoom);
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
-        }
-        if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
-            List<Application> applications = applicationRepository.findAllByCampaignId(campaignId);
+            campaign.setApplicationTotal(0);
+            campaign.setAppliedInfluencerIds(new ArrayList<>());
+            campaign.setInfluencerCountCurrent(0);
+        } else if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
+            List<Application> applications = applicationRepository.findAllByCampaignIdAndStatus(campaignId, "ACCEPTED");
             if (!applications.isEmpty()) {
                 applications.forEach(app -> {
                     if (app.getStatus().equals("ACCEPTED")) {
@@ -426,8 +541,10 @@ public class CampaignService {
                 return ApiResponse.sendError(403, "All campaign tracking must be completed", request.getRequestURI());
             }
         } else {
-            return ApiResponse.sendError(403, "Not supported yet.", request.getRequestURI());
+            return ApiResponse.sendError(403, "Not supported yet." + campaign.getStatus() + statusRequest.getStatus(),
+                    request.getRequestURI());
         }
+        campaign.setStatus(statusRequest.getStatus());
         campaignRepo.save(campaign);
         return ApiResponse.sendSuccess(200, "Update campaign status successfully", campaign,
                 request.getRequestURI());
@@ -442,6 +559,40 @@ public class CampaignService {
     // e.getMessage());
     // }
     // }
+    public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        if (term.isBlank() || term.isEmpty()) {
+            return this.getAllCampaign(pageNumber, pageSize, request);
+        }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<User> matchedBrands = userRepository.findByNameContainingIgnoreCaseAndRoleId(term,
+                EnvConfig.BRAND_ROLE_ID);
+        List<String> matchedBrandIds = matchedBrands.stream()
+                .map(User::getUserId)
+                .toList();
+
+        Page<Campaign> matchedCampaigns;
+
+        if (!matchedBrandIds.isEmpty()) {
+            matchedCampaigns = campaignRepo.findByBrandIdIn(matchedBrandIds, pageable);
+        } else {
+            matchedCampaigns = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+        }
+        if (matchedCampaigns.isEmpty()) {
+            return ApiResponse.sendSuccess(200, "No campaigns found", Collections.emptyList(), request.getRequestURI());
+        }
+        List<CampaignResponse> dtoList = matchedCampaigns.getContent().stream()
+                .map(campaign -> {
+                    User brand = userRepository.findById(campaign.getBrandId())
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Brand not found for campaign: " + campaign.getCampaignId()));
+                    return new CampaignResponse(brand, campaign, categoryRepo);
+                })
+                .toList();
+
+        return ApiResponse.sendSuccess(200, "Response success", dtoList, request.getRequestURI());
+    }
+
     public Campaign convertToCampaign(String obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();

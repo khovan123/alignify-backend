@@ -1,6 +1,6 @@
 package com.api.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +24,7 @@ import com.api.model.Influencer;
 import com.api.model.Status;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
-import com.api.repository.BrandRepository;
 import com.api.repository.CampaignRepository;
-import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
@@ -45,15 +40,11 @@ public class ApplicationService {
         @Autowired
         private UserRepository userRepository;
         @Autowired
-        private BrandRepository brandRepository;
-        @Autowired
         private InfluencerRepository influencerRepository;
         @Autowired
         private ApplicationRepository applicationRepository;
         @Autowired
         private CampaignRepository campaignRepository;
-        @Autowired
-        private CampaignTrackingRepository campaignTrackingRepository;
         @Autowired
         private CategoryRepository categoryRepository;
         @Autowired
@@ -72,12 +63,19 @@ public class ApplicationService {
                 if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
                 }
-                if (applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)
+                                || applicationRepository.existsByInfluencerIdAndCampaignId(influencerId, campaignId)) {
                         return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
                 }
                 Application application = applicationRepository
                                 .save(new Application(campaignId, influencerId, campaign.getBrandId()));
+                List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                ? new java.util.ArrayList<>()
+                                : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                updatedAppliedInfluencerIds.add(influencerId);
+                campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
+                campaignRepository.save(campaign);
                 return ApiResponse.sendSuccess(201, "Send apply for application successfully", application,
                                 request.getRequestURI());
         }
@@ -93,7 +91,19 @@ public class ApplicationService {
                         return ApiResponse.sendError(404, "id: " + applicationId + " not found",
                                         request.getRequestURI());
                 }
+                Optional<Campaign> campaignOpt = campaignRepository.findById(applicationOpt.get().getCampaignId());
+                if (!campaignOpt.isPresent()) {
+                        return ApiResponse.sendError(404, "id: " + applicationOpt.get().getCampaignId() + " not found",
+                                        request.getRequestURI());
+                }
+                Campaign campaign = campaignOpt.get();
                 applicationRepository.delete(applicationOpt.get());
+                List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                ? new java.util.ArrayList<>()
+                                : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                updatedAppliedInfluencerIds.remove(influencerId);
+                campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
+                campaignRepository.save(campaign);
                 return ApiResponse.sendSuccess(204, "Delete application successfully", null, request.getRequestURI());
         }
 
@@ -117,7 +127,17 @@ public class ApplicationService {
                         return ApiResponse.sendError(403, "Access is denied.",
                                         request.getRequestURI());
                 }
+                if (campaign.getAppliedInfluencerIds().contains(influencerId)
+                                || applicationRepository.existsByInfluencerIdAndCampaignId(influencerId,
+                                                campaign.getCampaignId())) {
+                        return ApiResponse.sendError(400, "Already apply", request.getRequestURI());
+                }
+                List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                ? new java.util.ArrayList<>()
+                                : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                updatedAppliedInfluencerIds.add(influencerId);
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
+                campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
                 campaignRepository.save(campaign);
                 application.setLimited(application.getLimited() - 1);
                 applicationRepository.save(application);
@@ -125,18 +145,16 @@ public class ApplicationService {
                                 request.getRequestURI());
         }
 
-        public ResponseEntity<?> getAllApplicationByBrand(int pageNumber, int pageSize, CustomUserDetails userDetails,
+        public ResponseEntity<?> getAllApplicationByBrand(CustomUserDetails userDetails,
                         HttpServletRequest request) {
                 String brandId = userDetails.getUserId();
-                Pageable pageable = PageRequest.of(pageNumber, pageSize);
-                Page<Campaign> campaignPage = campaignRepository.findAllByBrandIdAndStatusOrderByCreatedAtDesc(brandId,
-                                "RECRUITING",
-                                pageable);
                 Optional<User> brandUser = userRepository.findById(brandId);
-                List<Campaign> campaigns = campaignPage.getContent();
+                List<Campaign> campaigns = campaignRepository.findAllByBrandIdAndStatusOrderByCreatedAtDesc(brandId,
+                                "RECRUITING");
 
                 if (campaigns.isEmpty()) {
-                        ApiResponse.sendError(400, "Not found any campaign!", request.getRequestURI());
+                        return ApiResponse.sendSuccess(200, "You dont have any applications yet!", null,
+                                        request.getRequestURI());
                 }
                 List<String> campaignIds = campaigns.stream()
                                 .map(Campaign::getCampaignId)
@@ -190,9 +208,8 @@ public class ApplicationService {
                         HttpServletRequest request) {
                 String influencerId = userDetails.getUserId();
                 List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
-                Optional<User> user = userRepository.findById(influencerId);
                 if (applications.isEmpty()) {
-                        return ApiResponse.sendError(400, "Not found any application for this influencer!",
+                        return ApiResponse.sendSuccess(200, "You dont have any applications yet!", null,
                                         request.getRequestURI());
                 }
 
@@ -201,9 +218,12 @@ public class ApplicationService {
                                 .collect(Collectors.toSet());
 
                 List<Campaign> campaigns = campaignRepository.findAllByCampaignIdIn(campaignIds);
-
                 Map<String, Campaign> campaignMap = campaigns.stream()
                                 .collect(Collectors.toMap(Campaign::getCampaignId, campaign -> campaign));
+
+                Set<String> brandIds = campaigns.stream().map(Campaign::getBrandId).collect(Collectors.toSet());
+                Map<String, User> brandUserMap = userRepository.findAllById(brandIds).stream()
+                                .collect(Collectors.toMap(User::getUserId, u -> u));
 
                 Map<String, List<Application>> applicationsByCampaign = applications.stream()
                                 .collect(Collectors.groupingBy(Application::getCampaignId));
@@ -211,34 +231,122 @@ public class ApplicationService {
                 List<ApplicationsByfInfluencerResponse> applicationsByCampaignResponses = campaignIds.stream()
                                 .map(campaignId -> {
                                         Campaign campaign = campaignMap.get(campaignId);
-                                        List<Application> appsForCampaign = applicationsByCampaign.getOrDefault(
-                                                        campaignId,
-                                                        Collections.emptyList());
-                                        if (campaign.getApplicationTotal() != appsForCampaign.size()) {
-                                                campaign.setApplicationTotal(appsForCampaign.size());
-
-                                                long acceptedCount = appsForCampaign.stream()
-                                                                .filter(app -> Status.ACCEPTED.toString()
-                                                                                .equals(app.getStatus()))
-                                                                .count();
-
-                                                if (campaign.getInfluencerCountCurrent() != acceptedCount) {
-                                                        campaign.setInfluencerCountCurrent((int) acceptedCount);
-                                                }
-
+                                        if (campaign == null)
+                                                return null;
+                                        User brandUser = brandUserMap.get(campaign.getBrandId());
+                                        List<Application> appsForCampaign = applicationsByCampaign
+                                                        .getOrDefault(campaignId, Collections.emptyList());
+                                        int appSize = appsForCampaign.size();
+                                        boolean changed = false;
+                                        if (campaign.getApplicationTotal() != appSize) {
+                                                campaign.setApplicationTotal(appSize);
+                                                changed = true;
+                                        }
+                                        long acceptedCount = appsForCampaign.stream().filter(
+                                                        app -> Status.ACCEPTED.toString().equals(app.getStatus()))
+                                                        .count();
+                                        if (campaign.getInfluencerCountCurrent() != acceptedCount) {
+                                                campaign.setInfluencerCountCurrent((int) acceptedCount);
+                                                changed = true;
+                                        }
+                                        if (changed) {
                                                 campaignRepository.save(campaign);
                                         }
-                                        return new ApplicationsByfInfluencerResponse(
-                                                        user.get(),
-                                                        campaign,
-                                                        appsForCampaign,
-                                                        categoryRepository);
+                                        return new ApplicationsByfInfluencerResponse(brandUser, campaign,
+                                                        appsForCampaign, categoryRepository);
                                 })
+                                .filter(r -> r != null)
                                 .collect(Collectors.toList());
 
                 return ApiResponse.sendSuccess(200, "Response successfully", applicationsByCampaignResponses,
                                 request.getRequestURI());
         }
+
+        // public ResponseEntity<?> confirm_Application(String applicationId, boolean
+        // accepted,
+        // CustomUserDetails userDetails,
+        // HttpServletRequest request) {
+        // String brandId = userDetails.getUserId();
+
+        // Optional<Application> applicationOpt =
+        // applicationRepository.findByApplicationIdAndBrandId(
+        // applicationId,
+        // brandId);
+        // if (!applicationOpt.isPresent()) {
+        // return ApiResponse.sendError(404, "Applicationt with id: " + applicationId +
+        // " not found",
+        // request.getRequestURI());
+        // }
+        // Application application = applicationOpt.get();
+        // Optional<Campaign> campaignOpt =
+        // campaignRepository.findById(application.getCampaignId());
+        // if (!campaignOpt.isPresent()) {
+        // return ApiResponse.sendError(404, "Campaign not found",
+        // request.getRequestURI());
+        // }
+        // Campaign campaign = campaignOpt.get();
+        // List<Application> applications =
+        // applicationRepository.findAllByCampaignIdAndStatus(
+        // campaign.getCampaignId(),
+        // "ACCEPTED");
+        // if (applications.size() >= application.getLimited()) {
+        // return ApiResponse.sendError(400, "Reached to limitation",
+        // request.getRequestURI());
+        // }
+        // if (!application.getStatus().equals(Status.PENDING.toString())) {
+        // return ApiResponse.sendError(400, "Already " +
+        // application.getStatus().toLowerCase(),
+        // request.getRequestURI());
+        // }
+        // if (campaign.getInfluencerCountCurrent() >=
+        // campaign.getInfluencerCountExpected()) {
+        // return ApiResponse.sendError(400, "Reached to limitation",
+        // request.getRequestURI());
+        // }
+        // ChatRoom chatRoom =
+        // chatRoomRepository.findById(application.getCampaignId()).get();
+        // List<String> roomMate = chatRoom.getMembers();
+        // if (accepted) {
+        // application.setStatus("ACCEPTED");
+        // roomMate.add(application.getInfluencerId());
+        // chatRoom.setMembers(roomMate);
+        // chatRoomRepository.save(chatRoom);
+        // campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
+        // campaignRepository.save(campaign);
+        // ChatMessage chatMessage = new ChatMessage();
+        // User user =
+        // userRepository.findById(applicationOpt.get().getInfluencerId()).get();
+        // chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
+        // chatMessage.setName(user.getName());
+        // chatMessage.setSendAt(ZonedDateTime.now());
+        // chatMessage.setChatRoomId(chatRoom.getChatRoomId());
+        // chatMessage.setUserId("#SYS");
+        // chatMessageRepository.save(chatMessage);
+        // } else {
+        // application.setStatus("REJECTED");
+        // roomMate.remove(application.getInfluencerId());
+        // chatRoom.setMembers(roomMate);
+        // chatRoomRepository.save(chatRoom);
+        // List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds()
+        // == null
+        // ? new java.util.ArrayList<>()
+        // : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+        // updatedAppliedInfluencerIds.remove(application.getInfluencerId());
+        // campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
+        // campaignRepository.save(campaign);
+        // }
+        // applicationRepository.save(application);
+        // User user =
+        // userRepository.findById(application.getInfluencerId()).orElse(null);
+        // Influencer influencer =
+        // influencerRepository.findById(application.getInfluencerId()).orElse(null);
+        // ApplicationPlusInfluencer applicationPlusInfluencer = new
+        // ApplicationPlusInfluencer(user, influencer,
+        // application);
+        // return ApiResponse.sendSuccess(200, "Confirm apllication successfully",
+        // applicationPlusInfluencer,
+        // request.getRequestURI());
+        // }
 
         public ResponseEntity<?> confirm_Application(String applicationId, boolean accepted,
                         CustomUserDetails userDetails,
@@ -249,7 +357,7 @@ public class ApplicationService {
                                 applicationId,
                                 brandId);
                 if (!applicationOpt.isPresent()) {
-                        return ApiResponse.sendError(404, "Applicationt with id: " + applicationId + " not found",
+                        return ApiResponse.sendError(404, "Application with id: " + applicationId + " not found",
                                         request.getRequestURI());
                 }
                 Application application = applicationOpt.get();
@@ -258,33 +366,39 @@ public class ApplicationService {
                         return ApiResponse.sendError(404, "Campaign not found", request.getRequestURI());
                 }
                 Campaign campaign = campaignOpt.get();
-                List<Application> applications = applicationRepository.findAllByCampaignIdAndStatus(
-                                campaign.getCampaignId(),
-                                "ACCEPTED");
-                if (applications.size() >= application.getLimited()) {
+                if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Reached to limitation", request.getRequestURI());
                 }
                 if (!application.getStatus().equals(Status.PENDING.toString())) {
                         return ApiResponse.sendError(400, "Already " + application.getStatus().toLowerCase(),
                                         request.getRequestURI());
                 }
-                if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
-                        return ApiResponse.sendError(400, "Reached to limitation", request.getRequestURI());
+                ChatRoom chatRoom = chatRoomRepository.findById(application.getCampaignId()).orElse(null);
+                if (chatRoom == null) {
+                        chatRoom = new ChatRoom(campaign.getCampaignId(), brandId, campaign.getCampaignName(),
+                                        campaign.getImageUrl());
                 }
-                ChatRoom chatRoom = chatRoomRepository.findById(application.getCampaignId()).get();
-                List<String> roomMate = chatRoom.getMembers();
+                List<String> roomMate = chatRoom.getMembers() == null ? new java.util.ArrayList<>()
+                                : new java.util.ArrayList<>(chatRoom.getMembers());
                 if (accepted) {
                         application.setStatus("ACCEPTED");
-                        roomMate.add(application.getInfluencerId());
+                        if (!roomMate.contains(application.getInfluencerId())) {
+                                roomMate.add(application.getInfluencerId());
+                        }
                         chatRoom.setMembers(roomMate);
                         chatRoomRepository.save(chatRoom);
                         campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
                         campaignRepository.save(campaign);
                         ChatMessage chatMessage = new ChatMessage();
-                        User user = userRepository.findById(brandId).get();
-                        chatMessage.setMessage("Xin chào " + user.getName() + " !");
-                        chatMessage.setName(user.getName());
-                        chatMessage.setSendAt(LocalDateTime.now());
+                        User user = userRepository.findById(applicationOpt.get().getInfluencerId()).orElse(null);
+                        if (user != null) {
+                                chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
+                                chatMessage.setName(user.getName());
+                        } else {
+                                chatMessage.setMessage("Influencer đã vào phòng chat.");
+                                chatMessage.setName("Influencer");
+                        }
+                        chatMessage.setSendAt(ZonedDateTime.now());
                         chatMessage.setChatRoomId(chatRoom.getChatRoomId());
                         chatMessage.setUserId("#SYS");
                         chatMessageRepository.save(chatMessage);
@@ -292,14 +406,24 @@ public class ApplicationService {
                         application.setStatus("REJECTED");
                         roomMate.remove(application.getInfluencerId());
                         chatRoom.setMembers(roomMate);
-                        chatRoomRepository.save(chatRoom);
+                        List<String> updatedAppliedInfluencerIds = campaign.getAppliedInfluencerIds() == null
+                                        ? new java.util.ArrayList<>()
+                                        : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
+                        updatedAppliedInfluencerIds.remove(application.getInfluencerId());
+                        campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
+                        if (campaign.getInfluencerCountCurrent() > 0
+                                        && Status.ACCEPTED.toString().equals(application.getStatus())) {
+                                campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() - 1);
+                        }
+                        campaignRepository.save(campaign);
                 }
+                chatRoomRepository.save(chatRoom);
                 applicationRepository.save(application);
                 User user = userRepository.findById(application.getInfluencerId()).orElse(null);
                 Influencer influencer = influencerRepository.findById(application.getInfluencerId()).orElse(null);
                 ApplicationPlusInfluencer applicationPlusInfluencer = new ApplicationPlusInfluencer(user, influencer,
                                 application);
-                return ApiResponse.sendSuccess(200, "Confirm apllication successfully", applicationPlusInfluencer,
+                return ApiResponse.sendSuccess(200, "Confirm application successfully", applicationPlusInfluencer,
                                 request.getRequestURI());
         }
 

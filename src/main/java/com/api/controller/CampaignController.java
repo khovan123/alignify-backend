@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.dto.ApiResponse;
 import com.api.dto.request.StatusRequest;
 import com.api.model.Campaign;
 import com.api.security.CustomUserDetails;
@@ -41,10 +40,15 @@ public class CampaignController {
 
     @GetMapping("")
     public ResponseEntity<?> getAllCampaigns(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0", name = "pageNumber") int page,
+            @RequestParam(defaultValue = "10", name = "pageSize") int size,
             HttpServletRequest request) {
         return campaignService.getAllCampaign(page, size, request);
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<?> getCampaignsTop(HttpServletRequest request) {
+        return campaignService.getCampaignsTop(request);
     }
 
     // @GetMapping("/brands/{brandId}")
@@ -63,19 +67,7 @@ public class CampaignController {
             @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        System.out.println(obj);
-        try {
-            System.out.println("Received campaign JSON: " + obj);
-            Campaign campaign = campaignService.convertToCampaign(obj);
-            if (image != null && !image.isEmpty()) {
-                System.out.println("Received image: " + image.getOriginalFilename());
-            } else {
-                System.out.println("No image provided");
-            }
-            return campaignService.createCampaign(campaign, image, userDetails, request);
-        } catch (Exception e) {
-            return ApiResponse.sendError(400, "Invalid request: " + e.getMessage(), request.getRequestURI());
-        }
+        return campaignService.createCampaign(campaignService.convertToCampaign(obj), image, userDetails, request);
     }
 
     @PreAuthorize("hasRole('ROLE_BRAND')")
@@ -85,7 +77,15 @@ public class CampaignController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
-        return campaignService.getAllCampaignOfBrand(userDetails, page, size, request);
+        return campaignService.getAllCampaignOfBrand(userDetails, request);
+    }
+
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    @GetMapping("/brandNoPage")
+    public ResponseEntity<?> getAllCampaignOfBrandNoPage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.getAllCampaignOfBrandNoPage(userDetails, request);
     }
 
     @PutMapping("/{campaignId}")
@@ -125,7 +125,7 @@ public class CampaignController {
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
 
-        return campaignService.getAllCampaignOfInfluencer(userDetails, page, size, request);
+        return campaignService.getAllCampaignOfInfluencer(userDetails, request);
     }
 
     @GetMapping("/filterByCategory/{categoryId}")
@@ -136,5 +136,15 @@ public class CampaignController {
             HttpServletRequest request) {
 
         return campaignService.getCampaignsByCategoryIds(pageNumber, pageSize, categoryId, request);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<?> search(
+            @RequestParam(defaultValue = "all", name = "term") String term,
+            @RequestParam(defaultValue = "0", name = "pageNumber") int pageNumber,
+            @RequestParam(defaultValue = "10", name = "pageSize") int pageSize,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.searchByTerm(term, pageNumber, pageSize, userDetails, request);
     }
 }

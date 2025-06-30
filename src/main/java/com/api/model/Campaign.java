@@ -1,11 +1,11 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -22,10 +22,9 @@ public class Campaign {
     private String content;
     private String imageUrl;
     private List<String> categoryIds;
-    @CreatedDate
-    private LocalDateTime createdAt;
-    private LocalDateTime dueAt;
-    private LocalDateTime startAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime dueAt;
+    private ZonedDateTime startAt;
     private String status;
     private int budget;
     private Map<String, Integer> campaignRequirements;
@@ -33,12 +32,15 @@ public class Campaign {
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
+    private List<String> appliedInfluencerIds;
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
-        this.status = "RECRUITING";
+        this.status = "DRAFT";
         this.influencerCountCurrent = 0;
         this.applicationTotal = 0;
+        this.appliedInfluencerIds = new ArrayList<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
@@ -55,11 +57,12 @@ public class Campaign {
         this.campaignRequirements = campaignRequirements;
         this.influencerRequirements = influencerRequirements;
         this.influencerCountExpected = influencerCountExpected;
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
             List<String> categoryIds,
-            LocalDateTime createdAt, String status, int budget, Map<String, Integer> campaignRequirements,
+            ZonedDateTime createdAt, String status, int budget, Map<String, Integer> campaignRequirements,
             List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent,
             int applicationTotal) {
         this.campaignId = campaignId;
@@ -79,9 +82,10 @@ public class Campaign {
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
-            List<String> categoryIds, LocalDateTime createdAt, LocalDateTime dueAt, LocalDateTime startAt,
+            List<String> categoryIds, ZonedDateTime createdAt, ZonedDateTime dueAt, ZonedDateTime startAt,
             String status, int budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements,
-            int influencerCountExpected, int influencerCountCurrent, int applicationTotal) {
+            int influencerCountExpected, int influencerCountCurrent, int applicationTotal,
+            List<String> appliedInfluencerIds) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.campaignName = campaignName;
@@ -98,29 +102,30 @@ public class Campaign {
         this.influencerCountExpected = influencerCountExpected;
         this.influencerCountCurrent = influencerCountCurrent;
         this.applicationTotal = applicationTotal;
+        this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getDueAt() {
+    public ZonedDateTime getDueAt() {
         return dueAt;
     }
 
-    public void setDueAt(LocalDateTime dueAt) {
+    public void setDueAt(ZonedDateTime dueAt) {
         this.dueAt = dueAt;
     }
 
-    public LocalDateTime getStartAt() {
+    public ZonedDateTime getStartAt() {
         return startAt;
     }
 
-    public void setStartAt(LocalDateTime startAt) {
+    public void setStartAt(ZonedDateTime startAt) {
         this.startAt = startAt;
     }
 
@@ -226,6 +231,14 @@ public class Campaign {
 
     public void setApplicationTotal(int applicationTotal) {
         this.applicationTotal = applicationTotal;
+    }
+
+    public List<String> getAppliedInfluencerIds() {
+        return appliedInfluencerIds;
+    }
+
+    public void setAppliedInfluencerIds(List<String> appliedInfluencerIds) {
+        this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
 
 }

@@ -1,26 +1,36 @@
 package com.api.dto.request;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
 public class BrandProfileRequest {
-
+    private String name;
     private String bio;
     private List<String> categoryIds;
     private Map<String, String> contacts;
     private Map<String, String> socialMediaLinks;
-    private LocalDateTime establishDate;
+    private ZonedDateTime establishDate;
 
     public BrandProfileRequest() {
     }
 
-    public BrandProfileRequest(String bio, List<String> categoryIds, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate) {
+    public BrandProfileRequest(String name, String bio, List<String> categoryIds, Map<String, String> contacts,
+            Map<String, String> socialMediaLinks, ZonedDateTime establishDate) {
+        this.name = name;
         this.bio = bio;
         this.categoryIds = categoryIds;
         this.contacts = contacts;
         this.socialMediaLinks = socialMediaLinks;
         this.establishDate = establishDate;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getBio() {
@@ -55,11 +65,11 @@ public class BrandProfileRequest {
         this.socialMediaLinks = socialMediaLinks;
     }
 
-    public LocalDateTime getEstablishDate() {
+    public ZonedDateTime getEstablishDate() {
         return establishDate;
     }
 
-    public void setEstablishDate(LocalDateTime establishDate) {
+    public void setEstablishDate(ZonedDateTime establishDate) {
         this.establishDate = establishDate;
     }
 

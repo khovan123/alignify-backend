@@ -1,16 +1,17 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "messages")
 @CompoundIndex(name = "chatRoomId_sendAt_idx", def = "{'chatRoomId': 1, 'sendAt': -1}")
@@ -26,8 +27,7 @@ public class ChatMessage {
     private String name;
     private String chatRoomId;
     private String message;
-    @CreatedDate
-    private LocalDateTime sendAt;
+    private ZonedDateTime sendAt;
     private String tempId;
     private List<String> readBy = new ArrayList<>();
 

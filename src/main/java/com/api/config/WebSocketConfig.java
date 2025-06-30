@@ -1,13 +1,5 @@
 package com.api.config;
 
-import com.api.model.Brand;
-import com.api.model.Influencer;
-import com.api.model.User;
-import com.api.repository.BrandRepository;
-import com.api.repository.InfluencerRepository;
-import com.api.repository.UserRepository;
-import com.api.security.StompPrincipal;
-import com.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -22,18 +14,19 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import com.api.model.User;
+import com.api.repository.BrandRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.repository.UserRepository;
+import com.api.security.StompPrincipal;
+import com.api.util.JwtUtil;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private InfluencerRepository influencerRepository;
-
-    @Autowired
-    private BrandRepository brandRepository;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -45,7 +38,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns("https://alignify-rose.vercel.app", "http://localhost:3000")
                 .withSockJS();
     }
 
@@ -64,9 +57,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     try {
                         String userId = JwtUtil.decodeToken(token).getSubject();
                         User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new SecurityException("User not found: " + userId));
+                                .orElseThrow(() -> new SecurityException("User not found: " + userId));
                         String avatarUrl = null;
-                            avatarUrl = userRepository.findById(userId)
+                        avatarUrl = userRepository.findById(userId)
                                 .map(User::getAvatarUrl)
                                 .orElse(null);
                         accessor.setUser(new StompPrincipal(userId, user.getName(), user.getRoleId(), avatarUrl));

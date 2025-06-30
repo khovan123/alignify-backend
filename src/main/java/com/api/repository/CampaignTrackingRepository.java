@@ -3,8 +3,6 @@ package com.api.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,12 +15,16 @@ public interface CampaignTrackingRepository extends MongoRepository<CampaignTrac
 
     List<CampaignTracking> findAllByCampaignId(String campaignId);
 
-    Page<CampaignTracking> findAllByInfluencerId(String influencerId, Pageable pageable);
+    List<CampaignTracking> findAllByInfluencerId(String influencerId);
 
     List<CampaignTracking> findAllByCampaignIdAndStatus(String campaignId, String status);
 
-    default Page<String> findCampaignIdsByInfluencerId(String influencerId, Pageable pageable) {
-        return findAllByInfluencerId(influencerId, pageable)
-                .map(CampaignTracking::getCampaignId);
+    default List<String> findCampaignIdsByInfluencerId(String influencerId) {
+        return findAllByInfluencerId(influencerId)
+                .stream()
+                .map(CampaignTracking::getCampaignId)
+                .toList();
     }
+
+    void deleteAllByCampaignId(String campaignId);
 }

@@ -1,20 +1,23 @@
-package com.api.controller;
+package com.api.controller.websocket.chatting;
 
 import java.security.Principal;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.api.dto.UserDTO;
 import com.api.dto.response.ChatMessageResponse;
 import com.api.model.ChatMessage;
+import com.api.model.ChatRoom;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
 import com.api.security.StompPrincipal;
@@ -32,27 +35,38 @@ public class ChatController {
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat/{roomId}")
-    @SendTo("/topic/messages/{roomId}")
-    public ChatMessageResponse sendMessage(
+    // @SendTo("/topic/messages/{roomId}")
+    public void sendMessage(
             @Payload ChatMessage chatMessage,
+            // @RequestParam(defaultValue = "0", name = "pageNumber") int pageNumber,
+            // @RequestParam(defaultValue = "10", name = "pageSize") int pageSize,
             @DestinationVariable("roomId") String roomId,
             Principal principal) {
         if (principal == null || principal.getName() == null) {
-            throw new SecurityException("User not authorized for room: " + roomId);
+            throw new SecurityException("Access is denied at: " + roomId);
         }
         if (principal instanceof StompPrincipal stompPrincipal) {
             String userId = stompPrincipal.getUserId();
-            if (!chatRoomRepository.existsByChatRoomIdAndRoomOwnerIdOrMember(roomId, userId)) {
-                throw new SecurityException("User not authorized for room: " + roomId);
+            Optional<ChatRoom> roomOpt = chatRoomRepository.findById(roomId);
+            if (!roomOpt.isPresent()) {
+                throw new SecurityException("Access is denied at: " + roomId);
             }
             UserDTO userDTO = new UserDTO(stompPrincipal.getUserId(), stompPrincipal.getName(),
                     stompPrincipal.getAvatarUrl());
             chatMessage.setName(stompPrincipal.getName());
-            // chatMessage.setSendAt(LocalDateTime.now(ZoneId.of("+07:00")));
+            // chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            if (chatMessage.getSendAt() == null) {
+                chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            }
             chatMessage.setChatRoomId(roomId);
             chatMessage.setUserId(userId);
             chatMessageRepository.save(chatMessage);
-            return new ChatMessageResponse(userDTO, chatMessage);
+            ChatRoom chatRoom = roomOpt.get();
+            chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            chatRoomRepository.save(chatRoom);
+            messagingTemplate.convertAndSend("/topic/messages/" + roomId,
+                    new ChatMessageResponse(userDTO, chatMessage));
+
         }
         throw new SecurityException("Invalid principal type");
     }
