@@ -1,14 +1,18 @@
 package com.api.service;
 
-import com.api.dto.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import com.api.dto.ApiResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 @Service
 public class RapidAPIService {
@@ -35,10 +39,11 @@ public class RapidAPIService {
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
+                    request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Tiktok response successfully", statsJson[0], request.getRequestURI());
-
+        return ApiResponse.sendSuccess(200, "Tiktok response successfully", statsJson[0].toMap(),
+                request.getRequestURI());
     }
 
     public ResponseEntity<?> getVideoDetailsFromTiktok(String videoId, HttpServletRequest request) {
@@ -61,9 +66,11 @@ public class RapidAPIService {
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
+                    request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Tiktok response successfully", statsJson[0], request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Tiktok response successfully", statsJson[0].toMap(),
+                request.getRequestURI());
     }
 
     private String getChannelId(String channelName) throws IOException {
@@ -105,9 +112,17 @@ public class RapidAPIService {
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
+                    request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully", statsJson[0].getString("subscriber_count"), request.getRequestURI());
+        String subcriber = statsJson[0].getString("subscriber_count").replace("subscribers", "").trim();
+        if (subcriber.endsWith("K")) {
+            subcriber = subcriber.replace("K", "000");
+        } else if (subcriber.endsWith("M")) {
+            subcriber = subcriber.replace("K", "0000");
+        }
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("subcriber_count", subcriber),
+                request.getRequestURI());
     }
 
     public ResponseEntity<?> getVideoDetailsFromYoutube(String videoId, HttpServletRequest request) {
@@ -128,9 +143,11 @@ public class RapidAPIService {
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
+                    request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully", statsJson[0], request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", statsJson[0].toMap(),
+                request.getRequestURI());
     }
 
 }
