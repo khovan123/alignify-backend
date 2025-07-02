@@ -173,9 +173,13 @@ public class RapidAPIService {
             return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());
         }
+        // return ApiResponse.sendSuccess(200, "Youtube response successfully",
+        // Map.of("followers", statsJson[0].getInt("followers")),
+        // request.getRequestURI());
         return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                Map.of("followers", statsJson[0].getString("followers")),
+                statsJson[0].getJSONObject("followers").toMap(),
                 request.getRequestURI());
+
     }
 
     public ResponseEntity<?> getPostDetailsFromFacebook(String postId, HttpServletRequest request) {
@@ -230,7 +234,7 @@ public class RapidAPIService {
                     request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                Map.of("followers", statsJson[0].getString("follower_count")),
+                Map.of("followers", statsJson[0].getInt("follower_count")),
                 request.getRequestURI());
     }
 
