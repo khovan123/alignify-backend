@@ -119,7 +119,7 @@ public class RapidAPIService {
         if (subcriber.endsWith("K")) {
             subcriber = subcriber.replace("K", "000");
         } else if (subcriber.endsWith("M")) {
-            subcriber = subcriber.replace("K", "0000");
+            subcriber = subcriber.replace("M", "000000");
         }
         return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("subcriber_count", subcriber),
                 request.getRequestURI());
