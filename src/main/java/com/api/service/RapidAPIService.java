@@ -115,7 +115,8 @@ public class RapidAPIService {
             return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());
         }
-        String subcriber = statsJson[0].getString("subscriber_count").replace("subscribers", "").trim();
+        String subcriber = statsJson[0].getString("subscriber_count").replace("subscribers", "").replace(".", "")
+                .trim();
         if (subcriber.endsWith("K")) {
             subcriber = subcriber.replace("K", "000");
         } else if (subcriber.endsWith("M")) {
