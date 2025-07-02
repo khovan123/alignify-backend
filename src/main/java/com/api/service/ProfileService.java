@@ -130,6 +130,29 @@ public class ProfileService {
         return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
     }
 
+    public ResponseEntity<?> getUserByCategory(String roleId, String categoryId, int pageNumber, int pageSize, HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        if (roleId.equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Page<Influencer> influencers = influencerRepository.findByCategoryIdsInOrderByRatingDesc(categoryId, pageable);
+            for (Influencer influencer : influencers.getContent()) {
+                User user = userRepository.findById(influencer.getUserId()).get();
+                InfluencerProfileResponse influencerProfileReponse = new InfluencerProfileResponse(user, influencer,
+                        categoryRepository);
+                return ApiResponse.sendSuccess(200, "Response successfully", influencerProfileReponse,
+                        request.getRequestURI());
+            }
+
+        } else if (roleId.equals(EnvConfig.BRAND_ROLE_ID)) {
+            Page<Brand> brands = brandRepository.findByCategoryIdsInOrderByTotalCampaignDesc(categoryId, pageable);
+            for (Brand brand : brands.getContent()) {
+                User user = userRepository.findById(brand.getUserId()).get();
+                BrandProfileResponse brandProfileResponse = new BrandProfileResponse(user, brand, categoryRepository);
+                return ApiResponse.sendSuccess(200, "Response successfully", brandProfileResponse, request.getRequestURI());
+            }
+        }
+        return ApiResponse.sendError(400, "Don't have user exist", request.getRequestURI());
+    }
+
     public int getCompleteCampaign(String influencerId) {
         List<Application> applications = applicationRepository.findAllByInfluencerIdAndStatus(influencerId, "ACCEPTED");
         List<String> appliedCampaignIds = applications.stream()

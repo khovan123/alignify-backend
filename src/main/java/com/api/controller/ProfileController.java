@@ -71,6 +71,16 @@ public class ProfileController {
         return profileService.getTopInfluencers(request);
     }
 
+    @GetMapping("/filterByCategory/{categoryId}")
+    public ResponseEntity<?> getUserByCategoryId(
+            @PathVariable("categoryId") String categoryId,
+            @RequestParam String roleId,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        return profileService.getUserByCategory(roleId, categoryId, pageNumber, pageSize, request);
+    }
+
     @PostMapping("/brands/search")
     public ResponseEntity<?> searchBrand(
             @RequestParam("term") String term,
