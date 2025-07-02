@@ -115,13 +115,18 @@ public class RapidAPIService {
             return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());
         }
-        String subcriber = statsJson[0].getString("subscriber_count").replace("subscribers", "").replace(".", "")
-                .trim();
+        String subcriber = statsJson[0].getString("subscriber_count").replace("subscribers", "").trim();
+        double value = 0;
         if (subcriber.endsWith("K")) {
-            subcriber = subcriber.replace("K", "000");
+            value = Double.parseDouble(subcriber.replace("K", ""));
+            value *= 1_000;
         } else if (subcriber.endsWith("M")) {
-            subcriber = subcriber.replace("M", "000000");
+            value = Double.parseDouble(subcriber.replace("M", ""));
+            value *= 1_000_000;
+        } else {
+            value = Double.parseDouble(subcriber.replace(".", ""));
         }
+        subcriber = String.valueOf((int) value);
         return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("subcriber_count", subcriber),
                 request.getRequestURI());
     }
