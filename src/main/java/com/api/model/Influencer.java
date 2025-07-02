@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.*;
-import org.springframework.data.annotation.CreatedDate;
 
 @Document(collection = "influencers")
 public class Influencer {
@@ -15,7 +14,7 @@ public class Influencer {
     private ZonedDateTime DoB;
     private String gender;
     private String bio;
-    private Map<String, String> socialMediaLinks;
+    private List<SocialMedia> socialMediaLinks;
     private double rating;
     private List<String> categoryIds;
     private int follower;
@@ -28,12 +27,11 @@ public class Influencer {
         this.isPublic = true;
         this.gender = "NONE";
         this.categoryIds = new ArrayList<>();
-        this.socialMediaLinks = new HashMap<>();
+        this.socialMediaLinks = new ArrayList<>();
         this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Influencer(String userId, ZonedDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks,
-            double rating, List<String> categoryIds, int follower, boolean isPublic, ZonedDateTime createdAt) {
+    public Influencer(String userId, ZonedDateTime DoB, String gender, String bio, List<SocialMedia> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, ZonedDateTime createdAt) {
         this.userId = userId;
         this.DoB = DoB;
         this.gender = gender;
@@ -78,14 +76,6 @@ public class Influencer {
         this.bio = bio;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
-        return socialMediaLinks;
-    }
-
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
-        this.socialMediaLinks = socialMediaLinks;
-    }
-
     public double getRating() {
         return rating;
     }
@@ -100,6 +90,14 @@ public class Influencer {
 
     public void setCategoryIds(List<String> categoryIds) {
         this.categoryIds = categoryIds;
+    }
+
+    public List<SocialMedia> getSocialMediaLinks() {
+        return socialMediaLinks;
+    }
+
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
+        this.socialMediaLinks = socialMediaLinks;
     }
 
     public int getFollower() {

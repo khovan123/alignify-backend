@@ -43,9 +43,9 @@ public class MongoConfig {
   @PostConstruct
   public void init() {
     MongoDatabase db = mongoClient.getDatabase(databaseName);
-    // this.create_usersCollection(db);
-    // this.create_influencersCollection(db);
-    // this.create_brandsCollection(db);
+//     this.create_usersCollection(db);
+    //  this.create_influencersCollection(db);
+    //  this.create_brandsCollection(db);
     // this.create_rolesCollection(db);
     // this.create_categoriesCollection(db);
     // this.create_adminsCollection(db);
@@ -136,9 +136,22 @@ public class MongoConfig {
                   "bsonType": "string"
                 },
                 "socialMediaLinks": {
-                  "bsonType": "object",
-                  "additionalProperties": {
-                    "bsonType": "string"
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "object",
+                    "required": ["platform","url", "follower"],
+                    "properties": {
+                      "platform":{
+                        "bsonType": "string",
+                        "enum":["FACEBOOK", "TIKTOK", "YOUTUBE", "INSTAGRAM"]
+                        },
+                      "url": {
+                        "bsonType": "string"
+                        },
+                      "follower": {
+                        "bsonType": "int"
+                      }
+                    }
                   }
                 },
                 "rating": {
@@ -267,15 +280,36 @@ public class MongoConfig {
                       "bsonType": "string",
                     },
                     "contacts": {
-                      "bsonType": "object",
-                      "additionalProperties": {
-                        "bsonType": "string"
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "object",
+                        "properties":{
+                          "contact_type":{
+                            "bsonType": "string"
+                          },
+                          "contact_infor":{
+                            "bsonType": "string"
+                          }
+                        }
                       }
                     },
                     "socialMediaLinks": {
-                      "bsonType": "object",
-                      "additionalProperties": {
-                        "bsonType": "string"
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "object",
+                        "required": ["platform","url", "follower"],
+                        "properties": {
+                          "platform":{
+                            "bsonType": "string"
+                            "enum":["FACEBOOK", "TIKTOK", "YOUTUBE", "INSTAGRAM"]
+                          },
+                          "url": {
+                            "bsonType": "string"
+                            },
+                          "follower": {
+                            "bsonType": "int"
+                          }
+                        }
                       }
                     },
                     "categoryIds": {

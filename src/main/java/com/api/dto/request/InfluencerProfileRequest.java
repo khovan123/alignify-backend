@@ -1,5 +1,6 @@
 package com.api.dto.request;
 
+import com.api.model.SocialMedia;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class InfluencerProfileRequest {
     @JsonProperty("bio")
     private String bio;
     @JsonProperty("socialMediaLinks")
-    private Map<String, String> socialMediaLinks;
+    private List<SocialMedia> socialMediaLinks;
     @JsonProperty("categoryIds")
     private List<String> categoryIds;
     @JsonProperty("isPublic")
@@ -25,7 +26,7 @@ public class InfluencerProfileRequest {
 
     public InfluencerProfileRequest(@JsonProperty("name") String name, @JsonProperty("DoB") ZonedDateTime DoB,
             @JsonProperty("gender") String gender, @JsonProperty("bio") String bio,
-            @JsonProperty("socialMediaLinks") Map<String, String> socialMediaLinks,
+            @JsonProperty("socialMediaLinks") List<SocialMedia> socialMediaLinks,
             @JsonProperty("categoryIds") List<String> categoryIds, @JsonProperty("isPublic") Boolean isPublic) {
         this.name = name;
         this.DoB = DoB;
@@ -79,11 +80,11 @@ public class InfluencerProfileRequest {
         this.bio = bio;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
+    public List<SocialMedia> getSocialMediaLinks() {
         return socialMediaLinks;
     }
 
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
         this.socialMediaLinks = socialMediaLinks;
     }
 

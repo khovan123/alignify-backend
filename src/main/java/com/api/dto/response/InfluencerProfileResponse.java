@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.api.model.Category;
 import com.api.model.Influencer;
+import com.api.model.SocialMedia;
 import com.api.model.User;
 import com.api.repository.CategoryRepository;
 
@@ -21,7 +22,7 @@ public class InfluencerProfileResponse {
     private ZonedDateTime DoB;
     private String gender;
     private String bio;
-    private Map<String, String> socialMediaLinks;
+    private List<SocialMedia> socialMediaLinks;
     private double rating;
     private List<Category> categories;
     private int follower;
@@ -152,11 +153,11 @@ public class InfluencerProfileResponse {
         this.bio = bio;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
+    public List<SocialMedia> getSocialMediaLinks() {
         return socialMediaLinks;
     }
 
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
         this.socialMediaLinks = socialMediaLinks;
     }
 

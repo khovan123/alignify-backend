@@ -196,7 +196,7 @@ public class ProfileService {
             if (newInfluencer.getSocialMediaLinks() != null && !newInfluencer.getSocialMediaLinks().isEmpty()) {
                 influencer.setSocialMediaLinks(newInfluencer.getSocialMediaLinks());
             } else {
-                influencer.setSocialMediaLinks(new HashMap<>());
+                influencer.setSocialMediaLinks(new ArrayList<>());
             }
             userRepository.save(user);
             influencerRepository.save(influencer);
@@ -218,12 +218,12 @@ public class ProfileService {
             if (newBrand.getContacts() != null && !newBrand.getContacts().isEmpty()) {
                 brand.setContacts(newBrand.getContacts());
             } else {
-                brand.setContacts(new HashMap<>());
+                brand.setContacts(new ArrayList<>());
             }
             if (newBrand.getSocialMediaLinks() != null && !newBrand.getSocialMediaLinks().isEmpty()) {
                 brand.setSocialMediaLinks(newBrand.getSocialMediaLinks());
             } else {
-                brand.setSocialMediaLinks(new HashMap<>());
+                brand.setSocialMediaLinks(new ArrayList<>());
             }
             if (newBrand.getEstablishDate() != null) {
                 brand.setEstablishDate(newBrand.getEstablishDate());

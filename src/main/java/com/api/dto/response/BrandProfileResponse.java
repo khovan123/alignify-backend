@@ -2,6 +2,8 @@ package com.api.dto.response;
 
 import com.api.model.Brand;
 import com.api.model.Category;
+import com.api.model.Contact;
+import com.api.model.SocialMedia;
 import com.api.model.User;
 import com.api.repository.CategoryRepository;
 import java.time.ZonedDateTime;
@@ -19,8 +21,8 @@ public class BrandProfileResponse {
     private String backgroundUrl;
     private String bio;
     private List<Category> categories;
-    private Map<String, String> contacts;
-    private Map<String, String> socialMediaLinks;
+    private List<Contact> contacts;
+    private List<SocialMedia> socialMediaLinks;
     private ZonedDateTime establishDate;
     private int totalCampaign;
 
@@ -113,19 +115,19 @@ public class BrandProfileResponse {
         this.categories = categories;
     }
 
-    public Map<String, String> getContacts() {
+    public List<Contact> getContacts() {
         return contacts;
     }
 
-    public void setContacts(Map<String, String> contacts) {
+    public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
+    public List<SocialMedia> getSocialMediaLinks() {
         return socialMediaLinks;
     }
 
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
         this.socialMediaLinks = socialMediaLinks;
     }
 
