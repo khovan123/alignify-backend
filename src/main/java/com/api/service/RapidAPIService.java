@@ -211,16 +211,15 @@ public class RapidAPIService {
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
             client.prepare("GET",
-                    "https://instagram-social-api.p.rapidapi.com/v1/info?username_or_id_or_url=" + userName)
-                    .setHeader("x-rapidapi-key",
-                            rapidapikey)
-                    .setHeader("x-rapidapi-host", "instagram-social-api.p.rapidapi.com")
+                    "https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/profile_by_username?username=instagram")
+                    .setHeader("x-rapidapi-key", rapidapikey)
+                    .setHeader("x-rapidapi-host", "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com")
                     .execute()
                     .toCompletableFuture()
                     .thenAccept(response -> {
                         String body = response.getResponseBody();
                         JSONObject json = new JSONObject(body);
-                        statsJson[0] = json.getJSONObject("data");
+                        statsJson[0] = json;
                     })
                     .join();
 
@@ -229,12 +228,35 @@ public class RapidAPIService {
             return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());
         }
-        if (statsJson[0].getInt("account_type") != 3) {
-            return ApiResponse.sendError(403, "Please change privacy of account to public",
+        return ApiResponse.sendSuccess(200, "Youtube response successfully",
+                Map.of("followers", statsJson[0].getString("follower_count")),
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getInforDetailsFromInstagram(String code_or_id_or_url, HttpServletRequest request) {
+        final JSONObject[] statsJson = new JSONObject[1];
+        try {
+            AsyncHttpClient client = new DefaultAsyncHttpClient();
+            client.prepare("GET",
+                    "https://instagram-social-api.p.rapidapi.com/v1/post_info?code_or_id_or_url=" + code_or_id_or_url)
+                    .setHeader("x-rapidapi-key", rapidapikey)
+                    .setHeader("x-rapidapi-host", "instagram-social-api.p.rapidapi.com")
+                    .execute()
+                    .toCompletableFuture()
+                    .thenAccept(response -> {
+                        String body = response.getResponseBody();
+                        JSONObject json = new JSONObject(body);
+                        statsJson[0] = json.getJSONObject("data").getJSONObject("metrics");
+                    })
+                    .join();
+
+            client.close();
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                Map.of("followers", statsJson[0].getString("follower_count")),
+                statsJson[0].toMap(),
                 request.getRequestURI());
     }
 
