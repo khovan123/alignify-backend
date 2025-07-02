@@ -211,7 +211,8 @@ public class RapidAPIService {
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
             client.prepare("GET",
-                    "https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/profile_by_username?username=instagram")
+                    "https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/profile_by_username?username="
+                            + userName)
                     .setHeader("x-rapidapi-key", rapidapikey)
                     .setHeader("x-rapidapi-host", "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com")
                     .execute()
