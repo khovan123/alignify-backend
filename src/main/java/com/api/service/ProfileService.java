@@ -172,7 +172,7 @@ public class ProfileService {
             }
             if (newInfluencer.getBio() != null) {
                 influencer.setBio(newInfluencer.getBio());
-            }else{
+            } else {
                 influencer.setBio("");
             }
 
@@ -212,7 +212,7 @@ public class ProfileService {
             }
             if (newBrand.getBio() != null) {
                 brand.setBio(newBrand.getBio());
-            }else{
+            } else {
                 brand.setBio("");
             }
             if (newBrand.getContacts() != null && !newBrand.getContacts().isEmpty()) {

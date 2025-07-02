@@ -29,7 +29,9 @@ public class Brand {
         this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Brand(String userId, String bio, List<String> categoryIds, List<Contact> contacts, List<SocialMedia> socialMediaLinks, ZonedDateTime establishDate, int totalCampaign, ZonedDateTime createdAt) {
+    public Brand(String userId, String bio, List<String> categoryIds, List<Contact> contacts,
+            List<SocialMedia> socialMediaLinks, ZonedDateTime establishDate, int totalCampaign,
+            ZonedDateTime createdAt) {
         this.userId = userId;
         this.bio = bio;
         this.categoryIds = categoryIds;

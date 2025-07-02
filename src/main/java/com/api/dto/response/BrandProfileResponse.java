@@ -1,15 +1,15 @@
 package com.api.dto.response;
 
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
+
 import com.api.model.Brand;
 import com.api.model.Category;
 import com.api.model.Contact;
 import com.api.model.SocialMedia;
 import com.api.model.User;
 import com.api.repository.CategoryRepository;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 public class BrandProfileResponse {
 

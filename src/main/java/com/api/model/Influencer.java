@@ -2,9 +2,11 @@ package com.api.model;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.*;
 
 @Document(collection = "influencers")
 public class Influencer {
@@ -31,7 +33,8 @@ public class Influencer {
         this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Influencer(String userId, ZonedDateTime DoB, String gender, String bio, List<SocialMedia> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, ZonedDateTime createdAt) {
+    public Influencer(String userId, ZonedDateTime DoB, String gender, String bio, List<SocialMedia> socialMediaLinks,
+            double rating, List<String> categoryIds, int follower, boolean isPublic, ZonedDateTime createdAt) {
         this.userId = userId;
         this.DoB = DoB;
         this.gender = gender;

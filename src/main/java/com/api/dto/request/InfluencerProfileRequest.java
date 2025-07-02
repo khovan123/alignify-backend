@@ -1,10 +1,9 @@
 package com.api.dto.request;
 
-import com.api.model.SocialMedia;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 
+import com.api.model.SocialMedia;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InfluencerProfileRequest {

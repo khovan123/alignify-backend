@@ -3,7 +3,6 @@ package com.api.dto.response;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import com.api.model.Category;
 import com.api.model.Influencer;
