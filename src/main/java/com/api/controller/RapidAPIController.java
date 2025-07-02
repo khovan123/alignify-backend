@@ -59,14 +59,14 @@ public class RapidAPIController {
         return rapidAPIService.getPostDetailsFromFacebook(postId, request);
     }
 
-    @GetMapping("/instagram/user/${userName}")
+    @GetMapping("/instagram/user/{userName}")
     public ResponseEntity<?> getUserStatsFromInstagram(
             @PathVariable("userName") String userName,
             HttpServletRequest request) {
         return rapidAPIService.getStatsUserFromInstagram(userName, request);
     }
 
-    @GetMapping("/instagram/post_or_reel_or_stories_or_TV_post/${code_or_id_or_url}")
+    @GetMapping("/instagram/post_or_reel_or_stories_or_TV_post/{code_or_id_or_url}")
     public ResponseEntity<?> getInforDetailsFromInstagram(
             @PathVariable("code_or_id_or_url") String code_or_id_or_url,
             HttpServletRequest request) {
