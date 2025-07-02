@@ -1,6 +1,7 @@
 package com.api.service;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.api.dto.ApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 @Service
 public class RapidAPIService {
@@ -147,6 +147,94 @@ public class RapidAPIService {
                     request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Youtube response successfully", statsJson[0].toMap(),
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getStatsPageFromFacebook(String pageName, HttpServletRequest request) {
+        final JSONObject[] statsJson = new JSONObject[1];
+        try {
+            AsyncHttpClient client = new DefaultAsyncHttpClient();
+            client.prepare("GET",
+                    "https://facebook-scraper3.p.rapidapi.com/page/details?url=https%3A%2F%2Fwww.facebook.com%2F"
+                            + pageName)
+                    .setHeader("x-rapidapi-key", rapidapikey)
+                    .setHeader("x-rapidapi-host", "facebook-scraper3.p.rapidapi.com")
+                    .execute()
+                    .toCompletableFuture()
+                    .thenAccept(response -> {
+                        String body = response.getResponseBody();
+                        JSONObject json = new JSONObject(body);
+                        statsJson[0] = json.getJSONObject("results");
+                    })
+                    .join();
+
+            client.close();
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
+                    request.getRequestURI());
+        }
+        return ApiResponse.sendSuccess(200, "Youtube response successfully",
+                Map.of("followers", statsJson[0].getString("followers")),
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getPostDetailsFromFacebook(String postId, HttpServletRequest request) {
+        final JSONObject[] statsJson = new JSONObject[1];
+        try {
+            AsyncHttpClient client = new DefaultAsyncHttpClient();
+            client.prepare("GET",
+                    "https://facebook-scraper3.p.rapidapi.com/post?post_id=" + postId)
+                    .setHeader("x-rapidapi-key", rapidapikey)
+                    .setHeader("x-rapidapi-host", "facebook-scraper3.p.rapidapi.com")
+                    .execute()
+                    .toCompletableFuture()
+                    .thenAccept(response -> {
+                        String body = response.getResponseBody();
+                        JSONObject json = new JSONObject(body);
+                        statsJson[0] = json.getJSONObject("results");
+                    })
+                    .join();
+
+            client.close();
+            client.close();
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
+                    request.getRequestURI());
+        }
+        return ApiResponse.sendSuccess(200, "Youtube response successfully",
+                statsJson[0].toMap(),
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getStatsUserFromInstagram(String userName, HttpServletRequest request) {
+        final JSONObject[] statsJson = new JSONObject[1];
+        try {
+            AsyncHttpClient client = new DefaultAsyncHttpClient();
+            client.prepare("GET",
+                    "https://instagram-social-api.p.rapidapi.com/v1/info?username_or_id_or_url=" + userName)
+                    .setHeader("x-rapidapi-key",
+                            rapidapikey)
+                    .setHeader("x-rapidapi-host", "instagram-social-api.p.rapidapi.com")
+                    .execute()
+                    .toCompletableFuture()
+                    .thenAccept(response -> {
+                        String body = response.getResponseBody();
+                        JSONObject json = new JSONObject(body);
+                        statsJson[0] = json.getJSONObject("data");
+                    })
+                    .join();
+
+            client.close();
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
+                    request.getRequestURI());
+        }
+        if (statsJson[0].getInt("account_type") != 3) {
+            return ApiResponse.sendError(403, "Please change privacy of account to public",
+                    request.getRequestURI());
+        }
+        return ApiResponse.sendSuccess(200, "Youtube response successfully",
+                Map.of("followers", statsJson[0].getString("follower_count")),
                 request.getRequestURI());
     }
 
