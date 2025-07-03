@@ -19,6 +19,7 @@ import com.api.dto.ApiResponse;
 import com.api.dto.request.CampaignRequirementRequest;
 import com.api.model.CampaignRequirement;
 import com.api.model.CampaignTracking;
+import com.api.model.PlatformRequirementTracking;
 import com.api.repository.CampaignTrackingRepository;
 import com.api.service.FileStorageService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -55,44 +56,54 @@ public class CampaignTrackingController {
         return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackingOpt.get(), request.getRequestURI());
     }
 
-//    --update thêm file ảnh--
-//    @PostMapping("/requirements")
-//    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, #trackingId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId, 'PARTICIPATING',authentication.principal)")
-//    public ResponseEntity<?> addContentRequirement(
-//            @PathVariable("campaignId") String campaignId,
-//            @PathVariable("trackingId") String trackingId,
-//            @RequestBody Map<String, List<CampaignRequirementRequest>> requirementsMap,
-//            HttpServletRequest request) {
-//        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
-//                .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
-//        if (!campaignTrackingOpt.isPresent()) {
-//            return ApiResponse.sendError(404, "Id: " + trackingId + " not found!", request.getRequestURI());
-//        }
-//        CampaignTracking tracking = campaignTrackingOpt.get();
-//        Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTracking();
-//        for (Map.Entry<String, List<CampaignRequirementRequest>> entry : requirementsMap.entrySet()) {
-//            String type = entry.getKey();
-//            List<CampaignRequirementRequest> contentRequests = entry.getValue();
-//            List<CampaignRequirement> requirements = trackingMap.get(type);
-//            if (requirements == null) {
-//                return ApiResponse.sendError(400, "No requirements found for type: " + type, request.getRequestURI());
-//            }
-//            for (CampaignRequirementRequest contentRequest : contentRequests) {
-//                CampaignRequirement content = new CampaignRequirement(
-//                        contentRequest.getIndex(),
-//                        contentRequest.getImageUrl(),
-//                        contentRequest.getPostUrl());
-//                if (content.getIndex() < 0 || content.getIndex() >= requirements.size()) {
-//                    return ApiResponse.sendError(400, "Invalid index for type: " + type, request.getRequestURI());
-//                }
-//                requirements.remove(content.getIndex());
-//                requirements.add(content.getIndex(), content);
-//            }
-//        }
-//        CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
-//        return ApiResponse.sendSuccess(200, "Response successfully", updatedTracking.getCampaignRequirementTracking(),
-//                request.getRequestURI());
-//    }
+    // --update thêm file ảnh--
+    // @PostMapping("/requirements")
+    // @PreAuthorize("hasRole('ROLE_INFLUENCER') and
+    // @securityService.isJoinedCampaignTracking(#campaignId, #trackingId,
+    // authentication.principal) and
+    // @securityService.checkCampaignStatus(#campaignId,
+    // 'PARTICIPATING',authentication.principal)")
+    // public ResponseEntity<?> addContentRequirement(
+    // @PathVariable("campaignId") String campaignId,
+    // @PathVariable("trackingId") String trackingId,
+    // @RequestBody Map<String, List<CampaignRequirementRequest>> requirementsMap,
+    // HttpServletRequest request) {
+    // Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
+    // .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
+    // if (!campaignTrackingOpt.isPresent()) {
+    // return ApiResponse.sendError(404, "Id: " + trackingId + " not found!",
+    // request.getRequestURI());
+    // }
+    // CampaignTracking tracking = campaignTrackingOpt.get();
+    // Map<String, List<CampaignRequirement>> trackingMap =
+    // tracking.getCampaignRequirementTracking();
+    // for (Map.Entry<String, List<CampaignRequirementRequest>> entry :
+    // requirementsMap.entrySet()) {
+    // String type = entry.getKey();
+    // List<CampaignRequirementRequest> contentRequests = entry.getValue();
+    // List<CampaignRequirement> requirements = trackingMap.get(type);
+    // if (requirements == null) {
+    // return ApiResponse.sendError(400, "No requirements found for type: " + type,
+    // request.getRequestURI());
+    // }
+    // for (CampaignRequirementRequest contentRequest : contentRequests) {
+    // CampaignRequirement content = new CampaignRequirement(
+    // contentRequest.getIndex(),
+    // contentRequest.getImageUrl(),
+    // contentRequest.getPostUrl());
+    // if (content.getIndex() < 0 || content.getIndex() >= requirements.size()) {
+    // return ApiResponse.sendError(400, "Invalid index for type: " + type,
+    // request.getRequestURI());
+    // }
+    // requirements.remove(content.getIndex());
+    // requirements.add(content.getIndex(), content);
+    // }
+    // }
+    // CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
+    // return ApiResponse.sendSuccess(200, "Response successfully",
+    // updatedTracking.getCampaignRequirementTracking(),
+    // request.getRequestURI());
+    // }
     @PostMapping(value = "/requirements", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, #trackingId, authentication.principal)")
     public ResponseEntity<?> addContentRequirement(
@@ -107,15 +118,15 @@ public class CampaignTrackingController {
             Map<String, List<CampaignRequirementRequest>> requirementsMap = objectMapper.readValue(
                     requirementsJson,
                     new TypeReference<HashMap<String, List<CampaignRequirementRequest>>>() {
-            }
-            );
+                    });
             if (requirementsMap == null || requirementsMap.isEmpty()) {
                 return ApiResponse.sendError(400, "Requirements cannot be empty", request.getRequestURI());
             }
             // Validate images count
             int totalRequests = requirementsMap.values().stream().mapToInt(List::size).sum();
             if (images.size() != totalRequests) {
-                return ApiResponse.sendError(400, "Number of images does not match requirements", request.getRequestURI());
+                return ApiResponse.sendError(400, "Number of images does not match requirements",
+                        request.getRequestURI());
             }
 
             // Fetch CampaignTracking
@@ -125,7 +136,7 @@ public class CampaignTrackingController {
                 return ApiResponse.sendError(404, "Tracking ID: " + trackingId + " not found", request.getRequestURI());
             }
             CampaignTracking tracking = campaignTrackingOpt.get();
-            Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTrackings();
+            List<PlatformRequirementTracking> platformRequirementTracking = tracking.getPlatformRequirementTracking();
 
             // Process each requirement type
             int imageIndex = 0;
@@ -134,7 +145,8 @@ public class CampaignTrackingController {
                 List<CampaignRequirementRequest> contentRequests = entry.getValue();
                 List<CampaignRequirement> requirements = trackingMap.get(type);
                 if (requirements == null) {
-                    return ApiResponse.sendError(400, "No requirements found for type: " + type, request.getRequestURI());
+                    return ApiResponse.sendError(400, "No requirements found for type: " + type,
+                            request.getRequestURI());
                 }
 
                 for (CampaignRequirementRequest contentRequest : contentRequests) {
@@ -154,15 +166,15 @@ public class CampaignTrackingController {
                     try {
                         imageUrl = fileStorageService.storeFile(image);
                     } catch (Exception e) {
-                        return ApiResponse.sendError(400, "Failed to upload image: " + e.getMessage(), request.getRequestURI());
+                        return ApiResponse.sendError(400, "Failed to upload image: " + e.getMessage(),
+                                request.getRequestURI());
                     }
 
                     // Create CampaignRequirement
                     CampaignRequirement content = new CampaignRequirement(
                             contentRequest.getIndex(),
                             imageUrl,
-                            contentRequest.getPostUrl()
-                    );
+                            contentRequest.getPostUrl());
 
                     // Update requirements list
                     requirements.remove(content.getIndex());
@@ -172,7 +184,8 @@ public class CampaignTrackingController {
 
             // Save updated tracking
             CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
-            return ApiResponse.sendSuccess(200, "Response successfully", updatedTracking.getCampaignRequirementTrackings(),
+            return ApiResponse.sendSuccess(200, "Response successfully",
+                    updatedTracking.getCampaignRequirementTrackings(),
                     request.getRequestURI());
 
         } catch (Exception e) {

@@ -79,7 +79,6 @@ public class CampaignService {
         if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
             ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
         }
-        validateCampaignRequirements(campaign.getCampaignRequirements());
         String imageUrl;
         try {
             imageUrl = fileStorageService.storeFile(file);
@@ -110,18 +109,8 @@ public class CampaignService {
                 request.getRequestURI());
     }
 
-    private void validateCampaignRequirements(Map<String, Integer> campaignRequirements) {
-        if (campaignRequirements != null) {
-            for (Map.Entry<String, Integer> entry : campaignRequirements.entrySet()) {
-                if (entry.getValue() == null || entry.getValue() < 0) {
-                    throw new IllegalArgumentException("Campaign requirements must be non-negative integers");
-                }
-            }
-        }
-    }
-    
     public ResponseEntity<?> getHotCampaignsByApplication(
-             int pageNumber,
+            int pageNumber,
             int pageSize,
             String categoryIds,
             HttpServletRequest request) {
@@ -145,7 +134,8 @@ public class CampaignService {
                 .map(campaign -> {
                     User user = brandMap.get(campaign.getBrandId());
                     if (user == null) {
-                        throw new IllegalArgumentException("Brand user not found for campaign " + campaign.getCampaignId());
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
                     }
                     return new CampaignResponse(user, campaign, categoryRepo);
                 })
@@ -159,8 +149,9 @@ public class CampaignService {
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
+
     public ResponseEntity<?> getCampaignsByCategoryIds(
-             int pageNumber,
+            int pageNumber,
             int pageSize,
             String categoryIds,
             HttpServletRequest request) {
@@ -184,7 +175,8 @@ public class CampaignService {
                 .map(campaign -> {
                     User user = brandMap.get(campaign.getBrandId());
                     if (user == null) {
-                        throw new IllegalArgumentException("Brand user not found for campaign " + campaign.getCampaignId());
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
                     }
                     return new CampaignResponse(user, campaign, categoryRepo);
                 })
