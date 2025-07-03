@@ -198,6 +198,12 @@ public class ProfileService {
             } else {
                 influencer.setSocialMediaLinks(new ArrayList<>());
             }
+            if (!influencer.getSocialMediaLinks().isEmpty()) {
+                influencer.setFollower(0);
+                influencer.getSocialMediaLinks().forEach(social -> {
+                    influencer.setFollower(influencer.getFollower() + social.getFollower());
+                });
+            }
             userRepository.save(user);
             influencerRepository.save(influencer);
             InfluencerProfileResponse influencerProfile = new InfluencerProfileResponse(user, influencer,
