@@ -129,6 +129,35 @@ public class ProfileService {
         }
         return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
     }
+    
+   public ResponseEntity<?> getUserByCategory(String roleId, String categoryId, int pageNumber, int pageSize, HttpServletRequest request) {
+    PageRequest page = PageRequest.of(pageNumber, pageSize);
+
+    if (roleId.equalsIgnoreCase(EnvConfig.BRAND_ROLE_ID)) {
+        Page<Brand> brands = brandRepository.findByCategoryIdsInOrderByTotalCampaignDesc(categoryId, page);
+        List<BrandProfileResponse> responses = new ArrayList<>();
+
+        for (Brand brand : brands.getContent()) {
+            Optional<User> user = userRepository.findById(brand.getUserId());
+            user.ifPresent(u -> responses.add(new BrandProfileResponse(u, brand, categoryRepository)));
+        }
+
+        return ApiResponse.sendSuccess(200, "Response successfully", responses, request.getRequestURI());
+
+    } else if (roleId.equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID)) {
+        Page<Influencer> influencers = influencerRepository.findByCategoryIdsInOrderByRatingDesc(categoryId, page);
+        List<InfluencerProfileResponse> responses = new ArrayList<>();
+
+        for (Influencer influencer : influencers.getContent()) {
+            Optional<User> user = userRepository.findById(influencer.getUserId());
+            user.ifPresent(u -> responses.add(new InfluencerProfileResponse(u, influencer, categoryRepository)));
+        }
+
+        return ApiResponse.sendSuccess(200, "Response successfully", responses, request.getRequestURI());
+    }
+
+    return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
+}
 
     public int getCompleteCampaign(String influencerId) {
         List<Application> applications = applicationRepository.findAllByInfluencerIdAndStatus(influencerId, "ACCEPTED");
