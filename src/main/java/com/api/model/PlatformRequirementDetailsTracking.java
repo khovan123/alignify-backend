@@ -55,4 +55,10 @@ public class PlatformRequirementDetailsTracking extends PlatformRequirementDetai
     this.uploadedAt = uploadedAt;
   }
 
+  public void setRequirementDetailsTracking(String postUrl) {
+    this.postUrl = postUrl;
+    this.status = "PENDING";
+    this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+  }
+
 }
