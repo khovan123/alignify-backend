@@ -4,7 +4,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,8 +26,8 @@ public class Campaign {
     private ZonedDateTime startAt;
     private String status;
     private int budget;
-    private Map<String, Integer> campaignRequirements;
-    private List<String> influencerRequirements;
+    private List<PlatformRequirement> campaignRequirements;
+    private List<InfluencerRequirement> influencerRequirements;
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
@@ -44,8 +43,9 @@ public class Campaign {
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
-            List<String> categoryIds, String status, int budget, Map<String, Integer> campaignRequirements,
-            List<String> influencerRequirements, int influencerCountExpected) {
+            List<String> categoryIds, String status, int budget,
+            List<PlatformRequirement> campaignRequirements,
+            List<InfluencerRequirement> influencerRequirements, int influencerCountExpected) {
         this.campaignName = campaignName;
         this.campaignId = campaignId;
         this.brandId = brandId;
@@ -62,8 +62,9 @@ public class Campaign {
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
             List<String> categoryIds,
-            ZonedDateTime createdAt, String status, int budget, Map<String, Integer> campaignRequirements,
-            List<String> influencerRequirements, int influencerCountExpected, int influencerCountCurrent,
+            ZonedDateTime createdAt, String status, int budget,
+            List<PlatformRequirement> campaignRequirements,
+            List<InfluencerRequirement> influencerRequirements, int influencerCountExpected, int influencerCountCurrent,
             int applicationTotal) {
         this.campaignId = campaignId;
         this.brandId = brandId;
@@ -83,7 +84,9 @@ public class Campaign {
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
             List<String> categoryIds, ZonedDateTime createdAt, ZonedDateTime dueAt, ZonedDateTime startAt,
-            String status, int budget, Map<String, Integer> campaignRequirements, List<String> influencerRequirements,
+            String status, int budget,
+            List<PlatformRequirement> campaignRequirements,
+            List<InfluencerRequirement> influencerRequirements,
             int influencerCountExpected, int influencerCountCurrent, int applicationTotal,
             List<String> appliedInfluencerIds) {
         this.campaignId = campaignId;
@@ -129,11 +132,11 @@ public class Campaign {
         this.startAt = startAt;
     }
 
-    public List<String> getInfluencerRequirements() {
+    public List<InfluencerRequirement> getInfluencerRequirements() {
         return influencerRequirements;
     }
 
-    public void setInfluencerRequirements(List<String> influencerRequirements) {
+    public void setInfluencerRequirements(List<InfluencerRequirement> influencerRequirements) {
         this.influencerRequirements = influencerRequirements;
     }
 
@@ -153,11 +156,11 @@ public class Campaign {
         this.budget = budget;
     }
 
-    public Map<String, Integer> getCampaignRequirements() {
+    public List<PlatformRequirement> getCampaignRequirements() {
         return campaignRequirements;
     }
 
-    public void setCampaignRequirements(Map<String, Integer> campaignRequirements) {
+    public void setCampaignRequirements(List<PlatformRequirement> campaignRequirements) {
         this.campaignRequirements = campaignRequirements;
     }
 

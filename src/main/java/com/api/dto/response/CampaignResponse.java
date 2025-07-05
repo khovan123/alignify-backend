@@ -3,10 +3,11 @@ package com.api.dto.response;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.api.model.Campaign;
 import com.api.model.Category;
+import com.api.model.InfluencerRequirement;
+import com.api.model.PlatformRequirement;
 import com.api.model.User;
 import com.api.repository.CategoryRepository;
 
@@ -25,8 +26,8 @@ public class CampaignResponse {
     private ZonedDateTime startAt;
     private String status;
     private long budget;
-    private Map<String, Integer> campaignRequirements;
-    private List<String> influencerRequirements;
+    private List<PlatformRequirement> campaignRequirements;
+    private List<InfluencerRequirement> influencerRequirements;
     private int influencerCountExpected;
     private int influencerCountCurrent;
     private int applicationTotal;
@@ -146,11 +147,11 @@ public class CampaignResponse {
         this.startAt = startAt;
     }
 
-    public List<String> getInfluencerRequirements() {
+    public List<InfluencerRequirement> getInfluencerRequirements() {
         return influencerRequirements;
     }
 
-    public void setInfluencerRequirements(List<String> influencerRequirements) {
+    public void setInfluencerRequirements(List<InfluencerRequirement> influencerRequirements) {
         this.influencerRequirements = influencerRequirements;
     }
 
@@ -170,11 +171,11 @@ public class CampaignResponse {
         this.budget = budget;
     }
 
-    public Map<String, Integer> getCampaignRequirements() {
+    public List<PlatformRequirement> getCampaignRequirements() {
         return campaignRequirements;
     }
 
-    public void setCampaignRequirements(Map<String, Integer> campaignRequirements) {
+    public void setCampaignRequirements(List<PlatformRequirement> campaignRequirements) {
         this.campaignRequirements = campaignRequirements;
     }
 

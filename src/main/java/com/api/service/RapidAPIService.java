@@ -116,11 +116,17 @@ public class RapidAPIService {
                     request.getRequestURI());
         }
         String subcriber = statsJson[0].getString("subscriber_count").replace("subscribers", "").trim();
+        double value = 0;
         if (subcriber.endsWith("K")) {
-            subcriber = subcriber.replace("K", "000");
+            value = Double.parseDouble(subcriber.replace("K", ""));
+            value *= 1_000;
         } else if (subcriber.endsWith("M")) {
-            subcriber = subcriber.replace("K", "0000");
+            value = Double.parseDouble(subcriber.replace("M", ""));
+            value *= 1_000_000;
+        } else {
+            value = Double.parseDouble(subcriber.replace(".", ""));
         }
+        subcriber = String.valueOf((int) value);
         return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("subcriber_count", subcriber),
                 request.getRequestURI());
     }
@@ -174,7 +180,7 @@ public class RapidAPIService {
                     request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                Map.of("followers", statsJson[0].getString("followers")),
+                Map.of("followers", statsJson[0].getInt("followers")),
                 request.getRequestURI());
     }
 
@@ -230,7 +236,7 @@ public class RapidAPIService {
                     request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                Map.of("followers", statsJson[0].getString("follower_count")),
+                Map.of("followers", statsJson[0].getInt("follower_count")),
                 request.getRequestURI());
     }
 
