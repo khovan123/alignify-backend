@@ -151,7 +151,7 @@ public class ContentPostingService {
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
+        responseData.put("post", dtoList);
         responseData.put("currentPage", posts.getNumber());
         responseData.put("totalPages", posts.getTotalPages());
         responseData.put("totalItems", posts.getTotalElements());
@@ -202,12 +202,7 @@ public class ContentPostingService {
         List<ContentPostingResponse> dtoList = postPage.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", postPage.getNumber());
-        responseData.put("totalPages", postPage.getTotalPages());
-        responseData.put("totalItems", postPage.getTotalElements());
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
     public ResponseEntity<?> updateContentPosting(String contentId, CustomUserDetails userDetails,
