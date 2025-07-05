@@ -21,6 +21,7 @@ import com.api.model.Category;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
 import com.api.model.User;
+import com.api.repository.ApplicationRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
 import com.api.repository.ContentPostingRepository;
@@ -52,6 +53,8 @@ public class ContentPostingService {
     private UserRepository userRepository;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, MultipartFile file,
             CustomUserDetails userDetails,
@@ -316,4 +319,24 @@ public class ContentPostingService {
         }
     }
 
+    public ResponseEntity<?> getInfluencerStatistics(CustomUserDetails userDetails) {
+        String influencerId = userDetails.getUserId();
+
+        // Đếm tổng số bài đăng
+        long totalPosts = contentPostingRepo.countByUserId(influencerId);
+
+        // Đếm tổng số đơn ứng tuyển và số đơn accepted
+        long totalApplications = applicationRepository.countByInfluencerId(influencerId);
+        long acceptedApplications = applicationRepository.countByInfluencerIdAndStatus(influencerId, "accepted");
+
+        double acceptedRate = totalApplications > 0 ? (double) acceptedApplications / totalApplications : 0.0;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalPosts", totalPosts);
+        result.put("totalApplications", totalApplications);
+        result.put("acceptedApplications", acceptedApplications);
+        result.put("acceptedRate", acceptedRate);
+
+        return ResponseEntity.ok(result);
+    }
 }

@@ -78,6 +78,12 @@ public class ContentPostingController {
         return contentPostingSer.getMe(userDetails, request, pageNumber, pageSize);
     }
 
+    @GetMapping("/me/statistics")
+    public ResponseEntity<?> getInfluencerStatistics(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return contentPostingSer.getInfluencerStatistics(userDetails);
+    }
+
     @PutMapping("/{contentId}")
     public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,

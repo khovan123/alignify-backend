@@ -21,8 +21,9 @@ public interface ContentPostingRepository extends MongoRepository<ContentPosting
 
     Page<ContentPosting> findByUserIdInAndIsPublicTrue(List<String> userIds, Pageable pageable);
     
-Page<ContentPosting> findByCategoryIdsInOrderByCreatedDateDesc(String category, Pageable pageable);
+    Page<ContentPosting> findByCategoryIdsInOrderByCreatedDateDesc(String category, Pageable pageable);
 
     boolean existsByContentId(String contentId);
-
+    
+    long countByUserId(String userId);
 }
