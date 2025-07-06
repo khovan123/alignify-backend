@@ -279,20 +279,20 @@ public class MongoConfig {
                     "bio": {
                       "bsonType": "string",
                     },
-                    "contacts": {
-                      "bsonType": "array",
-                      "items": {
-                        "bsonType": "object",
-                        "properties":{
-                          "contact_type":{
-                            "bsonType": "string"
+                   "contacts": {
+                            bsonType: 'array',
+                            items: {
+                              bsonType: 'object',
+                              properties: {
+                                contact_type: {
+                                  bsonType: 'string'
+                                },
+                                contact_infor: {
+                                  bsonType: 'string'
+                                }
+                              }
+                            }
                           },
-                          "contact_infor":{
-                            "bsonType": "string"
-                          }
-                        }
-                      }
-                    },
                     "socialMediaLinks": {
                       "bsonType": "array",
                       "items": {
