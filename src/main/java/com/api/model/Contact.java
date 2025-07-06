@@ -5,6 +5,9 @@ public class Contact {
     private String contact_type;
     private String contact_infor;
 
+    public Contact() {
+    }
+
     public Contact(String contact_type, String contact_infor) {
         this.contact_type = contact_type;
         this.contact_infor = contact_infor;
