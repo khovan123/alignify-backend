@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -340,8 +339,11 @@ public class CampaignService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> updateCampaign(String campaignId, CustomUserDetails userDetails,
+    public ResponseEntity<?> updateCampaign(
+            String campaignId,
+            CustomUserDetails userDetails,
             Campaign updatedCampaign,
+            MultipartFile image,
             HttpServletRequest request) {
 
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
@@ -364,9 +366,17 @@ public class CampaignService {
             if (updatedCampaign.getContent() != null) {
                 campaign.setContent(updatedCampaign.getContent());
             }
-            if (updatedCampaign.getImageUrl() != null) {
-                campaign.setImageUrl(updatedCampaign.getImageUrl());
-                chatRoom.setRoomAvatarUrl(updatedCampaign.getImageUrl());
+            String newImageUrl = null;
+            try {
+                if (image != null) {
+                    newImageUrl = fileStorageService.storeFile(image);
+                }
+            } catch (Exception e) {
+                return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
+            }
+            if (newImageUrl != null) {
+                campaign.setImageUrl(newImageUrl);
+                chatRoom.setRoomAvatarUrl(newImageUrl);
             }
             if (updatedCampaign.getCategoryIds() != null && !updatedCampaign.getCategoryIds().isEmpty()) {
                 List<Category> validCategories = categoryRepo.findAllByCategoryIdIn(updatedCampaign.getCategoryIds());
@@ -378,9 +388,6 @@ public class CampaignService {
                         .toList();
                 campaign.setCategoryIds(validCategoryIds);
             }
-            if (updatedCampaign.getStatus() != null) {
-                campaign.setStatus(updatedCampaign.getStatus());
-            }
             if (updatedCampaign.getBudget() > 0) {
                 campaign.setBudget(newBudget);
             }
@@ -390,6 +397,9 @@ public class CampaignService {
             if (updatedCampaign.getDueAt() != null) {
                 campaign.setDueAt(updatedCampaign.getDueAt());
             }
+            if (updatedCampaign.getInfluencerCountExpected() > 0) {
+                campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
+            }
             if (updatedCampaign.getCampaignRequirements() != null
                     && !updatedCampaign.getCampaignRequirements().isEmpty()) {
                 campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
@@ -397,14 +407,17 @@ public class CampaignService {
             if (updatedCampaign.getInfluencerRequirements() != null
                     && !updatedCampaign.getInfluencerRequirements().isEmpty()) {
                 campaign.setInfluencerRequirements(updatedCampaign.getInfluencerRequirements());
+            } else {
+                updatedCampaign.setInfluencerRequirements(new ArrayList<>());
             }
-            if (updatedCampaign.getInfluencerCountExpected() > 0) {
-                campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
-            }
-            campaign.setCreatedAt(ZonedDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
+            campaign.setApplicationTotal(0);
+            campaign.setAppliedInfluencerIds(new ArrayList<>());
+            campaign.setInfluencerCountCurrent(0);
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
-
+            chatMessageRepository.deleteAllByChatRoomId(campaignId);
+            applicationRepository.deleteAllByCampaignId(campaignId);
+            campaignTrackingRepository.deleteAllByCampaignId(campaignId);
             return ApiResponse.sendSuccess(200, "Campaign posting updated successfully",
                     new CampaignResponse(user.get(), campaign, categoryRepo),
                     request.getRequestURI());

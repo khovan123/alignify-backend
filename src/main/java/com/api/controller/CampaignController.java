@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.api.dto.request.StatusRequest;
-import com.api.model.Campaign;
 import com.api.security.CustomUserDetails;
 import com.api.service.CampaignService;
 
@@ -90,11 +89,14 @@ public class CampaignController {
 
     @PutMapping("/{campaignId}")
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
-    public ResponseEntity<?> updateCampaign(@PathVariable String campaignId,
+    public ResponseEntity<?> updateCampaign(
+            @PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody Campaign campaign,
+            @RequestPart("campaign") String obj,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             HttpServletRequest request) {
-        return campaignService.updateCampaign(campaignId, userDetails, campaign, request);
+        return campaignService.updateCampaign(campaignId, userDetails, campaignService.convertToCampaign(obj),
+                image, request);
     }
 
     @PutMapping("/{campaignId}/status")
