@@ -393,6 +393,7 @@ public class ApplicationService {
                         CampaignTracking campaignTracking = new CampaignTracking(applicationId,
                                         application.getCampaignId(),
                                         brandId, application.getInfluencerId(), campaign.getCampaignRequirements());
+                        campaignTracking.setCampaignTrackingId(applicationId);
                         campaignTrackingRepository.save(campaignTracking);
                         chatRoom.setMembers(roomMate);
                         chatRoomRepository.save(chatRoom);
