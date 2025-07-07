@@ -281,10 +281,12 @@ public class CampaignService {
             HttpServletRequest request) {
         List<String> campaignIdsPage = campaignTrackingRepository
                 .findCampaignIdsByInfluencerId(userDetails.getUserId());
-        Optional<User> user = userRepository.findById(userDetails.getUserId());
         List<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage);
         List<CampaignResponse> dtoList = campaignPage.stream()
-                .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
+                .map(campaign -> {
+                    Optional<User> user = userRepository.findById(campaign.getBrandId());
+                    return new CampaignResponse(user.get(), campaign, categoryRepo);
+                })
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
