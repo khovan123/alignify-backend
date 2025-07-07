@@ -18,6 +18,7 @@ import com.api.dto.response.ApplicationsByBrandResponse;
 import com.api.dto.response.ApplicationsByfInfluencerResponse;
 import com.api.model.Application;
 import com.api.model.Campaign;
+import com.api.model.CampaignTracking;
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.Influencer;
@@ -25,6 +26,7 @@ import com.api.model.Status;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.CampaignRepository;
+import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
@@ -51,6 +53,9 @@ public class ApplicationService {
         private ChatRoomRepository chatRoomRepository;
         @Autowired
         private ChatMessageRepository chatMessageRepository;
+
+        @Autowired
+        private CampaignTrackingRepository campaignTrackingRepository;
 
         public ResponseEntity<?> apply_Application(String campaignId, CustomUserDetails userDetails,
                         HttpServletRequest request) {
@@ -385,6 +390,8 @@ public class ApplicationService {
                         if (!roomMate.contains(application.getInfluencerId())) {
                                 roomMate.add(application.getInfluencerId());
                         }
+                        campaignTrackingRepository.save(new CampaignTracking(applicationId, application.getCampaignId(),
+                                        brandId, application.getInfluencerId(), campaign.getCampaignRequirements()));
                         chatRoom.setMembers(roomMate);
                         chatRoomRepository.save(chatRoom);
                         campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
