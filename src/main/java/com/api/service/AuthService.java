@@ -202,6 +202,7 @@ public class AuthService {
         if (adminRepository.existsByEmail(admin.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
+        admin.setRoleId(EnvConfig.ADMIN_ROLE_ID);
         admin.setPassword(JwtUtil.hashPassword(admin.getPassword()));
         adminRepository.save(admin);
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
