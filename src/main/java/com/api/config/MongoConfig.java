@@ -56,7 +56,7 @@ public class MongoConfig {
     // this.create_campaignsCollection(db);
     // this.create_contentPostingsCollection(db);
     // this.create_likesCollection(db);
-    // this.create_applicationsCollection(db);
+    this.create_applicationsCollection(db);
     // this.create_campaignTrackingsCollection(db);
     // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
