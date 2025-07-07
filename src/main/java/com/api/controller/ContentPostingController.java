@@ -10,14 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.model.ContentPosting;
 import com.api.security.CustomUserDetails;
 import com.api.service.ContentPostingService;
 
@@ -64,11 +62,10 @@ public class ContentPostingController {
             @PathVariable("categoryId") String categoryId,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            HttpServletRequest request){
+            HttpServletRequest request) {
         return contentPostingSer.getPostByCategoryIds(pageNumber, pageSize, categoryId, request);
     }
-    
-    
+
     @GetMapping("/me")
     public ResponseEntity<?> getMe(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -79,14 +76,19 @@ public class ContentPostingController {
     }
 
     @PutMapping("/{contentId}")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId)")
     public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ContentPosting contentPosting,
+            @RequestPart("contentPosting") String obj,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+
             HttpServletRequest request) {
-        return contentPostingSer.updateContentPosting(contentId, userDetails, contentPosting, request);
+        return contentPostingSer.updateContentPosting(contentId, contentPostingSer.convertToContentPosting(obj), image,
+                userDetails, request);
     }
 
     @DeleteMapping("/{contentId}")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId)")
     public ResponseEntity<?> deletePost(
             @PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -94,7 +96,7 @@ public class ContentPostingController {
 
         return contentPostingSer.deleteContentPosting(contentId, userDetails, request);
     }
-    
+
     // @PutMapping("/{contentId}/like")
     // public ResponseEntity<?> toggleLike(@PathVariable("contentId") String
     // contentId,
