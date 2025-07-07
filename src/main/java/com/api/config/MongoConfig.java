@@ -57,7 +57,7 @@ public class MongoConfig {
     // this.create_contentPostingsCollection(db);
     // this.create_likesCollection(db);
     this.create_applicationsCollection(db);
-    // this.create_campaignTrackingsCollection(db);
+    this.create_campaignTrackingsCollection(db);
     // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
     // this.create_messagesCollection(db);
@@ -853,13 +853,10 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignTrackingId", "campaignId", "brandId", "influencerId", "platformRequirementTracking", "process", "status", "createdAt"],
+                "required": ["campaignId", "brandId", "influencerId", "platformRequirementTracking", "process", "status", "createdAt"],
                 "properties": {
                     "_id": {
                         "bsonType": "objectId"
-                    },
-                    "campaignTrackingId": {
-                        "bsonType": "string"
                     },
                     "campaignId": {
                         "bsonType": "string"
