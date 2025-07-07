@@ -136,9 +136,22 @@ public class MongoConfig {
                   "bsonType": "string"
                 },
                 "socialMediaLinks": {
-                  "bsonType": "object",
-                  "additionalProperties": {
-                    "bsonType": "string"
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "object",
+                    "required": ["platform","url", "follower"],
+                    "properties": {
+                      "platform":{
+                        "bsonType": "string",
+                        "enum":["FACEBOOK", "TIKTOK", "YOUTUBE", "INSTAGRAM"]
+                        },
+                      "url": {
+                        "bsonType": "string"
+                        },
+                      "follower": {
+                        "bsonType": "int"
+                      }
+                    }
                   }
                 },
                 "rating": {
@@ -266,16 +279,37 @@ public class MongoConfig {
                     "bio": {
                       "bsonType": "string",
                     },
-                    "contacts": {
-                      "bsonType": "object",
-                      "additionalProperties": {
-                        "bsonType": "string"
-                      }
-                    },
+                   "contacts": {
+                            bsonType: 'array',
+                            items: {
+                              bsonType: 'object',
+                              properties: {
+                                contact_type: {
+                                  bsonType: 'string'
+                                },
+                                contact_infor: {
+                                  bsonType: 'string'
+                                }
+                              }
+                            }
+                          },
                     "socialMediaLinks": {
-                      "bsonType": "object",
-                      "additionalProperties": {
-                        "bsonType": "string"
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "object",
+                        "required": ["platform","url", "follower"],
+                        "properties": {
+                          "platform":{
+                            "bsonType": "string"
+                            "enum":["FACEBOOK", "TIKTOK", "YOUTUBE", "INSTAGRAM"]
+                          },
+                          "url": {
+                            "bsonType": "string"
+                            },
+                          "follower": {
+                            "bsonType": "int"
+                          }
+                        }
                       }
                     },
                     "categoryIds": {
@@ -665,16 +699,39 @@ public class MongoConfig {
                     "budget": {
                         "bsonType": "int"
                     },
-                    "campaignRequirements": {
+                   "campaignRequirements": {
+                      "bsonType": "array",
+                      "items": {
                         "bsonType": "object",
-                        "additionalProperties": {
-                            "bsonType": "int"
+                        "required": ["platform", "post_type", "quantity", "details"],
+                        "properties": {
+                          "platform": { "bsonType": "string" },
+                          "post_type": { "bsonType": "string" },
+                          "quantity": { "bsonType": "int" },
+                          "details": {
+                            "bsonType": "array",
+                            "items": {
+                              "bsonType": "object",
+                              "properties": {
+                                "post_type": { "bsonType": "string" },
+                                "like": { "bsonType": "int" },
+                                "comment": { "bsonType": "int" },
+                                "share": { "bsonType": "int" }
+                              }
+                            }
+                          }
                         }
+                      }
                     },
                     "influencerRequirements": {
                         "bsonType": "array",
                         "items": {
-                            "bsonType": "string"
+                            "bsonType": "object",
+                            "required": ["platform", "followers"],
+                            "properties": {
+                                "platform": { "bsonType": "string" },
+                                "followers": { "bsonType": "int" }
+                            }
                         }
                     },
                     "influencerCountExpected": {
@@ -796,10 +853,13 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTrackings", "process", "status"],
+                "required": ["campaignTrackingId", "campaignId", "brandId", "influencerId", "platformRequirementTracking", "process", "status", "createdAt"],
                 "properties": {
                     "_id": {
                         "bsonType": "objectId"
+                    },
+                    "campaignTrackingId": {
+                        "bsonType": "string"
                     },
                     "campaignId": {
                         "bsonType": "string"
@@ -810,32 +870,51 @@ public class MongoConfig {
                     "influencerId": {
                         "bsonType": "string"
                     },
-                    "campaignRequirementTrackings": {
-                        "bsonType": "object",
-                        "additionalProperties": {
-                            "bsonType": "array",
-                            "items": {
-                                "bsonType": "object",
-                                "required": ["index"],
-                                "properties": {
-                                    "index": {
-                                        "bsonType": "int",
-                                        "minimum": 0
-                                    },
-                                    "imageUrl": {
-                                        "bsonType": ["string", "null"],
-                                        "pattern": "^https?://.+$"
-                                    },
-                                    "postUrl": {
-                                        "bsonType": ["string", "null"],
-                                        "pattern": "^https?://.+$"
-                                    },
-                                    "status": {
-                                        "bsonType": ["string", "null"],
-                                        "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
-                                    },
-                                    "uploadedAt": {
-                                        "bsonType": ["date", "null"]
+                    "platformRequirementTracking": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "object",
+                            "required": ["platform", "post_type", "quantity", "details"],
+                            "properties": {
+                                "platform": {
+                                    "bsonType": "string"
+                                },
+                                "post_type": {
+                                    "bsonType": "string"
+                                },
+                                "quantity": {
+                                    "bsonType": "int"
+                                },
+                                "details": {
+                                    "bsonType": "array",
+                                    "items": {
+                                        "bsonType": "object",
+                                        "required": ["post_type", "like", "comment", "share"],
+                                        "properties": {
+                                            "post_type": {
+                                                "bsonType": "string"
+                                            },
+                                            "like": {
+                                                "bsonType": "int"
+                                            },
+                                            "comment": {
+                                                "bsonType": "int"
+                                            },
+                                            "share": {
+                                                "bsonType": "int"
+                                            },
+                                            "postUrl": {
+                                                "bsonType": ["string", "null"],
+                                                "pattern": "^https?://.+$"
+                                            },
+                                            "status": {
+                                                "bsonType": ["string", "null"],
+                                                "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
+                                            },
+                                            "uploadedAt": {
+                                                "bsonType": ["date", "null"]
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -847,8 +926,8 @@ public class MongoConfig {
                         "maximum": 100
                     },
                     "status": {
-                      "bsonType": "string",
-                      "enum": ["PENDING", "COMPLETED"],
+                        "bsonType": "string",
+                        "enum": ["PENDING", "COMPLETED"]
                     },
                     "createdAt": {
                         "bsonType": "date"

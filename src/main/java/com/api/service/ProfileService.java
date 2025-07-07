@@ -130,6 +130,31 @@ public class ProfileService {
         return ApiResponse.sendError(400, "Invalid roleId", request.getRequestURI());
     }
 
+    public ResponseEntity<?> getInfluencerByCategory(String categoryId, int pageNumber, int pageSize, HttpServletRequest request) {
+        PageRequest page = PageRequest.of(pageNumber, pageSize);
+        Page<Influencer> influencers = influencerRepository.findByCategoryIdsInOrderByRatingDesc(categoryId, page);
+        List<InfluencerProfileResponse> responses = new ArrayList<>();
+
+        for (Influencer influencer : influencers.getContent()) {
+            Optional<User> user = userRepository.findById(influencer.getUserId());
+            user.ifPresent(u -> responses.add(new InfluencerProfileResponse(u, influencer, categoryRepository)));
+        }
+
+        return ApiResponse.sendSuccess(200, "Response successfully", responses, request.getRequestURI());
+    }
+    public ResponseEntity<?> getBrandByCategory(String categoryId, int pageNumber, int pageSize, HttpServletRequest request) {
+        PageRequest page = PageRequest.of(pageNumber, pageSize);
+        Page<Brand> brands = brandRepository.findByCategoryIdsInOrderByTotalCampaignDesc(categoryId, page);
+        List<BrandProfileResponse> responses = new ArrayList<>();
+
+        for (Brand brand : brands.getContent()) {
+            Optional<User> user = userRepository.findById(brand.getUserId());
+            user.ifPresent(u -> responses.add(new BrandProfileResponse(u, brand, categoryRepository)));
+        }
+
+        return ApiResponse.sendSuccess(200, "Response successfully", responses, request.getRequestURI());
+    }
+
     public int getCompleteCampaign(String influencerId) {
         List<Application> applications = applicationRepository.findAllByInfluencerIdAndStatus(influencerId, "ACCEPTED");
         List<String> appliedCampaignIds = applications.stream()
@@ -172,6 +197,8 @@ public class ProfileService {
             }
             if (newInfluencer.getBio() != null) {
                 influencer.setBio(newInfluencer.getBio());
+            } else {
+                influencer.setBio("");
             }
 
             if (newInfluencer.getDoB() != null) {
@@ -187,10 +214,20 @@ public class ProfileService {
 
             if (newInfluencer.getCategoryIds() != null && !newInfluencer.getCategoryIds().isEmpty()) {
                 influencer.setCategoryIds(newInfluencer.getCategoryIds());
+            } else {
+                influencer.setCategoryIds(new ArrayList<>());
             }
 
             if (newInfluencer.getSocialMediaLinks() != null && !newInfluencer.getSocialMediaLinks().isEmpty()) {
                 influencer.setSocialMediaLinks(newInfluencer.getSocialMediaLinks());
+            } else {
+                influencer.setSocialMediaLinks(new ArrayList<>());
+            }
+            if (!influencer.getSocialMediaLinks().isEmpty()) {
+                influencer.setFollower(0);
+                influencer.getSocialMediaLinks().forEach(social -> {
+                    influencer.setFollower(influencer.getFollower() + social.getFollower());
+                });
             }
             userRepository.save(user);
             influencerRepository.save(influencer);
@@ -206,18 +243,26 @@ public class ProfileService {
             }
             if (newBrand.getBio() != null) {
                 brand.setBio(newBrand.getBio());
+            } else {
+                brand.setBio("");
             }
             if (newBrand.getContacts() != null && !newBrand.getContacts().isEmpty()) {
                 brand.setContacts(newBrand.getContacts());
+            } else {
+                brand.setContacts(new ArrayList<>());
             }
             if (newBrand.getSocialMediaLinks() != null && !newBrand.getSocialMediaLinks().isEmpty()) {
                 brand.setSocialMediaLinks(newBrand.getSocialMediaLinks());
+            } else {
+                brand.setSocialMediaLinks(new ArrayList<>());
             }
             if (newBrand.getEstablishDate() != null) {
                 brand.setEstablishDate(newBrand.getEstablishDate());
             }
             if (newBrand.getCategoryIds() != null && !newBrand.getCategoryIds().isEmpty()) {
                 brand.setCategoryIds(newBrand.getCategoryIds());
+            } else {
+                brand.setCategoryIds(new ArrayList<>());
             }
             userRepository.save(user);
             brandRepository.save(brand);

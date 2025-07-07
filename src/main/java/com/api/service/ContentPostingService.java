@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,15 +28,11 @@ import com.api.repository.ContentPostingRepository;
 import com.api.repository.LikesRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
-import com.api.util.Helper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class ContentPostingService {
@@ -53,7 +50,9 @@ public class ContentPostingService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, MultipartFile file,
+    public ResponseEntity<?> createContentPosting(
+            ContentPosting contentPosting,
+            MultipartFile file,
             CustomUserDetails userDetails,
             HttpServletRequest request) {
         String imageUrl;
@@ -129,13 +128,7 @@ public class ContentPostingService {
                 .map(this::mapToDTO)
                 .toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("post", dtoList);
-        responseData.put("currentPage", posts.getNumber());
-        responseData.put("totalPages", posts.getTotalPages());
-        responseData.put("totalItems", posts.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
     public ResponseEntity<?> getMe(CustomUserDetails userDetails, HttpServletRequest request,
@@ -146,12 +139,6 @@ public class ContentPostingService {
         List<ContentPostingResponse> dtoList = posts.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
-
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", posts.getNumber());
-        responseData.put("totalPages", posts.getTotalPages());
-        responseData.put("totalItems", posts.getTotalElements());
 
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
@@ -194,49 +181,46 @@ public class ContentPostingService {
         }
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<ContentPosting> postPage = contentPostingRepo.findByCategoryIdsInOrderByCreatedDateDesc(categoryIds, pageable);
+        Page<ContentPosting> postPage = contentPostingRepo.findByCategoryIdsInOrderByCreatedDateDesc(categoryIds,
+                pageable);
 
         List<ContentPostingResponse> dtoList = postPage.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", postPage.getNumber());
-        responseData.put("totalPages", postPage.getTotalPages());
-        responseData.put("totalItems", postPage.getTotalElements());
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
-    public ResponseEntity<?> updateContentPosting(String contentId, CustomUserDetails userDetails,
+    public ResponseEntity<?> updateContentPosting(
+            String contentId,
             ContentPosting updatedContentPosting,
+            MultipartFile file,
+            CustomUserDetails userDetails,
             HttpServletRequest request) {
 
         Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
 
-            if (!Helper.isOwner(userDetails.getUserId(), request)) {
-                return ResponseEntity.status(403).body(
-                        Map.of("error", "Access denied. You are not the owner of this content."));
+            if (updatedContentPosting.getContent() != null) {
+                contentPosting.setContent(updatedContentPosting.getContent());
             }
-
-            List<String> updatedCategoryIds = updatedContentPosting.getCategoryIds();
-            List<Category> validCategories = categoryRepo.findAllByCategoryIdIn(updatedCategoryIds);
-
-            if (validCategories == null || validCategories.isEmpty()) {
-                return ApiResponse.sendError(400, "No valid category IDs provided", request.getRequestURI());
+            String imageUrl = null;
+            if (file != null) {
+                try {
+                    imageUrl = fileStorageService.storeFile(file);
+                } catch (Exception e) {
+                    return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
+                }
             }
-
-            List<String> validCategoryIds = validCategories.stream()
-                    .map(Category::getCategoryId)
-                    .toList();
-
-            contentPosting.setContent(updatedContentPosting.getContent());
-            contentPosting.setImageUrl(updatedContentPosting.getImageUrl());
-            contentPosting.setCategoryIds(validCategoryIds);
+            if (imageUrl != null) {
+                contentPosting.setImageUrl(imageUrl);
+            }
+            if (!updatedContentPosting.getCategoryIds().isEmpty() && updatedContentPosting.getCategoryIds() != null) {
+                contentPosting.setCategoryIds(updatedContentPosting.getCategoryIds());
+            } else {
+                contentPosting.setCategoryIds(new ArrayList<>());
+            }
             contentPosting.setIsPublic(updatedContentPosting.isIsPublic());
-            contentPosting.setCommentCount(updatedContentPosting.getCommentCount());
-            contentPosting.setLikeCount(updatedContentPosting.getLikeCount());
 
             contentPostingRepo.save(contentPosting);
 

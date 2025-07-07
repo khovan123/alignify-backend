@@ -1,7 +1,6 @@
 package com.api.controller.campaign;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api.dto.ApiResponse;
-import com.api.dto.request.CampaignRequirementRequest;
-import com.api.model.CampaignRequirement;
+import com.api.dto.request.PlatformRequirementDetailsTrackingRequest;
 import com.api.model.CampaignTracking;
+import com.api.model.PlatformRequirementTracking;
 import com.api.repository.CampaignTrackingRepository;
-import com.api.service.FileStorageService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/campaigns/{campaignId}/trackings/{trackingId}")
@@ -36,10 +28,6 @@ public class CampaignTrackingController {
 
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private FileStorageService fileStorageService;
 
     @GetMapping("")
     @PreAuthorize("hasAnyRole('ROLE_BRAND', 'ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, #trackingId, authentication.principal)")
@@ -55,124 +43,35 @@ public class CampaignTrackingController {
         return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackingOpt.get(), request.getRequestURI());
     }
 
-//    --update thêm file ảnh--
-//    @PostMapping("/requirements")
-//    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, #trackingId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId, 'PARTICIPATING',authentication.principal)")
-//    public ResponseEntity<?> addContentRequirement(
-//            @PathVariable("campaignId") String campaignId,
-//            @PathVariable("trackingId") String trackingId,
-//            @RequestBody Map<String, List<CampaignRequirementRequest>> requirementsMap,
-//            HttpServletRequest request) {
-//        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
-//                .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
-//        if (!campaignTrackingOpt.isPresent()) {
-//            return ApiResponse.sendError(404, "Id: " + trackingId + " not found!", request.getRequestURI());
-//        }
-//        CampaignTracking tracking = campaignTrackingOpt.get();
-//        Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTracking();
-//        for (Map.Entry<String, List<CampaignRequirementRequest>> entry : requirementsMap.entrySet()) {
-//            String type = entry.getKey();
-//            List<CampaignRequirementRequest> contentRequests = entry.getValue();
-//            List<CampaignRequirement> requirements = trackingMap.get(type);
-//            if (requirements == null) {
-//                return ApiResponse.sendError(400, "No requirements found for type: " + type, request.getRequestURI());
-//            }
-//            for (CampaignRequirementRequest contentRequest : contentRequests) {
-//                CampaignRequirement content = new CampaignRequirement(
-//                        contentRequest.getIndex(),
-//                        contentRequest.getImageUrl(),
-//                        contentRequest.getPostUrl());
-//                if (content.getIndex() < 0 || content.getIndex() >= requirements.size()) {
-//                    return ApiResponse.sendError(400, "Invalid index for type: " + type, request.getRequestURI());
-//                }
-//                requirements.remove(content.getIndex());
-//                requirements.add(content.getIndex(), content);
-//            }
-//        }
-//        CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
-//        return ApiResponse.sendSuccess(200, "Response successfully", updatedTracking.getCampaignRequirementTracking(),
-//                request.getRequestURI());
-//    }
-    @PostMapping(value = "/requirements", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/requirements")
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, #trackingId, authentication.principal)")
     public ResponseEntity<?> addContentRequirement(
             @PathVariable("campaignId") String campaignId,
             @PathVariable("trackingId") String trackingId,
-            @RequestPart("requirements") String requirementsJson,
-            @RequestPart("images") List<MultipartFile> images,
+            @RequestBody PlatformRequirementDetailsTrackingRequest platformRequirementDetailsTrackingRequest,
             HttpServletRequest request) {
         try {
-
-            // Parse requirements JSON
-            Map<String, List<CampaignRequirementRequest>> requirementsMap = objectMapper.readValue(
-                    requirementsJson,
-                    new TypeReference<HashMap<String, List<CampaignRequirementRequest>>>() {
-            }
-            );
-            if (requirementsMap == null || requirementsMap.isEmpty()) {
-                return ApiResponse.sendError(400, "Requirements cannot be empty", request.getRequestURI());
-            }
-            // Validate images count
-            int totalRequests = requirementsMap.values().stream().mapToInt(List::size).sum();
-            if (images.size() != totalRequests) {
-                return ApiResponse.sendError(400, "Number of images does not match requirements", request.getRequestURI());
-            }
-
-            // Fetch CampaignTracking
             Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
                     .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
             if (campaignTrackingOpt.isEmpty()) {
                 return ApiResponse.sendError(404, "Tracking ID: " + trackingId + " not found", request.getRequestURI());
             }
             CampaignTracking tracking = campaignTrackingOpt.get();
-            Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTrackings();
-
-            // Process each requirement type
-            int imageIndex = 0;
-            for (Map.Entry<String, List<CampaignRequirementRequest>> entry : requirementsMap.entrySet()) {
-                String type = entry.getKey();
-                List<CampaignRequirementRequest> contentRequests = entry.getValue();
-                List<CampaignRequirement> requirements = trackingMap.get(type);
-                if (requirements == null) {
-                    return ApiResponse.sendError(400, "No requirements found for type: " + type, request.getRequestURI());
-                }
-
-                for (CampaignRequirementRequest contentRequest : contentRequests) {
-                    // Validate index
-                    if (contentRequest.getIndex() < 0 || contentRequest.getIndex() >= requirements.size()) {
-                        return ApiResponse.sendError(400, "Invalid index for type: " + type, request.getRequestURI());
-                    }
-
-                    // Validate image
-                    if (imageIndex >= images.size()) {
-                        return ApiResponse.sendError(400, "Missing image for requirement", request.getRequestURI());
-                    }
-                    MultipartFile image = images.get(imageIndex++);
-
-                    // Store image and get URL
-                    String imageUrl;
-                    try {
-                        imageUrl = fileStorageService.storeFile(image);
-                    } catch (Exception e) {
-                        return ApiResponse.sendError(400, "Failed to upload image: " + e.getMessage(), request.getRequestURI());
-                    }
-
-                    // Create CampaignRequirement
-                    CampaignRequirement content = new CampaignRequirement(
-                            contentRequest.getIndex(),
-                            imageUrl,
-                            contentRequest.getPostUrl()
-                    );
-
-                    // Update requirements list
-                    requirements.remove(content.getIndex());
-                    requirements.add(content.getIndex(), content);
+            List<PlatformRequirementTracking> platformRequirementTrackings = tracking.getPlatformRequirementTracking();
+            for (int index = 0; index < platformRequirementTrackings.size(); index++) {
+                if (platformRequirementTrackings.get(index).getPlatform().toUpperCase()
+                        .equals(platformRequirementDetailsTrackingRequest.getPlatform().toUpperCase())) {
+                    platformRequirementTrackings.get(index).getDetails()
+                            .get(platformRequirementDetailsTrackingRequest.getIndex())
+                            .setRequirementDetailsTracking(
+                                    platformRequirementDetailsTrackingRequest.getPostUrl());
+                    tracking.setPlatformRequirementTracking(platformRequirementTrackings);
+                    campaignTrackingRepository.save(tracking);
+                    break;
                 }
             }
-
-            // Save updated tracking
-            CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
-            return ApiResponse.sendSuccess(200, "Response successfully", updatedTracking.getCampaignRequirementTrackings(),
+            return ApiResponse.sendSuccess(200, "Response successfully",
+                    null,
                     request.getRequestURI());
 
         } catch (Exception e) {
@@ -222,7 +121,7 @@ public class CampaignTrackingController {
     public ResponseEntity<?> updateRequirementStatus(
             @PathVariable("campaignId") String campaignId,
             @PathVariable("trackingId") String trackingId,
-            @RequestBody Map<String, List<CampaignRequirementRequest>> requirementsMap,
+            @RequestBody PlatformRequirementDetailsTrackingRequest platformRequirementDetailsTrackingRequest,
             HttpServletRequest request) {
         Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
                 .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
@@ -230,26 +129,22 @@ public class CampaignTrackingController {
             return ApiResponse.sendError(404, "Id: " + trackingId + " not found!", request.getRequestURI());
         }
         CampaignTracking tracking = campaignTrackingOpt.get();
-        Map<String, List<CampaignRequirement>> trackingMap = tracking.getCampaignRequirementTrackings();
-        for (Map.Entry<String, List<CampaignRequirementRequest>> entry : requirementsMap.entrySet()) {
-            String type = entry.getKey();
-            List<CampaignRequirementRequest> contentRequests = entry.getValue();
-            List<CampaignRequirement> requirements = trackingMap.get(type);
-            if (requirements == null) {
-                return ApiResponse.sendError(400, "No requirements found for type: " + type, request.getRequestURI());
-            }
-            for (CampaignRequirementRequest contentRequest : contentRequests) {
-                int idx = contentRequest.getIndex();
-                if (idx < 0 || idx >= requirements.size()) {
-                    return ApiResponse.sendError(400, "Invalid index for type: " + type, request.getRequestURI());
-                }
-                CampaignRequirement content = requirements.get(idx);
-                content.setStatus(contentRequest.getStatus());
+        List<PlatformRequirementTracking> platformRequirementTrackings = tracking.getPlatformRequirementTracking();
+        for (int index = 0; index < platformRequirementTrackings.size(); index++) {
+            if (platformRequirementTrackings.get(index).getPlatform().toUpperCase()
+                    .equals(platformRequirementDetailsTrackingRequest.getPlatform().toUpperCase())) {
+                platformRequirementTrackings.get(index).getDetails()
+                        .get(platformRequirementDetailsTrackingRequest.getIndex())
+                        .setRequirementDetailsTracking(
+                                platformRequirementDetailsTrackingRequest.getPostUrl());
+                tracking.setStatus(platformRequirementDetailsTrackingRequest.getStatus());
+                campaignTrackingRepository.save(tracking);
+                break;
             }
         }
-        double process = calculateProcess(trackingMap);
-        tracking.setProcess(calculateProcess(trackingMap));
-        if (process >= 100.0) {
+        double process = calculateProcess(tracking.getPlatformRequirementTracking());
+        tracking.setProcess(process);
+        if (process >= 100.0 || process >= 100) {
             tracking.setStatus("COMPLETED");
         }
         CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
@@ -257,10 +152,12 @@ public class CampaignTrackingController {
                 request.getRequestURI());
     }
 
-    private double calculateProcess(Map<String, List<CampaignRequirement>> trackingMap) {
-        int totalContents = trackingMap.values().stream().mapToInt(List::size).sum();
-        int acceptedContents = trackingMap.values().stream()
-                .flatMap(List::stream)
+    private double calculateProcess(List<PlatformRequirementTracking> platformRequirementTracking) {
+        int totalContents = platformRequirementTracking.stream()
+                .mapToInt(p -> p.getDetails() != null ? p.getDetails().size() : 0)
+                .sum();
+        int acceptedContents = platformRequirementTracking.stream()
+                .flatMap(p -> p.getDetails() != null ? p.getDetails().stream() : java.util.stream.Stream.empty())
                 .mapToInt(content -> {
                     String status = content.getStatus();
                     if (status == null) {

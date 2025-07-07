@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -79,7 +78,6 @@ public class CampaignService {
         if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
             ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
         }
-        validateCampaignRequirements(campaign.getCampaignRequirements());
         String imageUrl;
         try {
             imageUrl = fileStorageService.storeFile(file);
@@ -110,18 +108,8 @@ public class CampaignService {
                 request.getRequestURI());
     }
 
-    private void validateCampaignRequirements(Map<String, Integer> campaignRequirements) {
-        if (campaignRequirements != null) {
-            for (Map.Entry<String, Integer> entry : campaignRequirements.entrySet()) {
-                if (entry.getValue() == null || entry.getValue() < 0) {
-                    throw new IllegalArgumentException("Campaign requirements must be non-negative integers");
-                }
-            }
-        }
-    }
-    
     public ResponseEntity<?> getHotCampaignsByApplication(
-             int pageNumber,
+            int pageNumber,
             int pageSize,
             String categoryIds,
             HttpServletRequest request) {
@@ -145,7 +133,8 @@ public class CampaignService {
                 .map(campaign -> {
                     User user = brandMap.get(campaign.getBrandId());
                     if (user == null) {
-                        throw new IllegalArgumentException("Brand user not found for campaign " + campaign.getCampaignId());
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
                     }
                     return new CampaignResponse(user, campaign, categoryRepo);
                 })
@@ -159,8 +148,9 @@ public class CampaignService {
 
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
+
     public ResponseEntity<?> getCampaignsByCategoryIds(
-             int pageNumber,
+            int pageNumber,
             int pageSize,
             String categoryIds,
             HttpServletRequest request) {
@@ -184,7 +174,8 @@ public class CampaignService {
                 .map(campaign -> {
                     User user = brandMap.get(campaign.getBrandId());
                     if (user == null) {
-                        throw new IllegalArgumentException("Brand user not found for campaign " + campaign.getCampaignId());
+                        throw new IllegalArgumentException(
+                                "Brand user not found for campaign " + campaign.getCampaignId());
                     }
                     return new CampaignResponse(user, campaign, categoryRepo);
                 })
@@ -290,10 +281,12 @@ public class CampaignService {
             HttpServletRequest request) {
         List<String> campaignIdsPage = campaignTrackingRepository
                 .findCampaignIdsByInfluencerId(userDetails.getUserId());
-        Optional<User> user = userRepository.findById(userDetails.getUserId());
         List<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage);
         List<CampaignResponse> dtoList = campaignPage.stream()
-                .map(campaign -> new CampaignResponse(user.get(), campaign, categoryRepo))
+                .map(campaign -> {
+                    Optional<User> user = userRepository.findById(campaign.getBrandId());
+                    return new CampaignResponse(user.get(), campaign, categoryRepo);
+                })
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
@@ -348,8 +341,11 @@ public class CampaignService {
                 request.getRequestURI());
     }
 
-    public ResponseEntity<?> updateCampaign(String campaignId, CustomUserDetails userDetails,
+    public ResponseEntity<?> updateCampaign(
+            String campaignId,
+            CustomUserDetails userDetails,
             Campaign updatedCampaign,
+            MultipartFile image,
             HttpServletRequest request) {
 
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
@@ -372,9 +368,17 @@ public class CampaignService {
             if (updatedCampaign.getContent() != null) {
                 campaign.setContent(updatedCampaign.getContent());
             }
-            if (updatedCampaign.getImageUrl() != null) {
-                campaign.setImageUrl(updatedCampaign.getImageUrl());
-                chatRoom.setRoomAvatarUrl(updatedCampaign.getImageUrl());
+            String newImageUrl = null;
+            try {
+                if (image != null) {
+                    newImageUrl = fileStorageService.storeFile(image);
+                }
+            } catch (Exception e) {
+                return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
+            }
+            if (newImageUrl != null) {
+                campaign.setImageUrl(newImageUrl);
+                chatRoom.setRoomAvatarUrl(newImageUrl);
             }
             if (updatedCampaign.getCategoryIds() != null && !updatedCampaign.getCategoryIds().isEmpty()) {
                 List<Category> validCategories = categoryRepo.findAllByCategoryIdIn(updatedCampaign.getCategoryIds());
@@ -386,9 +390,6 @@ public class CampaignService {
                         .toList();
                 campaign.setCategoryIds(validCategoryIds);
             }
-            if (updatedCampaign.getStatus() != null) {
-                campaign.setStatus(updatedCampaign.getStatus());
-            }
             if (updatedCampaign.getBudget() > 0) {
                 campaign.setBudget(newBudget);
             }
@@ -398,6 +399,9 @@ public class CampaignService {
             if (updatedCampaign.getDueAt() != null) {
                 campaign.setDueAt(updatedCampaign.getDueAt());
             }
+            if (updatedCampaign.getInfluencerCountExpected() > 0) {
+                campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
+            }
             if (updatedCampaign.getCampaignRequirements() != null
                     && !updatedCampaign.getCampaignRequirements().isEmpty()) {
                 campaign.setCampaignRequirements(updatedCampaign.getCampaignRequirements());
@@ -405,14 +409,17 @@ public class CampaignService {
             if (updatedCampaign.getInfluencerRequirements() != null
                     && !updatedCampaign.getInfluencerRequirements().isEmpty()) {
                 campaign.setInfluencerRequirements(updatedCampaign.getInfluencerRequirements());
+            } else {
+                updatedCampaign.setInfluencerRequirements(new ArrayList<>());
             }
-            if (updatedCampaign.getInfluencerCountExpected() > 0) {
-                campaign.setInfluencerCountExpected(updatedCampaign.getInfluencerCountExpected());
-            }
-            campaign.setCreatedAt(ZonedDateTime.now(TimeZone.getTimeZone("Asia/Ho_Chi_Minh").toZoneId()));
+            campaign.setApplicationTotal(0);
+            campaign.setAppliedInfluencerIds(new ArrayList<>());
+            campaign.setInfluencerCountCurrent(0);
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
-
+            chatMessageRepository.deleteAllByChatRoomId(campaignId);
+            applicationRepository.deleteAllByCampaignId(campaignId);
+            campaignTrackingRepository.deleteAllByCampaignId(campaignId);
             return ApiResponse.sendSuccess(200, "Campaign posting updated successfully",
                     new CampaignResponse(user.get(), campaign, categoryRepo),
                     request.getRequestURI());
