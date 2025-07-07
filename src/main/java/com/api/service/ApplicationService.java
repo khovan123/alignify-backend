@@ -390,8 +390,11 @@ public class ApplicationService {
                         if (!roomMate.contains(application.getInfluencerId())) {
                                 roomMate.add(application.getInfluencerId());
                         }
-                        campaignTrackingRepository.save(new CampaignTracking(applicationId, application.getCampaignId(),
-                                        brandId, application.getInfluencerId(), campaign.getCampaignRequirements()));
+                        CampaignTracking campaignTracking = new CampaignTracking(applicationId,
+                                        application.getCampaignId(),
+                                        brandId, application.getInfluencerId(), campaign.getCampaignRequirements());
+                        campaignTracking.setCampaignTrackingId(applicationId);
+                        campaignTrackingRepository.save(campaignTracking);
                         chatRoom.setMembers(roomMate);
                         chatRoomRepository.save(chatRoom);
                         campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
