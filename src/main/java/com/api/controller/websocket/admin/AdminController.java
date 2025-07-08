@@ -4,7 +4,6 @@ import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +55,7 @@ public class AdminController {
             UserBan userBan = new UserBan();
             userBan.setUserId(userId);
             userBan.setRoleId(user.getRoleId());
+            userBan.setReasonId("SpamId");
             userBan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             userBanRepository.save(userBan);
             messagingTemplate.convertAndSend("/topic/users/" + userId, userBan);
@@ -65,17 +65,17 @@ public class AdminController {
     }
 
     // @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @MessageMapping("/isBanned/{userId}")
+    @MessageMapping("/checkBanned/{userId}")
     public void checkIfBanned(@DestinationVariable("userId") String userId, Principal principal) {
         if (principal == null || principal.getName() == null) {
             throw new SecurityException("Access is denied for: " + userId);
         }
 
         if (principal instanceof StompPrincipal) {
-            Optional<User> optionalUser = userRepository.findById(userId);
-            boolean isBanned = optionalUser.map(user -> !user.isActive()).orElse(false);
-            messagingTemplate.convertAndSend("/topic/users/isBanned/" + userId,
-                    Map.of("isBanned", isBanned));
+            Optional<UserBan> userBanOpt = userBanRepository.findById(userId);
+            if (userBanOpt.isPresent())
+                messagingTemplate.convertAndSend("/topic/users/" + userId,
+                        userBanOpt.get());
         } else {
             throw new SecurityException("Invalid principal type");
         }
