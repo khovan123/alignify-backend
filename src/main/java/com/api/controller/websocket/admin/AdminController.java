@@ -20,6 +20,7 @@ import org.springframework.stereotype.Controller;
 
 import com.api.config.EnvConfig;
 import com.api.dto.CommonPageRequest;
+import com.api.dto.UserDTO;
 import com.api.model.User;
 import com.api.model.UserBan;
 import com.api.repository.UserBanRepository;
@@ -94,7 +95,10 @@ public class AdminController {
                             EnvConfig.INFLUENCER_ROLE_ID,
                             userBans.stream().map(userBan -> userBan.getUserId()).toList(),
                             pageable);
-            messagingTemplate.convertAndSend("/topic/users/influencers/normal", users);
+            List<UserDTO> userDTOs = users.getContent().stream().map(user -> {
+                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), user.getCreatedAt());
+            }).toList();
+            messagingTemplate.convertAndSend("/topic/users/influencers/normal", userDTOs);
         } else {
             throw new SecurityException("Invalid principal type");
         }
@@ -109,8 +113,11 @@ public class AdminController {
             Pageable pageable = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize());
             Page<UserBan> userBans = userBanRepository.findAllByRoleId(EnvConfig.INFLUENCER_ROLE_ID, pageable);
             List<User> users = userRepository
-                    .findAllByUserIds(userBans.getContent().stream().map(userBan -> userBan.getUserId()).toList());
-            messagingTemplate.convertAndSend("/topic/users/influencers/banned", users);
+                    .findAllByUserIdIn(userBans.getContent().stream().map(userBan -> userBan.getUserId()).toList());
+            List<UserDTO> userDTOs = users.stream().map(user -> {
+                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), user.getCreatedAt());
+            }).toList();
+            messagingTemplate.convertAndSend("/topic/users/influencers/banned", userDTOs);
         } else {
             throw new SecurityException("Invalid principal type");
         }
@@ -129,7 +136,10 @@ public class AdminController {
                             EnvConfig.BRAND_ROLE_ID,
                             userBans.stream().map(userBan -> userBan.getUserId()).toList(),
                             pageable);
-            messagingTemplate.convertAndSend("/topic/users/brands/normal", users);
+            List<UserDTO> userDTOs = users.getContent().stream().map(user -> {
+                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), user.getCreatedAt());
+            }).toList();
+            messagingTemplate.convertAndSend("/topic/users/brands/normal", userDTOs);
         } else {
             throw new SecurityException("Invalid principal type");
         }
@@ -144,8 +154,11 @@ public class AdminController {
             Pageable pageable = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize());
             Page<UserBan> userBans = userBanRepository.findAllByRoleId(EnvConfig.BRAND_ROLE_ID, pageable);
             List<User> users = userRepository
-                    .findAllByUserIds(userBans.getContent().stream().map(userBan -> userBan.getUserId()).toList());
-            messagingTemplate.convertAndSend("/topic/users/brands/banned", users);
+                    .findAllByUserIdIn(userBans.getContent().stream().map(userBan -> userBan.getUserId()).toList());
+            List<UserDTO> userDTOs = users.stream().map(user -> {
+                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), user.getCreatedAt());
+            }).toList();
+            messagingTemplate.convertAndSend("/topic/users/brands/banned", userDTOs);
         } else {
             throw new SecurityException("Invalid principal type");
         }
