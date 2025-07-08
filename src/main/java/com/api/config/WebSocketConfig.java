@@ -15,8 +15,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import com.api.model.User;
-import com.api.repository.BrandRepository;
-import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
 import com.api.security.StompPrincipal;
 import com.api.util.JwtUtil;
