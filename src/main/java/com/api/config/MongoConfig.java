@@ -48,7 +48,7 @@ public class MongoConfig {
     // this.create_brandsCollection(db);
     // this.create_rolesCollection(db);
     // this.create_categoriesCollection(db);
-    // this.create_adminsCollection(db);
+    this.create_adminsCollection(db);
     // this.create_galleriesCollection(db);
     // this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
@@ -350,20 +350,9 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["name", "email", "password", "roleId"],
                   "properties": {
-                    "name": {
-                    "bsonType": "string"
-                    },
-                    "email": {
-                      "bsonType": "string",
-                      "pattern": "^.+@.+\\\\..+$"
-                    },
-                    "password": {
-                      "bsonType": "string",
-                    },
-                    "roleId": {
-                      "bsonType": "string"
+                    "_id": {
+                      "bsonType": "objectId",
                     },
                     "createdAt": {
                       "bsonType": "date"
