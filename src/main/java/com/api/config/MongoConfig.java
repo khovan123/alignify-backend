@@ -853,13 +853,10 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignTrackingId", "campaignId", "brandId", "influencerId", "platformRequirementTracking", "process", "status", "createdAt"],
+                "required": ["campaignId", "brandId", "influencerId", "platformRequirementTracking", "process", "status", "createdAt"],
                 "properties": {
                     "_id": {
                         "bsonType": "objectId"
-                    },
-                    "campaignTrackingId": {
-                        "bsonType": "string"
                     },
                     "campaignId": {
                         "bsonType": "string"
