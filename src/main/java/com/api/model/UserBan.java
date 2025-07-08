@@ -18,6 +18,7 @@ import lombok.ToString;
 public class UserBan {
   @Id
   private String userId;
+  private String roleId;
   private String reasonId;
   private ZonedDateTime createdAt;
 }

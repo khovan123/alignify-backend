@@ -62,8 +62,8 @@ public class MongoConfig {
     // this.create_chatRoomsCollection(db);
     // this.create_messagesCollection(db);
     // this.create_notificationsCollection(db);
-    this.create_reasonsCollection(db);
-    this.create_userBansCollection(db);
+    // this.create_reasonsCollection(db);
+    // this.create_userBansCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -350,20 +350,9 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["name", "email", "password", "roleId"],
                   "properties": {
-                    "name": {
-                    "bsonType": "string"
-                    },
-                    "email": {
-                      "bsonType": "string",
-                      "pattern": "^.+@.+\\\\..+$"
-                    },
-                    "password": {
-                      "bsonType": "string",
-                    },
-                    "roleId": {
-                      "bsonType": "string"
+                    "_id": {
+                      "bsonType": "objectId",
                     },
                     "createdAt": {
                       "bsonType": "date"
@@ -1086,6 +1075,9 @@ public class MongoConfig {
                 "bsonType": "object",
                 "required": ["reasonId"],
                 "properties": {
+                    "roleId": {
+                      "bsonType": "string"
+                    },
                     "reasonId": {
                         "bsonType": "string"
                     },

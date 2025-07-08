@@ -198,13 +198,19 @@ public class AuthService {
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> registerAdmin(Admin admin, HttpServletRequest request) {
-        if (adminRepository.existsByEmail(admin.getEmail())) {
+    public ResponseEntity<?> registerAdmin(RegisterRequest registerRequest, HttpServletRequest request) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
-        admin.setRoleId(EnvConfig.ADMIN_ROLE_ID);
-        admin.setPassword(JwtUtil.hashPassword(admin.getPassword()));
+        User user = new User();
+        user.setEmail(registerRequest.getEmail());
+        user.setRoleId(EnvConfig.ADMIN_ROLE_ID);
+        user.setPassword(JwtUtil.hashPassword(registerRequest.getPassword()));
+        user.setName(registerRequest.getName());
+        Admin admin = new Admin();
+        admin.setUserId(admin.getUserId());
         adminRepository.save(admin);
+        userRepository.save(user);
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
@@ -228,6 +234,7 @@ public class AuthService {
             if (!influencerOpt.isPresent()) {
                 Influencer influencer = new Influencer();
                 influencer.setUserId(user.getUserId());
+                influencer.setCreatedAt(user.getCreatedAt());
                 influencerRepository.save(influencer);
             }
         } else if (existing.get().getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
@@ -235,7 +242,16 @@ public class AuthService {
             if (!brandOpt.isPresent()) {
                 Brand brand = new Brand();
                 brand.setUserId(user.getUserId());
+                brand.setCreatedAt(user.getCreatedAt());
                 brandRepository.save(brand);
+            }
+        } else if (existing.get().getRoleId().equals(EnvConfig.ADMIN_ROLE_ID)) {
+            Optional<Admin> adminOpt = adminRepository.findById(user.getUserId());
+            if (!adminOpt.isPresent()) {
+                Admin admin = new Admin();
+                admin.setUserId(user.getUserId());
+                admin.setCreatedAt(user.getCreatedAt());
+                adminRepository.save(admin);
             }
         }
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
