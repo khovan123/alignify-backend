@@ -210,6 +210,7 @@ public class AuthService {
         Admin admin = new Admin();
         admin.setUserId(admin.getUserId());
         adminRepository.save(admin);
+        userRepository.save(user);
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
