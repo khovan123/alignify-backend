@@ -62,6 +62,8 @@ public class MongoConfig {
     // this.create_chatRoomsCollection(db);
     // this.create_messagesCollection(db);
     // this.create_notificationsCollection(db);
+    this.create_reasonsCollection(db);
+    this.create_userBansCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -1071,6 +1073,63 @@ public class MongoConfig {
         .validationOptions(validationOptions);
 
     db.createCollection("notifications", options);
+  }
+
+  public void create_userBansCollection(MongoDatabase db) {
+    if (db.getCollection("userBans") != null) {
+      db.getCollection("userBans").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["reasonId"],
+                "properties": {
+                    "reasonId": {
+                        "bsonType": "string"
+                    },
+                    "createdAt": {
+                        "bsonType": "date"
+                    },
+                }
+            }
+            """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("userBans", options);
+  }
+
+  public void create_reasonsCollection(MongoDatabase db) {
+    if (db.getCollection("reasons") != null) {
+      db.getCollection("reasons").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["content"],
+                "properties": {
+                    "content": {
+                        "bsonType": "string"
+                    },
+                }
+            }
+            """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("reasons", options);
   }
 
   // public void create_campaignTrackingsCollection(MongoDatabase db) {

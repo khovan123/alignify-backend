@@ -1,6 +1,8 @@
 package com.api.controller.websocket.ban;
 
 import java.security.Principal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -11,6 +13,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.api.model.User;
+import com.api.model.UserBan;
+import com.api.repository.UserBanRepository;
 import com.api.repository.UserRepository;
 import com.api.security.StompPrincipal;
 
@@ -19,30 +23,32 @@ public class BanController {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserBanRepository userBanRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/ban/{userId}")
-    public void toggleBanUser(@DestinationVariable("userId") String userId, Principal principal) {
+    public void banUser(@DestinationVariable("userId") String userId, Principal principal) {
         if (principal == null || principal.getName() == null) {
             throw new SecurityException("Access is denied for: " + userId);
         }
 
-        if (principal instanceof StompPrincipal stompPrincipal) {
-            // Optional: Check if the requester is actually an admin (by roleId)
+        if (principal instanceof StompPrincipal) {
             Optional<User> optionalUser = userRepository.findById(userId);
-            if (optionalUser.isEmpty()) {
+            if (!optionalUser.isPresent()) {
                 throw new IllegalArgumentException("User not found: " + userId);
             }
 
             User user = optionalUser.get();
-            user.setActive(!user.isActive()); // Toggle isActive
+            user.setActive(!user.isActive());
             userRepository.save(user);
-
-            // Notify clients
-            messagingTemplate.convertAndSend("/topic/users/" + userId,
-                    Map.of("isActive", user.isActive()));
+            UserBan userBan = new UserBan();
+            userBan.setUserId(userId);
+            userBan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            userBanRepository.save(userBan);
+            messagingTemplate.convertAndSend("/topic/users/" + userId, userBan);
         } else {
             throw new SecurityException("Invalid principal type");
         }
