@@ -199,7 +199,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> registerAdmin(RegisterRequest registerRequest, HttpServletRequest request) {
-        if (adminRepository.existsByEmail(registerRequest.getEmail())) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
         User user = new User();
