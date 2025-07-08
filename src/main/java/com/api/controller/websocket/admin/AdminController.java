@@ -50,7 +50,7 @@ public class AdminController {
             }
 
             User user = optionalUser.get();
-            user.setActive(!user.isActive());
+            user.setActive(false);
             userRepository.save(user);
             UserBan userBan = new UserBan();
             userBan.setUserId(userId);
@@ -59,6 +59,27 @@ public class AdminController {
             userBan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             userBanRepository.save(userBan);
             messagingTemplate.convertAndSend("/topic/users/" + userId, userBan);
+        } else {
+            throw new SecurityException("Invalid principal type");
+        }
+    }
+
+    @MessageMapping("/unban/{userId}")
+    public void unbanUser(@DestinationVariable("userId") String userId, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new SecurityException("Access is denied for: " + userId);
+        }
+
+        if (principal instanceof StompPrincipal) {
+            Optional<User> optionalUser = userRepository.findById(userId);
+            if (!optionalUser.isPresent()) {
+                throw new IllegalArgumentException("User not found: " + userId);
+            }
+
+            User user = optionalUser.get();
+            user.setActive(true);
+            userRepository.save(user);
+            userBanRepository.deleteById(userId);
         } else {
             throw new SecurityException("Invalid principal type");
         }
