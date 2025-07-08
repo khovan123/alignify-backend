@@ -18,6 +18,7 @@ import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,28 +33,11 @@ public class PaymentController {
 
     public static final String URL_PAYPAL_SUCCESS = "pay/success";
     public static final String URL_PAYPAL_CANCEL = "pay/cancel";
-    private static final Map<String, String> BIN_TO_SWIFT = Map.ofEntries(
-            Map.entry("970403", "BFTVVNVX"), // VietinBank
-            Map.entry("970418", "VTCBVNVX"), // Techcombank
-            Map.entry("970415", "SCBLVNVX"), // Standard Chartered
-            Map.entry("970405", "BIDVVNVX"), // BIDV
-            Map.entry("970432", "BFTVVNVX"), // SHB
-            Map.entry("970436", "VCBVVNVX"), // Vietcombank
-            Map.entry("970407", "SACLVNVX"), // Sacombank
-            Map.entry("970422", "EIBVVNVX"), // Eximbank
-            Map.entry("970423", "TPBVVNVX"), // TPBank
-            Map.entry("970427", "OCBVVNVX"), // OCB
-            Map.entry("970430", "VPBKVNVX"), // VPBank
-            Map.entry("970406", "HVBKVNVX"), // HSBC
-            Map.entry("970441", "ABBKVNVX"), // ABBank
-            Map.entry("970428", "MBBKVNVX"), // MBBank
-            Map.entry("970454", "NVBAVNVX"), // Nam A Bank
-            Map.entry("970429", "VIBVVNVX"), // VIB
-            Map.entry("970431", "SEAVVNVX"), // SeABank
-            Map.entry("970452", "PVBKVNVX"), // PVcomBank
-            Map.entry("970437", "LPBKVNVX"), // LienVietPostBank
-            Map.entry("970440", "BVBVVNVX") // Bao Viet Bank
-    );
+    @Value("${vietqr.bankCode}")
+    private String bankCode;
+
+    @Value("${vietqr.account}")
+    private String bankAccount;
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -66,19 +50,14 @@ public class PaymentController {
     }
 
     @GetMapping("/pay-bank")
-    public ResponseEntity<byte[]> generateBankQr(
-            @RequestParam("amount") long amount,
-            @RequestParam("bankCode") String bankCode,
-            @RequestParam("account") String bankAccount) {
+    public ResponseEntity<byte[]> generateBankQr(@RequestParam("amount") long amount) {
         try {
-            String swiftCode = BIN_TO_SWIFT.getOrDefault(bankCode, bankCode); // Ánh xạ nếu cần
-            String payload = VietQRGenerator.generateVietQrPayload(swiftCode, bankAccount, amount);
-            byte[] qrImage = VietQRGenerator.generateQRImage(payload);
-
+            String payload = VietQRGenerator.generateVietQrPayload(bankCode, bankAccount, amount);
+            byte[] qrBytes = VietQRGenerator.generateQRImage(payload);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_PNG);
+            return ResponseEntity.ok().headers(headers).body(qrBytes);
 
-            return ResponseEntity.ok().headers(headers).body(qrImage);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
