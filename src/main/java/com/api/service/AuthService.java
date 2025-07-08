@@ -198,11 +198,17 @@ public class AuthService {
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> registerAdmin(Admin admin, HttpServletRequest request) {
-        if (adminRepository.existsByEmail(admin.getEmail())) {
+    public ResponseEntity<?> registerAdmin(RegisterRequest registerRequest, HttpServletRequest request) {
+        if (adminRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
-        admin.setPassword(JwtUtil.hashPassword(admin.getPassword()));
+        User user = new User();
+        user.setEmail(registerRequest.getEmail());
+        user.setRoleId(EnvConfig.ADMIN_ROLE_ID);
+        user.setPassword(JwtUtil.hashPassword(registerRequest.getPassword()));
+        user.setName(registerRequest.getName());
+        Admin admin = new Admin();
+        admin.setUserId(admin.getUserId());
         adminRepository.save(admin);
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
