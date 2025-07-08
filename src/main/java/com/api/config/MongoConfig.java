@@ -63,7 +63,7 @@ public class MongoConfig {
     // this.create_messagesCollection(db);
     // this.create_notificationsCollection(db);
     // this.create_reasonsCollection(db);
-    // this.create_userBansCollection(db);
+    this.create_userBansCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -1075,6 +1075,9 @@ public class MongoConfig {
                 "bsonType": "object",
                 "required": ["reasonId"],
                 "properties": {
+                    "roleId": {
+                      "bsonType": "string"
+                    },
                     "reasonId": {
                         "bsonType": "string"
                     },
