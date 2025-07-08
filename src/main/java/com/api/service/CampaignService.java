@@ -279,9 +279,11 @@ public class CampaignService {
 
     public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails,
             HttpServletRequest request) {
-        List<String> campaignIdsPage = campaignTrackingRepository
-                .findCampaignIdsByInfluencerId(userDetails.getUserId());
-        List<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIdsPage);
+        List<CampaignTracking> campaignTrackings = campaignTrackingRepository
+                .findAllByInfluencerId(userDetails.getUserId());
+        List<String> campaignIds = campaignTrackings.stream().map(campaignTracking -> campaignTracking.getCampaignId())
+                .toList();
+        List<Campaign> campaignPage = campaignRepo.findAllByCampaignIdIn(campaignIds);
         List<CampaignResponse> dtoList = campaignPage.stream()
                 .map(campaign -> {
                     Optional<User> user = userRepository.findById(campaign.getBrandId());
