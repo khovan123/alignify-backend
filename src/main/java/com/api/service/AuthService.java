@@ -234,6 +234,7 @@ public class AuthService {
             if (!influencerOpt.isPresent()) {
                 Influencer influencer = new Influencer();
                 influencer.setUserId(user.getUserId());
+                influencer.setCreatedAt(user.getCreatedAt());
                 influencerRepository.save(influencer);
             }
         } else if (existing.get().getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
@@ -241,7 +242,16 @@ public class AuthService {
             if (!brandOpt.isPresent()) {
                 Brand brand = new Brand();
                 brand.setUserId(user.getUserId());
+                brand.setCreatedAt(user.getCreatedAt());
                 brandRepository.save(brand);
+            }
+        } else if (existing.get().getRoleId().equals(EnvConfig.ADMIN_ROLE_ID)) {
+            Optional<Admin> adminOpt = adminRepository.findById(user.getUserId());
+            if (!adminOpt.isPresent()) {
+                Admin admin = new Admin();
+                admin.setUserId(user.getUserId());
+                admin.setCreatedAt(user.getCreatedAt());
+                adminRepository.save(admin);
             }
         }
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
