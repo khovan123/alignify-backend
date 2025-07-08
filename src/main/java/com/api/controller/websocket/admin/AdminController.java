@@ -15,7 +15,6 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import com.api.config.EnvConfig;
@@ -38,7 +37,7 @@ public class AdminController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/ban/{userId}")
     public void banUser(@DestinationVariable("userId") String userId, Principal principal) {
         if (principal == null || principal.getName() == null) {
@@ -65,7 +64,7 @@ public class AdminController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/isBanned/{userId}")
     public void checkIfBanned(@DestinationVariable("userId") String userId, Principal principal) {
         if (principal == null || principal.getName() == null) {
@@ -82,7 +81,7 @@ public class AdminController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/users/influencers/normal")
     public void getNormalInfluencers(
             @Payload CommonPageRequest pageRequest,
@@ -104,7 +103,7 @@ public class AdminController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/users/influencers/banned")
     public void getBannedInfluencers(
             @Payload CommonPageRequest pageRequest,
@@ -123,7 +122,7 @@ public class AdminController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/users/brands/normal")
     public void getBrands(
             @Payload CommonPageRequest pageRequest,
@@ -145,7 +144,7 @@ public class AdminController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/users/brands/banned")
     public void getBannedBrands(
             @Payload CommonPageRequest pageRequest,
