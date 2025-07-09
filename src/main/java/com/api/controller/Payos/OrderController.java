@@ -23,7 +23,7 @@ import vn.payos.type.PaymentData;
 import vn.payos.type.PaymentLinkData;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/api/v1/order")
 public class OrderController {
     private final PayOS payOS;
 
@@ -60,6 +60,7 @@ public class OrderController {
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Lỗi tạo payment link: " + e.getMessage());
             response.put("error", -1);
             response.put("message", "fail");
             response.set("data", null);
