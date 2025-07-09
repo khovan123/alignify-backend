@@ -83,6 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         com.auth0.jwt.interfaces.DecodedJWT decodedJWT = JwtUtil.decodeToken(request);
         if (decodedJWT == null) {
             this.sendErrorResponse(response, path, "Invalid token: Token is missing or malformed");
+            return;
         }
         String userId = decodedJWT.getSubject();
         if (userId == null) {
