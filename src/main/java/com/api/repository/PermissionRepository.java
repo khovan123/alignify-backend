@@ -7,5 +7,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.api.model.Permission;
 
 public interface PermissionRepository extends MongoRepository<Permission, String> {
-  List<Permission> findByIdIn(List<String> ids);
+  List<Permission> findByPermissionIdIn(List<String> permissionIds);
 }

@@ -8,5 +8,5 @@ import com.api.model.PlanPermission;
 
 public interface PlanPermissionRepository extends MongoRepository<PlanPermission, String> {
 
-  List<PlanPermission> findByIdIn(List<String> ids);
+  List<PlanPermission> findByPlanPermissionIdIn(List<String> planPermissionIds);
 }
