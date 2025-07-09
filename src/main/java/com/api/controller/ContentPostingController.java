@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +27,7 @@ public class ContentPostingController {
     @Autowired
     ContentPostingService contentPostingSer;
 
-    @PreAuthorize("hasRole('ROLE_INFLUENCER')")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @permissionService.hasPermission('post',authentication.principal)")
     @PostMapping("")
     public ResponseEntity<?> createPost(
             @RequestPart("contentPosting") String obj,
@@ -76,7 +75,7 @@ public class ContentPostingController {
     }
 
     @PutMapping("/{contentId}")
-    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId)")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId,authentication.principal)")
     public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart("contentPosting") String obj,
@@ -88,7 +87,7 @@ public class ContentPostingController {
     }
 
     @DeleteMapping("/{contentId}")
-    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId)")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId,authentication.principal)")
     public ResponseEntity<?> deletePost(
             @PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -104,7 +103,6 @@ public class ContentPostingController {
     // return contentPostingSer.toggleLike(contentId, request);
     // }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/search")
     public ResponseEntity<?> searchContent(
             @RequestParam("term") String term,

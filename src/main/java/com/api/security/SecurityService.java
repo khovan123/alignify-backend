@@ -2,8 +2,6 @@ package com.api.security;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +18,6 @@ import com.api.repository.InvitationRepository;
 
 @Service
 public class SecurityService {
-
-    private static final Logger logger = LoggerFactory.getLogger(SecurityService.class);
 
     @Autowired
     private CampaignRepository campaignRepository;
@@ -50,28 +46,22 @@ public class SecurityService {
     // optionalCampaign.get().getUserId().equals(userId);
     // }
     public boolean isCampaignOwner(String campaignId, Object principal) {
-        logger.debug("Checking if user is campaign owner for campaignId: {}", campaignId);
 
         if (!(principal instanceof CustomUserDetails)) {
-            logger.warn("Principal is not an instance of CustomUserDetails: {}", principal);
             return false;
         }
 
         CustomUserDetails userDetails = (CustomUserDetails) principal;
         String userId = userDetails.getUserId();
-        logger.debug("UserId from principal: {}", userId);
 
         Optional<Campaign> optionalCampaign = campaignRepository.findById(campaignId);
         if (!optionalCampaign.isPresent()) {
-            logger.warn("Campaign not found for campaignId: {}", campaignId);
             return false;
         }
 
         Campaign campaign = optionalCampaign.get();
-        logger.debug("Campaign found: campaignId={}, owner userId={}", campaign.getCampaignId(), campaign.getBrandId());
 
         boolean isOwner = campaign.getBrandId().equals(userId);
-        logger.debug("Is user {} the owner of campaign {}? {}", userId, campaignId, isOwner);
 
         return isOwner;
     }
