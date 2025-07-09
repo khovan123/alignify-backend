@@ -265,7 +265,7 @@ public class MongoConfig {
                       "bsonType": "date"
                     },
                     "autoPaid": {
-                      "bsonType": "boolean"
+                      "bsonType": "bool"
                     }
                   }
             }
