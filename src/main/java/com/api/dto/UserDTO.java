@@ -23,6 +23,14 @@ public class UserDTO {
         this.permissions = permissions;
     }
 
+    public UserDTO(String userId, String name, String avatarUrl, List<Permission> permissions) {
+        this.userId = userId;
+        this.name = name;
+        this.avatarUrl = avatarUrl;
+        this.createdAt = null;
+        this.permissions = permissions;
+    }
+
     public UserDTO(String userId, String name, String avatarUrl, ZonedDateTime createdAt) {
         this.userId = userId;
         this.name = name;
