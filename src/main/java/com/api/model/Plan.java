@@ -62,7 +62,7 @@ public class Plan {
     this.roleId = roleId;
   }
 
-  public List<String> getPermission() {
+  public List<String> getPermissionIds() {
     return permissionIds;
   }
 

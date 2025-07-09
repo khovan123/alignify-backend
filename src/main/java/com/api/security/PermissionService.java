@@ -53,7 +53,7 @@ public class PermissionService {
 
     List<String> permissionIds = user.getPermissionIds();
     if (permissionIds != null && !permissionIds.isEmpty()) {
-      List<Permission> permissions = permissionRepository.findByPermissionIdIn(permissionIds);
+      List<Permission> permissions = permissionRepository.findByIdIn(permissionIds);
       for (Permission perm : permissions) {
         if ("all".equals(perm.getPermissionName())) {
           return true;
@@ -81,13 +81,13 @@ public class PermissionService {
     }
     Plan plan = planOpt.get();
 
-    for (Permission perm : plan.getPermission()) {
+    for (Permission perm : permissionRepository.findByIdIn(plan.getPermissionIds())) {
       if ("all".equals(perm.getPermissionName()) || action.equals(perm.getPermissionName())) {
         return true;
       }
     }
 
-    for (PlanPermission planPerm : plan.getPlanPermissions()) {
+    for (PlanPermission planPerm : planPermissionRepository.findByIdIn(plan.getPlanPermissionIds())) {
       Optional<PlanPermission> planPermissionOpt = planPermissionRepository
           .findById(planPerm.getPlanPermissionId());
       if (planPermissionOpt.isPresent()) {
@@ -120,7 +120,7 @@ public class PermissionService {
     }
     Plan plan = planOpt.get();
 
-    for (PlanPermission planPerm : plan.getPlanPermissions()) {
+    for (PlanPermission planPerm : planPermissionRepository.findByIdIn(plan.getPlanPermissionIds())) {
       Optional<PlanPermission> planPermissionOpt = planPermissionRepository
           .findById(planPerm.getPlanPermissionId());
       if (planPermissionOpt.isPresent()) {
