@@ -1,5 +1,6 @@
 package com.api.model;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -21,13 +22,13 @@ public class Plan {
   private String planName;
   private String description;
   private String roleId;
-  private List<Permission> permission;
-  private List<PlanPermission> planPermissions;
+  private List<String> permissionIds;
+  private List<String> planPermissionIds;
   private double price;
   private double discount;
   private String planType;
   private int planCount;
-  private java.util.Date createdAt;
+  private ZonedDateTime createdAt;
 
   public String getPlanId() {
     return planId;
@@ -61,20 +62,20 @@ public class Plan {
     this.roleId = roleId;
   }
 
-  public List<Permission> getPermission() {
-    return permission;
+  public List<String> getPermission() {
+    return permissionIds;
   }
 
-  public void setPermission(List<Permission> permission) {
-    this.permission = permission;
+  public void setPermissionIds(List<String> permissionIds) {
+    this.permissionIds = permissionIds;
   }
 
-  public List<PlanPermission> getPlanPermissions() {
-    return planPermissions;
+  public List<String> getPlanPermissionIds() {
+    return planPermissionIds;
   }
 
-  public void setPlanPermissions(List<PlanPermission> planPermissions) {
-    this.planPermissions = planPermissions;
+  public void setPlanPermissionIds(List<String> planPermissionIds) {
+    this.planPermissionIds = planPermissionIds;
   }
 
   public double getPrice() {
@@ -109,11 +110,11 @@ public class Plan {
     this.planCount = planCount;
   }
 
-  public java.util.Date getCreatedAt() {
+  public ZonedDateTime getCreatedAt() {
     return createdAt;
   }
 
-  public void setCreatedAt(java.util.Date createdAt) {
+  public void setCreatedAt(ZonedDateTime createdAt) {
     this.createdAt = createdAt;
   }
 }

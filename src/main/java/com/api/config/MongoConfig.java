@@ -109,7 +109,7 @@ public class MongoConfig {
                     },
                     "permissionIds": {
                       "bsonType": "array",
-                      "item":{
+                      "items":{
                         "bsonType": "string"
                       }
                     },
@@ -197,7 +197,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["planName","description","roleId","planPermissions","price","discount","planType","planCount"],
+                  "required": ["planName","description","roleId","planPermissionIds","price","planType","planCount"],
                   "properties": {
                     "planName": {
                       "bsonType": "string",
@@ -210,7 +210,15 @@ public class MongoConfig {
                     },
                     "planPermissionIds": {
                       "bsonType": "array",
-                      "item": "string"
+                      "items": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "permissionIds": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string"
+                      }
                     },
                     "price": {
                       "bsonType": "number"
