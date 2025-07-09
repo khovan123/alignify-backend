@@ -15,8 +15,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import com.api.model.User;
-import com.api.repository.BrandRepository;
-import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
 import com.api.security.StompPrincipal;
 import com.api.util.JwtUtil;
@@ -48,7 +46,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-                if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+                if (accessor != null && (StompCommand.CONNECT.equals(accessor.getCommand()) ||
+                        StompCommand.SEND.equals(accessor.getCommand()))) {
                     String authHeader = accessor.getFirstNativeHeader("Authorization");
                     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                         throw new SecurityException("Missing or invalid Authorization header");
@@ -58,10 +57,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         String userId = JwtUtil.decodeToken(token).getSubject();
                         User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new SecurityException("User not found: " + userId));
-                        String avatarUrl = null;
-                        avatarUrl = userRepository.findById(userId)
-                                .map(User::getAvatarUrl)
-                                .orElse(null);
+                        String avatarUrl = user.getAvatarUrl();
+                        // CustomUserDetails userDetails = new CustomUserDetails(userId,
+                        // user.getRoleId(), "", "");
+                        // UsernamePasswordAuthenticationToken authentication = new
+                        // UsernamePasswordAuthenticationToken(
+                        // userDetails, null, userDetails.getAuthorities());
+                        // SecurityContextHolder.getContext().setAuthentication(authentication);
                         accessor.setUser(new StompPrincipal(userId, user.getName(), user.getRoleId(), avatarUrl));
                     } catch (Exception e) {
                         throw new SecurityException("Security error at websocket: " + e.getMessage());
