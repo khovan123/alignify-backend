@@ -14,12 +14,17 @@ public class StatisticsController {
     private StatisticsService statisticsService;
 
     @GetMapping("/brand")
-    public BrandStatisticsResponse getBrandStatistics(@RequestParam Long brandId) {
-        return statisticsService.getBrandStatistics(brandId);
+    public BrandStatisticsResponse getBrandStatistics(@RequestParam("brandId") String brandId) {
+        try {
+            return statisticsService.getBrandStatistics(brandId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
+        }
     }
 
     @GetMapping("/influencer")
-    public InfluencerStatisticsResponse getInfluencerStatistics(@RequestParam Long influencerId) {
+    public InfluencerStatisticsResponse getInfluencerStatistics(@RequestParam("influencerId") String influencerId) {
         try {
             return statisticsService.getInfluencerStatistics(influencerId);
         } catch (Exception e) {

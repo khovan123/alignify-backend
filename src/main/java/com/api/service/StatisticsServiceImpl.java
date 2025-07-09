@@ -7,6 +7,9 @@ import com.api.model.Application;
 import com.api.model.Invitation;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.InvitationRepository;
+import com.api.repository.ContentPostingRepository;
+// import com.api.repository.CommentRepository;
+// import com.api.repository.LikesRepository;
 // import com.api.repository.CampaignRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,13 +24,17 @@ public class StatisticsServiceImpl implements StatisticsService {
     private ApplicationRepository applicationRepository;
     @Autowired
     private InvitationRepository invitationRepository;
+    @Autowired
+    private ContentPostingRepository contentPostingRepository;
     // @Autowired
-    // private CampaignRepository campaignRepository;
+    // private CommentRepository commentRepository;
+    // @Autowired
+    // private LikesRepository likesRepository;
 
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
 
     @Override
-    public BrandStatisticsResponse getBrandStatistics(Long brandId) {
+    public BrandStatisticsResponse getBrandStatistics(String brandId) {
         String brandIdStr = String.valueOf(brandId);
         List<Application> applications = applicationRepository.findAllByBrandId(brandIdStr);
         List<Invitation> invitations = invitationRepository.findAll()
@@ -84,8 +91,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public InfluencerStatisticsResponse getInfluencerStatistics(Long influencerId) {
-        String influencerIdStr = String.valueOf(influencerId);
+    public InfluencerStatisticsResponse getInfluencerStatistics(String influencerId) {
+        String influencerIdStr = influencerId;
         List<Application> applications = applicationRepository.findAllByInfluencerId(influencerIdStr);
         List<Invitation> invitations = invitationRepository.findAll()
             .stream().filter(i -> influencerIdStr.equals(i.getInfluencerId())).collect(Collectors.toList());
@@ -125,6 +132,43 @@ public class StatisticsServiceImpl implements StatisticsService {
             stat.setRejected(rejected);
             applicationStats.add(stat);
         }
+
+        // Income: group các application APPROVED theo tháng, income = 0 (chưa có payment), campaigns = số application APPROVED
+        Map<String, List<Application>> approvedAppsByMonth = applications.stream()
+            .filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus()))
+            .collect(Collectors.groupingBy(a -> a.getCreatedAt().format(MONTH_FORMATTER)));
+        List<InfluencerStatisticsResponse.Income> incomeStats = new ArrayList<>();
+        for (String month : approvedAppsByMonth.keySet()) {
+            List<Application> monthApps = approvedAppsByMonth.get(month);
+            InfluencerStatisticsResponse.Income stat = new InfluencerStatisticsResponse.Income();
+            stat.setMonth(month);
+            stat.setIncome(0); // Chưa có payment
+            stat.setCampaigns(monthApps.size());
+            incomeStats.add(stat);
+        }
+
+        // Forum: group các contentPosting theo tháng, tính posts, likes, comments, shares/views = 0
+        List<com.api.model.ContentPosting> posts = contentPostingRepository.findAll().stream()
+            .filter(p -> influencerIdStr.equals(p.getUserId())).collect(Collectors.toList());
+        Map<String, List<com.api.model.ContentPosting>> postsByMonth = posts.stream()
+            .collect(Collectors.groupingBy(p -> p.getCreatedDate().format(MONTH_FORMATTER)));
+        List<InfluencerStatisticsResponse.Forum> forumStats = new ArrayList<>();
+        for (String month : postsByMonth.keySet()) {
+            List<com.api.model.ContentPosting> monthPosts = postsByMonth.get(month);
+            int postCount = monthPosts.size();
+            int likeCount = monthPosts.stream().mapToInt(com.api.model.ContentPosting::getLikeCount).sum();
+            int commentCount = monthPosts.stream().mapToInt(com.api.model.ContentPosting::getCommentCount).sum();
+            InfluencerStatisticsResponse.Forum stat = new InfluencerStatisticsResponse.Forum();
+            stat.setMonth(month);
+            stat.setPosts(postCount);
+            stat.setLikes(likeCount);
+            stat.setComments(commentCount);
+            stat.setShares(0);
+            stat.setViews(0);
+            forumStats.add(stat);
+        }
+
+        // Tổng hợp
         int totalApplications = applications.size();
         int totalApproved = (int) applications.stream().filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus())).count();
         int totalPending = (int) applications.stream().filter(a -> "PENDING".equalsIgnoreCase(a.getStatus())).count();
@@ -135,9 +179,20 @@ public class StatisticsServiceImpl implements StatisticsService {
         int totalRejectedInvitations = (int) invitations.stream().filter(i -> "REJECTED".equalsIgnoreCase(i.getStatus())).count();
         double invitationAcceptanceRate = totalInvitations == 0 ? 0 : (double) totalAccepted / totalInvitations;
 
+        // currentMonthIncome: lấy tháng hiện tại
+        String currentMonth = java.time.ZonedDateTime.now().format(MONTH_FORMATTER);
+        int currentMonthIncome = incomeStats.stream().filter(i -> currentMonth.equals(i.getMonth())).mapToInt(InfluencerStatisticsResponse.Income::getIncome).sum();
+        int totalForumPosts = forumStats.stream().mapToInt(InfluencerStatisticsResponse.Forum::getPosts).sum();
+        int totalIncome = incomeStats.stream().mapToInt(InfluencerStatisticsResponse.Income::getIncome).sum();
+        int totalCampaigns = incomeStats.stream().mapToInt(InfluencerStatisticsResponse.Income::getCampaigns).sum();
+        double avgIncomePerCampaign = totalCampaigns == 0 ? 0 : (double) totalIncome / totalCampaigns;
+        double avgIncome = incomeStats.size() == 0 ? 0 : (double) totalIncome / incomeStats.size();
+
         InfluencerStatisticsResponse response = new InfluencerStatisticsResponse();
         response.setApplications(applicationStats);
         response.setInvitations(invitationStats);
+        response.setIncome(incomeStats);
+        response.setForum(forumStats);
         response.setTotalApplications(totalApplications);
         response.setTotalApproved(totalApproved);
         response.setTotalPending(totalPending);
@@ -147,6 +202,13 @@ public class StatisticsServiceImpl implements StatisticsService {
         response.setTotalAccepted(totalAccepted);
         response.setTotalRejectedInvitations(totalRejectedInvitations);
         response.setInvitationAcceptanceRate(invitationAcceptanceRate);
+        response.setCurrentMonthIncome(currentMonthIncome);
+        response.setTotalForumPosts(totalForumPosts);
+        response.setTotalIncome(totalIncome);
+        response.setTotalCampaigns(totalCampaigns);
+        response.setAvgIncomePerCampaign(avgIncomePerCampaign);
+        response.setAvgIncome(avgIncome);
         return response;
     }
+
 }

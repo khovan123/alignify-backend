@@ -7,6 +7,8 @@ import lombok.Data;
 public class InfluencerStatisticsResponse {
     private List<Application> applications;
     private List<Invitation> invitations;
+    private List<Income> income;
+    private List<Forum> forum;
     private int totalApplications;
     private int totalApproved;
     private int totalPending;
@@ -16,6 +18,12 @@ public class InfluencerStatisticsResponse {
     private int totalAccepted;
     private int totalRejectedInvitations;
     private double invitationAcceptanceRate;
+    private int currentMonthIncome;
+    private int totalForumPosts;
+    private int totalIncome;
+    private int totalCampaigns;
+    private double avgIncomePerCampaign;
+    private double avgIncome;
 
     public void setApplications(List<Application> applicationStats) {
         this.applications = applicationStats;
@@ -68,48 +76,30 @@ public class InfluencerStatisticsResponse {
         private int approved;
         private int pending;
         private int rejected;
-
-        public void setMonth(String month) {
-            this.month = month;
-        }
-
-        public void setTotal(int total) {
-            this.total = total;
-        }
-
-        public void setApproved(int approved) {
-            this.approved = approved;
-        }
-
-        public void setPending(int pending) {
-            this.pending = pending;
-        }
-
-        public void setRejected(int rejected) {
-            this.rejected = rejected;
-        }
     }
+
     @Data
     public static class Invitation {
         private String month;
         private int sent;
         private int accepted;
         private int rejected;
+    }
 
-        public void setMonth(String month) {
-            this.month = month;
-        }
+    @Data
+    public static class Income {
+        private String month;
+        private int income;
+        private int campaigns;
+    }
 
-        public void setSent(int sent) {
-            this.sent = sent;
-        }
-
-        public void setAccepted(int accepted) {
-            this.accepted = accepted;
-        }
-
-        public void setRejected(int rejected) {
-            this.rejected = rejected;
-        }
+    @Data
+    public static class Forum {
+        private String month;
+        private int posts;
+        private int likes;
+        private int comments;
+        private int shares;
+        private int views;
     }
 }
