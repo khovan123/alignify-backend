@@ -1,22 +1,28 @@
 
 package com.api.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FeaturePlan {
-    private String futureName;
+    private String name;
     private int amount;
 
-    public FeaturePlan(String futureName, int amount) {
-        this.futureName = futureName;
+    public FeaturePlan(String name, int amount) {
+        this.name = name;
         this.amount = amount;
     }
 
-    public String getFutureName() {
-        return futureName;
+    public String getName() {
+        return name;
     }
 
-    public void setFutureName(String futureName) {
-        this.futureName = futureName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getAmount() {

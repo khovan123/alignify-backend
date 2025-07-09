@@ -17,104 +17,114 @@ import lombok.ToString;
 @Data
 @ToString
 public class Plan {
-  @Id
-  private String planId;
-  private String planName;
-  private String description;
-  private String roleId;
-  private List<String> permissionIds;
-  private List<String> planPermissionIds;
-  private double price;
-  private double discount;
-  private String planType;
-  private int planCount;
-  private ZonedDateTime createdAt;
 
-  public String getPlanId() {
-    return planId;
-  }
+    @Id
+    private String planId;
+    private String planName;
+    private String description;
+    private String roleId;
+    private List<String> permissionIds;
+    private List<String> planPermissionIds;
+    private double price;
+    private double discount;
+    private String planType;
+    private int planCount;
+    private List<FeaturePlan> feature;
+    private ZonedDateTime createdAt;
 
-  public void setPlanId(String planId) {
-    this.planId = planId;
-  }
+    public String getPlanId() {
+        return planId;
+    }
 
-  public String getPlanName() {
-    return planName;
-  }
+    public void setPlanId(String planId) {
+        this.planId = planId;
+    }
 
-  public void setPlanName(String planName) {
-    this.planName = planName;
-  }
+    public String getPlanName() {
+        return planName;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public void setPlanName(String planName) {
+        this.planName = planName;
+    }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public String getRoleId() {
-    return roleId;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-  public void setRoleId(String roleId) {
-    this.roleId = roleId;
-  }
+    public String getRoleId() {
+        return roleId;
+    }
 
-  public List<String> getPermissionIds() {
-    return permissionIds;
-  }
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
 
-  public void setPermissionIds(List<String> permissionIds) {
-    this.permissionIds = permissionIds;
-  }
+    public List<String> getPermissionIds() {
+        return permissionIds;
+    }
 
-  public List<String> getPlanPermissionIds() {
-    return planPermissionIds;
-  }
+    public void setPermissionIds(List<String> permissionIds) {
+        this.permissionIds = permissionIds;
+    }
 
-  public void setPlanPermissionIds(List<String> planPermissionIds) {
-    this.planPermissionIds = planPermissionIds;
-  }
+    public List<String> getPlanPermissionIds() {
+        return planPermissionIds;
+    }
 
-  public double getPrice() {
-    return price;
-  }
+    public void setPlanPermissionIds(List<String> planPermissionIds) {
+        this.planPermissionIds = planPermissionIds;
+    }
 
-  public void setPrice(double price) {
-    this.price = price;
-  }
+    public double getPrice() {
+        return price;
+    }
 
-  public double getDiscount() {
-    return discount;
-  }
+    public void setPrice(double price) {
+        this.price = price;
+    }
 
-  public void setDiscount(double discount) {
-    this.discount = discount;
-  }
+    public double getDiscount() {
+        return discount;
+    }
 
-  public String getPlanType() {
-    return planType;
-  }
+    public void setDiscount(double discount) {
+        this.discount = discount;
+    }
 
-  public void setPlanType(String planType) {
-    this.planType = planType;
-  }
+    public String getPlanType() {
+        return planType;
+    }
 
-  public int getPlanCount() {
-    return planCount;
-  }
+    public void setPlanType(String planType) {
+        this.planType = planType;
+    }
 
-  public void setPlanCount(int planCount) {
-    this.planCount = planCount;
-  }
+    public int getPlanCount() {
+        return planCount;
+    }
 
-  public ZonedDateTime getCreatedAt() {
-    return createdAt;
-  }
+    public void setPlanCount(int planCount) {
+        this.planCount = planCount;
+    }
 
-  public void setCreatedAt(ZonedDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
+    public ZonedDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(ZonedDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+     public List<FeaturePlan> getFeature() {
+        return feature;
+    }
+
+    public void setFeature(List<FeaturePlan> feature) {
+        this.feature = feature;
+    }
 }

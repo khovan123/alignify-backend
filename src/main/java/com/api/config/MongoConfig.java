@@ -38,36 +38,36 @@ public class MongoConfig {
                 new DateToZonedDateTimeConverter()));
     }
 
-  @PostConstruct
-  public void init() {
-    MongoDatabase db = mongoClient.getDatabase(databaseName);
-    // this.create_usersCollection(db);
-    // this.create_influencersCollection(db);
-    // this.create_brandsCollection(db);
-    // this.create_rolesCollection(db);
-    // this.create_categoriesCollection(db);
-    // this.create_adminsCollection(db);
-    // this.create_galleriesCollection(db);
-    // this.create_galleryImagesCollection(db);
-    // this.create_otpsCollection(db);
-    // this.create_accountVerifiedsCollection(db);
-    // this.create_campaignsCollection(db);
-    // this.create_contentPostingsCollection(db);
-    // this.create_likesCollection(db);
-    // this.create_applicationsCollection(db);
-    // this.create_campaignTrackingsCollection(db);
-    // this.create_commentsCollection(db);
-    // this.create_chatRoomsCollection(db);
-    // this.create_messagesCollection(db);
-    // this.create_notificationsCollection(db);
-    // this.create_reasonsCollection(db);
-    // this.create_userBansCollection(db);
-    // this.create_packageTypeCollection(db);
-    // this.create_permissionsCollection(db);
-    // this.create_planPermissionsCollection(db);
-    // this.create_userPlansCollection(db);
-    // this.create_plansCollection(db);
-  }
+    @PostConstruct
+    public void init() {
+        MongoDatabase db = mongoClient.getDatabase(databaseName);
+        // this.create_usersCollection(db);
+        // this.create_influencersCollection(db);
+        // this.create_brandsCollection(db);
+        // this.create_rolesCollection(db);
+        // this.create_categoriesCollection(db);
+        // this.create_adminsCollection(db);
+        // this.create_galleriesCollection(db);
+        // this.create_galleryImagesCollection(db);
+        // this.create_otpsCollection(db);
+        // this.create_accountVerifiedsCollection(db);
+        // this.create_campaignsCollection(db);
+        // this.create_contentPostingsCollection(db);
+        // this.create_likesCollection(db);
+        // this.create_applicationsCollection(db);
+        // this.create_campaignTrackingsCollection(db);
+        // this.create_commentsCollection(db);
+        // this.create_chatRoomsCollection(db);
+        // this.create_messagesCollection(db);
+        // this.create_notificationsCollection(db);
+        // this.create_reasonsCollection(db);
+        // this.create_userBansCollection(db);
+        // this.create_packageTypeCollection(db);
+        // this.create_permissionsCollection(db);
+        // this.create_planPermissionsCollection(db);
+        // this.create_userPlansCollection(db);
+        // this.create_plansCollection(db);
+    }
 
     public void create_usersCollection(MongoDatabase db) {
         if (db.getCollection("users") != null) {
@@ -124,15 +124,15 @@ public class MongoConfig {
         CreateCollectionOptions options = new CreateCollectionOptions()
                 .validationOptions(validationOptions);
 
-    db.createCollection("users", options);
-  }
-
-  public void create_permissionsCollection(MongoDatabase db) {
-    if (db.getCollection("permissions") != null) {
-      db.getCollection("permissions").drop();
+        db.createCollection("users", options);
     }
-    Document jsonSchema = Document.parse(
-        """
+
+    public void create_permissionsCollection(MongoDatabase db) {
+        if (db.getCollection("permissions") != null) {
+            db.getCollection("permissions").drop();
+        }
+        Document jsonSchema = Document.parse(
+                """
             {
                   "bsonType": "object",
                   "required": ["permissionName","permissionDescription"],
@@ -147,21 +147,21 @@ public class MongoConfig {
                   }
             }
             """);
-    ValidationOptions validationOptions = new ValidationOptions()
-        .validator(new Document("$jsonSchema", jsonSchema));
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
 
-    CreateCollectionOptions options = new CreateCollectionOptions()
-        .validationOptions(validationOptions);
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
 
-    db.createCollection("permissions", options);
-  }
-
-  public void create_planPermissionsCollection(MongoDatabase db) {
-    if (db.getCollection("planPermissions") != null) {
-      db.getCollection("planPermissions").drop();
+        db.createCollection("permissions", options);
     }
-    Document jsonSchema = Document.parse(
-        """
+
+    public void create_planPermissionsCollection(MongoDatabase db) {
+        if (db.getCollection("planPermissions") != null) {
+            db.getCollection("planPermissions").drop();
+        }
+        Document jsonSchema = Document.parse(
+                """
             {
                   "bsonType": "object",
                   "required": ["planPermissionName","roleId","limited"],
@@ -179,21 +179,21 @@ public class MongoConfig {
                   }
             }
             """);
-    ValidationOptions validationOptions = new ValidationOptions()
-        .validator(new Document("$jsonSchema", jsonSchema));
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
 
-    CreateCollectionOptions options = new CreateCollectionOptions()
-        .validationOptions(validationOptions);
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
 
-    db.createCollection("planPermissions", options);
-  }
-
-  public void create_plansCollection(MongoDatabase db) {
-    if (db.getCollection("plans") != null) {
-      db.getCollection("plans").drop();
+        db.createCollection("planPermissions", options);
     }
-    Document jsonSchema = Document.parse(
-        """
+
+    public void create_plansCollection(MongoDatabase db) {
+        if (db.getCollection("plans") != null) {
+            db.getCollection("plans").drop();
+        }
+        Document jsonSchema = Document.parse(
+                """
             {
                   "bsonType": "object",
                   "required": ["planName","description","roleId","planPermissionIds","price","planType","planCount"],
@@ -219,9 +219,15 @@ public class MongoConfig {
                         "bsonType": "string"
                       }
                     },
+                    "feature": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "object"
+                      }
+                    },   
                     "price": {
                       "bsonType": "number"
-                    }
+                    },
                     "discount": {
                       "bsonType": "number"
                     },
@@ -235,21 +241,21 @@ public class MongoConfig {
                   }
             }
             """);
-    ValidationOptions validationOptions = new ValidationOptions()
-        .validator(new Document("$jsonSchema", jsonSchema));
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
 
-    CreateCollectionOptions options = new CreateCollectionOptions()
-        .validationOptions(validationOptions);
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
 
-    db.createCollection("plans", options);
-  }
-
-  public void create_userPlansCollection(MongoDatabase db) {
-    if (db.getCollection("userPlans") != null) {
-      db.getCollection("userPlans").drop();
+        db.createCollection("plans", options);
     }
-    Document jsonSchema = Document.parse(
-        """
+
+    public void create_userPlansCollection(MongoDatabase db) {
+        if (db.getCollection("userPlans") != null) {
+            db.getCollection("userPlans").drop();
+        }
+        Document jsonSchema = Document.parse(
+                """
             {
                   "bsonType": "object",
                   "required": ["userId","planId", "createdAt", "autoPaid"],
@@ -269,14 +275,14 @@ public class MongoConfig {
                   }
             }
             """);
-    ValidationOptions validationOptions = new ValidationOptions()
-        .validator(new Document("$jsonSchema", jsonSchema));
+        ValidationOptions validationOptions = new ValidationOptions()
+                .validator(new Document("$jsonSchema", jsonSchema));
 
-    CreateCollectionOptions options = new CreateCollectionOptions()
-        .validationOptions(validationOptions);
+        CreateCollectionOptions options = new CreateCollectionOptions()
+                .validationOptions(validationOptions);
 
-    db.createCollection("userPlans", options);
-  }
+        db.createCollection("userPlans", options);
+    }
 
     public void create_influencersCollection(MongoDatabase db) {
         if (db.getCollection("influencers") != null) {
