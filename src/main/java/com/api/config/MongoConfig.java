@@ -102,6 +102,15 @@ public class MongoConfig {
                     },
                     "createdAt": {
                       "bsonType": "date"
+                    },
+                    "permissionIds": {
+                      "bsonType": "array",
+                      "item":{
+                        "bsonType": "string"
+                      }
+                    },
+                    "userPlanId": {
+                      "bsonType": "string"
                     }
                   }
             }
@@ -113,6 +122,149 @@ public class MongoConfig {
         .validationOptions(validationOptions);
 
     db.createCollection("users", options);
+  }
+
+  public void create_permissionsCollection(MongoDatabase db) {
+    if (db.getCollection("permissions") != null) {
+      db.getCollection("permissions").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["permissionName","permissionDescription"],
+                  "properties": {
+                    "permissionName": {
+                      "bsonType": "string",
+                      "enum": ["posting", "comment", "all"]
+                    },
+                    "permissionDescription": {
+                      "bsonType": "string"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("permissions", options);
+  }
+
+  public void create_planPermissionsCollection(MongoDatabase db) {
+    if (db.getCollection("planPermissions") != null) {
+      db.getCollection("planPermissions").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["planPermissionName","roleId","limited"],
+                  "properties": {
+                    "planPermissionName": {
+                      "bsonType": "string",
+                      "enum": ["search_result","campaign_members","campaign_invitation","campaign_apply"]
+                    },
+                    "limited": {
+                      "bsonType": "number"
+                    }
+                    "roleId": {
+                      "bsonType": "string"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("planPermissions", options);
+  }
+
+  public void create_plansCollection(MongoDatabase db) {
+    if (db.getCollection("plans") != null) {
+      db.getCollection("plans").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["planName","description","roleId","planPermissions","price","discount","planType","planCount"],
+                  "properties": {
+                    "planName": {
+                      "bsonType": "string",
+                    },
+                    "description": {
+                      "bsonType": "string",
+                    },
+                    "roleId": {
+                      "bsonType": "string",
+                    },
+                    "planPermissionIds": {
+                      "bsonType": "array",
+                      "item": "string"
+                    },
+                    "price": {
+                      "bsonType": "number"
+                    }
+                    "discount": {
+                      "bsonType": "number"
+                    },
+                    "planType": {
+                      "bsonType": "string",
+                      "enum": ["one_month","monthly","one_year"]
+                    },
+                    "planCount": {
+                      "bsonType": "number"
+                    },
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("plans", options);
+  }
+
+  public void create_userPlansCollection(MongoDatabase db) {
+    if (db.getCollection("userPlans") != null) {
+      db.getCollection("userPlans").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["userId","planId", "createdAt", "autoPaid"],
+                  "properties": {
+                    "userId": {
+                      "bsonType": "string",
+                    },
+                    "planId": {
+                      "bsonType": "string"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    },
+                    "autoPaid": {
+                      "bsonType": "boolean"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("userPlans", options);
   }
 
   public void create_influencersCollection(MongoDatabase db) {
