@@ -1,5 +1,6 @@
 package com.api.controller;
 
+import com.api.model.PackageType;
 import com.api.service.PackageTypeService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -23,9 +25,9 @@ public class PackageTypeController {
 
     @PostMapping("")
     public ResponseEntity<?> createPackage(
-            @RequestPart("packageType") String obj,
+            @RequestBody PackageType packageType,
             HttpServletRequest request) {
-        return packageTypeService.createPackage(packageTypeService.convertToPackage(obj), request);
+        return packageTypeService.createPackage(packageType, request);
     }
     @GetMapping("")
     public ResponseEntity<?> getPackage(

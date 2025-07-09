@@ -1151,6 +1151,8 @@ public class MongoConfig {
                     },       
                     "subcribeType": {
                       "bsonType": "string"
+                      "enum" : ["MONTH", "YEAR"]
+                
                     },
                     "roleId": {
                       "bsonType": "string"

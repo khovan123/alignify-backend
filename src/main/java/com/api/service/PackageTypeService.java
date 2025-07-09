@@ -86,7 +86,7 @@ public class PackageTypeService {
             mapper.registerModule(new JavaTimeModule());
             return mapper.readValue(obj, PackageType.class);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid campaign JSON: " + e.getMessage(), e);
+            throw new IllegalArgumentException("Invalid package JSON: " + e.getMessage(), e);
         }
     }
 }
