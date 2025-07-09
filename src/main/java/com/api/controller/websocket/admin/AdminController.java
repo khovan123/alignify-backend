@@ -19,8 +19,10 @@ import org.springframework.stereotype.Controller;
 import com.api.config.EnvConfig;
 import com.api.dto.CommonPageRequest;
 import com.api.dto.UserDTO;
+import com.api.model.Permission;
 import com.api.model.User;
 import com.api.model.UserBan;
+import com.api.repository.PermissionRepository;
 import com.api.repository.UserBanRepository;
 import com.api.repository.UserRepository;
 import com.api.security.StompPrincipal;
@@ -32,6 +34,8 @@ public class AdminController {
     private UserRepository userRepository;
     @Autowired
     private UserBanRepository userBanRepository;
+    @Autowired
+    private PermissionRepository permissionRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -116,7 +120,9 @@ public class AdminController {
                             userBans.stream().map(userBan -> userBan.getUserId()).toList(),
                             pageable);
             List<UserDTO> userDTOs = users.getContent().stream().map(user -> {
-                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), user.getCreatedAt());
+                List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
+                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions,
+                        user.getCreatedAt());
             }).toList();
             messagingTemplate.convertAndSend("/topic/users/influencers/normal", userDTOs);
         } else {
@@ -157,7 +163,9 @@ public class AdminController {
                             userBans.stream().map(userBan -> userBan.getUserId()).toList(),
                             pageable);
             List<UserDTO> userDTOs = users.getContent().stream().map(user -> {
-                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), user.getCreatedAt());
+                List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
+                return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions,
+                        user.getCreatedAt());
             }).toList();
             messagingTemplate.convertAndSend("/topic/users/brands/normal", userDTOs);
         } else {
