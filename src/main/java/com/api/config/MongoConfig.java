@@ -64,10 +64,10 @@ public class MongoConfig {
     // this.create_notificationsCollection(db);
     // this.create_reasonsCollection(db);
     // this.create_userBansCollection(db);
-    this.create_permissionsCollection(db);
-    this.create_planPermissionsCollection(db);
-    this.create_userPlansCollection(db);
-    this.create_plansCollection(db);
+    // this.create_permissionsCollection(db);
+    // this.create_planPermissionsCollection(db);
+    // this.create_userPlansCollection(db);
+    // this.create_plansCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
