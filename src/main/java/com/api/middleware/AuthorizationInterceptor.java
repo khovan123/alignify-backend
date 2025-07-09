@@ -30,7 +30,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        String method = request.getMethod();
+        // String method = request.getMethod();
         String uri = request.getRequestURI();
         if (EXCLUDED_PATHS.stream().anyMatch(path -> uri.startsWith(path) || uri.matches(path.replace("/**", ".*")))) {
             return true;

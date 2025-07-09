@@ -73,7 +73,7 @@ public class CommentController {
     if (principal == null || principal.getName() == null) {
       throw new SecurityException("Access is denied at: " + contentId);
     }
-    if (principal instanceof StompPrincipal stompPrincipal) {
+    if (principal instanceof StompPrincipal) {
       Optional<ContentPosting> contentOpt = contentPostingRepository.findById(contentId);
       if (!contentOpt.isPresent()) {
         throw new SecurityException("Access is denied at: " + contentId);
