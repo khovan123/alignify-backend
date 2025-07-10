@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class FileStorageService {
         this.parsedMaxFileSize = parseFileSize(MAX_FILE_SIZE);
     }
 
+    @SuppressWarnings("rawtypes")
     public String storeFile(MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {
             throw new Exception("File is empty");
@@ -49,7 +51,7 @@ public class FileStorageService {
                             "upload_preset", uploadPreset,
                             "public_id", publicId));
             return (String) uploadResult.get("secure_url");
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new Exception(e);
         }
     }

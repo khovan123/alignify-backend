@@ -61,13 +61,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/api/v1/auth/request-otp/**")
                 || path.equals("/api/v1/auth/verify-otp/**")
                 || path.equals("/api/v1/auth/register/**")
+                || path.equals("/api/v1/auth/register-secret/**")
+                || path.equals("/api/v1/auth/register-secret")
                 || path.equals("/api/v1/auth/login")
                 || path.equals("/api/v1/auth/google/**")
                 || path.equals("/api/v1/auth/google")
                 || path.equals("/api/v1/auth/recovery-password")
                 || path.equals("/api/v1/auth/reset-password/**")
                 || path.matches(
-                        "/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|login|google|reset-password|recovery-password))(.*)?")) {
+                        "/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|register-secret|login|google|reset-password|recovery-password))(.*)?")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -81,6 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         com.auth0.jwt.interfaces.DecodedJWT decodedJWT = JwtUtil.decodeToken(request);
         if (decodedJWT == null) {
             this.sendErrorResponse(response, path, "Invalid token: Token is missing or malformed");
+            return;
         }
         String userId = decodedJWT.getSubject();
         if (userId == null) {

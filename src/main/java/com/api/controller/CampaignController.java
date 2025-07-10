@@ -60,7 +60,7 @@ public class CampaignController {
     // }
     // --update thêm file ảnh--vao request
     @PostMapping("")
-    @PreAuthorize("hasRole('ROLE_BRAND')")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @permissionService.hasPermission('posting',authentication.principal)")
     public ResponseEntity<?> createCampaign(
             @RequestPart("campaign") String obj,
             @RequestPart(value = "image", required = false) MultipartFile image,
