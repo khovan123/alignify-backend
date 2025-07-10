@@ -19,9 +19,13 @@ import org.springframework.stereotype.Controller;
 import com.api.config.EnvConfig;
 import com.api.dto.CommonPageRequest;
 import com.api.dto.UserDTO;
+import com.api.dto.response.CampaignResponse;
+import com.api.model.Campaign;
 import com.api.model.Permission;
 import com.api.model.User;
 import com.api.model.UserBan;
+import com.api.repository.CampaignRepository;
+import com.api.repository.CategoryRepository;
 import com.api.repository.PermissionRepository;
 import com.api.repository.UserBanRepository;
 import com.api.repository.UserRepository;
@@ -36,6 +40,10 @@ public class AdminController {
     private UserBanRepository userBanRepository;
     @Autowired
     private PermissionRepository permissionRepository;
+    @Autowired
+    private CampaignRepository campaignRepository;
+    @Autowired
+    CategoryRepository categoryRepository;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -187,6 +195,23 @@ public class AdminController {
                 return new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), user.getCreatedAt());
             }).toList();
             messagingTemplate.convertAndSend("/topic/users/brands/banned", userDTOs);
+        } else {
+            throw new SecurityException("Invalid principal type");
+        }
+    }
+
+    @MessageMapping("/campaigns")
+    public void getAllCampaigns(
+            @Payload CommonPageRequest pageRequest,
+            Principal principal) {
+        if (principal instanceof StompPrincipal) {
+            Pageable pageable = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize());
+            Page<Campaign> campaignPage = campaignRepository.findAll(pageable);
+            List<CampaignResponse> campaignResponses = campaignPage.getContent().stream().map(campaign -> {
+                User user = userRepository.findByUserId(campaign.getBrandId()).get();
+                return new CampaignResponse(user, campaign, categoryRepository);
+            }).toList();
+            messagingTemplate.convertAndSend("/topic/campaigns", campaignResponses);
         } else {
             throw new SecurityException("Invalid principal type");
         }
