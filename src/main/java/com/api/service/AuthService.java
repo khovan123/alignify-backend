@@ -125,7 +125,10 @@ public class AuthService {
             }
             Role role = roleRepository.findById(user.getRoleId()).get();
             UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatar);
-
+            Optional<UserBan> userBanOpt = userBanRepository.findById(user.getUserId());
+            if (userBanOpt.isPresent()) {
+                return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
+            }
             return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                     "token", JwtUtil.createToken(user),
                     "role", role.getRoleName(),
