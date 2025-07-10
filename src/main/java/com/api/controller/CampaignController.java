@@ -157,6 +157,6 @@ public class CampaignController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request) {
-        return campaignService.getAllCampaignOfBrand(userDetails, request);
+        return campaignService.getAllRecruitingCampaignOfBrand(userDetails, request);
     }
 }
