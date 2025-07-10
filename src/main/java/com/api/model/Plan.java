@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Document(collection = "plans")
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 @ToString
@@ -25,12 +24,18 @@ public class Plan {
     private String roleId;
     private List<String> permissionIds;
     private List<String> planPermissionIds;
-    private double price;
-    private double discount;
+    private Double price;
+    private Double discount;
     private String planType;
     private int planCount;
-    private List<FeaturePlan> feature;
     private ZonedDateTime createdAt;
+    private boolean isPopular;
+
+    public Plan() {
+        this.discount = 0.0;
+        this.planCount = 0;
+        this.isPopular = false;
+    }
 
     public String getPlanId() {
         return planId;
@@ -80,19 +85,19 @@ public class Plan {
         this.planPermissionIds = planPermissionIds;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public double getDiscount() {
+    public Double getDiscount() {
         return discount;
     }
 
-    public void setDiscount(double discount) {
+    public void setDiscount(Double discount) {
         this.discount = discount;
     }
 
@@ -119,12 +124,13 @@ public class Plan {
     public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
-    
-     public List<FeaturePlan> getFeature() {
-        return feature;
+
+    public boolean isPopular() {
+        return isPopular;
     }
 
-    public void setFeature(List<FeaturePlan> feature) {
-        this.feature = feature;
+    public void setPopular(boolean isPopular) {
+        this.isPopular = isPopular;
     }
+    
 }

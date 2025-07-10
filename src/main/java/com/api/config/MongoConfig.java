@@ -219,14 +219,11 @@ public class MongoConfig {
                         "bsonType": "string"
                       }
                     },
-                    "feature": {
-                      "bsonType": "array",
-                      "items": {
-                        "bsonType": "object"
-                      }
-                    },   
                     "price": {
                       "bsonType": "number"
+                    },
+                    "isPopular": {
+                      "bsonType": "boolean"
                     },
                     "discount": {
                       "bsonType": "number"

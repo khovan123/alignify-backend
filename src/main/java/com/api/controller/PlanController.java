@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,20 +31,20 @@ public class PlanController {
     }
     @GetMapping("")
     public ResponseEntity<?> getPlan(
-            @PathVariable("roleId") String roleId,
+            @RequestParam("roleId") String roleId,
             HttpServletRequest request){
         return planService.getAllPlanByRoleId(roleId, request);
     }
-    @PutMapping("")
+    @PutMapping("/{planId}")
      public ResponseEntity<?> updatePlan(@PathVariable("planId") String planId,
-            @RequestPart("plan") String obj,
+            @RequestBody Plan plan,
             HttpServletRequest request) {
-        return planService.updatePlan(planId, planService.convertToPlan(obj),request);
+        return planService.updatePlan(planId, plan,request);
     }
-    @DeleteMapping("")
+    @DeleteMapping("/{planId}")
      public ResponseEntity<?> deletePlan(
-            @PathVariable("packageId") String packageId,
+            @PathVariable("planId") String planId,
             HttpServletRequest request) {
-        return planService.deletePlan(packageId, request);
+        return planService.deletePlan(planId, request);
     }
 }
