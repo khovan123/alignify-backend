@@ -27,6 +27,7 @@ import com.api.model.Influencer;
 import com.api.model.Permission;
 import com.api.model.Role;
 import com.api.model.User;
+import com.api.model.UserBan;
 import com.api.repository.AccountVerifiedRepository;
 import com.api.repository.AdminRepository;
 import com.api.repository.BrandRepository;
@@ -34,6 +35,7 @@ import com.api.repository.GalleryRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.PermissionRepository;
 import com.api.repository.RoleRepository;
+import com.api.repository.UserBanRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.JwtUtil;
@@ -69,6 +71,8 @@ public class AuthService {
     private AccountVerifiedRepository accountVerifiedRepository;
     @Autowired
     private PermissionRepository permissionRepository;
+    @Autowired
+    private UserBanRepository userBanRepository;
     @Value("${spring.google.client-id}")
     private String clientId;
     @Value("${spring.google.secret-key}")
@@ -232,6 +236,10 @@ public class AuthService {
         Optional<Role> role = roleRepository.findById(user.getRoleId());
         if (!role.isPresent()) {
             return ApiResponse.sendError(400, "Invalid role", request.getRequestURI());
+        }
+        Optional<UserBan> userBanOpt = userBanRepository.findById(user.getUserId());
+        if (userBanOpt.isPresent()) {
+            return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
         }
         String avatarUrl = user.getAvatarUrl();
         List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
