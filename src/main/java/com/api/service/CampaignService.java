@@ -271,6 +271,22 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
+    public ResponseEntity<?> getAllRecruitingCampaignOfBrand(CustomUserDetails userDetails,
+            HttpServletRequest request) {
+
+        List<Campaign> campaignPage = campaignRepo.findAllByBrandIdAndStatus(userDetails.getUserId(), "RECRUITING");
+        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
+
+        List<CampaignResponse> dtoList = campaignPage.stream()
+                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
     public ResponseEntity<?> getAllCampaignOfBrandNoPage(CustomUserDetails userDetails, HttpServletRequest request) {
 
         List<Campaign> campaigns = campaignRepo.findAllByBrandId(userDetails.getUserId());

@@ -149,4 +149,14 @@ public class CampaignController {
             HttpServletRequest request) {
         return campaignService.searchByTerm(term, pageNumber, pageSize, userDetails, request);
     }
+
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    @GetMapping("/recruting")
+    public ResponseEntity<?> getAllRecruitingCampaignOfBrand(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+        return campaignService.getAllCampaignOfBrand(userDetails, request);
+    }
 }
