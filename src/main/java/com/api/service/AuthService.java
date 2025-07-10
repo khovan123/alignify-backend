@@ -1,6 +1,7 @@
 package com.api.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,14 +24,18 @@ import com.api.model.Admin;
 import com.api.model.Brand;
 import com.api.model.Gallery;
 import com.api.model.Influencer;
+import com.api.model.Permission;
 import com.api.model.Role;
 import com.api.model.User;
+import com.api.model.UserBan;
 import com.api.repository.AccountVerifiedRepository;
 import com.api.repository.AdminRepository;
 import com.api.repository.BrandRepository;
 import com.api.repository.GalleryRepository;
 import com.api.repository.InfluencerRepository;
+import com.api.repository.PermissionRepository;
 import com.api.repository.RoleRepository;
+import com.api.repository.UserBanRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.JwtUtil;
@@ -64,6 +69,10 @@ public class AuthService {
     private OtpService otpService;
     @Autowired
     private AccountVerifiedRepository accountVerifiedRepository;
+    @Autowired
+    private PermissionRepository permissionRepository;
+    @Autowired
+    private UserBanRepository userBanRepository;
     @Value("${spring.google.client-id}")
     private String clientId;
     @Value("${spring.google.secret-key}")
@@ -73,6 +82,7 @@ public class AuthService {
     @Value("${spring.google.preset}")
     private String preset;
 
+    @SuppressWarnings("deprecation")
     public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
         if (request.getHeader("X-Requested-With") == null) {
             return ApiResponse.sendError(400, "Missing required header field: X-Requested-With",
@@ -115,7 +125,10 @@ public class AuthService {
             }
             Role role = roleRepository.findById(user.getRoleId()).get();
             UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatar);
-
+            Optional<UserBan> userBanOpt = userBanRepository.findById(user.getUserId());
+            if (userBanOpt.isPresent()) {
+                return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
+            }
             return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                     "token", JwtUtil.createToken(user),
                     "role", role.getRoleName(),
@@ -227,8 +240,13 @@ public class AuthService {
         if (!role.isPresent()) {
             return ApiResponse.sendError(400, "Invalid role", request.getRequestURI());
         }
+        Optional<UserBan> userBanOpt = userBanRepository.findById(user.getUserId());
+        if (userBanOpt.isPresent()) {
+            return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
+        }
         String avatarUrl = user.getAvatarUrl();
-        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl);
+        List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
+        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl, permissions);
         if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
             if (!influencerOpt.isPresent()) {

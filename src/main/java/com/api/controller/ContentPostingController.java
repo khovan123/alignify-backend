@@ -27,7 +27,7 @@ public class ContentPostingController {
     @Autowired
     ContentPostingService contentPostingSer;
 
-    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @permissionService.hasPermission('post',authentication.principal)")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @permissionService.hasPermission('posting',authentication.principal)")
     @PostMapping("")
     public ResponseEntity<?> createPost(
             @RequestPart("contentPosting") String obj,
