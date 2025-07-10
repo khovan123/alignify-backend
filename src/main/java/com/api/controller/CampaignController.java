@@ -151,7 +151,7 @@ public class CampaignController {
     }
 
     @PreAuthorize("hasRole('ROLE_BRAND')")
-    @GetMapping("/recruting")
+    @GetMapping("/recruiting")
     public ResponseEntity<?> getAllRecruitingCampaignOfBrand(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
