@@ -42,7 +42,7 @@ public class AdminRestController {
   @PostMapping("/users/{userId}/{permissionId}")
   public ResponseEntity<?> blockAction(
       @PathVariable("userId") String userId,
-      @PathVariable("permissonId") String permissonId,
+      @PathVariable("permissionId") String permissonId,
       @RequestParam("block") Boolean block,
       HttpServletRequest request) {
     Optional<User> userOpt = userRepository.findById(userId);
