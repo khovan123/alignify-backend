@@ -24,6 +24,7 @@ import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Campaign;
 import com.api.model.ContentPosting;
 import com.api.model.Permission;
+import com.api.model.Reason;
 import com.api.model.User;
 import com.api.model.UserBan;
 import com.api.repository.CampaignRepository;
@@ -57,7 +58,10 @@ public class AdminController {
 
     // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/ban/{userId}")
-    public void banUser(@DestinationVariable("userId") String userId, Principal principal) {
+    public void banUser(
+            @DestinationVariable("userId") String userId,
+            @Payload Reason reason,
+            Principal principal) {
         if (principal == null || principal.getName() == null) {
             throw new SecurityException("Access is denied for: " + userId);
         }
@@ -74,7 +78,7 @@ public class AdminController {
             UserBan userBan = new UserBan();
             userBan.setUserId(userId);
             userBan.setRoleId(user.getRoleId());
-            userBan.setReasonId("SpamId");
+            userBan.setReasonId(reason.getReasonId());
             userBan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             userBanRepository.save(userBan);
             messagingTemplate.convertAndSend("/topic/users/" + userId, userBan);
