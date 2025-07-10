@@ -78,6 +78,7 @@ public class AuthService {
     @Value("${spring.google.preset}")
     private String preset;
 
+    @SuppressWarnings("deprecation")
     public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
         if (request.getHeader("X-Requested-With") == null) {
             return ApiResponse.sendError(400, "Missing required header field: X-Requested-With",

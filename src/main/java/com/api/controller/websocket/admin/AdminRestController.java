@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.api.dto.ApiResponse;
 import com.api.model.Permission;
@@ -42,7 +43,7 @@ public class AdminRestController {
   public ResponseEntity<?> blockAction(
       @PathVariable("userId") String userId,
       @PathVariable("permissonId") String permissonId,
-      @PathVariable("block") boolean block,
+      @RequestParam("block") Boolean block,
       HttpServletRequest request) {
     Optional<User> userOpt = userRepository.findById(userId);
     if (!userOpt.isPresent()) {
