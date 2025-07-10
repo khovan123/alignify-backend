@@ -1270,7 +1270,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["title", "description],
+                "required": ["title", "description"],
                 "properties": {
                     "title": {
                         "bsonType": "string"
