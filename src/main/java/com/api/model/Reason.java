@@ -1,5 +1,6 @@
 package com.api.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -13,6 +14,8 @@ import lombok.ToString;
 @Data
 @ToString
 public class Reason {
+
+  @Id
   private String reasonId;
   private String title;
   private String description;
