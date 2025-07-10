@@ -14,6 +14,7 @@ import lombok.ToString;
 @ToString
 public class Reason {
   private String reasonId;
-  private String content;
+  private String title;
+  private String description;
 
 }
