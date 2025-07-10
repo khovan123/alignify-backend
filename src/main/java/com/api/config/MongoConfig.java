@@ -42,7 +42,7 @@ public class MongoConfig {
 
   @PostConstruct
   public void init() {
-    MongoDatabase db = mongoClient.getDatabase(databaseName);
+    // MongoDatabase db = mongoClient.getDatabase(databaseName);
     // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
@@ -1270,9 +1270,12 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["content"],
+                "required": ["title", "description"],
                 "properties": {
-                    "content": {
+                    "title": {
+                        "bsonType": "string"
+                    },
+                    "description": {
                         "bsonType": "string"
                     },
                 }

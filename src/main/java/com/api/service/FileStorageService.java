@@ -31,6 +31,7 @@ public class FileStorageService {
         this.parsedMaxFileSize = parseFileSize(MAX_FILE_SIZE);
     }
 
+    @SuppressWarnings("rawtypes")
     public String storeFile(MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {
             throw new Exception("File is empty");
