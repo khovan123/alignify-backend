@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,6 +50,8 @@ public class ContentPostingService {
     private UserRepository userRepository;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public ResponseEntity<?> createContentPosting(
             ContentPosting contentPosting,
@@ -64,6 +67,7 @@ public class ContentPostingService {
         contentPosting.setUserId(userDetails.getUserId());
         contentPosting.setImageUrl(imageUrl);
         contentPosting = contentPostingRepo.save(contentPosting);
+        messagingTemplate.convertAndSend("/topic/contents/post", mapToDTO(contentPosting));
         return ApiResponse.sendSuccess(201, "Content posting created successfully", mapToDTO(contentPosting),
                 request.getRequestURI());
     }

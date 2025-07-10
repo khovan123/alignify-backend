@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,6 +71,8 @@ public class CampaignService {
     private FileStorageService fileStorageService;
     @Autowired
     private BrandRepository brandRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
             HttpServletRequest request) {
@@ -103,6 +106,8 @@ public class CampaignService {
         chatMessage.setUserId("#SYS");
         chatMessage.setSendAt(ZonedDateTime.now());
         chatMessageRepository.save(chatMessage);
+        CampaignResponse campaignResponse = new CampaignResponse(user, campaign, categoryRepo);
+        messagingTemplate.convertAndSend("/topic/campaigns/post", campaignResponse);
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(user, campaign, categoryRepo),
                 request.getRequestURI());
