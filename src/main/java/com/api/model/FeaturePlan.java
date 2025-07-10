@@ -1,4 +1,3 @@
-
 package com.api.model;
 
 import lombok.AllArgsConstructor;
@@ -9,13 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FeaturePlan {
+
     private String name;
     private int amount;
-
-    public FeaturePlan(String name, int amount) {
-        this.name = name;
-        this.amount = amount;
-    }
 
     public String getName() {
         return name;
@@ -32,5 +27,5 @@ public class FeaturePlan {
     public void setAmount(int amount) {
         this.amount = amount;
     }
-    
+
 }
