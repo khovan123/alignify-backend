@@ -20,16 +20,20 @@ import com.api.config.EnvConfig;
 import com.api.dto.CommonPageRequest;
 import com.api.dto.UserDTO;
 import com.api.dto.response.CampaignResponse;
+import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Campaign;
+import com.api.model.ContentPosting;
 import com.api.model.Permission;
 import com.api.model.User;
 import com.api.model.UserBan;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CategoryRepository;
+import com.api.repository.ContentPostingRepository;
 import com.api.repository.PermissionRepository;
 import com.api.repository.UserBanRepository;
 import com.api.repository.UserRepository;
 import com.api.security.StompPrincipal;
+import com.api.service.ContentPostingService;
 
 @Controller
 public class AdminController {
@@ -43,10 +47,13 @@ public class AdminController {
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
-    CategoryRepository categoryRepository;
-
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private ContentPostingRepository contentPostingRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private ContentPostingService contentPostingService;
 
     // @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/ban/{userId}")
@@ -212,6 +219,23 @@ public class AdminController {
                 return new CampaignResponse(user, campaign, categoryRepository);
             }).toList();
             messagingTemplate.convertAndSend("/topic/campaigns", campaignResponses);
+        } else {
+            throw new SecurityException("Invalid principal type");
+        }
+    }
+
+    @MessageMapping("/contents")
+    public void getAllContents(
+            @Payload CommonPageRequest pageRequest,
+            Principal principal) {
+        if (principal instanceof StompPrincipal) {
+            Pageable pageable = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize());
+            Page<ContentPosting> contentsPage = contentPostingRepository.findAll(pageable);
+            List<ContentPostingResponse> contentResponse = contentsPage.getContent().stream()
+                    .map(content -> contentPostingService.mapToDTO(
+                            content))
+                    .toList();
+            messagingTemplate.convertAndSend("/topic/contents", contentResponse);
         } else {
             throw new SecurityException("Invalid principal type");
         }
