@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ public class AdminRestController {
   @Autowired
   private PermissionRepository permissionRepository;
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping("/permissions")
   public ResponseEntity<?> getAllPermissionByRoleId(HttpServletRequest request) {
     List<Permission> permissions = permissionRepository.findAll();
@@ -39,6 +41,7 @@ public class AdminRestController {
     return ApiResponse.sendSuccess(200, "Response successfully", permissions, request.getRequestURI());
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/users/{userId}/{permissionId}")
   public ResponseEntity<?> blockAction(
       @PathVariable("userId") String userId,
