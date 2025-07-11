@@ -42,7 +42,7 @@ public class MongoConfig {
 
   @PostConstruct
   public void init() {
-    MongoDatabase db = mongoClient.getDatabase(databaseName);
+    // MongoDatabase db = mongoClient.getDatabase(databaseName);
     // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
@@ -53,7 +53,7 @@ public class MongoConfig {
     // this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
     // this.create_accountVerifiedsCollection(db);
-    this.create_campaignsCollection(db);
+    // this.create_campaignsCollection(db);
     // this.create_contentPostingsCollection(db);
     // this.create_likesCollection(db);
     // this.create_applicationsCollection(db);
