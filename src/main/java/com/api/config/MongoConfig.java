@@ -42,7 +42,7 @@ public class MongoConfig {
 
   @PostConstruct
   public void init() {
-    // MongoDatabase db = mongoClient.getDatabase(databaseName);
+    MongoDatabase db = mongoClient.getDatabase(databaseName);
     // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
@@ -68,6 +68,7 @@ public class MongoConfig {
     // this.create_planPermissionsCollection(db);
     // this.create_userPlansCollection(db);
     // this.create_plansCollection(db);
+    this.create_invitationsCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {

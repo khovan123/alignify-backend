@@ -60,6 +60,7 @@ public class InvitationController {
         if (campaign.getInfluencerCountExpected() <= campaign.getJoinedInfluencerIds().size()) {
             return ApiResponse.sendError(400, "Your campaign is enough Influencer", request.getRequestURI());
         }
+        List<String> appliedInfluencerIds = campaign.getAppliedInfluencerIds();
         User user = userRepository.findByUserId(brandId).get();
         for (String influencerId : invitationRequest.getInfluencerIds()) {
             ChatRoom chatRoom = chatRoomRepository.findById(invitationRequest.getCampaignId()).get();
@@ -71,9 +72,13 @@ public class InvitationController {
                 invitationRepository.save(invitation);
                 CampaignResponse campaignResponse = new CampaignResponse(user, campaign, categoryRepository);
                 InvitationResponse invitationResponse = new InvitationResponse(invitation, campaignResponse);
+                campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
+                appliedInfluencerIds.add(influencerId);
                 messagingTemplate.convertAndSend("/topic/users/" + influencerId + "/invitations", invitationResponse);
             }
         }
+        campaign.setAppliedInfluencerIds(appliedInfluencerIds);
+        campaignRepository.save(campaign);
         return ApiResponse.sendSuccess(201, "Send invitation successfully!", null, request.getRequestURI());
     }
 
