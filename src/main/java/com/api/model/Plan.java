@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Document(collection = "plans")
@@ -30,11 +29,13 @@ public class Plan {
     private int planCount;
     private ZonedDateTime createdAt;
     private boolean isPopular;
+    private boolean isActive;
 
     public Plan() {
         this.discount = 0.0;
         this.planCount = 0;
         this.isPopular = false;
+        this.isActive = false;
     }
 
     public String getPlanId() {
@@ -131,6 +132,14 @@ public class Plan {
 
     public void setPopular(boolean isPopular) {
         this.isPopular = isPopular;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
     
 }

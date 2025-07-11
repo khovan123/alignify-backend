@@ -23,6 +23,7 @@ public class PlanResponse {
     private int planCount;
     private ZonedDateTime createdAt;
     private boolean isPopular;
+    private boolean isActive;
 
     public PlanResponse(Plan plan, PermissionRepository permissionRepository, PlanPermissionRepository planPermissionRepository) {
         this.planId = plan.getPlanId();
@@ -41,6 +42,7 @@ public class PlanResponse {
         this.planPermissions = (plan.getPlanPermissionIds()!= null && !plan.getPlanPermissionIds().contains(null))
                 ? planPermissionRepository.findAllById(plan.getPlanPermissionIds())
                 : Collections.emptyList();
+        this.isActive = plan.isActive();
     }
 
     public String getPlanId() {
@@ -137,6 +139,14 @@ public class PlanResponse {
 
     public void setIsPopular(boolean isPopular) {
         this.isPopular = isPopular;
+    }
+
+    public boolean isIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
     
 

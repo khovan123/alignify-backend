@@ -132,6 +132,7 @@ public class PlanService {
         }
 
         plan.setPopular(updatedPlan.isPopular());
+        plan.setActive(updatedPlan.isActive());
         PlanResponse planResponse = new PlanResponse(plan, permissionRepository, planPermissionRepository);
 
         planRepository.save(plan);

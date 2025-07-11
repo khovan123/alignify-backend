@@ -224,6 +224,9 @@ public class MongoConfig {
                     "isPopular": {
                       "bsonType": "boolean"
                     },
+                    "isActive": {
+                      "bsonType": "boolean"
+                    },
                     "discount": {
                       "bsonType": "number"
                     },
