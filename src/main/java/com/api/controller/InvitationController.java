@@ -51,10 +51,14 @@ public class InvitationController {
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal)")
     public ResponseEntity<?> sendInvatation(
+            @PathVariable("campaignId") String campaignId,
             @RequestBody InvitationRequest invitationRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
+        if (!campaignId.equals(invitationRequest.getCampaignId())) {
+            return ApiResponse.sendError(400, "Two check failed with id: " + campaignId, request.getRequestURI());
+        }
         Campaign campaign = campaignRepository.findByCampaignIdAndBrandId(invitationRequest.getCampaignId(),
                 brandId).get();
         if (campaign.getInfluencerCountExpected() <= campaign.getJoinedInfluencerIds().size()) {
