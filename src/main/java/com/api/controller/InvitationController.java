@@ -49,7 +49,7 @@ public class InvitationController {
     private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal)")
     public ResponseEntity<?> sendInvatation(
             @RequestBody InvitationRequest invitationRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails,
