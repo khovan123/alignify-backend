@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +40,7 @@ public class InvitationController {
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
     public ResponseEntity<?> sendInvatation(
             @RequestBody InvitationRequest invitationRequest,
-            CustomUserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
         Campaign campaign = campaignRepository.findByCampaignIdAndBrandId(invitationRequest.getCampaignId(),
@@ -62,8 +63,10 @@ public class InvitationController {
 
     @PostMapping("/invitations/{invitationId}/confirm")
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedInvitation(#invitationId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
-    public ResponseEntity<?> confirmInvatation(@RequestParam("accepted") boolean accepted,
-            @PathVariable("invitationId") String invitationId, CustomUserDetails userDetails,
+    public ResponseEntity<?> confirmInvatation(
+            @RequestParam("accepted") boolean accepted,
+            @PathVariable("invitationId") String invitationId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
         Invitation invitation = invitationRepository.findById(invitationId).get();
