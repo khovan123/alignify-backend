@@ -437,7 +437,7 @@ public class CampaignService {
             }
             campaign.setApplicationTotal(0);
             campaign.setAppliedInfluencerIds(new ArrayList<>());
-            campaign.setInfluencerCountCurrent(0);
+            campaign.setJoinedInfluencerIds(new ArrayList<>());
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
@@ -481,7 +481,7 @@ public class CampaignService {
             chatMessage.setSendAt(ZonedDateTime.now());
             chatMessageRepository.save(chatMessage);
         } else if (campaign.getStatus().equals("RECRUITING") && statusRequest.getStatus().equals("PENDING")) {
-            if (campaign.getInfluencerCountCurrent() <= 0) {
+            if (campaign.getJoinedInfluencerIds().size() <= 0) {
                 return ApiResponse.sendError(403, "Please confirm at least one application", request.getRequestURI());
             }
             List<String> influencerIds = campaign.getAppliedInfluencerIds();
@@ -505,7 +505,7 @@ public class CampaignService {
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
             campaign.setApplicationTotal(0);
             campaign.setAppliedInfluencerIds(new ArrayList<>());
-            campaign.setInfluencerCountCurrent(0);
+            campaign.setJoinedInfluencerIds(new ArrayList<>());
         } else if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
             List<Application> applications = applicationRepository.findAllByCampaignIdAndStatus(campaignId, "ACCEPTED");
             if (!applications.isEmpty()) {
@@ -526,7 +526,7 @@ public class CampaignService {
         } else if (statusRequest.getStatus().equals("COMPLETED") && campaign.getStatus().equals("PARTICIPATING")) {
             List<CampaignTracking> campaignTrackings = campaignTrackingRepository
                     .findAllByCampaignIdAndStatus(campaignId, "COMPLETED");
-            if (campaign.getInfluencerCountCurrent() > campaignTrackings.size()) {
+            if (campaign.getJoinedInfluencerIds().size() > campaignTrackings.size()) {
                 return ApiResponse.sendError(403, "All campaign tracking must be completed", request.getRequestURI());
             }
         } else {

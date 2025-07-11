@@ -29,7 +29,7 @@ public class CampaignResponse {
     private List<PlatformRequirement> campaignRequirements;
     private List<InfluencerRequirement> influencerRequirements;
     private int influencerCountExpected;
-    private int influencerCountCurrent;
+    private List<String> joinedInfluencerIds;
     private int applicationTotal;
     private List<String> appliedInfluencerIds;
 
@@ -53,7 +53,7 @@ public class CampaignResponse {
         this.campaignRequirements = campaign.getCampaignRequirements();
         this.influencerRequirements = campaign.getInfluencerRequirements();
         this.influencerCountExpected = campaign.getInfluencerCountExpected();
-        this.influencerCountCurrent = campaign.getInfluencerCountCurrent();
+        this.joinedInfluencerIds = campaign.getJoinedInfluencerIds();
         this.applicationTotal = campaign.getApplicationTotal();
         this.appliedInfluencerIds = campaign.getAppliedInfluencerIds() != null ? campaign.getAppliedInfluencerIds()
                 : List.of();
@@ -187,12 +187,12 @@ public class CampaignResponse {
         this.influencerCountExpected = influencerCountExpected;
     }
 
-    public int getInfluencerCountCurrent() {
-        return influencerCountCurrent;
+    public List<String> getJoinedInfluencerIds() {
+        return joinedInfluencerIds;
     }
 
-    public void setInfluencerCountCurrent(int influencerCountCurrent) {
-        this.influencerCountCurrent = influencerCountCurrent;
+    public void setJoinedInfluencerIds(List<String> joinedInfluencerIds) {
+        this.joinedInfluencerIds = joinedInfluencerIds;
     }
 
     public int getApplicationTotal() {

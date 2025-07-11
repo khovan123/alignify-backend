@@ -65,7 +65,7 @@ public class ApplicationService {
                         return ApiResponse.sendError(404, "id: " + campaignId + " not found", request.getRequestURI());
                 }
                 Campaign campaign = campaignOpt.get();
-                if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
+                if (campaign.getJoinedInfluencerIds().size() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
                 }
                 if (campaign.getAppliedInfluencerIds().contains(influencerId)
@@ -125,7 +125,7 @@ public class ApplicationService {
                 }
                 Application application = applicationOpt.get();
                 Campaign campaign = campaignRepository.findById(application.getCampaignId()).get();
-                if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
+                if (campaign.getJoinedInfluencerIds().size() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Campaign has enough participants", request.getRequestURI());
                 }
                 if (application.getLimited() <= 0) {
@@ -176,14 +176,13 @@ public class ApplicationService {
                                         if (campaign.getApplicationTotal() != appsForCampaign.size()) {
                                                 campaign.setApplicationTotal(appsForCampaign.size());
 
-                                                long acceptedCount = appsForCampaign.stream()
-                                                                .filter(app -> Status.ACCEPTED.toString()
-                                                                                .equals(app.getStatus()))
-                                                                .count();
+                                                List<String> joinedInfluencerIds = appsForCampaign.stream()
+                                                                .filter(app -> app.getStatus()
+                                                                                .equals(Status.ACCEPTED.toString()))
+                                                                .map(Application::getInfluencerId)
+                                                                .toList();
 
-                                                if (campaign.getInfluencerCountCurrent() != acceptedCount) {
-                                                        campaign.setInfluencerCountCurrent((int) acceptedCount);
-                                                }
+                                                campaign.setJoinedInfluencerIds(joinedInfluencerIds);
                                                 campaignRepository.save(campaign);
                                         }
 
@@ -247,11 +246,14 @@ public class ApplicationService {
                                                 campaign.setApplicationTotal(appSize);
                                                 changed = true;
                                         }
-                                        long acceptedCount = appsForCampaign.stream().filter(
-                                                        app -> Status.ACCEPTED.toString().equals(app.getStatus()))
-                                                        .count();
-                                        if (campaign.getInfluencerCountCurrent() != acceptedCount) {
-                                                campaign.setInfluencerCountCurrent((int) acceptedCount);
+                                        List<String> joinedInfluencerIds = appsForCampaign.stream()
+                                                        .filter(app -> app.getStatus()
+                                                                        .equals(Status.ACCEPTED.toString()))
+                                                        .map(Application::getInfluencerId)
+                                                        .toList();
+
+                                        if (campaign.getJoinedInfluencerIds().size() != joinedInfluencerIds.size()) {
+                                                campaign.setJoinedInfluencerIds(joinedInfluencerIds);
                                                 changed = true;
                                         }
                                         if (changed) {
@@ -371,7 +373,7 @@ public class ApplicationService {
                         return ApiResponse.sendError(404, "Campaign not found", request.getRequestURI());
                 }
                 Campaign campaign = campaignOpt.get();
-                if (campaign.getInfluencerCountCurrent() >= campaign.getInfluencerCountExpected()) {
+                if (campaign.getJoinedInfluencerIds().size() >= campaign.getInfluencerCountExpected()) {
                         return ApiResponse.sendError(400, "Reached to limitation", request.getRequestURI());
                 }
                 if (!application.getStatus().equals(Status.PENDING.toString())) {
@@ -385,6 +387,7 @@ public class ApplicationService {
                 }
                 List<String> roomMate = chatRoom.getMembers() == null ? new java.util.ArrayList<>()
                                 : new java.util.ArrayList<>(chatRoom.getMembers());
+                List<String> joinedInfluencerIds = campaign.getJoinedInfluencerIds();
                 if (accepted) {
                         application.setStatus("ACCEPTED");
                         if (!roomMate.contains(application.getInfluencerId())) {
@@ -397,7 +400,8 @@ public class ApplicationService {
                         campaignTrackingRepository.save(campaignTracking);
                         chatRoom.setMembers(roomMate);
                         chatRoomRepository.save(chatRoom);
-                        campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() + 1);
+                        joinedInfluencerIds.add(application.getInfluencerId());
+                        campaign.setJoinedInfluencerIds(joinedInfluencerIds);
                         campaignRepository.save(campaign);
                         ChatMessage chatMessage = new ChatMessage();
                         User user = userRepository.findById(applicationOpt.get().getInfluencerId()).orElse(null);
@@ -421,9 +425,10 @@ public class ApplicationService {
                                         : new java.util.ArrayList<>(campaign.getAppliedInfluencerIds());
                         updatedAppliedInfluencerIds.remove(application.getInfluencerId());
                         campaign.setAppliedInfluencerIds(updatedAppliedInfluencerIds);
-                        if (campaign.getInfluencerCountCurrent() > 0
+                        if (!campaign.getJoinedInfluencerIds().isEmpty()
                                         && Status.ACCEPTED.toString().equals(application.getStatus())) {
-                                campaign.setInfluencerCountCurrent(campaign.getInfluencerCountCurrent() - 1);
+                                joinedInfluencerIds.remove(application.getInfluencerId());
+                                campaign.setJoinedInfluencerIds(joinedInfluencerIds);
                         }
                         campaignRepository.save(campaign);
                 }
