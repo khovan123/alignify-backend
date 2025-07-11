@@ -32,7 +32,7 @@ import com.api.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/v1/invitations")
+@RequestMapping("/api/v1")
 public class InvitationController {
 
     @Autowired
@@ -48,7 +48,7 @@ public class InvitationController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("")
+    @PostMapping("/{campaignId}/invitations")
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal)")
     public ResponseEntity<?> sendInvatation(
             @PathVariable("campaignId") String campaignId,
