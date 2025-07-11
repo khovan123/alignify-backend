@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,12 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.api.dto.ApiResponse;
 import com.api.dto.request.InvitationRequest;
+import com.api.dto.response.CampaignResponse;
+import com.api.dto.response.InvitationResponse;
 import com.api.model.Campaign;
 import com.api.model.ChatRoom;
 import com.api.model.Invitation;
+import com.api.model.User;
 import com.api.repository.CampaignRepository;
+import com.api.repository.CategoryRepository;
 import com.api.repository.ChatRoomRepository;
 import com.api.repository.InvitationRepository;
+import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +41,12 @@ public class InvitationController {
     private ChatRoomRepository chatRoomRepository;
     @Autowired
     private InvitationRepository invitationRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
@@ -48,14 +60,18 @@ public class InvitationController {
         if (campaign.getInfluencerCountExpected() <= campaign.getJoinedInfluencerIds().size()) {
             return ApiResponse.sendError(400, "Your campaign is enough Influencer", request.getRequestURI());
         }
+        User user = userRepository.findByUserId(brandId).get();
         for (String influencerId : invitationRequest.getInfluencerIds()) {
             ChatRoom chatRoom = chatRoomRepository.findById(invitationRequest.getCampaignId()).get();
             if (!(invitationRepository.existsByCampaignIdAndInfluencerId(
                     invitationRequest.getCampaignId(),
                     influencerId) && chatRoom.getMembers().contains(influencerId))) {
-                Invitation invitation = new Invitation(brandId, influencerId, invitationRequest.getCampaignId(),
+                Invitation invitation = new Invitation(brandId, invitationRequest.getCampaignId(), influencerId,
                         invitationRequest.getMessage());
                 invitationRepository.save(invitation);
+                CampaignResponse campaignResponse = new CampaignResponse(user, campaign, categoryRepository);
+                InvitationResponse invitationResponse = new InvitationResponse(invitation, campaignResponse);
+                messagingTemplate.convertAndSend("/topic/users/" + influencerId + "/invitations", invitationResponse);
             }
         }
         return ApiResponse.sendSuccess(201, "Send invitation successfully!", null, request.getRequestURI());
