@@ -83,7 +83,7 @@ public class InvitationController {
             if (!(invitationRepository.existsByCampaignIdAndInfluencerId(
                     invitationRequest.getCampaignId(),
                     influencerId) && chatRoom.getMembers().contains(influencerId))) {
-                User influencer = userRepository.findByUserId(brandId).get();
+                User influencer = userRepository.findByUserId(influencerId).get();
                 Invitation invitation = new Invitation(brandId, invitationRequest.getCampaignId(), influencerId,
                         invitationRequest.getMessage());
                 invitationRepository.save(invitation);
