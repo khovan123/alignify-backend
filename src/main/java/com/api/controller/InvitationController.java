@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api.dto.ApiResponse;
+import com.api.dto.UserDTO;
 import com.api.dto.request.InvitationRequest;
 import com.api.dto.response.CampaignResponse;
 import com.api.dto.response.InvitationResponse;
@@ -65,25 +67,71 @@ public class InvitationController {
             return ApiResponse.sendError(400, "Your campaign is enough Influencer", request.getRequestURI());
         }
         List<String> appliedInfluencerIds = campaign.getAppliedInfluencerIds();
-        User user = userRepository.findByUserId(brandId).get();
+        User brand = userRepository.findByUserId(brandId).get();
         for (String influencerId : invitationRequest.getInfluencerIds()) {
             ChatRoom chatRoom = chatRoomRepository.findById(invitationRequest.getCampaignId()).get();
             if (!(invitationRepository.existsByCampaignIdAndInfluencerId(
                     invitationRequest.getCampaignId(),
                     influencerId) && chatRoom.getMembers().contains(influencerId))) {
+                User influencer = userRepository.findByUserId(brandId).get();
                 Invitation invitation = new Invitation(brandId, invitationRequest.getCampaignId(), influencerId,
                         invitationRequest.getMessage());
                 invitationRepository.save(invitation);
-                CampaignResponse campaignResponse = new CampaignResponse(user, campaign, categoryRepository);
-                InvitationResponse invitationResponse = new InvitationResponse(invitation, campaignResponse);
+                CampaignResponse campaignResponse = new CampaignResponse(brand, campaign,
+                        categoryRepository);
+                InvitationResponse invitationResponseForInfluencer = new InvitationResponse(invitation,
+                        campaignResponse);
+                UserDTO userDTO = new UserDTO(influencer);
+                InvitationResponse invitationResponseForBrand = new InvitationResponse(
+                        userDTO, invitation,
+                        campaignResponse);
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
                 appliedInfluencerIds.add(influencerId);
-                messagingTemplate.convertAndSend("/topic/users/" + influencerId + "/invitations", invitationResponse);
+                messagingTemplate.convertAndSend("/topic/users/" + influencerId + "/invitations",
+                        invitationResponseForInfluencer);
+                messagingTemplate.convertAndSend("/topic/users/" + brandId + "/invitations",
+                        invitationResponseForBrand);
             }
         }
         campaign.setAppliedInfluencerIds(appliedInfluencerIds);
         campaignRepository.save(campaign);
         return ApiResponse.sendSuccess(201, "Send invitation successfully!", null, request.getRequestURI());
+    }
+
+    @GetMapping("/invitations/influencer")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER')")
+    public ResponseEntity<?> getAllInvitationsByInfluencer(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        List<Invitation> invitations = invitationRepository.findAllByInfluencerId(userDetails.getUserId());
+        List<InvitationResponse> invitationResponses = invitations.stream().map(invitation -> {
+            User brand = userRepository.findByUserId(invitation.getBrandId()).get();
+            Campaign campaign = campaignRepository.findByCampaignIdAndBrandId(invitation.getCampaignId(),
+                    invitation.getBrandId()).get();
+            CampaignResponse campaignResponse = new CampaignResponse(brand, campaign, categoryRepository);
+            InvitationResponse invitationResponse = new InvitationResponse(invitation, campaignResponse);
+            return invitationResponse;
+        }).toList();
+        return ApiResponse.sendSuccess(200, "Response successfully!", invitationResponses, request.getRequestURI());
+    }
+
+    @GetMapping("/invitations/brand")
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    public ResponseEntity<?> getAllInvitationsByBrand(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        User brand = userRepository.findByUserId(userDetails.getUserId()).get();
+        List<Invitation> invitations = invitationRepository.findAllByInfluencerId(userDetails.getUserId());
+        List<InvitationResponse> invitationResponses = invitations.stream().map(invitation -> {
+            User influencer = userRepository.findByUserId(invitation.getInfluencerId()).get();
+            Campaign campaign = campaignRepository.findByCampaignIdAndBrandId(invitation.getCampaignId(),
+                    invitation.getBrandId()).get();
+            UserDTO userDTO = new UserDTO(influencer);
+            CampaignResponse campaignResponse = new CampaignResponse(brand, campaign, categoryRepository);
+            InvitationResponse invitationResponse = new InvitationResponse(userDTO, invitation, campaignResponse);
+            return invitationResponse;
+        }).toList();
+        return ApiResponse.sendSuccess(200, "Response successfully!", invitationResponses, request.getRequestURI());
     }
 
     @PostMapping("/invitations/{invitationId}/confirm")
