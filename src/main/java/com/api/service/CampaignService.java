@@ -283,7 +283,8 @@ public class CampaignService {
 
         List<CampaignResponse> dtoList = campaignPage.stream()
                 .map(campaign -> {
-                    List<String> invitedInfluencerIds = invitationRepository.findAllByBrandId(brandId).stream()
+                    List<String> invitedInfluencerIds = invitationRepository
+                            .findAllByBrandIdAndCampaignId(brandId, campaign.getCampaignId()).stream()
                             .map(Invitation::getInfluencerId).toList();
                     return new CampaignResponse(brandUser, campaign, categoryRepo, invitedInfluencerIds);
                 })

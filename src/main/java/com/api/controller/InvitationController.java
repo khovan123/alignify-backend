@@ -144,15 +144,19 @@ public class InvitationController {
         return ApiResponse.sendSuccess(200, "Response successfully!", invitationResponses, request.getRequestURI());
     }
 
-    @PostMapping("/invitations/{invitationId}/confirm")
+    @PostMapping("/campaigns/{campaignId}/invitations/{invitationId}/confirm")
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedInvitation(#invitationId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal)")
     public ResponseEntity<?> confirmInvatation(
             @RequestParam("accepted") boolean accepted,
             @PathVariable("invitationId") String invitationId,
+            @PathVariable("campaignId") String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         String influencerId = userDetails.getUserId();
         Invitation invitation = invitationRepository.findById(invitationId).get();
+        if (!campaignId.equals(invitation.getCampaignId())) {
+            return ApiResponse.sendError(400, "Two check failed with id: " + campaignId, request.getRequestURI());
+        }
         Campaign campaign = campaignRepository
                 .findByCampaignIdAndBrandId(invitation.getCampaignId(), invitation.getBrandId()).get();
         if (campaign.getInfluencerCountExpected() <= campaign.getJoinedInfluencerIds().size()) {
