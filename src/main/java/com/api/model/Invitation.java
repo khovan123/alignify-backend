@@ -20,6 +20,7 @@ public class Invitation {
 
     public Invitation() {
         this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        this.status = "PENDING";
     }
 
     public Invitation(String brandId, String campaignId, String influencerId, String message) {

@@ -104,7 +104,7 @@ public class CampaignService {
         chatMessage.setName(user.getName());
         chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
         chatMessage.setUserId("#SYS");
-        chatMessage.setSendAt(ZonedDateTime.now());
+        chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         chatMessageRepository.save(chatMessage);
         CampaignResponse campaignResponse = new CampaignResponse(user, campaign, categoryRepo);
         messagingTemplate.convertAndSend("/topic/campaigns/post", campaignResponse);
@@ -271,6 +271,38 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
+    public ResponseEntity<?> getAllCampaignOfBrandInInvitation(CustomUserDetails userDetails,
+            HttpServletRequest request) {
+
+        List<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId());
+        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
+
+        List<CampaignResponse> dtoList = campaignPage.stream()
+                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> getAllRecruitingCampaignOfBrand(CustomUserDetails userDetails,
+            HttpServletRequest request) {
+
+        List<Campaign> campaignPage = campaignRepo.findAllByBrandIdAndStatus(userDetails.getUserId(), "RECRUITING");
+        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
+
+        List<CampaignResponse> dtoList = campaignPage.stream()
+                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
+                .toList();
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("campaigns", dtoList);
+
+        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+    }
+
     public ResponseEntity<?> getAllCampaignOfBrandNoPage(CustomUserDetails userDetails, HttpServletRequest request) {
 
         List<Campaign> campaigns = campaignRepo.findAllByBrandId(userDetails.getUserId());
@@ -421,7 +453,7 @@ public class CampaignService {
             }
             campaign.setApplicationTotal(0);
             campaign.setAppliedInfluencerIds(new ArrayList<>());
-            campaign.setInfluencerCountCurrent(0);
+            campaign.setJoinedInfluencerIds(new ArrayList<>());
             campaignRepo.save(campaign);
             chatRoomRepository.save(chatRoom);
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
@@ -462,10 +494,10 @@ public class CampaignService {
             chatMessage.setName(user.getName());
             chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
             chatMessage.setUserId("#SYS");
-            chatMessage.setSendAt(ZonedDateTime.now());
+            chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatMessageRepository.save(chatMessage);
         } else if (campaign.getStatus().equals("RECRUITING") && statusRequest.getStatus().equals("PENDING")) {
-            if (campaign.getInfluencerCountCurrent() <= 0) {
+            if (campaign.getJoinedInfluencerIds().size() <= 0) {
                 return ApiResponse.sendError(403, "Please confirm at least one application", request.getRequestURI());
             }
             List<String> influencerIds = campaign.getAppliedInfluencerIds();
@@ -489,7 +521,7 @@ public class CampaignService {
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
             campaign.setApplicationTotal(0);
             campaign.setAppliedInfluencerIds(new ArrayList<>());
-            campaign.setInfluencerCountCurrent(0);
+            campaign.setJoinedInfluencerIds(new ArrayList<>());
         } else if (statusRequest.getStatus().equals("PARTICIPATING") && campaign.getStatus().equals("PENDING")) {
             List<Application> applications = applicationRepository.findAllByCampaignIdAndStatus(campaignId, "ACCEPTED");
             if (!applications.isEmpty()) {
@@ -510,7 +542,7 @@ public class CampaignService {
         } else if (statusRequest.getStatus().equals("COMPLETED") && campaign.getStatus().equals("PARTICIPATING")) {
             List<CampaignTracking> campaignTrackings = campaignTrackingRepository
                     .findAllByCampaignIdAndStatus(campaignId, "COMPLETED");
-            if (campaign.getInfluencerCountCurrent() > campaignTrackings.size()) {
+            if (campaign.getJoinedInfluencerIds().size() > campaignTrackings.size()) {
                 return ApiResponse.sendError(403, "All campaign tracking must be completed", request.getRequestURI());
             }
         } else {

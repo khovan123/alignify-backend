@@ -68,6 +68,7 @@ public class MongoConfig {
     // this.create_planPermissionsCollection(db);
     // this.create_userPlansCollection(db);
     // this.create_plansCollection(db);
+    // this.create_invitationsCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -818,7 +819,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal", "appliedInfluencerIds"],
+                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "joinedInfluencerIds", "applicationTotal", "appliedInfluencerIds"],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -892,8 +893,11 @@ public class MongoConfig {
                     "influencerCountExpected": {
                         "bsonType": "int"
                     },
-                    "influencerCountCurrent": {
-                        "bsonType": "int"
+                    "joinedInfluencerIds": {
+                        "bsonType": "array",
+                        "items": {
+                          "bsonType": "string"
+                        }
                     },
                     "applicationTotal": {
                         "bsonType": "int"
