@@ -60,7 +60,7 @@ public class InvitationController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/{campaignId}/invitations")
+    @PostMapping("/campaigns/{campaignId}/invitations")
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal)")
     public ResponseEntity<?> sendInvatation(
             @PathVariable("campaignId") String campaignId,
@@ -145,7 +145,7 @@ public class InvitationController {
     }
 
     @PostMapping("/invitations/{invitationId}/confirm")
-    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedInvitation(#invitationId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedInvitation(#invitationId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal)")
     public ResponseEntity<?> confirmInvatation(
             @RequestParam("accepted") boolean accepted,
             @PathVariable("invitationId") String invitationId,
