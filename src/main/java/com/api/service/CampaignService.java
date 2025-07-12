@@ -34,6 +34,7 @@ import com.api.model.CampaignTracking;
 import com.api.model.Category;
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
+import com.api.model.Invitation;
 import com.api.model.User;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.BrandRepository;
@@ -42,6 +43,7 @@ import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
+import com.api.repository.InvitationRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -71,6 +73,8 @@ public class CampaignService {
     private FileStorageService fileStorageService;
     @Autowired
     private BrandRepository brandRepository;
+    @Autowired
+    private InvitationRepository invitationRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
@@ -271,30 +275,18 @@ public class CampaignService {
         return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllCampaignOfBrandInInvitation(CustomUserDetails userDetails,
-            HttpServletRequest request) {
-
-        List<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId());
-        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
-
-        List<CampaignResponse> dtoList = campaignPage.stream()
-                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
-                .toList();
-
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
-    }
-
     public ResponseEntity<?> getAllRecruitingCampaignOfBrand(CustomUserDetails userDetails,
             HttpServletRequest request) {
-
+        String brandId = userDetails.getUserId();
         List<Campaign> campaignPage = campaignRepo.findAllByBrandIdAndStatus(userDetails.getUserId(), "RECRUITING");
-        User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
+        User brandUser = userRepository.findById(brandId).orElse(null);
 
         List<CampaignResponse> dtoList = campaignPage.stream()
-                .map(campaign -> new CampaignResponse(brandUser, campaign, categoryRepo))
+                .map(campaign -> {
+                    List<String> invitedInfluencerIds = invitationRepository.findAllByBrandId(brandId).stream()
+                            .map(Invitation::getInfluencerId).toList();
+                    return new CampaignResponse(brandUser, campaign, categoryRepo, invitedInfluencerIds);
+                })
                 .toList();
 
         Map<String, Object> responseData = new HashMap<>();
