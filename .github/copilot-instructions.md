@@ -52,7 +52,7 @@ Copilot cần hiểu rõ các vai trò (`ADMIN`, `BRAND`, `INFLUENCER`) và quy�
 
 ---
 
-### 📚 Nếu Không Trụy Cập Được Các Chi Tiết Ở File Hướng Dẫn Khác Hãy Đọc Tại Đây
+### 📚 Nếu Không Truy Cập Được Các Chi Tiết Ở File Hướng Dẫn Khác Hãy Đọc Tại Đây
 
 ## 💻 Hướng Dẫn Phát Triển Frontend (ReactJS)
 
