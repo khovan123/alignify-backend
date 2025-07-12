@@ -104,7 +104,7 @@ public class CampaignService {
         chatMessage.setName(user.getName());
         chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
         chatMessage.setUserId("#SYS");
-        chatMessage.setSendAt(ZonedDateTime.now());
+        chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         chatMessageRepository.save(chatMessage);
         CampaignResponse campaignResponse = new CampaignResponse(user, campaign, categoryRepo);
         messagingTemplate.convertAndSend("/topic/campaigns/post", campaignResponse);
@@ -478,7 +478,7 @@ public class CampaignService {
             chatMessage.setName(user.getName());
             chatMessage.setReadBy(new ArrayList<>(Arrays.asList(brandId)));
             chatMessage.setUserId("#SYS");
-            chatMessage.setSendAt(ZonedDateTime.now());
+            chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatMessageRepository.save(chatMessage);
         } else if (campaign.getStatus().equals("RECRUITING") && statusRequest.getStatus().equals("PENDING")) {
             if (campaign.getJoinedInfluencerIds().size() <= 0) {

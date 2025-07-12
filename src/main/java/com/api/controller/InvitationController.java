@@ -1,5 +1,7 @@
 package com.api.controller;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +23,13 @@ import com.api.dto.request.InvitationRequest;
 import com.api.dto.response.CampaignResponse;
 import com.api.dto.response.InvitationResponse;
 import com.api.model.Campaign;
+import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.Invitation;
 import com.api.model.User;
 import com.api.repository.CampaignRepository;
 import com.api.repository.CategoryRepository;
+import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
 import com.api.repository.InvitationRepository;
 import com.api.repository.UserRepository;
@@ -47,6 +51,8 @@ public class InvitationController {
     private CategoryRepository categoryRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ChatMessageRepository chatMessageRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
@@ -135,7 +141,7 @@ public class InvitationController {
     }
 
     @PostMapping("/invitations/{invitationId}/confirm")
-    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedInvitation(#invitationId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedInvitation(#invitationId, authentication.principal) and @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
     public ResponseEntity<?> confirmInvatation(
             @RequestParam("accepted") boolean accepted,
             @PathVariable("invitationId") String invitationId,
@@ -161,6 +167,13 @@ public class InvitationController {
             ChatRoom chatRoom = chatRoomRepository.findById(invitation.getCampaignId()).get();
             chatRoom.getMembers().add(influencerId);
             chatRoomRepository.save(chatRoom);
+            ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setChatRoomId(chatRoom.getChatRoomId());
+            chatMessage.setMessage(userDetails.getUsername() + " đã vào phòng!");
+            chatMessage.setUserId("#SYS");
+            chatMessage.setName(userDetails.getUsername());
+            chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            chatMessageRepository.save(chatMessage);
         } else {
             invitation.setStatus("REJECTED");
             invitationRepository.save(invitation);

@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -412,7 +413,7 @@ public class ApplicationService {
                                 chatMessage.setMessage("Influencer đã vào phòng chat.");
                                 chatMessage.setName("Influencer");
                         }
-                        chatMessage.setSendAt(ZonedDateTime.now());
+                        chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
                         chatMessage.setChatRoomId(chatRoom.getChatRoomId());
                         chatMessage.setUserId("#SYS");
                         chatMessageRepository.save(chatMessage);
