@@ -23,11 +23,13 @@ import com.api.dto.request.InvitationRequest;
 import com.api.dto.response.CampaignResponse;
 import com.api.dto.response.InvitationResponse;
 import com.api.model.Campaign;
+import com.api.model.CampaignTracking;
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
 import com.api.model.Invitation;
 import com.api.model.User;
 import com.api.repository.CampaignRepository;
+import com.api.repository.CampaignTrackingRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
@@ -53,6 +55,8 @@ public class InvitationController {
     private UserRepository userRepository;
     @Autowired
     private ChatMessageRepository chatMessageRepository;
+    @Autowired
+    private CampaignTrackingRepository campaignTrackingRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
@@ -174,6 +178,18 @@ public class InvitationController {
             chatMessage.setName(userDetails.getUsername());
             chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatMessageRepository.save(chatMessage);
+            List<String> roomMate = chatRoom.getMembers() == null ? new java.util.ArrayList<>()
+                    : new java.util.ArrayList<>(chatRoom.getMembers());
+            if (!roomMate.contains(influencerId)) {
+                roomMate.add(influencerId);
+            }
+            CampaignTracking campaignTracking = new CampaignTracking(invitationId,
+                    invitation.getCampaignId(),
+                    invitation.getBrandId(), influencerId, campaign.getCampaignRequirements());
+            campaignTracking.setCampaignTrackingId(invitationId);
+            campaignTrackingRepository.save(campaignTracking);
+            chatRoom.setMembers(roomMate);
+            chatRoomRepository.save(chatRoom);
         } else {
             invitation.setStatus("REJECTED");
             invitationRepository.save(invitation);
