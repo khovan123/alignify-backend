@@ -17,4 +17,6 @@ public interface InvitationRepository extends MongoRepository<Invitation, String
 
     List<Invitation> findAllByInfluencerId(String influencerId);
 
+    List<Invitation> findAllByBrandId(String brandId);
+
 }

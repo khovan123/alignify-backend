@@ -121,7 +121,7 @@ public class InvitationController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         User brand = userRepository.findByUserId(userDetails.getUserId()).get();
-        List<Invitation> invitations = invitationRepository.findAllByInfluencerId(userDetails.getUserId());
+        List<Invitation> invitations = invitationRepository.findAllByBrandId(userDetails.getUserId());
         List<InvitationResponse> invitationResponses = invitations.stream().map(invitation -> {
             User influencer = userRepository.findByUserId(invitation.getInfluencerId()).get();
             Campaign campaign = campaignRepository.findByCampaignIdAndBrandId(invitation.getCampaignId(),
