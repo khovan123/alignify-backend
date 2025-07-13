@@ -150,7 +150,7 @@ public class GeminiService {
             data.put("recommendedCampaigns", recommendedCampaigns);
             return new AssistantResponse<Map<String, Object>>(data, ResponseStatus.COMPLETED);
         } catch (JsonProcessingException e) {
-            return new AssistantResponse<String>("Failed to retrieve campaign recommendations: " + e.getMessage() + e.getMessage(), ResponseStatus.FAILED);
+            return new AssistantResponse<String>("Failed to retrieve campaign recommendations: " + e.getMessage(), ResponseStatus.FAILED);
         }
     }
 
