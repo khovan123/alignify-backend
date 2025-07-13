@@ -15,6 +15,9 @@ pom.xml
 ### VS Code ###
 .vscode/
 
+### IntelliJ IDEA ###
+.idea/
+
 # Package Files #
 *.json
 *.lst
