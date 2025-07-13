@@ -3,7 +3,6 @@ package com.api.service;
 import com.api.config.EnvConfig;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +13,9 @@ import com.api.dto.response.AssistantResponse;
 import com.api.security.StompPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
-import com.api.dto.ApiResponse;
 import com.api.dto.response.CampaignResponse;
 import com.api.dto.response.InfluencerProfileResponse;
 import com.api.model.Campaign;
@@ -27,13 +25,11 @@ import com.api.repository.CampaignRepository;
 import com.api.repository.CategoryRepository;
 import com.api.repository.InfluencerRepository;
 import com.api.repository.UserRepository;
-import com.api.security.CustomUserDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,13 +43,13 @@ public class GeminiService {
     private UserRepository userRepository;
     @Autowired
     private CampaignRepository campaignRepository;
-    @Value("${spring.gemini.apikey")
-    private String apiKey;
+    @Value("${GOOGLE_API_KEY")
+    private String GOOGLE_API_KEY;
     private Client client;
 
     @PostConstruct
     public void init() {
-        this.client = Client.builder().apiKey(apiKey).build();
+        this.client = Client.builder().apiKey(GOOGLE_API_KEY).build();
     }
 
     @Autowired
