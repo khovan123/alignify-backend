@@ -64,8 +64,13 @@ public class GeminiService {
         try {
             List<User> users = userRepository.findByRoleIdAndUserIdNotIn(EnvConfig.INFLUENCER_ROLE_ID,
                     campaign.getJoinedInfluencerIds());
+            List<String> userIds = users.stream().map(User::getUserId).toList();
+            List<Influencer> influencers = influencerRepository.findAllById(userIds);
+            Map<String, Influencer> influencerMap = influencers.stream()
+                    .collect(Collectors.toMap(Influencer::getUserId, influencer -> influencer));
+
             List<InfluencerProfileResponse> influencerProfileResponses = users.stream().map(user -> {
-                Influencer influencer = influencerRepository.findById(user.getUserId()).get();
+                Influencer influencer = influencerMap.get(user.getUserId());
                 InfluencerProfileResponse influencerProfileResponse = new InfluencerProfileResponse(user, influencer,
                         categoryRepository);
                 return influencerProfileResponse;
