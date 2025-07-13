@@ -107,9 +107,19 @@ public class GeminiService {
         String influencerId = userDetails.getUserId();
         try {
             User user = userRepository.findById(influencerId)
-                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + influencerId));
+                    .orElseThrow(() -> {
+                        return ApiResponse.sendError(
+                                404,
+                                "User not found with ID: " + influencerId,
+                                request.getRequestURI());
+                    });
             Influencer influencer = influencerRepository.findById(influencerId)
-                    .orElseThrow(() -> new RuntimeException("Influencer not found with ID: " + influencerId));
+                    .orElseThrow(() -> {
+                        return ApiResponse.sendError(
+                                404,
+                                "Influencer not found with ID: " + influencerId,
+                                request.getRequestURI());
+                    });
             InfluencerProfileResponse influencerProfileResponse = new InfluencerProfileResponse(user, influencer,
                     categoryRepository);
             List<Campaign> campaigns = campaignRepository.findAllByStatusOrderByCreatedAtDesc("RECRUITING");
