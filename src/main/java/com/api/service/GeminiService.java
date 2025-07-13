@@ -101,13 +101,16 @@ public class GeminiService {
   public ResponseEntity<?> getCampaignRecommendations(CustomUserDetails userDetails, HttpServletRequest request) {
     String influencerId = userDetails.getUserId();
     try {
-      User user = userRepository.findById(influencerId).get();
-      Influencer influencer = influencerRepository.findById(influencerId).get();
+      User user = userRepository.findById(influencerId)
+          .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + influencerId));
+      Influencer influencer = influencerRepository.findById(influencerId)
+          .orElseThrow(() -> new ResourceNotFoundException("Influencer not found with ID: " + influencerId));
       InfluencerProfileResponse influencerProfileResponse = new InfluencerProfileResponse(user, influencer,
           categoryRepository);
       List<Campaign> campaigns = campaignRepository.findAllByStatusOrderByCreatedAtDesc("RECRUITING");
       List<CampaignResponse> campaignResponses = campaigns.stream().map(campaign -> {
-        User brand = userRepository.findById(campaign.getBrandId()).get();
+        User brand = userRepository.findById(campaign.getBrandId())
+            .orElseThrow(() -> new ResourceNotFoundException("Brand not found with ID: " + campaign.getBrandId()));
         CampaignResponse campaignResponse = new CampaignResponse(brand, campaign, categoryRepository);
         return campaignResponse;
       }).toList();
