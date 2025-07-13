@@ -141,3 +141,63 @@ Dự án Alignify sử dụng WebSocket (qua SockJS và STOMP) để triển kha
     - Cập nhật trạng thái `ChatRoom` khi có tin nhắn mới (ví dụ: `chatRoom.setCreatedAt`).
 
 ---
+
+### 🧠 Hướng Dẫn Tích Hợp API Gemini cho Các Tính Năng Thông Minh
+
+Để cung cấp các tính năng đề xuất và chatbot thông minh, Alignify sẽ tích hợp **Google Gemini API**.
+
+- **Mục tiêu**:
+
+  - **Chatbot đề xuất chiến dịch**: Xây dựng một chatbot có khả năng đề xuất các chiến dịch phù hợp dựa trên truy vấn hoặc hành vi của người dùng (Brand/Influencer).
+  - **Đề xuất chiến dịch trên trang chủ**: Tự động gợi ý các chiến dịch liên quan khi người dùng truy cập trang chủ.
+  - **Đề xuất Influencer cho Brand**: Khi Brand tạo lời mời hợp tác, hệ thống sẽ đề xuất các Influencer tiềm năng dựa trên tiêu chí chiến dịch.
+
+- **Kiến trúc tích hợp**:
+
+  - Tạo một **Service riêng biệt** (ví dụ: `GeminiAIService.java`) để xử lý các cuộc gọi đến Gemini API.
+  - Service này sẽ chịu trách nhiệm định dạng dữ liệu đầu vào cho Gemini (prompts), gửi yêu cầu, và phân tích phản hồi.
+  - Tùy thuộc vào yêu cầu, service có thể cần truy cập **database (MongoDB)** để lấy thông tin về chiến dịch, Influencer, Brand hoặc lịch sử tương tác của người dùng để làm ngữ cảnh cho các đề xuất.
+
+- **Cách thức hoạt động**:
+
+  - **Quản lý API Key**:
+
+    - Sử dụng `@Value("${GOOGLE_API_KEY}") private String GOOGLE_API_KEY;` để inject API Key từ file cấu hình (ví dụ: `application.properties` hoặc biến môi trường). **Không bao giờ hardcode hoặc commit API Key trực tiếp vào mã nguồn.**
+    - Khởi tạo Gemini client bằng API Key đã được inject:
+
+      ```java
+      import com.google.cloud.vertexai.api.GenerateContentResponse;
+      import com.google.cloud.vertexai.generativeai.GenerativeModel; // Hoặc thư viện client tương ứng bạn đang dùng
+
+      // ... trong service hoặc component cần dùng Gemini
+      // Khởi tạo client
+      Client client = Client.builder().apiKey(GOOGLE_API_KEY).build(); // Giả sử Client là lớp client của thư viện Gemini bạn đang dùng
+      ```
+
+  - **Gửi yêu cầu tới Gemini**:
+    - Sử dụng client đã khởi tạo để gọi API Gemini.
+    - Ví dụ để tạo nội dung:
+      ```java
+      // message ở đây là Content hoặc List<Content> theo định dạng của Gemini API
+      GenerateContentResponse response = client.models.generateContent(
+          "gemini-2.5-flash", // Chọn model phù hợp (ví dụ: gemini-2.5-flash, gemini-1.5-pro, v.v.)
+          message,
+          null // Tham số tùy chọn, ví dụ: generationConfig, safetySettings
+      );
+      // Xử lý phản hồi từ 'response'
+      ```
+  - **Đề xuất chiến dịch/Influencer**:
+    - Backend sẽ xây dựng các prompts cho Gemini dựa trên dữ liệu người dùng, dữ liệu chiến dịch/Influencer từ MongoDB.
+    - Ví dụ: "Hãy đề xuất 5 Influencer phù hợp với chiến dịch marketing về mỹ phẩm, đối tượng là gen Z, ngân sách 50 triệu VND. Dữ liệu Influencer: [list các Influencer có sẵn từ DB]".
+    - Gemini sẽ phản hồi với các đề xuất, sau đó backend sẽ xử lý kết quả và trả về cho frontend.
+  - **Chatbot**:
+    - Frontend gửi truy vấn của người dùng đến backend.
+    - Backend chuyển tiếp truy vấn này đến Gemini API, có thể kèm theo lịch sử hội thoại hoặc ngữ cảnh từ database.
+    - Gemini phản hồi, và backend truyền phản hồi về cho frontend.
+
+- **Lưu ý khi tích hợp**:
+  - **Xử lý Rate Limit**: Triển khai cơ chế xử lý giới hạn tỷ lệ (rate limiting) của Gemini API để tránh bị chặn.
+  - **Xử lý phản hồi**: Đảm bảo rằng backend có khả năng phân tích và xử lý các phản hồi từ Gemini API, bao gồm các trường hợp lỗi hoặc phản hồi không mong muốn.
+  - **Tối ưu hóa Prompts**: Thiết kế các prompts hiệu quả và rõ ràng cho Gemini để đạt được kết quả đề xuất tốt nhất.
+
+---
