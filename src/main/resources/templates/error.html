@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Alignify</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 600px;
+            margin: 20px;
+        }
+        .error-icon {
+            font-size: 120px;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+        }
+        .error-title {
+            font-size: 36px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .error-message {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .error-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        .error-details h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #34495e;
+            flex: 1;
+        }
+        .detail-value {
+            color: #7f8c8d;
+            flex: 2;
+            text-align: right;
+            word-break: break-word;
+        }
+        .status-code {
+            color: #e74c3c !important;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .action-buttons {
+            margin-top: 40px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .support-info {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .support-info h4 {
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .support-info p {
+            color: #34495e;
+            margin: 5px 0;
+        }
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 40px 20px;
+                margin: 10px;
+            }
+            .error-title {
+                font-size: 28px;
+            }
+            .error-icon {
+                font-size: 80px;
+            }
+            .detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .detail-value {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-title">Oops! Something went wrong</h1>
+        <p class="error-message">
+            We're sorry, but something unexpected happened. Don't worry, our team has been notified and we're working to fix this issue.
+        </p>
+        
+        <div class="error-details">
+            <h3>Error Details</h3>
+            <div class="detail-item">
+                <span class="detail-label">Status Code:</span>
+                <span class="detail-value status-code" th:text="${status ?: 'Unknown'}">500</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Error:</span>
+                <span class="detail-value" th:text="${error ?: 'Internal Server Error'}">Internal Server Error</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Timestamp:</span>
+                <span class="detail-value" th:text="${timestamp ?: #temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm:ss')}">2025-01-13 12:00:00</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Path:</span>
+                <span class="detail-value" th:text="${path ?: '/'}">Current page</span>
+            </div>
+            <div class="detail-item" th:if="${message}">
+                <span class="detail-label">Description:</span>
+                <span class="detail-value" th:text="${message}">No additional details available</span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">🏠 Return to Home</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">← Go Back</a>
+        </div>
+
+        <div class="support-info">
+            <h4>Need Help?</h4>
+            <p><strong>Contact Support:</strong> support@alignify.com</p>
+            <p><strong>Support Hours:</strong> Monday to Friday, 9 AM - 6 PM (GMT+7)</p>
+            <p><strong>Emergency:</strong> For urgent issues, please call +84-xxx-xxx-xxx</p>
+            <p>Please include the error details above when contacting support.</p>
+        </div>
+    </div>
+</body>
+</html>

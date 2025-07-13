@@ -9,9 +9,13 @@ pom.xml
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 
-# Spring Boot resources
-/src/main/resources/
-/src/test/
+# Spring Boot resources - exclude compiled/generated resources but keep source templates and configs
+!/src/main/resources/templates/
+!/src/main/resources/application*.properties
+!/src/main/resources/application*.yml
+
+# Test directory - exclude compiled but keep source tests
+!/src/test/java/
 
 ### VS Code ###
 .vscode/
@@ -22,7 +26,9 @@ pom.xml
 # Package Files #
 *.json
 *.lst
-*.properties
+# Allow application properties in resources but exclude others
+/target/*.properties
+!/src/main/resources/*.properties
 *.yml
 *.jar
 
