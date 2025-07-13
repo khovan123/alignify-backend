@@ -77,7 +77,7 @@ public class GeminiService {
             }).toList();
             String prompt = "Based on campaign requirements: " + toJson(campaign)
                     + ", recommend influencers from: " + toJson(influencerProfileResponses)
-                    + ". Return a JSON array of influencer profile response in: " + InfluencerProfileResponse.class;
+                    + ". Return a JSON array of influencer profile response in: " + InfluencerProfileResponse.class.getSimpleName();
 
             GenerateContentResponse response = client.models.generateContent(
                     "gemini-1.5-flash",
