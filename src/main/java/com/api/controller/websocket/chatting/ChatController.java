@@ -1,8 +1,8 @@
 package com.api.controller.websocket.chatting;
 
 import java.security.Principal;
-import java.time.ZonedDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,11 +35,8 @@ public class ChatController {
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat/{roomId}")
-    // @SendTo("/topic/messages/{roomId}")
     public void sendMessage(
             @Payload ChatMessage chatMessage,
-            // @RequestParam(defaultValue = "0", name = "pageNumber") int pageNumber,
-            // @RequestParam(defaultValue = "10", name = "pageSize") int pageSize,
             @DestinationVariable("roomId") String roomId,
             Principal principal) {
         if (principal == null || principal.getName() == null) {
@@ -54,7 +51,6 @@ public class ChatController {
             UserDTO userDTO = new UserDTO(stompPrincipal.getUserId(), stompPrincipal.getName(),
                     stompPrincipal.getAvatarUrl());
             chatMessage.setName(stompPrincipal.getName());
-            // chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             if (chatMessage.getSendAt() == null) {
                 chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             }

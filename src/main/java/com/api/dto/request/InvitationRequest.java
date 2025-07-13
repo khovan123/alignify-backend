@@ -1,32 +1,33 @@
 package com.api.dto.request;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@ToString
 public class InvitationRequest {
 
-    @JsonProperty("influencerId")
-    private String influencerId;
+    @JsonProperty("influencerIds")
+    private List<String> influencerIds;
+    @JsonProperty("campaignId")
+    private String campaignId;
     @JsonProperty("message")
     private String message;
 
-    public InvitationRequest(@JsonProperty("influencerId") String influencerId,@JsonProperty("message") String message) {
-        this.influencerId = influencerId;
-        this.message = message;
-    }
-
-    public String getInfluencerId() {
-        return influencerId;
-    }
-
-    public void setInfluencerId(String influencerId) {
-        this.influencerId = influencerId;
-    }
-    
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
+    public InvitationRequest(
+            @JsonProperty("campaignId") String campaignId,
+            @JsonProperty("influencerIds") List<String> influencerIds,
+            @JsonProperty("message") String message) {
+        this.campaignId = campaignId;
+        this.influencerIds = influencerIds;
         this.message = message;
     }
 
