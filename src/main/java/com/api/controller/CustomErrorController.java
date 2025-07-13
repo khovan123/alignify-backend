@@ -96,7 +96,10 @@ public class CustomErrorController implements ErrorController {
             case 502 -> "Bad Gateway";
             case 503 -> "Service Unavailable";
             case 504 -> "Gateway Timeout";
-            default -> HttpStatus.valueOf(statusCode).getReasonPhrase();
+            default -> {
+                HttpStatus httpStatus = HttpStatus.resolve(statusCode);
+                yield (httpStatus != null) ? httpStatus.getReasonPhrase() : "Unknown Status";
+            }
         };
     }
 }
