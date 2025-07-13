@@ -103,6 +103,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Optional<User> user = userRepository.findByUserId(userId);
         if (!user.isPresent()) {
             this.sendErrorResponse(response, path, "Invalid token: User ID is missing or invalid");
+            return;
         }
         CustomUserDetails userDetails = new CustomUserDetails(userId, roleId, user.get().getName(),
                 user.get().getAvatarUrl(), "");
