@@ -22,7 +22,7 @@ public class GeminiController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/assistant/campaigns")
+    @MessageMapping("/assistant/influencers/campaigns")
     public void getRecommendCampaigns(
             @Payload AssistantRequest assistantRequest,
             Principal principal) {
