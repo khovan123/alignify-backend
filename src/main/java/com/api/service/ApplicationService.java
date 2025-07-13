@@ -400,6 +400,7 @@ public class ApplicationService {
                         campaignTracking.setCampaignTrackingId(applicationId);
                         campaignTrackingRepository.save(campaignTracking);
                         chatRoom.setMembers(roomMate);
+                        chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
                         chatRoomRepository.save(chatRoom);
                         joinedInfluencerIds.add(application.getInfluencerId());
                         campaign.setJoinedInfluencerIds(joinedInfluencerIds);

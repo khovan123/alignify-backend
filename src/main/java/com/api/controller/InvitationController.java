@@ -174,6 +174,7 @@ public class InvitationController {
             campaignRepository.save(campaign);
             ChatRoom chatRoom = chatRoomRepository.findById(invitation.getCampaignId()).get();
             chatRoom.getMembers().add(influencerId);
+            chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatRoomRepository.save(chatRoom);
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setChatRoomId(chatRoom.getChatRoomId());
