@@ -29,6 +29,7 @@ import com.google.genai.types.GenerateContentResponse;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GeminiService {
@@ -71,9 +72,8 @@ public class GeminiService {
 
             List<InfluencerProfileResponse> influencerProfileResponses = users.stream().map(user -> {
                 Influencer influencer = influencerMap.get(user.getUserId());
-                InfluencerProfileResponse influencerProfileResponse = new InfluencerProfileResponse(user, influencer,
+                return new InfluencerProfileResponse(user, influencer,
                         categoryRepository);
-                return influencerProfileResponse;
             }).toList();
             String prompt = "Based on campaign requirements: " + toJson(campaign)
                     + ", recommend influencers from: " + toJson(influencerProfileResponses)
@@ -118,12 +118,11 @@ public class GeminiService {
                     .distinct()
                     .toList();
             Map<String, User> brandsById = userRepository.findAllById(brandIds).stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
+                    .collect(Collectors.toMap(User::getUserId, u -> u));
             List<CampaignResponse> campaignResponses = campaigns.stream().map(campaign -> {
                 User brand = Optional.ofNullable(brandsById.get(campaign.getBrandId()))
                         .orElseThrow(() -> new RuntimeException("Brand not found with ID: " + campaign.getBrandId()));
-                CampaignResponse campaignResponse = new CampaignResponse(brand, campaign, categoryRepository);
-                return campaignResponse;
+                return new CampaignResponse(brand, campaign, categoryRepository);
             }).toList();
             String prompt = "Analyze campaign details: " + toJson(campaignResponses)
                     + ". Recommend campaigns for influencer: " + toJson(
