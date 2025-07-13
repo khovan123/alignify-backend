@@ -80,9 +80,9 @@ public class InvitationController {
         User brand = userRepository.findByUserId(brandId).get();
         for (String influencerId : invitationRequest.getInfluencerIds()) {
             ChatRoom chatRoom = chatRoomRepository.findById(invitationRequest.getCampaignId()).get();
-            if (!(invitationRepository.existsByCampaignIdAndInfluencerId(
+            if (!invitationRepository.existsByCampaignIdAndInfluencerId(
                     invitationRequest.getCampaignId(),
-                    influencerId) && chatRoom.getMembers().contains(influencerId))) {
+                    influencerId) && !chatRoom.getMembers().contains(influencerId)) {
                 User influencer = userRepository.findByUserId(influencerId).get();
                 Invitation invitation = new Invitation(brandId, invitationRequest.getCampaignId(), influencerId,
                         invitationRequest.getMessage());
