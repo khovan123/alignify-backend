@@ -6,6 +6,7 @@ pom.xml
 /target/maven-archiver/
 /target/generated-sources/
 /target/generated-test-sources/
+/target/
 !.mvn/wrapper/maven-wrapper.jar
 
 # Spring Boot resources
@@ -23,9 +24,9 @@ pom.xml
 *.lst
 *.properties
 *.yml
+*.jar
 
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
-/target/
