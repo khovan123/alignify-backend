@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.api.model.Permission;
+import com.api.model.User;
 
 public class UserDTO {
 
@@ -43,6 +44,14 @@ public class UserDTO {
         this.userId = userId;
         this.name = name;
         this.avatarUrl = avatarUrl;
+        this.createdAt = null;
+        this.permissions = new ArrayList<>();
+    }
+
+    public UserDTO(User user) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.avatarUrl = user.getAvatarUrl();
         this.createdAt = null;
         this.permissions = new ArrayList<>();
     }

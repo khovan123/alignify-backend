@@ -29,14 +29,14 @@ public class Campaign {
     private List<PlatformRequirement> campaignRequirements;
     private List<InfluencerRequirement> influencerRequirements;
     private int influencerCountExpected;
-    private int influencerCountCurrent;
+    private List<String> joinedInfluencerIds;
     private int applicationTotal;
     private List<String> appliedInfluencerIds;
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
         this.status = "DRAFT";
-        this.influencerCountCurrent = 0;
+        this.joinedInfluencerIds = new ArrayList<>();
         this.applicationTotal = 0;
         this.appliedInfluencerIds = new ArrayList<>();
         this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
@@ -64,7 +64,8 @@ public class Campaign {
             List<String> categoryIds,
             ZonedDateTime createdAt, String status, int budget,
             List<PlatformRequirement> campaignRequirements,
-            List<InfluencerRequirement> influencerRequirements, int influencerCountExpected, int influencerCountCurrent,
+            List<InfluencerRequirement> influencerRequirements, int influencerCountExpected,
+            List<String> joinedInfluencerIds,
             int applicationTotal) {
         this.campaignId = campaignId;
         this.brandId = brandId;
@@ -78,7 +79,7 @@ public class Campaign {
         this.campaignRequirements = campaignRequirements;
         this.influencerRequirements = influencerRequirements;
         this.influencerCountExpected = influencerCountExpected;
-        this.influencerCountCurrent = influencerCountCurrent;
+        this.joinedInfluencerIds = joinedInfluencerIds;
         this.applicationTotal = applicationTotal;
     }
 
@@ -87,7 +88,8 @@ public class Campaign {
             String status, int budget,
             List<PlatformRequirement> campaignRequirements,
             List<InfluencerRequirement> influencerRequirements,
-            int influencerCountExpected, int influencerCountCurrent, int applicationTotal,
+            int influencerCountExpected,
+            List<String> joinedInfluencerIds, int applicationTotal,
             List<String> appliedInfluencerIds) {
         this.campaignId = campaignId;
         this.brandId = brandId;
@@ -103,7 +105,7 @@ public class Campaign {
         this.campaignRequirements = campaignRequirements;
         this.influencerRequirements = influencerRequirements;
         this.influencerCountExpected = influencerCountExpected;
-        this.influencerCountCurrent = influencerCountCurrent;
+        this.joinedInfluencerIds = joinedInfluencerIds;
         this.applicationTotal = applicationTotal;
         this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
@@ -220,12 +222,12 @@ public class Campaign {
         this.influencerCountExpected = influencerCountExpected;
     }
 
-    public int getInfluencerCountCurrent() {
-        return influencerCountCurrent;
+    public List<String> getJoinedInfluencerIds() {
+        return joinedInfluencerIds;
     }
 
-    public void setInfluencerCountCurrent(int influencerCountCurrent) {
-        this.influencerCountCurrent = influencerCountCurrent;
+    public void setJoinedInfluencerIds(List<String> joinedInfluencerIds) {
+        this.joinedInfluencerIds = joinedInfluencerIds;
     }
 
     public int getApplicationTotal() {
