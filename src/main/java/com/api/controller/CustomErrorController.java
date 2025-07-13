@@ -33,7 +33,7 @@ public class CustomErrorController implements ErrorController {
 
         // Set default values and format them for the template
         int statusCode = (status != null) ? Integer.parseInt(status.toString()) : 500;
-        String errorMessage = (message != null) ? message.toString() : "An unexpected error occurred";
+        String errorMessage = extractErrorMessage(exception, message);
         String path = (requestUri != null) ? requestUri.toString() : request.getRequestURI();
         
         // Format timestamp
@@ -52,6 +52,32 @@ public class CustomErrorController implements ErrorController {
 
         // Return the error template
         return "error";
+    }
+
+    /**
+     * Extract specific error message from exception or message attribute
+     */
+    private String extractErrorMessage(Object exception, Object message) {
+        // First, try to get message from the exception object
+        if (exception instanceof Exception ex) {
+            String exceptionMessage = ex.getMessage();
+            if (exceptionMessage != null && !exceptionMessage.trim().isEmpty()) {
+                return exceptionMessage;
+            }
+            // If no message, return exception class name for specificity
+            return ex.getClass().getSimpleName() + " occurred";
+        }
+        
+        // Second, try to get message from request attribute
+        if (message != null) {
+            String messageStr = message.toString();
+            if (!messageStr.trim().isEmpty()) {
+                return messageStr;
+            }
+        }
+        
+        // Last resort - provide a generic message
+        return "An unexpected error occurred";
     }
 
     /**

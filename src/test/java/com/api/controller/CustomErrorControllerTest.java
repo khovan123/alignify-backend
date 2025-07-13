@@ -117,4 +117,42 @@ class CustomErrorControllerTest {
         assertEquals("/admin", model.getAttribute("path"));
         assertNotNull(model.getAttribute("timestamp"));
     }
+
+    @Test
+    void testErrorPageWithSpecificException() {
+        // Set up request attributes with an actual exception
+        request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+        request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, new RuntimeException("Specific error details"));
+        request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/api/error");
+
+        // Call the error handler
+        String viewName = errorController.handleError(request, model);
+
+        // Verify the response uses specific exception message
+        assertEquals("error", viewName);
+        assertEquals(500, model.getAttribute("status"));
+        assertEquals("Internal Server Error", model.getAttribute("error"));
+        assertEquals("Specific error details", model.getAttribute("message"));
+        assertEquals("/api/error", model.getAttribute("path"));
+        assertNotNull(model.getAttribute("timestamp"));
+    }
+
+    @Test
+    void testErrorPageWithExceptionNoMessage() {
+        // Set up request attributes with exception that has no message
+        request.setAttribute(RequestDispatcher.ERROR_STATUS_CODE, 500);
+        request.setAttribute(RequestDispatcher.ERROR_EXCEPTION, new IllegalArgumentException());
+        request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/api/error");
+
+        // Call the error handler
+        String viewName = errorController.handleError(request, model);
+
+        // Verify the response uses exception class name
+        assertEquals("error", viewName);
+        assertEquals(500, model.getAttribute("status"));
+        assertEquals("Internal Server Error", model.getAttribute("error"));
+        assertEquals("IllegalArgumentException occurred", model.getAttribute("message"));
+        assertEquals("/api/error", model.getAttribute("path"));
+        assertNotNull(model.getAttribute("timestamp"));
+    }
 }
