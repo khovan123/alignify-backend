@@ -36,4 +36,7 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     @Query("{ 'roleId': ?0, '_id': { $nin: ?1 } }")
     Page<User> findAllByRoleIdAndNotIn(String roleId, List<String> userBanIds, Pageable pageable);
+
+    List<User> findByRoleIdAndUserIdNotIn(String roleId, List<String> userIds);
+
 }
