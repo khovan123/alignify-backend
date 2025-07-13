@@ -42,7 +42,7 @@ public class GeminiService {
     private UserRepository userRepository;
     @Autowired
     private CampaignRepository campaignRepository;
-    @Value("${GOOGLE_API_KEY}")
+    @Value("${spring.gemini.apikey}")
     private String GOOGLE_API_KEY;
     private Client client;
 
