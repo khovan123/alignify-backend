@@ -15,13 +15,15 @@ public class CustomUserDetails implements UserDetails {
     private final String userId;
     private final String roleId;
     private final String username;
+    private final String avatarUrl;
     private final String password;
     private final List<GrantedAuthority> authorities;
 
-    public CustomUserDetails(String userId, String roleId, String username, String password) {
+    public CustomUserDetails(String userId, String roleId, String username, String avatarUrl, String password) {
         this.userId = userId;
         this.roleId = roleId;
         this.username = username;
+        this.avatarUrl = avatarUrl;
         this.password = password;
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority(mapRoleIdToAuthority(roleId)));
     }
@@ -79,5 +81,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 }
