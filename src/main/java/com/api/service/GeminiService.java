@@ -1,11 +1,17 @@
 package com.api.service;
 
 import com.api.config.EnvConfig;
+
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.api.dto.ResponseStatus;
+import com.api.dto.request.AssistantRequest;
+import com.api.dto.response.AssistantResponse;
+import com.api.security.StompPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +34,7 @@ import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -40,12 +47,12 @@ public class GeminiService {
     private UserRepository userRepository;
     @Autowired
     private CampaignRepository campaignRepository;
-    @Value("${gemini.api.key}")
+    @Value("${spring.gemini.apikey")
     private String apiKey;
     private Client client;
 
     @PostConstruct
-    public void initGeminiClient() {
+    public void init() {
         this.client = Client.builder().apiKey(apiKey).build();
     }
 
@@ -54,12 +61,14 @@ public class GeminiService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public ResponseEntity<?> getInfluencerRecommendations(String campaignId, CustomUserDetails userDetails,
-            HttpServletRequest request) {
-        String brandId = userDetails.getUserId();
+    public AssistantResponse<?> getInfluencerRecommendations(String campaignId, AssistantRequest assistantRequest, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new SecurityException("Access is denied");
+        }
+        String brandId = ((StompPrincipal) principal).getUserId();
         Optional<Campaign> campaignOpt = campaignRepository.findByCampaignIdAndBrandId(campaignId, brandId);
         if (!campaignOpt.isPresent()) {
-            return ApiResponse.sendError(404, "Not found campaign with Id: " + campaignId, request.getRequestURI());
+            return new AssistantResponse<String>("Not found campaign with Id: " + campaignId, ResponseStatus.FAILED);
         }
         Campaign campaign = campaignOpt.get();
         try {
@@ -75,7 +84,7 @@ public class GeminiService {
                 return new InfluencerProfileResponse(user, influencer,
                         categoryRepository);
             }).toList();
-            String prompt = "Based on campaign requirements: " + toJson(campaign)
+            String prompt = "Based on campaign requirements: " + toJson(campaign) + " and brand requirements: " + assistantRequest.getQuestion()
                     + ", recommend influencers from: " + toJson(influencerProfileResponses)
                     + ". Return a JSON array of influencer profile response in: " + InfluencerProfileResponse.class.getSimpleName();
 
@@ -90,21 +99,17 @@ public class GeminiService {
             Map<String, Object> data = new HashMap<>();
             data.put("recommendedInfluencers", recommendedInfluencers);
 
-            return ApiResponse.sendSuccess(
-                    200,
-                    "Influencer recommendations retrieved successfully",
-                    data,
-                    request.getRequestURI());
+            return new AssistantResponse<Map<String, Object>>(data, ResponseStatus.COMPLETED);
         } catch (JsonProcessingException e) {
-            return ApiResponse.sendError(
-                    500,
-                    "Failed to retrieve influencer recommendations: " + e.getMessage(),
-                    request.getRequestURI());
+            return new AssistantResponse<String>("Failed to retrieve influencer recommendations: " + e.getMessage(), ResponseStatus.FAILED);
         }
     }
 
-    public ResponseEntity<?> getCampaignRecommendations(CustomUserDetails userDetails, HttpServletRequest request) {
-        String influencerId = userDetails.getUserId();
+    public AssistantResponse<?> getCampaignRecommendations(AssistantRequest assistantRequest, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new SecurityException("Access is denied");
+        }
+        String influencerId = ((StompPrincipal) principal).getUserId();
         try {
             User user = userRepository.findById(influencerId)
                     .orElseThrow(() -> new RuntimeException(
@@ -130,7 +135,7 @@ public class GeminiService {
             }).toList();
             String prompt = "Analyze campaign details: " + toJson(campaignResponses)
                     + ". Recommend campaigns for influencer: " + toJson(
-                            influencerProfileResponse)
+                    influencerProfileResponse) + " and " + assistantRequest.getQuestion()
                     + ". Return a JSON array of campaign response in: " + CampaignResponse.class;
 
             GenerateContentResponse response = client.models.generateContent(
@@ -143,17 +148,9 @@ public class GeminiService {
                     objectMapper.getTypeFactory().constructCollectionType(List.class, CampaignResponse.class));
             Map<String, Object> data = new HashMap<>();
             data.put("recommendedCampaigns", recommendedCampaigns);
-
-            return ApiResponse.sendSuccess(
-                    200,
-                    "Campaign recommendations retrieved successfully",
-                    data,
-                    request.getRequestURI());
+            return new AssistantResponse<Map<String, Object>>(data, ResponseStatus.COMPLETED);
         } catch (JsonProcessingException e) {
-            return ApiResponse.sendError(
-                    500,
-                    "Failed to retrieve campaign recommendations: " + e.getMessage(),
-                    request.getRequestURI());
+            return new AssistantResponse<String>("Failed to retrieve campaign recommendations: " + e.getMessage() + e.getMessage(), ResponseStatus.FAILED);
         }
     }
 
