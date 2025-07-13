@@ -113,8 +113,14 @@ public class GeminiService {
             InfluencerProfileResponse influencerProfileResponse = new InfluencerProfileResponse(user, influencer,
                     categoryRepository);
             List<Campaign> campaigns = campaignRepository.findAllByStatusOrderByCreatedAtDesc("RECRUITING");
+            List<String> brandIds = campaigns.stream()
+                    .map(Campaign::getBrandId)
+                    .distinct()
+                    .toList();
+            Map<String, User> brandsById = userRepository.findAllById(brandIds).stream()
+                    .collect(Collectors.toMap(User::getId, user -> user));
             List<CampaignResponse> campaignResponses = campaigns.stream().map(campaign -> {
-                User brand = userRepository.findById(campaign.getBrandId())
+                User brand = Optional.ofNullable(brandsById.get(campaign.getBrandId()))
                         .orElseThrow(() -> new RuntimeException("Brand not found with ID: " + campaign.getBrandId()));
                 CampaignResponse campaignResponse = new CampaignResponse(brand, campaign, categoryRepository);
                 return campaignResponse;
