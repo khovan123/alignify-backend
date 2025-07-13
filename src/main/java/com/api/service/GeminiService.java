@@ -105,11 +105,14 @@ public class GeminiService {
         }
     }
 
-    public AssistantResponse<?> getCampaignRecommendations(AssistantRequest assistantRequest, Principal principal) {
+    public AssistantResponse<?> getCampaignRecommendations(String userId,AssistantRequest assistantRequest, Principal principal) {
         if (principal == null || principal.getName() == null) {
             throw new SecurityException("Access is denied");
         }
         String influencerId = ((StompPrincipal) principal).getUserId();
+        if (!userId.equals(((StompPrincipal) principal).getUserId())) {
+            throw new SecurityException("Access is denied for: "+userId);
+        }
         try {
             User user = userRepository.findById(influencerId)
                     .orElseThrow(() -> new RuntimeException(
