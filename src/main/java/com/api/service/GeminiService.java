@@ -136,7 +136,7 @@ public class GeminiService {
             String prompt = "Analyze campaign details: " + toJson(campaignResponses)
                     + ". Recommend campaigns for influencer: " + toJson(
                     influencerProfileResponse) + " and " + assistantRequest.getQuestion()
-                    + ". Return a JSON array of campaign response in: " + CampaignResponse.class;
+                    + ". Return a JSON array of campaign response in: " + CampaignResponse.class.getSimpleName();
 
             GenerateContentResponse response = client.models.generateContent(
                     "gemini-1.5-flash",
