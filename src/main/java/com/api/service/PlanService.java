@@ -2,8 +2,11 @@ package com.api.service;
 
 import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
+import com.api.dto.request.PlanRequest;
 import com.api.dto.response.PlanResponse;
+import com.api.model.Permission;
 import com.api.model.Plan;
+import com.api.model.PlanPermission;
 import com.api.repository.PermissionRepository;
 import com.api.repository.PlanPermissionRepository;
 import com.api.repository.PlanRepository;
@@ -27,8 +30,8 @@ public class PlanService {
     @Autowired
     private PlanPermissionRepository planPermissionRepository;
 
-    public ResponseEntity<?> createPlan(Plan plan, HttpServletRequest request) {
-        List<String> permissionIds = plan.getPermissionIds();
+    public ResponseEntity<?> createPlan(PlanRequest planrequest, HttpServletRequest request) {
+        List<String> permissionIds = planrequest.getPermissionIds();
         if (permissionIds != null && !permissionIds.isEmpty()) {
             List<String> validPermissionIds = permissionRepository.findAllById(permissionIds)
                     .stream()
@@ -38,21 +41,24 @@ public class PlanService {
             if (validPermissionIds.size() != permissionIds.size()) {
                 return ApiResponse.sendError(400, "Some permissionIds are invalid", request.getRequestURI());
             }
-            plan.setPermissionIds(validPermissionIds);
+            planrequest.setPermissionIds(validPermissionIds);
         }
 
-        List<String> planPermissionIds = plan.getPlanPermissionIds();
-        if (planPermissionIds != null && !planPermissionIds.isEmpty()) {
-            List<String> validPlanPermissionIds = planPermissionRepository.findAllById(planPermissionIds)
-                    .stream()
-                    .map(p -> p.getPlanPermissionId())
-                    .toList();
-
-            if (validPlanPermissionIds.size() != planPermissionIds.size()) {
-                return ApiResponse.sendError(400, "Some planPermissionIds are invalid", request.getRequestURI());
-            }
-            plan.setPlanPermissionIds(validPlanPermissionIds);
+        List<PlanPermission> planPermissions = planrequest.getPlanPermissions();
+        for (PlanPermission p : planPermissions) {
+            p = planPermissionRepository.save(p);
         }
+        Plan plan = new Plan();
+        plan.setPlanName(planrequest.getPlanName());
+        plan.setDescription(planrequest.getDescription());
+        plan.setRoleId(planrequest.getRoleId());
+        plan.setPermissionIds(planrequest.getPermissionIds());
+        plan.setPlanPermissionIds(planrequest.getPlanPermissions().stream().map(p -> p.getPlanPermissionId()).toList());
+        plan.setPrice(planrequest.getPrice());
+        plan.setDiscount(planrequest.getDiscount());
+        plan.setPlanType(planrequest.getPlanType());
+        plan.setPopular(planrequest.isPopular());
+        plan.setActive(planrequest.isActive());
         PlanResponse planResponse = new PlanResponse(plan, permissionRepository, planPermissionRepository);
         planRepository.save(plan);
         return ApiResponse.sendSuccess(200, "Success", planResponse, request.getRequestURI());
@@ -139,13 +145,11 @@ public class PlanService {
         return ApiResponse.sendSuccess(200, "Plan updated successfully", planResponse, request.getRequestURI());
     }
 
-    public Plan convertToPlan(String obj) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            return mapper.readValue(obj, Plan.class);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid Plan JSON: " + e.getMessage(), e);
+    public ResponseEntity<?> getPermission(HttpServletRequest request) {
+        List<Permission> permissions = permissionRepository.findAll();
+        if(permissions.isEmpty()){
+            return ApiResponse.sendError(400, "No have any permission", request.getRequestURI());
         }
+        return ApiResponse.sendSuccess(200, "Successfully", permissions, request.getRequestURI());
     }
 }

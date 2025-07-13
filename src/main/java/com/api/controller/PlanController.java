@@ -1,5 +1,6 @@
 package com.api.controller;
 
+import com.api.dto.request.PlanRequest;
 import com.api.model.Plan;
 import com.api.service.PlanService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,24 +26,34 @@ public class PlanController {
 
     @PostMapping("")
     public ResponseEntity<?> createPackage(
-            @RequestBody Plan plan,
+            @RequestBody PlanRequest plan,
             HttpServletRequest request) {
         return planService.createPlan(plan, request);
     }
+
+    @GetMapping("/permission")
+    public ResponseEntity<?> getPermission(
+            HttpServletRequest request){
+        return planService.getPermission(request);
+    }
+            
     @GetMapping("")
+
     public ResponseEntity<?> getPlan(
             @RequestParam("roleId") String roleId,
-            HttpServletRequest request){
+            HttpServletRequest request) {
         return planService.getAllPlanByRoleId(roleId, request);
     }
+
     @PutMapping("/{planId}")
-     public ResponseEntity<?> updatePlan(@PathVariable("planId") String planId,
+    public ResponseEntity<?> updatePlan(@PathVariable("planId") String planId,
             @RequestBody Plan plan,
             HttpServletRequest request) {
-        return planService.updatePlan(planId, plan,request);
+        return planService.updatePlan(planId, plan, request);
     }
+
     @DeleteMapping("/{planId}")
-     public ResponseEntity<?> deletePlan(
+    public ResponseEntity<?> deletePlan(
             @PathVariable("planId") String planId,
             HttpServletRequest request) {
         return planService.deletePlan(planId, request);
