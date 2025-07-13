@@ -15,7 +15,7 @@ import com.api.model.Invitation;
 import com.api.repository.InvitationRepository;
 import com.api.security.CustomUserDetails;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
