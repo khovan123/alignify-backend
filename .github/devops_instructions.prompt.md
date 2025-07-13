@@ -4,7 +4,7 @@ Quy trình DevOps của dự án Alignify sẽ được tự động hóa hoàn 
 
 - **CI/CD Pipeline**:
   - Sử dụng **GitHub Actions** để thiết lập pipeline tự động với các giai đoạn:
-    - **Pre-Build**: Kiểm tra toàn bộ file docker chạy đã đúng và đảm bảo build thành công, và file config không để lộ thông tin bảo mật.
+    - **Pre-Build**: Kiểm tra tất cả file Docker chạy đúng, đảm bảo build thành công và file config không để lộ thông tin bảo mật.
     - **Build**: Kiểm tra và build ứng dụng ReactJS (frontend) và Spring Boot (backend).
     - **Test**: Chạy **unit test** và **integration test** cho cả frontend và backend.
     - **Deploy**: Triển khai ứng dụng lên môi trường `staging` hoặc `production` sau khi các bước trước thành công.
