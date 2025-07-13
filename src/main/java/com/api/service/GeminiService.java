@@ -89,7 +89,7 @@ public class GeminiService {
                     + ". Return a JSON array of influencer profile response in: " + InfluencerProfileResponse.class.getSimpleName();
 
             GenerateContentResponse response = client.models.generateContent(
-                    "gemini-1.5-flash",
+                    "gemini-2.5-flash",
                     prompt,
                     null);
 
@@ -142,7 +142,7 @@ public class GeminiService {
                     + ". Return a JSON array of campaign response in: " + CampaignResponse.class.getSimpleName();
 
             GenerateContentResponse response = client.models.generateContent(
-                    "gemini-1.5-flash",
+                    "gemini-2.5-flash",
                     prompt,
                     null);
 
