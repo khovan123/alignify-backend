@@ -69,10 +69,10 @@ public class MongoConfig {
     // this.create_userPlansCollection(db);
     // this.create_plansCollection(db);
     // this.create_invitationsCollection(db);
-    //this.create_assistanttMessagesCollection(db);
+    //this.create_assistantMessagesCollection(db);
   }
 
-  public void create_assistanttMessagesCollection(MongoDatabase db) {
+  public void create_assistantMessagesCollection(MongoDatabase db) {
     if (db.getCollection("assistantMessages") != null) {
       db.getCollection("assistantMessages").drop();
     }
