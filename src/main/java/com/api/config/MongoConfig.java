@@ -42,7 +42,7 @@ public class MongoConfig {
 
   @PostConstruct
   public void init() {
-    // MongoDatabase db = mongoClient.getDatabase(databaseName);
+    //MongoDatabase db = mongoClient.getDatabase(databaseName);
     // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
@@ -69,6 +69,52 @@ public class MongoConfig {
     // this.create_userPlansCollection(db);
     // this.create_plansCollection(db);
     // this.create_invitationsCollection(db);
+    //this.create_assistantMessagesCollection(db);
+  }
+
+  public void create_assistantMessagesCollection(MongoDatabase db) {
+    if (db.getCollection("assistantMessages") != null) {
+      db.getCollection("assistantMessages").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+            """
+            {
+              "bsonType": "object",
+              "required": ["roomId", "senderId", "senderType", "messageType", "content", "createdAt"],
+              "properties": {
+                "roomId": {
+                  "bsonType": "string",
+                },
+                "senderId": {
+                  "bsonType": "string",
+                },
+                "senderType": {
+                  "bsonType": "string",
+                  "enum": ["USER", "ASSISTANT"],
+                },
+                "messageType": {
+                  "bsonType": "string",
+                  "enum": ["TEXT", "CAMPAIGN_RECOMMENDATIONS"],
+                },
+                "content": {
+                  "bsonType": "string",
+                },
+                "createdAt": {
+                  "bsonType": "date",
+                }
+              }
+            }
+            """
+    );
+
+    ValidationOptions validationOptions = new ValidationOptions()
+            .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+            .validationOptions(validationOptions);
+
+    db.createCollection("assistantMessages", options);
   }
 
   public void create_usersCollection(MongoDatabase db) {
