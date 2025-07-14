@@ -204,12 +204,11 @@ public class GeminiService {
                     categoryRepository);
             List<User> users = userRepository.findAllByRoleId(EnvConfig.BRAND_ROLE_ID);
             List<Brand> brands = brandRepository.findAllById(users.stream().map(User::getUserId).toList());
+            Map<String, Brand> brandMap = brands.stream()
+                    .collect(Collectors.toMap(Brand::getUserId, b -> b));
             List<BrandProfileResponse> brandProfiles = users.stream()
                     .map(u -> {
-                        Brand brand = brands.stream()
-                                .filter(b -> b.getUserId().equals(u.getUserId()))
-                                .findFirst()
-                                .orElse(null);
+                        Brand brand = brandMap.get(u.getUserId());
                         return brand != null
                                 ? new BrandProfileResponse(u, brand, categoryRepository)
                                 : null;
