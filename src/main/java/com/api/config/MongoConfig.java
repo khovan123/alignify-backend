@@ -42,8 +42,8 @@ public class MongoConfig {
 
   @PostConstruct
   public void init() {
-    MongoDatabase db = mongoClient.getDatabase(databaseName);
-    // this.create_usersCollection(db);
+    // MongoDatabase db = mongoClient.getDatabase(databaseName);
+    // // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
     // this.create_rolesCollection(db);
@@ -68,6 +68,7 @@ public class MongoConfig {
     // this.create_planPermissionsCollection(db);
     // this.create_userPlansCollection(db);
     // this.create_plansCollection(db);
+    // this.create_invitationsCollection(db);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -818,7 +819,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal", "appliedInfluencerIds"],
+                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "joinedInfluencerIds", "applicationTotal", "appliedInfluencerIds"],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -892,8 +893,11 @@ public class MongoConfig {
                     "influencerCountExpected": {
                         "bsonType": "int"
                     },
-                    "influencerCountCurrent": {
-                        "bsonType": "int"
+                    "joinedInfluencerIds": {
+                        "bsonType": "array",
+                        "items": {
+                          "bsonType": "string"
+                        }
                     },
                     "applicationTotal": {
                         "bsonType": "int"
@@ -1270,9 +1274,12 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["content"],
+                "required": ["title", "description"],
                 "properties": {
-                    "content": {
+                    "title": {
+                        "bsonType": "string"
+                    },
+                    "description": {
                         "bsonType": "string"
                     },
                 }

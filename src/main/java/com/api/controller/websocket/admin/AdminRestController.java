@@ -6,11 +6,13 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.api.dto.ApiResponse;
 import com.api.model.Permission;
@@ -29,6 +31,7 @@ public class AdminRestController {
   @Autowired
   private PermissionRepository permissionRepository;
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping("/permissions")
   public ResponseEntity<?> getAllPermissionByRoleId(HttpServletRequest request) {
     List<Permission> permissions = permissionRepository.findAll();
@@ -38,11 +41,12 @@ public class AdminRestController {
     return ApiResponse.sendSuccess(200, "Response successfully", permissions, request.getRequestURI());
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/users/{userId}/{permissionId}")
   public ResponseEntity<?> blockAction(
       @PathVariable("userId") String userId,
-      @PathVariable("permissonId") String permissonId,
-      @PathVariable("block") boolean block,
+      @PathVariable("permissionId") String permissonId,
+      @RequestParam("block") Boolean block,
       HttpServletRequest request) {
     Optional<User> userOpt = userRepository.findById(userId);
     if (!userOpt.isPresent()) {

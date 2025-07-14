@@ -1,6 +1,7 @@
 package com.api.middleware;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -10,7 +11,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.api.model.User;
 import com.api.repository.RoleRepository;
+import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.JwtUtil;
 
@@ -24,6 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -95,7 +100,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             this.sendErrorResponse(response, path, "Invalid token: Role ID is missing");
             return;
         }
-        CustomUserDetails userDetails = new CustomUserDetails(userId, roleId, "", "");
+        Optional<User> user = userRepository.findByUserId(userId);
+        if (!user.isPresent()) {
+            this.sendErrorResponse(response, path, "Invalid token: User ID is missing or invalid");
+            return;
+        }
+        CustomUserDetails userDetails = new CustomUserDetails(userId, roleId, user.get().getName(),
+                user.get().getAvatarUrl(), "");
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

@@ -139,6 +139,8 @@ public class ChatRestController {
             chatMessage.setUserId("#SYS");
             chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatMessage = chatMessageRepository.save(chatMessage);
+            room.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            chatRoomRepository.save(room);
         }
         return chatMessage;
     }

@@ -60,7 +60,7 @@ public class CampaignController {
     // }
     // --update thêm file ảnh--vao request
     @PostMapping("")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @permissionService.hasPermission('post',authentication.principal)")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @permissionService.hasPermission('posting',authentication.principal)")
     public ResponseEntity<?> createCampaign(
             @RequestPart("campaign") String obj,
             @RequestPart(value = "image", required = false) MultipartFile image,
@@ -148,5 +148,15 @@ public class CampaignController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         return campaignService.searchByTerm(term, pageNumber, pageSize, userDetails, request);
+    }
+
+    @PreAuthorize("hasRole('ROLE_BRAND')")
+    @GetMapping("/recruiting")
+    public ResponseEntity<?> getAllRecruitingCampaignOfBrand(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+        return campaignService.getAllRecruitingCampaignOfBrand(userDetails, request);
     }
 }

@@ -29,7 +29,6 @@ public class NotificationController {
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/notify/{userId}")
-    // @SendTo("/topic/notifications/{userId}")
     public void sendNotification(
             @Payload Notification notification,
             @DestinationVariable("userId") String userId,
