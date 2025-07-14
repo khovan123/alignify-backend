@@ -53,7 +53,7 @@ public class GeminiService {
     private AssistantMessageRespository assistantMessageRespository;
     @Autowired
     private BrandRepository brandRepository;
-    @Value("${GOOGLE_API_KEY}")
+    @Value("${spring.gemini.apikey}")
     private String GOOGLE_API_KEY;
     @Autowired
     private InfluencerRepository influencerRepository;
