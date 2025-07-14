@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -25,20 +24,19 @@ public class PlanController {
     private PlanService planService;
 
     @PostMapping("")
-    public ResponseEntity<?> createPackage(
-            @RequestBody PlanRequest plan,
+    public ResponseEntity<?> createPlan(
+            @RequestBody  PlanRequest plan,
             HttpServletRequest request) {
         return planService.createPlan(plan, request);
     }
 
     @GetMapping("/permission")
     public ResponseEntity<?> getPermission(
-            HttpServletRequest request){
+            HttpServletRequest request) {
         return planService.getPermission(request);
     }
-            
-    @GetMapping("")
 
+    @GetMapping("")
     public ResponseEntity<?> getPlan(
             @RequestParam("roleId") String roleId,
             HttpServletRequest request) {

@@ -31,6 +31,22 @@ public class PlanRequest {
         this.isActive = false;
         this.discount = 0.0;
     }
+
+    public boolean isIsPopular() {
+        return isPopular;
+    }
+
+    public void setIsPopular(boolean isPopular) {
+        this.isPopular = isPopular;
+    }
+
+    public boolean isIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
     
 
 }

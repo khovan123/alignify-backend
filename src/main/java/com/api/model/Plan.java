@@ -126,20 +126,22 @@ public class Plan {
         this.createdAt = createdAt;
     }
 
-    public boolean isPopular() {
+    public boolean isIsPopular() {
         return isPopular;
     }
 
-    public void setPopular(boolean isPopular) {
+    public void setIsPopular(boolean isPopular) {
         this.isPopular = isPopular;
     }
 
-    public boolean isActive() {
+    public boolean isIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean isActive) {
+    public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
+
+  
     
 }

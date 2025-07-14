@@ -35,14 +35,14 @@ public class PlanResponse {
         this.planType = plan.getPlanType();
         this.planCount = plan.getPlanCount();
         this.createdAt = plan.getCreatedAt();
-        this.isPopular = plan.isPopular();
+        this.isPopular = plan.isIsPopular();
         this.permissions = (plan.getPermissionIds()!= null && !plan.getPermissionIds().contains(null))
                 ? permissionRepository.findAllById(plan.getPermissionIds())
                 : Collections.emptyList();
         this.planPermissions = (plan.getPlanPermissionIds()!= null && !plan.getPlanPermissionIds().contains(null))
                 ? planPermissionRepository.findAllById(plan.getPlanPermissionIds())
                 : Collections.emptyList();
-        this.isActive = plan.isActive();
+        this.isActive = plan.isIsActive();
     }
 
     public String getPlanId() {

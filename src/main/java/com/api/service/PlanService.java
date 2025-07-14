@@ -1,6 +1,5 @@
 package com.api.service;
 
-import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.request.PlanRequest;
 import com.api.dto.response.PlanResponse;
@@ -10,9 +9,6 @@ import com.api.model.PlanPermission;
 import com.api.repository.PermissionRepository;
 import com.api.repository.PlanPermissionRepository;
 import com.api.repository.PlanRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
@@ -57,8 +53,8 @@ public class PlanService {
         plan.setPrice(planrequest.getPrice());
         plan.setDiscount(planrequest.getDiscount());
         plan.setPlanType(planrequest.getPlanType());
-        plan.setPopular(planrequest.isPopular());
-        plan.setActive(planrequest.isActive());
+        plan.setIsPopular(planrequest.isIsPopular());
+        plan.setIsActive(planrequest.isIsActive());
         PlanResponse planResponse = new PlanResponse(plan, permissionRepository, planPermissionRepository);
         planRepository.save(plan);
         return ApiResponse.sendSuccess(200, "Success", planResponse, request.getRequestURI());
@@ -137,8 +133,8 @@ public class PlanService {
             plan.setPlanPermissionIds(validPlanPermissionIds);
         }
 
-        plan.setPopular(updatedPlan.isPopular());
-        plan.setActive(updatedPlan.isActive());
+        plan.setIsPopular(updatedPlan.isIsPopular());
+        plan.setIsActive(updatedPlan.isIsActive());
         PlanResponse planResponse = new PlanResponse(plan, permissionRepository, planPermissionRepository);
 
         planRepository.save(plan);
