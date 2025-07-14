@@ -221,7 +221,7 @@ public class InvitationController {
                List<Category> userCategories = categories.stream()
                        .filter(cat -> influencer.getCategoryIds().contains(cat.getCategoryId()))
                        .toList();
-               return new InfluencerRecommendation(user.getUserId(),user.getName(),user.getAvatarUrl(),influencer.getDoB(),influencer.getGender(),influencer.getSocialMediaLinks(),influencer.getRating(),userCategories,influencer.getFollower());
+               return new InfluencerRecommendation(user.getUserId(),user.getName(),user.getAvatarUrl(),influencer.getGender(),influencer.getSocialMediaLinks(),influencer.getRating(),userCategories,influencer.getFollower());
            })
            .filter(Objects::nonNull)
            .sorted((a, b) -> Double.compare(b.getRating(), a.getRating()))

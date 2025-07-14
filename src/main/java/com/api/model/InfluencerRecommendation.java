@@ -16,7 +16,6 @@ public class InfluencerRecommendation {
     private String userId;
     private String name;
     private String avatarUrl;
-    private ZonedDateTime DoB;
     private String gender;
     private List<SocialMedia> socialMediaLinks;
     private double rating;
@@ -28,7 +27,6 @@ public class InfluencerRecommendation {
             @JsonProperty("userId") String userId,
             @JsonProperty("name") String name,
             @JsonProperty("avatarUrl") String avatarUrl,
-            @JsonProperty("DoB") ZonedDateTime DoB,
             @JsonProperty("gender") String gender,
             @JsonProperty("socialMediaLinks") List<SocialMedia> socialMediaLinks,
             @JsonProperty("rating") Double rating,
@@ -37,7 +35,6 @@ public class InfluencerRecommendation {
         this.userId = userId;
         this.name = name;
         this.avatarUrl = avatarUrl;
-        this.DoB = DoB;
         this.gender = gender;
         this.socialMediaLinks = socialMediaLinks;
         this.rating = rating;

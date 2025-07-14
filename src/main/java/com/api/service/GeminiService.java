@@ -98,7 +98,6 @@ public class GeminiService {
                     + "    \"userId\": \"string\",\n"
                     + "    \"name\": \"string\",\n"
                     + "    \"avatarUrl\": \"string\",\n"
-                    + "    \"DoB\": \"string\",\n"
                     + "    \"gender\": \"string\",\n"
                     + "    \"socialMediaLinks\": [ { \"platform\": \"string\", \"url\": \"string\" } ],\n"
                     + "    \"rating\": \"number\",\n"
