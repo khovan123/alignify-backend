@@ -8,6 +8,7 @@ RUN mvn clean package -DskipTests
 # Package stage
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /alignify-backend
+RUN apk --no-cache add ca-certificates
 COPY --from=build /alignify-backend/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
