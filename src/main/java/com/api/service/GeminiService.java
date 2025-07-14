@@ -55,13 +55,6 @@ public class GeminiService {
     private BrandRepository brandRepository;
     @Value("${GOOGLE_API_KEY}")
     private String GOOGLE_API_KEY;
-    private Client client;
-
-    @PostConstruct
-    public void init() {
-        this.client = Client.builder().apiKey(GOOGLE_API_KEY).build();
-    }
-
     @Autowired
     private InfluencerRepository influencerRepository;
     @Autowired
