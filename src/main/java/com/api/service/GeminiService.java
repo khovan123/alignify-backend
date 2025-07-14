@@ -74,7 +74,7 @@ public class GeminiService {
             return ApiResponse.sendError(404, "Not found campaign with id: " + campaignId, request.getRequestURI());
         }
         Campaign campaign = campaignOpt.get();
-
+        AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient();
         try {
             List<User> users = userRepository.findByRoleIdAndUserIdNotIn(EnvConfig.INFLUENCER_ROLE_ID,
                     campaign.getJoinedInfluencerIds());
@@ -85,8 +85,9 @@ public class GeminiService {
 
             List<InfluencerProfileResponse> availableInfluencers = users.stream().map(user -> {
                 Influencer influencer = influencerMap.get(user.getUserId());
+                if (influencer == null) return null;
                 return new InfluencerProfileResponse(user, influencer, categoryRepository);
-            }).toList();
+            }).filter(Objects::nonNull).toList();
 
             String prompt = "Bạn là một công cụ AI chuyên biệt, có nhiệm vụ DUY NHẤT là đề xuất danh sách influencer phù hợp cho chiến dịch. "
                     + "**Đầu ra của bạn phải là MỘT MẢNG JSON duy nhất, TUYỆT ĐỐI không chứa bất kỳ văn bản, lời chào, giải thích, hay nội dung nào nào ngoài khối JSON này.** "
@@ -124,25 +125,36 @@ public class GeminiService {
                     .put("maxOutputTokens", 10000)
                     .put("topP", 0.9)
                     .put("topK", 40));
-
-            AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient();
-            String rawResponseText;
-
-            try {
-                org.asynchttpclient.Response httpResponse = asyncHttpClient.preparePost("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent")
-                        .setHeader("x-goog-api-key", GOOGLE_API_KEY)
-                        .setHeader("Content-Type", "application/json")
-                        .setBody(payload.toString())
-                        .execute()
-                        .toCompletableFuture()
-                        .get();
-
-                rawResponseText = new JSONObject(httpResponse.getResponseBody()).getJSONArray("candidates").getJSONObject(0).getJSONObject("content").getJSONArray("parts").getJSONObject(0).getString("text");
-
-            } finally {
-                asyncHttpClient.close();
+            final JSONObject[] responseJsonContainer = new JSONObject[1];
+            asyncHttpClient.preparePost("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent")
+                    .setHeader("x-goog-api-key", GOOGLE_API_KEY)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(payload.toString())
+                    .execute()
+                    .toCompletableFuture()
+                    .thenAccept(response -> {
+                        String body = response.getResponseBody();
+                        responseJsonContainer[0] = new JSONObject(body);
+                    }).join();
+            asyncHttpClient.close();
+            JSONObject geminiResponse = responseJsonContainer[0];
+            if (geminiResponse == null || !geminiResponse.has("candidates")) {
+                throw new RuntimeException("Invalid response from Gemini API: " + (geminiResponse != null ? geminiResponse.toString() : "null"));
             }
 
+            JSONArray candidates = geminiResponse.getJSONArray("candidates");
+            if (candidates.isEmpty()) {
+                throw new RuntimeException("No candidates found in Gemini API response.");
+            }
+
+            JSONObject firstCandidate = candidates.getJSONObject(0);
+            JSONObject contentPart = firstCandidate.getJSONObject("content");
+            JSONArray parts = contentPart.getJSONArray("parts");
+
+            String rawResponseText = parts.getJSONObject(0).getString("text");
+            System.out.println(rawResponseText);
+
+            ObjectMapper objectMapper = new ObjectMapper();
             Pattern pattern = Pattern.compile("```json\\s*([\\s\\S]*?)\\s*```", Pattern.DOTALL);
             Matcher matcher = pattern.matcher(rawResponseText);
 
@@ -162,9 +174,6 @@ public class GeminiService {
             }
             return ApiResponse.sendSuccess(200, "Response successfully!", recommendedInfluencers, request.getRequestURI());
         } catch (JsonProcessingException e) {
-            return ApiResponse.sendError(500, "Server not available: " + e.getMessage(), request.getRequestURI());
-        } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Lỗi khi gọi API Gemini: " + e.getMessage());
             return ApiResponse.sendError(500, "Server not available: " + e.getMessage(), request.getRequestURI());
         } catch (Exception err) {
             return ApiResponse.sendError(500, "Server not available: " + err.getMessage(), request.getRequestURI());

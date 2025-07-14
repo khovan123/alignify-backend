@@ -1,11 +1,12 @@
 package com.api.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 @ToString
@@ -21,4 +22,26 @@ public class InfluencerRecommendation {
     private double rating;
     private List<Category> categories;
     private int follower;
+
+    @JsonCreator
+    public InfluencerRecommendation(
+            @JsonProperty("userId") String userId,
+            @JsonProperty("name") String name,
+            @JsonProperty("avatarUrl") String avatarUrl,
+            @JsonProperty("DoB") ZonedDateTime DoB,
+            @JsonProperty("gender") String gender,
+            @JsonProperty("socialMediaLinks") List<SocialMedia> socialMediaLinks,
+            @JsonProperty("rating") Double rating,
+            @JsonProperty("categories") List<Category> categories,
+            @JsonProperty("follower") Integer follower) {
+        this.userId = userId;
+        this.name = name;
+        this.avatarUrl = avatarUrl;
+        this.DoB = DoB;
+        this.gender = gender;
+        this.socialMediaLinks = socialMediaLinks;
+        this.rating = rating;
+        this.categories = categories;
+        this.follower = follower;
+    }
 }
