@@ -110,7 +110,7 @@ public class StatisticsService {
 
         List<InfluencerStatisticsResponse.Invitation> invitationStats = new ArrayList<>();
         List<String> sortedInvitationMonths = new ArrayList<>(invitationByMonth.keySet());
-        Collections.sort(sortedInvitationMonths);
+        sortedInvitationMonths.sort(Comparator.naturalOrder());
         for (String month : sortedInvitationMonths) {
             List<Invitation> monthInvites = invitationByMonth.get(month);
             int sent = monthInvites.size();
