@@ -16,7 +16,7 @@ public class UtilsPaypal {
         }
 
         url.append(contextPath);
-        if (url.toString().endsWith("/")) {
+        if (!url.toString().endsWith("/")) {
             url.append("/");
         }
 
