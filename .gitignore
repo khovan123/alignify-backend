@@ -1,5 +1,4 @@
 ### Maven ###
-pom.xml
 /target/classes/
 /target/test-classes/
 /target/maven-status/
@@ -22,6 +21,9 @@ pom.xml
 
 ### IntelliJ IDEA ###
 .idea/
+
+### Git ###
+backup.patch
 
 # Package Files #
 *.json

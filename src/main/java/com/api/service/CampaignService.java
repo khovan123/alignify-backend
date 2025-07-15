@@ -262,7 +262,7 @@ public class CampaignService {
     public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails,
             HttpServletRequest request) {
 
-        List<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId());
+        List<Campaign> campaignPage = campaignRepo.findAllByBrandIdOrderByCreatedAtDesc(userDetails.getUserId());
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
 
         List<CampaignResponse> dtoList = campaignPage.stream()
@@ -572,9 +572,9 @@ public class CampaignService {
         Page<Campaign> matchedCampaigns;
 
         if (!matchedBrandIds.isEmpty()) {
-            matchedCampaigns = campaignRepo.findByBrandIdIn(matchedBrandIds, pageable);
+            matchedCampaigns = campaignRepo.findByStatusAndBrandIdIn("RECRUITING", matchedBrandIds, pageable);
         } else {
-            matchedCampaigns = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+            matchedCampaigns = campaignRepo.findByStatusAndCampaignNameContainingIgnoreCase("RECRUITING", term, pageable);
         }
         if (matchedCampaigns.isEmpty()) {
             return ApiResponse.sendSuccess(200, "No campaigns found", Collections.emptyList(), request.getRequestURI());
