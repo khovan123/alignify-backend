@@ -49,7 +49,7 @@ public class InfluencerProfileResponse {
         this.socialMediaLinks = influencer.getSocialMediaLinks();
         this.rating = influencer.getRating();
         this.categories = allCategories.stream()
-                .filter(cat -> influencer.getCategoryIds().contains(cat.getCategoryId()))
+                .filter(cat -> influencer.getCategoryIds() != null && influencer.getCategoryIds().contains(cat.getCategoryId()))
                 .toList();
         this.follower = influencer.getFollower();
     }
