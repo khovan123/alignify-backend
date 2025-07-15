@@ -151,7 +151,7 @@ public class StatisticsService {
             List<Application> monthApps = approvedAppsByMonth.get(month);
             InfluencerStatisticsResponse.Income stat = new InfluencerStatisticsResponse.Income();
             stat.setMonth(month);
-            stat.setIncome(0); // Chưa có payment
+            stat.setIncome(0); // No payment logic implemented yet
             stat.setCampaigns(monthApps.size());
             incomeStats.add(stat);
         }
