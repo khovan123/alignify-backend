@@ -126,7 +126,7 @@ public class StatisticsService {
 
         List<InfluencerStatisticsResponse.Application> applicationStats = new ArrayList<>();
         List<String> sortedApplicationMonths = new ArrayList<>(applicationByMonth.keySet());
-        Collections.sort(sortedApplicationMonths);
+        sortedApplicationMonths.sort(Comparator.naturalOrder());
         for (String month : sortedApplicationMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
