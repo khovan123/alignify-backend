@@ -26,6 +26,24 @@ public class BrandProfileResponse {
     private ZonedDateTime establishDate;
     private int totalCampaign;
 
+    public BrandProfileResponse(User user, Brand brand, List<Category> allCategories) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.email = user.getEmail();
+        this.roleId = user.getRoleId();
+        this.avatarUrl = user.getAvatarUrl();
+        this.backgroundUrl = user.getBackgroundUrl();
+        this.bio = brand.getBio();
+        this.categories = allCategories.stream()
+                .filter(cat -> brand.getCategoryIds().contains(cat.getCategoryId()))
+                .toList();
+        this.contacts = brand.getContacts();
+        this.socialMediaLinks = brand.getSocialMediaLinks();
+        this.establishDate = brand.getEstablishDate();
+        this.totalCampaign = brand.getTotalCampaign();
+    }
+
+
     public BrandProfileResponse(User user, Brand brand, CategoryRepository categoryRepository) {
         this.userId = user.getUserId();
         this.name = user.getName();
