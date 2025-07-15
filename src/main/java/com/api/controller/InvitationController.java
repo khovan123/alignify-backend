@@ -3,8 +3,15 @@ package com.api.controller;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.api.config.EnvConfig;
+import com.api.model.*;
+import com.api.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,19 +29,6 @@ import com.api.dto.UserDTO;
 import com.api.dto.request.InvitationRequest;
 import com.api.dto.response.CampaignResponse;
 import com.api.dto.response.InvitationResponse;
-import com.api.model.Campaign;
-import com.api.model.CampaignTracking;
-import com.api.model.ChatMessage;
-import com.api.model.ChatRoom;
-import com.api.model.Invitation;
-import com.api.model.User;
-import com.api.repository.CampaignRepository;
-import com.api.repository.CampaignTrackingRepository;
-import com.api.repository.CategoryRepository;
-import com.api.repository.ChatMessageRepository;
-import com.api.repository.ChatRoomRepository;
-import com.api.repository.InvitationRepository;
-import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,6 +51,8 @@ public class InvitationController {
     private ChatMessageRepository chatMessageRepository;
     @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
+    @Autowired
+    private InfluencerRepository influencerRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
@@ -203,5 +199,33 @@ public class InvitationController {
         invitationRepository.save(invitation);
 
         return ApiResponse.sendSuccess(201, "Create invitation successfully", invitation, request.getRequestURI());
+    }
+
+    @GetMapping("/campaigns/invitations/influencers")
+    public ResponseEntity<?> getAllInfluencersForInvitation(
+           @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+           @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String userId = userDetails.getUserId();
+        PageRequest page = PageRequest.of(pageNumber, pageSize);
+        List<Category> categories = categoryRepository.findAll();
+        List<User> users = userRepository.findAllByRoleId(EnvConfig.INFLUENCER_ROLE_ID);
+        List<Influencer> influencers = influencerRepository.findAllById(users.stream().map(User::getUserId).toList());
+        Map<String, Influencer> influencerMap = influencers.stream()
+                .collect(Collectors.toMap(Influencer::getUserId, influencer -> influencer));
+       List<InfluencerRecommendation> influencerRecommendations = users.stream()
+           .map(user -> {
+               Influencer influencer = influencerMap.get(user.getUserId());
+               if (influencer == null) return null;
+               List<Category> userCategories = categories.stream()
+                       .filter(cat -> influencer.getCategoryIds().contains(cat.getCategoryId()))
+                       .toList();
+               return new InfluencerRecommendation(user.getUserId(),user.getName(),user.getAvatarUrl(),influencer.getGender(),influencer.getSocialMediaLinks(),influencer.getRating(),userCategories,influencer.getFollower());
+           })
+           .filter(Objects::nonNull)
+           .sorted((a, b) -> Double.compare(b.getRating(), a.getRating()))
+           .toList();
+        return ApiResponse.sendSuccess(200, "Response successfully", influencerRecommendations, request.getRequestURI());
     }
 }
