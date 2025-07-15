@@ -35,10 +35,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public BrandStatisticsResponse getBrandStatistics(String brandId) {
-        String brandIdStr = String.valueOf(brandId);
-        List<Application> applications = applicationRepository.findAllByBrandId(brandIdStr);
-        List<Invitation> invitations = invitationRepository.findAll()
-            .stream().filter(i -> brandIdStr.equals(i.getBrandId())).collect(Collectors.toList());
+        List<Application> applications = applicationRepository.findAllByBrandId(brandId);
+        List<Invitation> invitations = invitationRepository.findAllByBrandId(brandId);
 
         // Group by month
         Map<String, List<Invitation>> invitationByMonth = invitations.stream()
@@ -47,7 +45,9 @@ public class StatisticsServiceImpl implements StatisticsService {
             .collect(Collectors.groupingBy(a -> a.getCreatedAt().format(MONTH_FORMATTER)));
 
         List<BrandStatisticsResponse.Invitation> invitationStats = new ArrayList<>();
-        for (String month : invitationByMonth.keySet()) {
+        List<String> months = new ArrayList<>(invitationByMonth.keySet());
+        months.sort(Comparator.naturalOrder());
+        for (String month : months) {
             List<Invitation> monthInvites = invitationByMonth.get(month);
             int sent = monthInvites.size();
             int accepted = (int) monthInvites.stream().filter(i -> "ACCEPTED".equalsIgnoreCase(i.getStatus())).count();
