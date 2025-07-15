@@ -145,7 +145,7 @@ public class PlanService {
     public ResponseEntity<?> getPermission(HttpServletRequest request) {
         List<Permission> permissions = permissionRepository.findAll();
         if(permissions.isEmpty()){
-            return ApiResponse.sendError(400, "No have any permission", request.getRequestURI());
+            return ApiResponse.sendError(400, "No permissions found", request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Successfully", permissions, request.getRequestURI());
     }
