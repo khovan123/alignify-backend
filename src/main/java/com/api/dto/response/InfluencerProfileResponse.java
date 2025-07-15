@@ -46,7 +46,6 @@ public class InfluencerProfileResponse {
         this.email = user.getEmail();
         this.DoB = influencer.getDoB();
         this.gender = influencer.getGender();
-        this.bio = influencer.getBio();
         this.socialMediaLinks = influencer.getSocialMediaLinks();
         this.rating = influencer.getRating();
         this.categories = allCategories.stream()
