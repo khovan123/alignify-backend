@@ -85,7 +85,7 @@ public class StatisticsService {
         BrandStatisticsResponse response = new BrandStatisticsResponse();
         response.setInvitations(invitationStats);
         response.setApplications(applicationStats);
-        // Đảm bảo costs luôn là mảng rỗng nếu chưa có logic
+        // Ensure costs is always an empty array if no logic is implemented yet
         response.setCosts(new ArrayList<>());
         response.setTotalInvitations(totalInvitations);
         response.setAcceptanceRate(acceptanceRate);
