@@ -61,7 +61,9 @@ public class StatisticsService {
         }
 
         List<BrandStatisticsResponse.Application> applicationStats = new ArrayList<>();
-        for (String month : applicationByMonth.keySet()) {
+        List<String> applicationMonths = new ArrayList<>(applicationByMonth.keySet());
+        applicationMonths.sort(Comparator.naturalOrder());
+        for (String month : applicationMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
             int approved = (int) monthApps.stream().filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus())).count();
@@ -107,7 +109,9 @@ public class StatisticsService {
             .collect(Collectors.groupingBy(a -> a.getCreatedAt().format(MONTH_FORMATTER)));
 
         List<InfluencerStatisticsResponse.Invitation> invitationStats = new ArrayList<>();
-        for (String month : invitationByMonth.keySet()) {
+        List<String> sortedInvitationMonths = new ArrayList<>(invitationByMonth.keySet());
+        Collections.sort(sortedInvitationMonths);
+        for (String month : sortedInvitationMonths) {
             List<Invitation> monthInvites = invitationByMonth.get(month);
             int sent = monthInvites.size();
             int accepted = (int) monthInvites.stream().filter(i -> "ACCEPTED".equalsIgnoreCase(i.getStatus())).count();
@@ -121,7 +125,9 @@ public class StatisticsService {
         }
 
         List<InfluencerStatisticsResponse.Application> applicationStats = new ArrayList<>();
-        for (String month : applicationByMonth.keySet()) {
+        List<String> sortedApplicationMonths = new ArrayList<>(applicationByMonth.keySet());
+        Collections.sort(sortedApplicationMonths);
+        for (String month : sortedApplicationMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
             int approved = (int) monthApps.stream().filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus())).count();
