@@ -1359,7 +1359,7 @@ public class MongoConfig {
                     "packageName": {
                         "bsonType": "string"
                     },
-                    "discription": {
+                    "description": {
                         "bsonType": "string"
                     },
                     "price": {
