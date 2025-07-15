@@ -262,7 +262,7 @@ public class CampaignService {
     public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails,
             HttpServletRequest request) {
 
-        List<Campaign> campaignPage = campaignRepo.findAllByBrandId(userDetails.getUserId());
+        List<Campaign> campaignPage = campaignRepo.findAllByBrandIdOrderByCreatedAtDesc(userDetails.getUserId());
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
 
         List<CampaignResponse> dtoList = campaignPage.stream()
