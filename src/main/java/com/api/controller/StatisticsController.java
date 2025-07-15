@@ -1,10 +1,14 @@
 package com.api.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.api.dto.response.BrandStatisticsResponse;
 import com.api.dto.response.InfluencerStatisticsResponse;
 import com.api.service.StatisticsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/statistics")
@@ -18,7 +22,6 @@ public class StatisticsController {
         try {
             return statisticsService.getBrandStatistics(brandId);
         } catch (Exception e) {
-            logger.error("Error occurred while fetching brand statistics for brandId: {}", brandId, e);
             throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
         }
     }
@@ -28,7 +31,6 @@ public class StatisticsController {
         try {
             return statisticsService.getInfluencerStatistics(influencerId);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
         }
     }
