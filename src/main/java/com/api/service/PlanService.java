@@ -41,9 +41,10 @@ public class PlanService {
         }
 
         List<PlanPermission> planPermissions = planrequest.getPlanPermissions();
-        for (PlanPermission p : planPermissions) {
-            p = planPermissionRepository.save(p);
-        }
+        List<PlanPermission> savedPlanPermissions = planPermissions.stream()
+                .map(planPermissionRepository::save)
+                .toList();
+        planrequest.setPlanPermissions(savedPlanPermissions);
         Plan plan = new Plan();
         plan.setPlanName(planrequest.getPlanName());
         plan.setDescription(planrequest.getDescription());
