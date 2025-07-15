@@ -18,7 +18,6 @@ public class StatisticsController {
         try {
             return statisticsService.getBrandStatistics(brandId);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
         }
     }
@@ -28,7 +27,6 @@ public class StatisticsController {
         try {
             return statisticsService.getInfluencerStatistics(influencerId);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
         }
     }
