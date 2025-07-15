@@ -35,6 +35,25 @@ public class InfluencerProfileResponse {
         this.follower = influencer.getFollower();
     }
 
+    public InfluencerProfileResponse(User user, Influencer influencer, List<Category> allCategories ) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.roleId = user.getRoleId();
+        this.avatarUrl = user.getAvatarUrl();
+        this.backgroundUrl = user.getBackgroundUrl();
+        this.bio = influencer.getBio();
+        this.isPublic = influencer.isPublic();
+        this.email = user.getEmail();
+        this.DoB = influencer.getDoB();
+        this.gender = influencer.getGender();
+        this.socialMediaLinks = influencer.getSocialMediaLinks();
+        this.rating = influencer.getRating();
+        this.categories = allCategories.stream()
+                .filter(cat -> influencer.getCategoryIds() != null && influencer.getCategoryIds().contains(cat.getCategoryId()))
+                .toList();
+        this.follower = influencer.getFollower();
+    }
+
     public InfluencerProfileResponse(User user, Influencer influencer, CategoryRepository categoryRepository) {
         this.userId = user.getUserId();
         this.name = user.getName();
@@ -53,7 +72,6 @@ public class InfluencerProfileResponse {
                 ? categoryRepository.findAllById(influencer.getCategoryIds())
                 : Collections.emptyList();
         this.follower = influencer.getFollower();
-
     }
 
     public InfluencerProfileResponse(User user, Influencer influencer, int completedCampaign, boolean isOwner,
