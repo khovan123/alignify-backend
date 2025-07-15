@@ -4,6 +4,7 @@ package com.api.service;
 import com.api.dto.response.BrandStatisticsResponse;
 import com.api.dto.response.InfluencerStatisticsResponse;
 import com.api.model.Application;
+import com.api.model.ContentPosting;
 import com.api.model.Invitation;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.InvitationRepository;
@@ -96,10 +97,8 @@ public class StatisticsService {
     }
 
     public InfluencerStatisticsResponse getInfluencerStatistics(String influencerId) {
-        String influencerIdStr = influencerId;
-        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerIdStr);
-        List<Invitation> invitations = invitationRepository.findAll()
-            .stream().filter(i -> influencerIdStr.equals(i.getInfluencerId())).collect(Collectors.toList());
+        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
+        List<Invitation> invitations = invitationRepository.findAllByInfluencerId(influencerId);
 
         // Group by month
         Map<String, List<Invitation>> invitationByMonth = invitations.stream()
@@ -152,16 +151,15 @@ public class StatisticsService {
         }
 
         // Forum: group các contentPosting theo tháng, tính posts, likes, comments, shares/views = 0
-        List<com.api.model.ContentPosting> posts = contentPostingRepository.findAll().stream()
-            .filter(p -> influencerIdStr.equals(p.getUserId())).collect(Collectors.toList());
-        Map<String, List<com.api.model.ContentPosting>> postsByMonth = posts.stream()
+        List<ContentPosting> posts = contentPostingRepository.findByUserId(influencerId);
+        Map<String, List<ContentPosting>> postsByMonth = posts.stream()
             .collect(Collectors.groupingBy(p -> p.getCreatedDate().format(MONTH_FORMATTER)));
         List<InfluencerStatisticsResponse.Forum> forumStats = new ArrayList<>();
         for (String month : postsByMonth.keySet()) {
-            List<com.api.model.ContentPosting> monthPosts = postsByMonth.get(month);
+            List<ContentPosting> monthPosts = postsByMonth.get(month);
             int postCount = monthPosts.size();
-            int likeCount = monthPosts.stream().mapToInt(com.api.model.ContentPosting::getLikeCount).sum();
-            int commentCount = monthPosts.stream().mapToInt(com.api.model.ContentPosting::getCommentCount).sum();
+            int likeCount = monthPosts.stream().mapToInt(ContentPosting::getLikeCount).sum();
+            int commentCount = monthPosts.stream().mapToInt(ContentPosting::getCommentCount).sum();
             InfluencerStatisticsResponse.Forum stat = new InfluencerStatisticsResponse.Forum();
             stat.setMonth(month);
             stat.setPosts(postCount);
