@@ -124,7 +124,9 @@ public class StatisticsService {
         }
 
         List<InfluencerStatisticsResponse.Application> applicationStats = new ArrayList<>();
-        for (String month : applicationByMonth.keySet()) {
+        List<String> sortedApplicationMonths = new ArrayList<>(applicationByMonth.keySet());
+        Collections.sort(sortedApplicationMonths);
+        for (String month : sortedApplicationMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
             int approved = (int) monthApps.stream().filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus())).count();
