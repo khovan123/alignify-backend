@@ -18,7 +18,7 @@ public class StatisticsController {
         try {
             return statisticsService.getBrandStatistics(brandId);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error occurred while fetching brand statistics for brandId: {}", brandId, e);
             throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
         }
     }
