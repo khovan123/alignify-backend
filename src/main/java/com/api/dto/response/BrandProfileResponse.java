@@ -34,9 +34,11 @@ public class BrandProfileResponse {
         this.avatarUrl = user.getAvatarUrl();
         this.backgroundUrl = user.getBackgroundUrl();
         this.bio = brand.getBio();
-        this.categories = allCategories.stream()
-                .filter(cat -> brand.getCategoryIds().contains(cat.getCategoryId()))
-                .toList();
+        this.categories = (brand.getCategoryIds() != null)
+                ? allCategories.stream()
+                        .filter(cat -> brand.getCategoryIds().contains(cat.getCategoryId()))
+                        .toList()
+                : Collections.emptyList();
         this.contacts = brand.getContacts();
         this.socialMediaLinks = brand.getSocialMediaLinks();
         this.establishDate = brand.getEstablishDate();
