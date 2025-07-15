@@ -68,6 +68,7 @@ public class GeminiService {
         }
         Campaign campaign = campaignOpt.get();
         AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient();
+        List<Category> allCategories = categoryRepository.findAll();
         try {
             List<User> users = userRepository.findByRoleIdAndUserIdNotIn(EnvConfig.INFLUENCER_ROLE_ID,
                     campaign.getJoinedInfluencerIds());
@@ -79,7 +80,7 @@ public class GeminiService {
             List<InfluencerProfileResponse> availableInfluencers = users.stream().map(user -> {
                 Influencer influencer = influencerMap.get(user.getUserId());
                 if (influencer == null) return null;
-                return new InfluencerProfileResponse(user, influencer, categoryRepository);
+                return new InfluencerProfileResponse(user, influencer, allCategories);
             }).filter(Objects::nonNull).toList();
 
             String prompt = "Bạn là một công cụ AI chuyên biệt, có nhiệm vụ DUY NHẤT là đề xuất danh sách influencer phù hợp cho chiến dịch. "
@@ -190,7 +191,7 @@ public class GeminiService {
         userMessage.setContent(assistantRequest.getQuestion());
         userMessage.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         assistantMessageRespository.save(userMessage);
-
+        List<Category> allCategories = categoryRepository.findAll();
         AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient();
         try {
             User user = userRepository.findById(influencerId)
@@ -202,7 +203,7 @@ public class GeminiService {
                             "Influencer not found with ID: " + influencerId
                     ));
             InfluencerProfileResponse influencerProfileResponse = new InfluencerProfileResponse(user, influencer,
-                    categoryRepository);
+                    allCategories);
             List<User> users = userRepository.findAllByRoleId(EnvConfig.BRAND_ROLE_ID);
             List<Brand> brands = brandRepository.findAllById(users.stream().map(User::getUserId).toList());
             Map<String, Brand> brandMap = brands.stream()
@@ -211,7 +212,7 @@ public class GeminiService {
                     .map(u -> {
                         Brand brand = brandMap.get(u.getUserId());
                         return brand != null
-                                ? new BrandProfileResponse(u, brand, categoryRepository)
+                                ? new BrandProfileResponse(u, brand, allCategories)
                                 : null;
                     })
                     .filter(Objects::nonNull)
