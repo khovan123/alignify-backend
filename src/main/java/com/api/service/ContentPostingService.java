@@ -1,5 +1,7 @@
 package com.api.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,23 +13,25 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Category;
 import com.api.model.Comment;
 import com.api.model.ContentPosting;
-import com.api.model.Likes;
+import com.api.model.User;
 import com.api.repository.CategoryRepository;
 import com.api.repository.CommentRepository;
 import com.api.repository.ContentPostingRepository;
 import com.api.repository.LikesRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
-import com.api.util.Helper;
-import com.api.util.JwtUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -44,16 +48,28 @@ public class ContentPostingService {
     private CommentRepository commentRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
-
-    public ResponseEntity<?> createContentPosting(ContentPosting contentPosting, CustomUserDetails userDetails, HttpServletRequest request) {
-        if (userDetails.getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
-            contentPosting.setUserId(userDetails.getUserId());
-            contentPosting = contentPostingRepo.save(contentPosting);
-            return ApiResponse.sendSuccess(201, "Content posting created successfully", contentPosting,
-                    request.getRequestURI());
+    public ResponseEntity<?> createContentPosting(
+            ContentPosting contentPosting,
+            MultipartFile file,
+            CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        String imageUrl;
+        try {
+            imageUrl = fileStorageService.storeFile(file);
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendError(403, "Content Posting only create by Influencer", request.getRequestURI());
+        contentPosting.setUserId(userDetails.getUserId());
+        contentPosting.setImageUrl(imageUrl);
+        contentPosting = contentPostingRepo.save(contentPosting);
+        messagingTemplate.convertAndSend("/topic/contents/post", mapToDTO(contentPosting));
+        return ApiResponse.sendSuccess(201, "Content posting created successfully", mapToDTO(contentPosting),
+                request.getRequestURI());
     }
 
     public ContentPostingResponse mapToDTO(ContentPosting post) {
@@ -69,20 +85,31 @@ public class ContentPostingService {
                 .toList();
 
         List<Comment> comments = commentRepository.findAllByContentId(post.getContentId());
-
+        User user = userRepository.findByUserId(post.getUserId()).orElse(null);
         ContentPostingResponse dto = new ContentPostingResponse();
+        long likeCount = likesRepo.countByContentId(post.getContentId());
+        long commentCount = commentRepository.countByContentId(post.getContentId());
+        if (commentCount != post.getCommentCount()) {
+            post.setCommentCount((int) commentCount);
+        }
+        if (likeCount != post.getLikeCount()) {
+            post.setLikeCount((int) likeCount);
+        }
         dto.setContentId(post.getContentId());
         dto.setContentName(post.getContentName());
-        dto.setUserAvatar(userRepository.findByUserId(post.getUserId()).getAvatarUrl());
+        if (user != null) {
+            dto.setUserAvatar(user.getAvatarUrl());
+            dto.setUserName(user.getName());
+        }
         dto.setUserId(post.getUserId());
-        dto.setUserName(userRepository.findByUserId(post.getUserId()).getName());
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
         dto.setCategories(categoryInfo);
         dto.setCreatedDate(post.getCreatedDate());
         dto.setPublic(post.isIsPublic());
         dto.setCommentCount(comments.size());
-        dto.setLikeCount(post.getLikeCount());
+        dto.setLikeCount((long) post.getLikeCount());
+        contentPostingRepo.save(post);
         return dto;
     }
 
@@ -93,11 +120,6 @@ public class ContentPostingService {
         List<ContentPostingResponse> dtoList = posts.getContent().stream()
                 .map(this::mapToDTO)
                 .toList();
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", posts.getNumber());
-        responseData.put("totalPages", posts.getTotalPages());
-        responseData.put("totalItems", posts.getTotalElements());
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
@@ -110,13 +132,7 @@ public class ContentPostingService {
                 .map(this::mapToDTO)
                 .toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", posts.getNumber());
-        responseData.put("totalPages", posts.getTotalPages());
-        responseData.put("totalItems", posts.getTotalElements());
-
-        return ApiResponse.sendSuccess(200, "Success", responseData, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
     public ResponseEntity<?> getMe(CustomUserDetails userDetails, HttpServletRequest request,
@@ -128,12 +144,6 @@ public class ContentPostingService {
                 .map(this::mapToDTO)
                 .toList();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("campaigns", dtoList);
-        responseData.put("currentPage", posts.getNumber());
-        responseData.put("totalPages", posts.getTotalPages());
-        responseData.put("totalItems", posts.getTotalElements());
-
         return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
     }
 
@@ -143,12 +153,14 @@ public class ContentPostingService {
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
 
-            if (!contentPosting.getUserId().equals(userDetails)) {
+            if (!contentPosting.getUserId().equals(userDetails.getUserId())) {
                 return ResponseEntity.status(403).body(
                         Map.of("error", "Access denied. You are not the owner of this content."));
             }
 
             contentPostingRepo.deleteById(contentId);
+            likesRepo.deleteAllByContentId(contentId);
+            commentRepository.deleteAllByContentId(contentId);
             return ApiResponse.sendSuccess(
                     204,
                     "Content posting deleted successfully",
@@ -162,36 +174,57 @@ public class ContentPostingService {
         }
     }
 
-    public ResponseEntity<?> updateContentPosting(String contentId, CustomUserDetails userDetails,
+    public ResponseEntity<?> getPostByCategoryIds(
+            int pageNumber,
+            int pageSize,
+            String categoryIds,
+            HttpServletRequest request) {
+
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return ApiResponse.sendError(400, "Category list must not be empty", request.getRequestURI());
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<ContentPosting> postPage = contentPostingRepo.findByCategoryIdsInOrderByCreatedDateDesc(categoryIds,
+                pageable);
+
+        List<ContentPostingResponse> dtoList = postPage.getContent().stream()
+                .map(this::mapToDTO)
+                .toList();
+        return ApiResponse.sendSuccess(200, "Success", dtoList, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> updateContentPosting(
+            String contentId,
             ContentPosting updatedContentPosting,
+            MultipartFile file,
+            CustomUserDetails userDetails,
             HttpServletRequest request) {
 
         Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
 
-            if (!Helper.isOwner(userDetails.getUserId(), request)) {
-                return ResponseEntity.status(403).body(
-                        Map.of("error", "Access denied. You are not the owner of this content."));
+            if (updatedContentPosting.getContent() != null) {
+                contentPosting.setContent(updatedContentPosting.getContent());
             }
-
-            List<String> updatedCategoryIds = updatedContentPosting.getCategoryIds();
-            List<Category> validCategories = categoryRepo.findAllByCategoryIdIn(updatedCategoryIds);
-
-            if (validCategories == null || validCategories.isEmpty()) {
-                return ApiResponse.sendError(400, "No valid category IDs provided", request.getRequestURI());
+            String imageUrl = null;
+            if (file != null) {
+                try {
+                    imageUrl = fileStorageService.storeFile(file);
+                } catch (Exception e) {
+                    return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
+                }
             }
-
-            List<String> validCategoryIds = validCategories.stream()
-                    .map(Category::getCategoryId)
-                    .toList();
-
-            contentPosting.setContent(updatedContentPosting.getContent());
-            contentPosting.setImageUrl(updatedContentPosting.getImageUrl());
-            contentPosting.setCategoryIds(validCategoryIds);
+            if (imageUrl != null) {
+                contentPosting.setImageUrl(imageUrl);
+            }
+            if (!updatedContentPosting.getCategoryIds().isEmpty() && updatedContentPosting.getCategoryIds() != null) {
+                contentPosting.setCategoryIds(updatedContentPosting.getCategoryIds());
+            } else {
+                contentPosting.setCategoryIds(new ArrayList<>());
+            }
             contentPosting.setIsPublic(updatedContentPosting.isIsPublic());
-            contentPosting.setCommentCount(updatedContentPosting.getCommentCount());
-            contentPosting.setLikeCount(updatedContentPosting.getLikeCount());
 
             contentPostingRepo.save(contentPosting);
 
@@ -202,43 +235,73 @@ public class ContentPostingService {
         }
     }
 
-    public ResponseEntity<?> toggleLike(String contentId, HttpServletRequest request) {
-        Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
-        if (contentPostingOpt.isEmpty()) {
-            return ApiResponse.sendError(404, "Content posting not found", request.getRequestURI());
+    // public ResponseEntity<?> toggleLike(String contentId, HttpServletRequest
+    // request) {
+    // Optional<ContentPosting> contentPostingOpt =
+    // contentPostingRepo.findById(contentId);
+    // if (contentPostingOpt.isEmpty()) {
+    // return ApiResponse.sendError(404, "Content posting not found",
+    // request.getRequestURI());
+    // }
+    // ContentPosting content = contentPostingOpt.get();
+    // String userId = JwtUtil.decodeToken(request).getSubject();
+    // boolean isOwner = content.getUserId().equals(userId);
+    // boolean isPublic = content.isIsPublic();
+    // if (!isPublic && !isOwner) {
+    // return ResponseEntity.status(403).body(
+    // Map.of("error", "You do not have permission to like this private content."));
+    // }
+    // Optional<Likes> existingLike = likesRepo.findByUserIdAndContentId(userId,
+    // contentId);
+    // if (existingLike.isPresent()) {
+    // likesRepo.deleteByUserIdAndContentId(userId, contentId);
+    // } else {
+    // Likes newLike = new Likes(userId, contentId);
+    // likesRepo.save(newLike);
+    // }
+    // long likeCount = likesRepo.countByContentId(contentId);
+    // content.setLikeCount((int) likeCount);
+    // contentPostingRepo.save(content);
+    // String message = existingLike.isPresent() ? "Like removed" : "Like added";
+    // return ApiResponse.sendSuccess(
+    // 200,
+    // message,
+    // Map.of("likeCount", likeCount),
+    // request.getRequestURI());
+    // }
+    public ResponseEntity<?> findContentByTerm(String term, int pageNumber, int pageSize, HttpServletRequest request) {
+        if (term == null || term.trim().isEmpty()) {
+            return ApiResponse.sendSuccess(200, "No content found", Collections.emptyList(), request.getRequestURI());
         }
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        ContentPosting content = contentPostingOpt.get();
-        String userId = JwtUtil.decodeToken(request).getSubject();
+        List<String> userIds = userRepository.findByNameContainingIgnoreCase(term)
+                .stream()
+                .map(user -> user.getUserId())
+                .toList();
 
-        boolean isOwner = content.getUserId().equals(userId);
-        boolean isPublic = content.isIsPublic();
-
-        if (!isPublic && !isOwner) {
-            return ResponseEntity.status(403).body(
-                    Map.of("error", "You do not have permission to like this private content."));
-        }
-
-        Optional<Likes> existingLike = likesRepo.findByUserIdAndContentId(userId, contentId);
-
-        if (existingLike.isPresent()) {
-            likesRepo.deleteByUserIdAndContentId(userId, contentId);
+        Page<ContentPosting> contentPage;
+        if (!userIds.isEmpty()) {
+            contentPage = contentPostingRepo.findByUserIdInAndIsPublicTrue(userIds, pageable);
         } else {
-            Likes newLike = new Likes(userId, contentId);
-            likesRepo.save(newLike);
+            contentPage = contentPostingRepo.findByContentNameContainingIgnoreCaseAndIsPublicTrue(term, pageable);
         }
 
-        long likeCount = likesRepo.countByContentId(contentId);
-        content.setLikeCount((int) likeCount);
-        contentPostingRepo.save(content);
+        List<ContentPostingResponse> dtoList = contentPage.getContent().stream()
+                .map(this::mapToDTO)
+                .toList();
 
-        String message = existingLike.isPresent() ? "Like removed" : "Like added";
+        return ApiResponse.sendSuccess(200, "Search content success", dtoList, request.getRequestURI());
+    }
 
-        return ApiResponse.sendSuccess(
-                200,
-                message,
-                Map.of("likeCount", likeCount),
-                request.getRequestURI());
+    public ContentPosting convertToContentPosting(String obj) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            return mapper.readValue(obj, ContentPosting.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid campaign JSON: " + e.getMessage(), e);
+        }
     }
 
 }

@@ -10,9 +10,34 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.*;
 
-@ControllerAdvice
-@RestControllerAdvice
+/**
+ * JWT Exception Handler for API requests only.
+ * Browser requests expecting HTML will be handled by Spring Boot's default error handling.
+ */
+@RestControllerAdvice(basePackages = "com.api.controller")
 public class JWTExceptionHandler {
+
+    /**
+     * Check if the request expects JSON response based on Accept header
+     * or if it's an API request (starts with /api)
+     */
+    private boolean isApiRequest(HttpServletRequest request) {
+        String acceptHeader = request.getHeader("Accept");
+        String requestURI = request.getRequestURI();
+        
+        // Check if it's an API request path
+        if (requestURI != null && requestURI.startsWith("/api")) {
+            return true;
+        }
+        
+        // Check if client accepts JSON but not HTML (prioritize JSON over HTML)
+        if (acceptHeader != null) {
+            return acceptHeader.contains("application/json") && 
+                   !acceptHeader.contains("text/html");
+        }
+        
+        return false;
+    }
 
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<?> handleTokenExpired(TokenExpiredException ex, HttpServletRequest request) {

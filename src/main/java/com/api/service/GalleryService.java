@@ -1,28 +1,28 @@
 package com.api.service;
 
-import com.api.dto.*;
-import com.api.model.*;
-import com.api.repository.*;
-import com.api.security.CustomUserDetails;
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.util.Helper;
-import java.awt.Image;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.api.dto.ApiResponse;
+import com.api.model.Gallery;
+import com.api.model.GalleryImage;
+import com.api.model.Influencer;
+import com.api.repository.GalleryImageRepository;
+import com.api.repository.GalleryRepository;
+import com.api.repository.InfluencerRepository;
+import com.api.security.CustomUserDetails;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class GalleryService {
@@ -33,10 +33,6 @@ public class GalleryService {
     private GalleryRepository galleryRepository;
     @Autowired
     private GalleryImageRepository imageRepository;
-    @Autowired
-    private Cloudinary cloudinary;
-    @Value("${cloudinary.upload-preset}")
-    private String uploadPreset;
     @Autowired
     private FileStorageService fileStorageService;
 

@@ -1,14 +1,17 @@
 package com.api.service;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 @Service
 public class FileStorageService {
@@ -19,7 +22,7 @@ public class FileStorageService {
     private String uploadPreset;
     @Value("${spring.servlet.multipart.max-file-size}")
     private String MAX_FILE_SIZE;
-    private String ALLOWED_EXTENSIONS[] = {".png", ".jpg", ".jpeg"};
+    private final String ALLOWED_EXTENSIONS[] = { ".png", ".jpg", ".jpeg" };
     private long parsedMaxFileSize;
 
     @Autowired
@@ -28,6 +31,7 @@ public class FileStorageService {
         this.parsedMaxFileSize = parseFileSize(MAX_FILE_SIZE);
     }
 
+    @SuppressWarnings("rawtypes")
     public String storeFile(MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {
             throw new Exception("File is empty");
@@ -45,10 +49,9 @@ public class FileStorageService {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
                             "upload_preset", uploadPreset,
-                            "public_id", publicId)
-            );
+                            "public_id", publicId));
             return (String) uploadResult.get("secure_url");
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new Exception(e);
         }
     }

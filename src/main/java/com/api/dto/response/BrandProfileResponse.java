@@ -1,13 +1,15 @@
 package com.api.dto.response;
 
-import com.api.model.Brand;
-import com.api.model.Category;
-import com.api.model.User;
-import com.api.repository.CategoryRepository;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+
+import com.api.model.Brand;
+import com.api.model.Category;
+import com.api.model.Contact;
+import com.api.model.SocialMedia;
+import com.api.model.User;
+import com.api.repository.CategoryRepository;
 
 public class BrandProfileResponse {
 
@@ -19,9 +21,30 @@ public class BrandProfileResponse {
     private String backgroundUrl;
     private String bio;
     private List<Category> categories;
-    private Map<String, String> contacts;
-    private Map<String, String> socialMediaLinks;
-    private LocalDateTime establishDate;
+    private List<Contact> contacts;
+    private List<SocialMedia> socialMediaLinks;
+    private ZonedDateTime establishDate;
+    private int totalCampaign;
+
+    public BrandProfileResponse(User user, Brand brand, List<Category> allCategories) {
+        this.userId = user.getUserId();
+        this.name = user.getName();
+        this.email = user.getEmail();
+        this.roleId = user.getRoleId();
+        this.avatarUrl = user.getAvatarUrl();
+        this.backgroundUrl = user.getBackgroundUrl();
+        this.bio = brand.getBio();
+        this.categories = (brand.getCategoryIds() != null)
+                ? allCategories.stream()
+                        .filter(cat -> brand.getCategoryIds().contains(cat.getCategoryId()))
+                        .toList()
+                : Collections.emptyList();
+        this.contacts = brand.getContacts();
+        this.socialMediaLinks = brand.getSocialMediaLinks();
+        this.establishDate = brand.getEstablishDate();
+        this.totalCampaign = brand.getTotalCampaign();
+    }
+
 
     public BrandProfileResponse(User user, Brand brand, CategoryRepository categoryRepository) {
         this.userId = user.getUserId();
@@ -37,6 +60,15 @@ public class BrandProfileResponse {
         this.contacts = brand.getContacts();
         this.socialMediaLinks = brand.getSocialMediaLinks();
         this.establishDate = brand.getEstablishDate();
+        this.totalCampaign = brand.getTotalCampaign();
+    }
+
+    public int getTotalCampaign() {
+        return totalCampaign;
+    }
+
+    public void setTotalCampaign(int totalCampaign) {
+        this.totalCampaign = totalCampaign;
     }
 
     public String getUserId() {
@@ -103,27 +135,27 @@ public class BrandProfileResponse {
         this.categories = categories;
     }
 
-    public Map<String, String> getContacts() {
+    public List<Contact> getContacts() {
         return contacts;
     }
 
-    public void setContacts(Map<String, String> contacts) {
+    public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
+    public List<SocialMedia> getSocialMediaLinks() {
         return socialMediaLinks;
     }
 
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
         this.socialMediaLinks = socialMediaLinks;
     }
 
-    public LocalDateTime getEstablishDate() {
+    public ZonedDateTime getEstablishDate() {
         return establishDate;
     }
 
-    public void setEstablishDate(LocalDateTime establishDate) {
+    public void setEstablishDate(ZonedDateTime establishDate) {
         this.establishDate = establishDate;
     }
 

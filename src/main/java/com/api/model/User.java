@@ -1,7 +1,10 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
-import org.springframework.data.annotation.CreatedDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,14 +20,19 @@ public class User {
     private boolean isActive;
     private String avatarUrl;
     private String backgroundUrl;
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
+    private List<String> permissionIds;
+    private String userPlanId;
 
     public User() {
         this.isActive = true;
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        this.permissionIds = new ArrayList<>();
+        this.userPlanId = null;
     }
 
-    public User(String userId, String name, String email, String password, String roleId, boolean isActive, String avatarUrl, String backgroundUrl, LocalDateTime createdAt) {
+    public User(String userId, String name, String email, String password, String roleId, boolean isActive,
+            String avatarUrl, String backgroundUrl, ZonedDateTime createdAt) {
         this.userId = userId;
         this.name = name;
         this.email = email;
@@ -34,6 +42,8 @@ public class User {
         this.avatarUrl = avatarUrl;
         this.backgroundUrl = backgroundUrl;
         this.createdAt = createdAt;
+        this.permissionIds = new ArrayList<>();
+        this.userPlanId = null;
     }
 
     public String getAvatarUrl() {
@@ -51,7 +61,6 @@ public class User {
     public void setBackgroundUrl(String backgroundUrl) {
         this.backgroundUrl = backgroundUrl;
     }
-
 
     public String getUserId() {
         return userId;
@@ -101,12 +110,28 @@ public class User {
         this.isActive = isActive;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getUserPlanId() {
+        return userPlanId;
+    }
+
+    public void setUserPlanId(String userPlanId) {
+        this.userPlanId = userPlanId;
+    }
+
+    public List<String> getPermissionIds() {
+        return permissionIds;
+    }
+
+    public void setPermissionIds(List<String> permissionIds) {
+        this.permissionIds = permissionIds;
     }
 
 }

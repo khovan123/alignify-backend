@@ -1,33 +1,65 @@
 package com.api.dto.request;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
+
+import com.api.model.SocialMedia;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InfluencerProfileRequest {
 
-    private LocalDateTime DoB;
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("DoB")
+    private ZonedDateTime DoB;
+    @JsonProperty("gender")
     private String gender;
+    @JsonProperty("bio")
     private String bio;
-    private Map<String, String> socialMediaLinks;
+    @JsonProperty("socialMediaLinks")
+    private List<SocialMedia> socialMediaLinks;
+    @JsonProperty("categoryIds")
     private List<String> categoryIds;
+    @JsonProperty("isPublic")
+    private Boolean isPublic;
 
-    public InfluencerProfileRequest( LocalDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks, List<String> categoryIds) {
+    public InfluencerProfileRequest(@JsonProperty("name") String name, @JsonProperty("DoB") ZonedDateTime DoB,
+            @JsonProperty("gender") String gender, @JsonProperty("bio") String bio,
+            @JsonProperty("socialMediaLinks") List<SocialMedia> socialMediaLinks,
+            @JsonProperty("categoryIds") List<String> categoryIds, @JsonProperty("isPublic") Boolean isPublic) {
+        this.name = name;
         this.DoB = DoB;
         this.gender = gender;
         this.bio = bio;
         this.socialMediaLinks = socialMediaLinks;
         this.categoryIds = categoryIds;
+        this.isPublic = isPublic;
+    }
+
+    public Boolean getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public InfluencerProfileRequest() {
     }
 
-    public LocalDateTime getDoB() {
+    public ZonedDateTime getDoB() {
         return DoB;
     }
 
-    public void setDoB(LocalDateTime DoB) {
+    public void setDoB(ZonedDateTime DoB) {
         this.DoB = DoB;
     }
 
@@ -47,11 +79,11 @@ public class InfluencerProfileRequest {
         this.bio = bio;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
+    public List<SocialMedia> getSocialMediaLinks() {
         return socialMediaLinks;
     }
 
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
         this.socialMediaLinks = socialMediaLinks;
     }
 

@@ -1,6 +1,7 @@
 package com.api.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,14 +24,18 @@ import com.api.model.Admin;
 import com.api.model.Brand;
 import com.api.model.Gallery;
 import com.api.model.Influencer;
+import com.api.model.Permission;
 import com.api.model.Role;
 import com.api.model.User;
+import com.api.model.UserBan;
 import com.api.repository.AccountVerifiedRepository;
 import com.api.repository.AdminRepository;
 import com.api.repository.BrandRepository;
 import com.api.repository.GalleryRepository;
 import com.api.repository.InfluencerRepository;
+import com.api.repository.PermissionRepository;
 import com.api.repository.RoleRepository;
+import com.api.repository.UserBanRepository;
 import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.JwtUtil;
@@ -64,6 +69,10 @@ public class AuthService {
     private OtpService otpService;
     @Autowired
     private AccountVerifiedRepository accountVerifiedRepository;
+    @Autowired
+    private PermissionRepository permissionRepository;
+    @Autowired
+    private UserBanRepository userBanRepository;
     @Value("${spring.google.client-id}")
     private String clientId;
     @Value("${spring.google.secret-key}")
@@ -73,6 +82,7 @@ public class AuthService {
     @Value("${spring.google.preset}")
     private String preset;
 
+    @SuppressWarnings("deprecation")
     public ResponseEntity<?> loginViaGoogle(String authCode, HttpServletRequest request) {
         if (request.getHeader("X-Requested-With") == null) {
             return ApiResponse.sendError(400, "Missing required header field: X-Requested-With",
@@ -92,6 +102,7 @@ public class AuthService {
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
             String name = (String) payload.get("name");
+            String avatar = (String) payload.get("picture");
 
             User user;
             if (!userRepository.existsByEmail(email)) {
@@ -101,14 +112,27 @@ public class AuthService {
                 user.setRoleId(EnvConfig.INFLUENCER_ROLE_ID);
                 user.setPassword(JwtUtil.hashPassword(email));
                 user = userRepository.save(user);
+                Influencer influencer = new Influencer();
+                influencer.setUserId(user.getUserId());
+                influencer.setCreatedAt(user.getCreatedAt());
+                Gallery gallery = new Gallery();
+                gallery.setGalleryId(user.getUserId());
+                gallery.setCreatedAt(user.getCreatedAt());
+                influencerRepository.save(influencer);
+                galleryRepository.save(gallery);
             } else {
                 user = userRepository.findByEmail(email).get();
             }
-            return ApiResponse.sendSuccess(200, "Login successful",
-                    Map.of(
-                            "token", JwtUtil.createToken(user),
-                            "id", user.getUserId()),
-                    request.getRequestURI());
+            Role role = roleRepository.findById(user.getRoleId()).get();
+            UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatar);
+            Optional<UserBan> userBanOpt = userBanRepository.findById(user.getUserId());
+            if (userBanOpt.isPresent()) {
+                return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
+            }
+            return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                    "token", JwtUtil.createToken(user),
+                    "role", role.getRoleName(),
+                    "user", userDTO), request.getRequestURI());
         } catch (IOException e) {
             return ApiResponse.sendError(401, "Invalid Google authentication code", request.getRequestURI());
         }
@@ -187,12 +211,19 @@ public class AuthService {
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> registerAdmin(Admin admin, HttpServletRequest request) {
-        if (adminRepository.existsByEmail(admin.getEmail())) {
+    public ResponseEntity<?> registerAdmin(RegisterRequest registerRequest, HttpServletRequest request) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
-        admin.setPassword(JwtUtil.hashPassword(admin.getPassword()));
+        User user = new User();
+        user.setEmail(registerRequest.getEmail());
+        user.setRoleId(EnvConfig.ADMIN_ROLE_ID);
+        user.setPassword(JwtUtil.hashPassword(registerRequest.getPassword()));
+        user.setName(registerRequest.getName());
+        Admin admin = new Admin();
+        admin.setUserId(admin.getUserId());
         adminRepository.save(admin);
+        userRepository.save(user);
         return ApiResponse.sendSuccess(201, "Account registered successfully", null, request.getRequestURI());
     }
 
@@ -209,13 +240,42 @@ public class AuthService {
         if (!role.isPresent()) {
             return ApiResponse.sendError(400, "Invalid role", request.getRequestURI());
         }
+        Optional<UserBan> userBanOpt = userBanRepository.findById(user.getUserId());
+        if (userBanOpt.isPresent()) {
+            return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
+        }
         String avatarUrl = user.getAvatarUrl();
-        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl);
+        List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
+        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl, permissions);
+        if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
+            Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
+            if (!influencerOpt.isPresent()) {
+                Influencer influencer = new Influencer();
+                influencer.setUserId(user.getUserId());
+                influencer.setCreatedAt(user.getCreatedAt());
+                influencerRepository.save(influencer);
+            }
+        } else if (existing.get().getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+            Optional<Brand> brandOpt = brandRepository.findById(user.getUserId());
+            if (!brandOpt.isPresent()) {
+                Brand brand = new Brand();
+                brand.setUserId(user.getUserId());
+                brand.setCreatedAt(user.getCreatedAt());
+                brandRepository.save(brand);
+            }
+        } else if (existing.get().getRoleId().equals(EnvConfig.ADMIN_ROLE_ID)) {
+            Optional<Admin> adminOpt = adminRepository.findById(user.getUserId());
+            if (!adminOpt.isPresent()) {
+                Admin admin = new Admin();
+                admin.setUserId(user.getUserId());
+                admin.setCreatedAt(user.getCreatedAt());
+                adminRepository.save(admin);
+            }
+        }
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                 "token", JwtUtil.createToken(existing.get()),
                 "role", role.get().getRoleName(),
-                "user", userDTO
-        ), request.getRequestURI());
+                "user", userDTO), request.getRequestURI());
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
@@ -240,7 +300,7 @@ public class AuthService {
         }
 
         user.setPassword(JwtUtil.hashPassword(passwordRequest.getNewPassword()));
-
+        userRepository.save(user);
         return ApiResponse.sendSuccess(200, "Password changed successfully", null, request.getRequestURI());
     }
 
@@ -255,9 +315,10 @@ public class AuthService {
         }
         String resetURL = JwtUtil.createURLResetPassword(recoveryPasswordRequest.getUrl(),
                 recoveryPasswordRequest.getEmail());
-        String subject = "Reset your password";
-        String message = "Click this url: " + resetURL + " to reset your password.";
-        emailService.sendSimpleEmail(recoveryPasswordRequest.getEmail(), subject, message);
+        // String subject = "Reset your password";
+        // String message = "Click this url: " + + " to reset your password.";
+        emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(), user.get().getName(),
+                user.get().getAvatarUrl(), resetURL);
         // emailService.sendResetPasswordEmail(recoveryPasswordRequest.getEmail(),
         // resetURL);
         return ApiResponse.sendSuccess(200, "Password reset request sent successfully to your email", null,

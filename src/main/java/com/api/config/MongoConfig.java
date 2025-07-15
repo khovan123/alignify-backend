@@ -1,16 +1,14 @@
 package com.api.config;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
-import com.api.model.Category;
-import com.api.model.Role;
-import com.api.repository.CategoryRepository;
-import com.api.repository.RoleRepository;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -26,36 +24,97 @@ public class MongoConfig {
   @Autowired
   private MongoClient mongoClient;
 
-  @Autowired
-  private RoleRepository roleRepository;
+  // @Autowired
+  // private RoleRepository roleRepository;
 
-  @Autowired
-  private CategoryRepository categoryRepository;
+  // @Autowired
+  // private CategoryRepository categoryRepository;
 
   @Value("${spring.data.mongodb.database}")
   private String databaseName;
 
+  @Bean
+  public MongoCustomConversions mongoCustomConversions() {
+    return new MongoCustomConversions(Arrays.asList(
+        new ZonedDateTimeToDateConverter(),
+        new DateToZonedDateTimeConverter()));
+  }
+
   @PostConstruct
   public void init() {
-    MongoDatabase db = mongoClient.getDatabase(databaseName);
+    //MongoDatabase db = mongoClient.getDatabase(databaseName);
     // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
     // this.create_rolesCollection(db);
     // this.create_categoriesCollection(db);
     // this.create_adminsCollection(db);
-//    this.create_galleriesCollection(db);
-//    this.create_galleryImagesCollection(db);
+    // this.create_galleriesCollection(db);
+    // this.create_galleryImagesCollection(db);
     // this.create_otpsCollection(db);
     // this.create_accountVerifiedsCollection(db);
     // this.create_campaignsCollection(db);
-//    this.create_contentPostingsCollection(db);
-//    this.create_likesCollection(db);
+    // this.create_contentPostingsCollection(db);
+    // this.create_likesCollection(db);
     // this.create_applicationsCollection(db);
     // this.create_campaignTrackingsCollection(db);
-//    this.create_commentsCollection(db);
+    // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
-//    this.create_messagesCollection(db);
+    // this.create_messagesCollection(db);
+    // this.create_notificationsCollection(db);
+    // this.create_reasonsCollection(db);
+    // this.create_userBansCollection(db);
+    // this.create_permissionsCollection(db);
+    // this.create_planPermissionsCollection(db);
+    // this.create_userPlansCollection(db);
+    // this.create_plansCollection(db);
+    // this.create_invitationsCollection(db);
+    //this.create_assistantMessagesCollection(db);
+  }
+
+  public void create_assistantMessagesCollection(MongoDatabase db) {
+    if (db.getCollection("assistantMessages") != null) {
+      db.getCollection("assistantMessages").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+            """
+            {
+              "bsonType": "object",
+              "required": ["roomId", "senderId", "senderType", "messageType", "content", "createdAt"],
+              "properties": {
+                "roomId": {
+                  "bsonType": "string",
+                },
+                "senderId": {
+                  "bsonType": "string",
+                },
+                "senderType": {
+                  "bsonType": "string",
+                  "enum": ["USER", "ASSISTANT"],
+                },
+                "messageType": {
+                  "bsonType": "string",
+                  "enum": ["TEXT", "CAMPAIGN_RECOMMENDATIONS"],
+                },
+                "content": {
+                  "bsonType": "string",
+                },
+                "createdAt": {
+                  "bsonType": "date",
+                }
+              }
+            }
+            """
+    );
+
+    ValidationOptions validationOptions = new ValidationOptions()
+            .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+            .validationOptions(validationOptions);
+
+    db.createCollection("assistantMessages", options);
   }
 
   public void create_usersCollection(MongoDatabase db) {
@@ -94,6 +153,15 @@ public class MongoConfig {
                     },
                     "createdAt": {
                       "bsonType": "date"
+                    },
+                    "permissionIds": {
+                      "bsonType": "array",
+                      "items":{
+                        "bsonType": "string"
+                      }
+                    },
+                    "userPlanId": {
+                      "bsonType": "string"
                     }
                   }
             }
@@ -105,6 +173,157 @@ public class MongoConfig {
         .validationOptions(validationOptions);
 
     db.createCollection("users", options);
+  }
+
+  public void create_permissionsCollection(MongoDatabase db) {
+    if (db.getCollection("permissions") != null) {
+      db.getCollection("permissions").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["permissionName","permissionDescription"],
+                  "properties": {
+                    "permissionName": {
+                      "bsonType": "string",
+                      "enum": ["posting", "comment", "all"]
+                    },
+                    "permissionDescription": {
+                      "bsonType": "string"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("permissions", options);
+  }
+
+  public void create_planPermissionsCollection(MongoDatabase db) {
+    if (db.getCollection("planPermissions") != null) {
+      db.getCollection("planPermissions").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["planPermissionName","roleId","limited"],
+                  "properties": {
+                    "planPermissionName": {
+                      "bsonType": "string",
+                      "enum": ["search_result","campaign_members","campaign_invitation","campaign_apply"]
+                    },
+                    "limited": {
+                      "bsonType": "number"
+                    }
+                    "roleId": {
+                      "bsonType": "string"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("planPermissions", options);
+  }
+
+  public void create_plansCollection(MongoDatabase db) {
+    if (db.getCollection("plans") != null) {
+      db.getCollection("plans").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["planName","description","roleId","planPermissionIds","price","planType","planCount"],
+                  "properties": {
+                    "planName": {
+                      "bsonType": "string",
+                    },
+                    "description": {
+                      "bsonType": "string",
+                    },
+                    "roleId": {
+                      "bsonType": "string",
+                    },
+                    "planPermissionIds": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "permissionIds": {
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string"
+                      }
+                    },
+                    "price": {
+                      "bsonType": "number"
+                    }
+                    "discount": {
+                      "bsonType": "number"
+                    },
+                    "planType": {
+                      "bsonType": "string",
+                      "enum": ["one_month","monthly","one_year"]
+                    },
+                    "planCount": {
+                      "bsonType": "number"
+                    },
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("plans", options);
+  }
+
+  public void create_userPlansCollection(MongoDatabase db) {
+    if (db.getCollection("userPlans") != null) {
+      db.getCollection("userPlans").drop();
+    }
+    Document jsonSchema = Document.parse(
+        """
+            {
+                  "bsonType": "object",
+                  "required": ["userId","planId", "createdAt", "autoPaid"],
+                  "properties": {
+                    "userId": {
+                      "bsonType": "string",
+                    },
+                    "planId": {
+                      "bsonType": "string"
+                    },
+                    "createdAt": {
+                      "bsonType": "date"
+                    },
+                    "autoPaid": {
+                      "bsonType": "bool"
+                    }
+                  }
+            }
+            """);
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("userPlans", options);
   }
 
   public void create_influencersCollection(MongoDatabase db) {
@@ -119,7 +338,6 @@ public class MongoConfig {
                 "_id": {
                   "bsonType": "objectId"
                 },
-                
                 "DoB": {
                   "bsonType": "date"
                 },
@@ -131,9 +349,22 @@ public class MongoConfig {
                   "bsonType": "string"
                 },
                 "socialMediaLinks": {
-                  "bsonType": "object",
-                  "additionalProperties": {
-                    "bsonType": "string"
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "object",
+                    "required": ["platform","url", "follower"],
+                    "properties": {
+                      "platform":{
+                        "bsonType": "string",
+                        "enum":["FACEBOOK", "TIKTOK", "YOUTUBE", "INSTAGRAM"]
+                        },
+                      "url": {
+                        "bsonType": "string"
+                        },
+                      "follower": {
+                        "bsonType": "int"
+                      }
+                    }
                   }
                 },
                 "rating": {
@@ -191,14 +422,14 @@ public class MongoConfig {
 
     db.createCollection("roles", options);
 
-    if (roleRepository.count() == 0) {
-      Role adminRole = roleRepository.save(new Role("ADMIN"));
-      Role brandRole = roleRepository.save(new Role("BRAND"));
-      Role influencerRole = roleRepository.save(new Role("INFLUENCER"));
-      EnvConfig.ADMIN_ROLE_ID = adminRole.getRoleId();
-      EnvConfig.BRAND_ROLE_ID = brandRole.getRoleId();
-      EnvConfig.INFLUENCER_ROLE_ID = influencerRole.getRoleId();
-    }
+    // if (roleRepository.count() == 0) {
+    // Role adminRole = roleRepository.save(new Role("ADMIN"));
+    // Role brandRole = roleRepository.save(new Role("BRAND"));
+    // Role influencerRole = roleRepository.save(new Role("INFLUENCER"));
+    // EnvConfig.ADMIN_ROLE_ID = adminRole.getRoleId();
+    // EnvConfig.BRAND_ROLE_ID = brandRole.getRoleId();
+    // EnvConfig.INFLUENCER_ROLE_ID = influencerRole.getRoleId();
+    // }
   }
 
   public void create_categoriesCollection(MongoDatabase db) {
@@ -225,25 +456,25 @@ public class MongoConfig {
 
     db.createCollection("categories", options);
 
-    if (categoryRepository.count() == 0) {
-      categoryRepository.saveAll(
-          List.of(
-              new Category("thời trang"),
-              new Category("mỹ phẩm"),
-              new Category("công nghệ"),
-              new Category("nghệ thuật"),
-              new Category("thể thao"),
-              new Category("ăn uống"),
-              new Category("du lịch"),
-              new Category("lối sống"),
-              new Category("âm nhạc"),
-              new Category("trò chơi điện tử"),
-              new Category("handmade"),
-              new Category("phong tục và văn hóa"),
-              new Category("khởi nghiệp"),
-              new Category("kĩ năng mềm"),
-              new Category("mẹ và bé")));
-    }
+    // if (categoryRepository.count() == 0) {
+    // categoryRepository.saveAll(
+    // List.of(
+    // new Category("thời trang"),
+    // new Category("mỹ phẩm"),
+    // new Category("công nghệ"),
+    // new Category("nghệ thuật"),
+    // new Category("thể thao"),
+    // new Category("ăn uống"),
+    // new Category("du lịch"),
+    // new Category("lối sống"),
+    // new Category("âm nhạc"),
+    // new Category("trò chơi điện tử"),
+    // new Category("handmade"),
+    // new Category("phong tục và văn hóa"),
+    // new Category("khởi nghiệp"),
+    // new Category("kĩ năng mềm"),
+    // new Category("mẹ và bé")));
+    // }
   }
 
   public void create_brandsCollection(MongoDatabase db) {
@@ -261,16 +492,37 @@ public class MongoConfig {
                     "bio": {
                       "bsonType": "string",
                     },
-                    "contacts": {
-                      "bsonType": "object",
-                      "additionalProperties": {
-                        "bsonType": "string"
-                      }
-                    },
+                   "contacts": {
+                            bsonType: 'array',
+                            items: {
+                              bsonType: 'object',
+                              properties: {
+                                contact_type: {
+                                  bsonType: 'string'
+                                },
+                                contact_infor: {
+                                  bsonType: 'string'
+                                }
+                              }
+                            }
+                          },
                     "socialMediaLinks": {
-                      "bsonType": "object",
-                      "additionalProperties": {
-                        "bsonType": "string"
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "object",
+                        "required": ["platform","url", "follower"],
+                        "properties": {
+                          "platform":{
+                            "bsonType": "string"
+                            "enum":["FACEBOOK", "TIKTOK", "YOUTUBE", "INSTAGRAM"]
+                          },
+                          "url": {
+                            "bsonType": "string"
+                            },
+                          "follower": {
+                            "bsonType": "int"
+                          }
+                        }
                       }
                     },
                     "categoryIds": {
@@ -309,20 +561,9 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["name", "email", "password", "roleId"],
                   "properties": {
-                    "name": {
-                    "bsonType": "string"
-                    },
-                    "email": {
-                      "bsonType": "string",
-                      "pattern": "^.+@.+\\\\..+$"
-                    },
-                    "password": {
-                      "bsonType": "string",
-                    },
-                    "roleId": {
-                      "bsonType": "string"
+                    "_id": {
+                      "bsonType": "objectId",
                     },
                     "createdAt": {
                       "bsonType": "date"
@@ -624,7 +865,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "influencerCountCurrent", "applicationTotal"],
+                "required": ["brandId", "campaignName", "content", "budget", "imageUrl", "status", "campaignRequirements", "influencerRequirements", "startAt" , "dueAt", "influencerCountExpected", "joinedInfluencerIds", "applicationTotal", "appliedInfluencerIds"],
                 "properties": {
                     "brandId": {
                         "bsonType": "string"
@@ -660,26 +901,58 @@ public class MongoConfig {
                     "budget": {
                         "bsonType": "int"
                     },
-                    "campaignRequirements": {
+                   "campaignRequirements": {
+                      "bsonType": "array",
+                      "items": {
                         "bsonType": "object",
-                        "additionalProperties": {
-                            "bsonType": "int"
+                        "required": ["platform", "post_type", "quantity", "details"],
+                        "properties": {
+                          "platform": { "bsonType": "string" },
+                          "post_type": { "bsonType": "string" },
+                          "quantity": { "bsonType": "int" },
+                          "details": {
+                            "bsonType": "array",
+                            "items": {
+                              "bsonType": "object",
+                              "properties": {
+                                "post_type": { "bsonType": "string" },
+                                "like": { "bsonType": "int" },
+                                "comment": { "bsonType": "int" },
+                                "share": { "bsonType": "int" }
+                              }
+                            }
+                          }
                         }
+                      }
                     },
                     "influencerRequirements": {
                         "bsonType": "array",
                         "items": {
-                            "bsonType": "string"
+                            "bsonType": "object",
+                            "required": ["platform", "followers"],
+                            "properties": {
+                                "platform": { "bsonType": "string" },
+                                "followers": { "bsonType": "int" }
+                            }
                         }
                     },
                     "influencerCountExpected": {
                         "bsonType": "int"
                     },
-                    "influencerCountCurrent": {
-                        "bsonType": "int"
+                    "joinedInfluencerIds": {
+                        "bsonType": "array",
+                        "items": {
+                          "bsonType": "string"
+                        }
                     },
                     "applicationTotal": {
                         "bsonType": "int"
+                    },
+                    "appliedInfluencerIds": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "string"
+                        }
                     }
                 }
             }
@@ -785,7 +1058,7 @@ public class MongoConfig {
         """
             {
                 "bsonType": "object",
-                "required": ["campaignId", "brandId", "influencerId", "campaignRequirementTrackings", "process", "status"],
+                "required": ["campaignId", "brandId", "influencerId", "platformRequirementTracking", "process", "status", "createdAt"],
                 "properties": {
                     "_id": {
                         "bsonType": "objectId"
@@ -799,32 +1072,51 @@ public class MongoConfig {
                     "influencerId": {
                         "bsonType": "string"
                     },
-                    "campaignRequirementTrackings": {
-                        "bsonType": "object",
-                        "additionalProperties": {
-                            "bsonType": "array",
-                            "items": {
-                                "bsonType": "object",
-                                "required": ["index"],
-                                "properties": {
-                                    "index": {
-                                        "bsonType": "int",
-                                        "minimum": 0
-                                    },
-                                    "imageUrl": {
-                                        "bsonType": ["string", "null"],
-                                        "pattern": "^https?://.+$"
-                                    },
-                                    "postUrl": {
-                                        "bsonType": ["string", "null"],
-                                        "pattern": "^https?://.+$"
-                                    },
-                                    "status": {
-                                        "bsonType": ["string", "null"],
-                                        "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
-                                    },
-                                    "uploadedAt": {
-                                        "bsonType": ["date", "null"]
+                    "platformRequirementTracking": {
+                        "bsonType": "array",
+                        "items": {
+                            "bsonType": "object",
+                            "required": ["platform", "post_type", "quantity", "details"],
+                            "properties": {
+                                "platform": {
+                                    "bsonType": "string"
+                                },
+                                "post_type": {
+                                    "bsonType": "string"
+                                },
+                                "quantity": {
+                                    "bsonType": "int"
+                                },
+                                "details": {
+                                    "bsonType": "array",
+                                    "items": {
+                                        "bsonType": "object",
+                                        "required": ["post_type", "like", "comment", "share"],
+                                        "properties": {
+                                            "post_type": {
+                                                "bsonType": "string"
+                                            },
+                                            "like": {
+                                                "bsonType": "int"
+                                            },
+                                            "comment": {
+                                                "bsonType": "int"
+                                            },
+                                            "share": {
+                                                "bsonType": "int"
+                                            },
+                                            "postUrl": {
+                                                "bsonType": ["string", "null"],
+                                                "pattern": "^https?://.+$"
+                                            },
+                                            "status": {
+                                                "bsonType": ["string", "null"],
+                                                "enum": [null, "PENDING", "ACCEPTED", "REJECTED"]
+                                            },
+                                            "uploadedAt": {
+                                                "bsonType": ["date", "null"]
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -836,8 +1128,8 @@ public class MongoConfig {
                         "maximum": 100
                     },
                     "status": {
-                      "bsonType": "string",
-                      "enum": ["PENDING", "COMPLETED"],
+                        "bsonType": "string",
+                        "enum": ["PENDING", "COMPLETED"]
                     },
                     "createdAt": {
                         "bsonType": "date"
@@ -943,6 +1235,112 @@ public class MongoConfig {
 
     db.createCollection("chatRooms", options);
   }
+
+  public void create_notificationsCollection(MongoDatabase db) {
+    if (db.getCollection("notifications") != null) {
+      db.getCollection("notifications").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["userId", "name", "content", "avatarUrl"],
+                "properties": {
+                    "userId": {
+                        "bsonType": "string"
+                    },
+                    "name": {
+                        "bsonType": "string"
+                    },
+                    "avatarUrl":{
+                      "bsonType": "string"
+                    },
+                    "content": {
+                        "bsonType": "string"
+                    },
+                    "createdAt": {
+                        "bsonType": "date"
+                    },
+                    "isRead": {
+                        "bsonType": "bool"
+                    }
+                }
+            }
+            """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("notifications", options);
+  }
+
+  public void create_userBansCollection(MongoDatabase db) {
+    if (db.getCollection("userBans") != null) {
+      db.getCollection("userBans").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["reasonId"],
+                "properties": {
+                    "roleId": {
+                      "bsonType": "string"
+                    },
+                    "reasonId": {
+                        "bsonType": "string"
+                    },
+                    "createdAt": {
+                        "bsonType": "date"
+                    },
+                }
+            }
+            """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("userBans", options);
+  }
+
+  public void create_reasonsCollection(MongoDatabase db) {
+    if (db.getCollection("reasons") != null) {
+      db.getCollection("reasons").drop();
+    }
+
+    Document jsonSchema = Document.parse(
+        """
+            {
+                "bsonType": "object",
+                "required": ["title", "description"],
+                "properties": {
+                    "title": {
+                        "bsonType": "string"
+                    },
+                    "description": {
+                        "bsonType": "string"
+                    },
+                }
+            }
+            """);
+
+    ValidationOptions validationOptions = new ValidationOptions()
+        .validator(new Document("$jsonSchema", jsonSchema));
+
+    CreateCollectionOptions options = new CreateCollectionOptions()
+        .validationOptions(validationOptions);
+
+    db.createCollection("reasons", options);
+  }
+
   // public void create_campaignTrackingsCollection(MongoDatabase db) {
   // if (db.getCollection("campaignTrackings") != null) {
   // db.getCollection("campaignTrackings").drop();

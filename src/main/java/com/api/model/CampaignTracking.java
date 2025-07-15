@@ -1,12 +1,10 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,35 +16,33 @@ public class CampaignTracking {
     private String campaignId;
     private String brandId;
     private String influencerId;
-    private Map<String, List<CampaignRequirement>> campaignRequirementTrackings;
+    private List<PlatformRequirementTracking> platformRequirementTracking;
     private double process;
     private String status;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public CampaignTracking() {
-        this.campaignRequirementTrackings = new HashMap<>();
+        this.platformRequirementTracking = new ArrayList<>();
         this.process = 0.0;
         this.status = "PENDING";
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public CampaignTracking(String applicationId, String campaignId, String brandId, String influencerId,
-            Map<String, Integer> campaignRequirement) {
+            List<PlatformRequirement> platformRequirement) {
         this.campaignTrackingId = applicationId;
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.influencerId = influencerId;
         this.process = 0.0;
-        this.campaignRequirementTrackings = new HashMap<>();
-        campaignRequirement.forEach((key, count) -> {
-            List<CampaignRequirement> requirements = new ArrayList<>();
-            for (int i = 0; i < count; i++) {
-                requirements.add(new CampaignRequirement(i));
-            }
-            campaignRequirementTrackings.put(key, requirements);
-        });
+        this.platformRequirementTracking = new ArrayList<>();
+        if (!platformRequirement.isEmpty()) {
+            this.platformRequirementTracking = platformRequirement.stream().map(platform -> {
+                return new PlatformRequirementTracking(platform);
+            }).toList();
+        }
         this.status = "PENDING";
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
     public String getCampaignTrackingId() {
@@ -81,12 +77,12 @@ public class CampaignTracking {
         this.influencerId = influencerId;
     }
 
-    public Map<String, List<CampaignRequirement>> getCampaignRequirementTrackings() {
-        return campaignRequirementTrackings;
+    public List<PlatformRequirementTracking> getPlatformRequirementTracking() {
+        return platformRequirementTracking;
     }
-    
-    public void setCampaignRequirementTrackings(Map<String, List<CampaignRequirement>> campaignRequirementTrackings) {
-        this.campaignRequirementTrackings = campaignRequirementTrackings;
+
+    public void setPlatformRequirementTracking(List<PlatformRequirementTracking> platformRequirementTracking) {
+        this.platformRequirementTracking = platformRequirementTracking;
     }
 
     public double getProcess() {
@@ -105,11 +101,11 @@ public class CampaignTracking {
         return status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

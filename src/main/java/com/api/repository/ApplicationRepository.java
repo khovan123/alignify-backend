@@ -18,7 +18,7 @@ public interface ApplicationRepository extends MongoRepository<Application, Stri
     Optional<Application> findByApplicationIdAndInfluencerId(String applicationId, String influencerId);
 
     List<Application> findAllByCampaignId(String campaignId);
-    
+
     List<Application> findAllByInfluencerId(String influencerId);
 
     List<Application> findAllByCampaignIdIn(List<String> campaignIds);
@@ -27,4 +27,9 @@ public interface ApplicationRepository extends MongoRepository<Application, Stri
 
     List<Application> findAllByCampaignIdAndStatus(String campaignId, String status);
 
+    void deleteAllByCampaignId(String campaignId);
+
+    List<Application> findAllByInfluencerIdAndStatus(String influencerId, String status);
+
+    List<Application> findAllByCampaignIdAndInfluencerIdIn(String campaignId, List<String> applicationIds);
 }

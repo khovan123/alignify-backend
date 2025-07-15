@@ -1,30 +1,34 @@
 package com.api.middleware;
 
-import com.api.repository.RoleRepository;
-import com.api.security.CustomUserDetails;
 import java.io.IOException;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.api.model.User;
+import com.api.repository.RoleRepository;
+import com.api.repository.UserRepository;
+import com.api.security.CustomUserDetails;
 import com.api.util.JwtUtil;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -32,10 +36,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI().split("\\?")[0];
 
         if (HttpMethod.OPTIONS.name().equalsIgnoreCase(request.getMethod()) || path.startsWith("/ws")) {
-            response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            String origin = request.getHeader("Origin");
+            if ("https://alignify-rose.vercel.app".equals(origin) || "http://localhost:3000".equals(origin)) {
+                response.setHeader("Access-Control-Allow-Origin", origin);
+                response.setHeader("Access-Control-Allow-Credentials", "true");
+            } else {
+                response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+                response.setHeader("Access-Control-Allow-Credentials", "true");
+            }
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             response.setHeader("Access-Control-Allow-Headers", "*");
+            // response.setHeader("Access-Control-Allow-Origin", "*");
+            // response.setHeader("Access-Control-Allow-Credentials", "true");
+            // response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE,
+            // OPTIONS");
+            // response.setHeader("Access-Control-Allow-Headers", "*");
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,12 +66,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/api/v1/auth/request-otp/**")
                 || path.equals("/api/v1/auth/verify-otp/**")
                 || path.equals("/api/v1/auth/register/**")
+                || path.equals("/api/v1/auth/register-secret/**")
+                || path.equals("/api/v1/auth/register-secret")
                 || path.equals("/api/v1/auth/login")
                 || path.equals("/api/v1/auth/google/**")
                 || path.equals("/api/v1/auth/google")
                 || path.equals("/api/v1/auth/recovery-password")
                 || path.equals("/api/v1/auth/reset-password/**")
-                || path.matches("/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|login|google|reset-password|recovery-password))(.*)?")) {
+                || path.matches(
+                        "/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|register-secret|login|google|reset-password|recovery-password))(.*)?")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,6 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         com.auth0.jwt.interfaces.DecodedJWT decodedJWT = JwtUtil.decodeToken(request);
         if (decodedJWT == null) {
             this.sendErrorResponse(response, path, "Invalid token: Token is missing or malformed");
+            return;
         }
         String userId = decodedJWT.getSubject();
         if (userId == null) {
@@ -81,7 +100,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             this.sendErrorResponse(response, path, "Invalid token: Role ID is missing");
             return;
         }
-        CustomUserDetails userDetails = new CustomUserDetails(userId, roleId, "", "");
+        Optional<User> user = userRepository.findByUserId(userId);
+        if (!user.isPresent()) {
+            this.sendErrorResponse(response, path, "Invalid token: User ID is missing or invalid");
+            return;
+        }
+        CustomUserDetails userDetails = new CustomUserDetails(userId, roleId, user.get().getName(),
+                user.get().getAvatarUrl(), "");
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

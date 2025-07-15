@@ -1,27 +1,27 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.*;
-import org.springframework.data.annotation.CreatedDate;
 
 @Document(collection = "influencers")
 public class Influencer {
 
     @Id
     private String userId;
-    private LocalDateTime DoB;
+    private ZonedDateTime DoB;
     private String gender;
     private String bio;
-    private Map<String, String> socialMediaLinks;
+    private List<SocialMedia> socialMediaLinks;
     private double rating;
     private List<String> categoryIds;
     private int follower;
     private boolean isPublic;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Influencer() {
         this.rating = 0.0;
@@ -29,12 +29,13 @@ public class Influencer {
         this.isPublic = true;
         this.gender = "NONE";
         this.categoryIds = new ArrayList<>();
-        this.socialMediaLinks = new HashMap<>();
+        this.socialMediaLinks = new ArrayList<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Influencer(String userId, LocalDateTime DoB, String gender, String bio, Map<String, String> socialMediaLinks, double rating, List<String> categoryIds, int follower, boolean isPublic, LocalDateTime createdAt) {
+    public Influencer(String userId, ZonedDateTime DoB, String gender, String bio, List<SocialMedia> socialMediaLinks,
+            double rating, List<String> categoryIds, int follower, boolean isPublic, ZonedDateTime createdAt) {
         this.userId = userId;
-
         this.DoB = DoB;
         this.gender = gender;
         this.bio = bio;
@@ -54,11 +55,11 @@ public class Influencer {
         this.userId = userId;
     }
 
-    public LocalDateTime getDoB() {
+    public ZonedDateTime getDoB() {
         return DoB;
     }
 
-    public void setDoB(LocalDateTime DoB) {
+    public void setDoB(ZonedDateTime DoB) {
         this.DoB = DoB;
     }
 
@@ -78,14 +79,6 @@ public class Influencer {
         this.bio = bio;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
-        return socialMediaLinks;
-    }
-
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
-        this.socialMediaLinks = socialMediaLinks;
-    }
-
     public double getRating() {
         return rating;
     }
@@ -100,6 +93,14 @@ public class Influencer {
 
     public void setCategoryIds(List<String> categoryIds) {
         this.categoryIds = categoryIds;
+    }
+
+    public List<SocialMedia> getSocialMediaLinks() {
+        return socialMediaLinks;
+    }
+
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
+        this.socialMediaLinks = socialMediaLinks;
     }
 
     public int getFollower() {
@@ -118,11 +119,11 @@ public class Influencer {
         this.isPublic = isPublic;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

@@ -1,34 +1,37 @@
 package com.api.model;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import org.springframework.data.annotation.CreatedDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "brands")
-public class Brand{
+public class Brand {
 
     @Id
     private String userId;
     private String bio;
     private List<String> categoryIds;
-    private Map<String, String> contacts;
-    private Map<String, String> socialMediaLinks;
-    private LocalDateTime establishDate;
+    private List<Contact> contacts;
+    private List<SocialMedia> socialMediaLinks;
+    private ZonedDateTime establishDate;
     private int totalCampaign;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public Brand() {
         this.totalCampaign = 0;
         this.categoryIds = new ArrayList<>();
-        this.contacts = new HashMap<>();
-        this.socialMediaLinks = new HashMap<>();
+        this.contacts = new ArrayList<>();
+        this.socialMediaLinks = new ArrayList<>();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
 
-    public Brand(String userId, String bio, List<String> categoryIds, Map<String, String> contacts, Map<String, String> socialMediaLinks, LocalDateTime establishDate, int totalCampaign, LocalDateTime createdAt) {
+    public Brand(String userId, String bio, List<String> categoryIds, List<Contact> contacts,
+            List<SocialMedia> socialMediaLinks, ZonedDateTime establishDate, int totalCampaign,
+            ZonedDateTime createdAt) {
         this.userId = userId;
         this.bio = bio;
         this.categoryIds = categoryIds;
@@ -71,35 +74,35 @@ public class Brand{
         this.categoryIds = categoryIds;
     }
 
-    public Map<String, String> getContacts() {
+    public List<Contact> getContacts() {
         return contacts;
     }
 
-    public void setContacts(Map<String, String> contacts) {
+    public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
 
-    public Map<String, String> getSocialMediaLinks() {
+    public List<SocialMedia> getSocialMediaLinks() {
         return socialMediaLinks;
     }
 
-    public void setSocialMediaLinks(Map<String, String> socialMediaLinks) {
+    public void setSocialMediaLinks(List<SocialMedia> socialMediaLinks) {
         this.socialMediaLinks = socialMediaLinks;
     }
 
-    public LocalDateTime getEstablishDate() {
+    public ZonedDateTime getEstablishDate() {
         return establishDate;
     }
 
-    public void setEstablishDate(LocalDateTime establishDate) {
+    public void setEstablishDate(ZonedDateTime establishDate) {
         this.establishDate = establishDate;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

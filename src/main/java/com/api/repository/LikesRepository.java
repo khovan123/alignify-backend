@@ -9,8 +9,14 @@ import org.springframework.stereotype.Repository;
 import com.api.model.Likes;
 
 @Repository
-public interface LikesRepository extends MongoRepository<Likes, String>{
-     Optional<Likes> findByUserIdAndContentId(String userId, String contentId);
+public interface LikesRepository extends MongoRepository<Likes, String> {
+    Optional<Likes> findByUserIdAndContentId(String userId, String contentId);
+
     long countByContentId(String contentId);
+
     void deleteByUserIdAndContentId(String userId, String contentId);
+
+    void deleteAllByContentId(String contentId);
+
+    boolean existsByContentIdAndUserId(String contentId, String userId);
 }
