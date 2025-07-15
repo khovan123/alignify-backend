@@ -572,9 +572,9 @@ public class CampaignService {
         Page<Campaign> matchedCampaigns;
 
         if (!matchedBrandIds.isEmpty()) {
-            matchedCampaigns = campaignRepo.findByBrandIdIn(matchedBrandIds, pageable);
+            matchedCampaigns = campaignRepo.findByStatusAndBrandIdIn("RECRUITING", matchedBrandIds, pageable);
         } else {
-            matchedCampaigns = campaignRepo.findByCampaignNameContainingIgnoreCase(term, pageable);
+            matchedCampaigns = campaignRepo.findByStatusAndCampaignNameContainingIgnoreCase("RECRUITING", term, pageable);
         }
         if (matchedCampaigns.isEmpty()) {
             return ApiResponse.sendSuccess(200, "No campaigns found", Collections.emptyList(), request.getRequestURI());
