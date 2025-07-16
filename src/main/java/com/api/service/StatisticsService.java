@@ -9,11 +9,9 @@ import com.api.model.Invitation;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.InvitationRepository;
 import com.api.repository.ContentPostingRepository;
-// import com.api.repository.CommentRepository;
-// import com.api.repository.LikesRepository;
-// import com.api.repository.CampaignRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,10 +25,6 @@ public class StatisticsService {
     private InvitationRepository invitationRepository;
     @Autowired
     private ContentPostingRepository contentPostingRepository;
-    // @Autowired
-    // private CommentRepository commentRepository;
-    // @Autowired
-    // private LikesRepository likesRepository;
 
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
 
@@ -45,9 +39,9 @@ public class StatisticsService {
             .collect(Collectors.groupingBy(a -> a.getCreatedAt().format(MONTH_FORMATTER)));
 
         List<BrandStatisticsResponse.Invitation> invitationStats = new ArrayList<>();
-        List<String> months = new ArrayList<>(invitationByMonth.keySet());
-        months.sort(Comparator.naturalOrder());
-        for (String month : months) {
+        List<String> sortedInvitationMonths = new ArrayList<>(invitationByMonth.keySet());
+        Collections.sort(sortedInvitationMonths);
+        for (String month : sortedInvitationMonths) {
             List<Invitation> monthInvites = invitationByMonth.get(month);
             int sent = monthInvites.size();
             int accepted = (int) monthInvites.stream().filter(i -> "ACCEPTED".equalsIgnoreCase(i.getStatus())).count();
@@ -61,9 +55,9 @@ public class StatisticsService {
         }
 
         List<BrandStatisticsResponse.Application> applicationStats = new ArrayList<>();
-        List<String> applicationMonths = new ArrayList<>(applicationByMonth.keySet());
-        applicationMonths.sort(Comparator.naturalOrder());
-        for (String month : applicationMonths) {
+        List<String> sortedMonths = new ArrayList<>(applicationByMonth.keySet());
+        Collections.sort(sortedMonths);
+        for (String month : sortedMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
             int approved = (int) monthApps.stream().filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus())).count();
@@ -85,7 +79,7 @@ public class StatisticsService {
         BrandStatisticsResponse response = new BrandStatisticsResponse();
         response.setInvitations(invitationStats);
         response.setApplications(applicationStats);
-        // Ensure costs is always an empty array if no logic is implemented yet
+        // Đảm bảo costs luôn là mảng rỗng nếu chưa có logic
         response.setCosts(new ArrayList<>());
         response.setTotalInvitations(totalInvitations);
         response.setAcceptanceRate(acceptanceRate);
@@ -110,7 +104,7 @@ public class StatisticsService {
 
         List<InfluencerStatisticsResponse.Invitation> invitationStats = new ArrayList<>();
         List<String> sortedInvitationMonths = new ArrayList<>(invitationByMonth.keySet());
-        sortedInvitationMonths.sort(Comparator.naturalOrder());
+        Collections.sort(sortedInvitationMonths);
         for (String month : sortedInvitationMonths) {
             List<Invitation> monthInvites = invitationByMonth.get(month);
             int sent = monthInvites.size();
@@ -126,7 +120,7 @@ public class StatisticsService {
 
         List<InfluencerStatisticsResponse.Application> applicationStats = new ArrayList<>();
         List<String> sortedApplicationMonths = new ArrayList<>(applicationByMonth.keySet());
-        sortedApplicationMonths.sort(Comparator.naturalOrder());
+        sortedApplicationMonths.sort(Comparator.comparing(month -> ZonedDateTime.parse(month, MONTH_FORMATTER)));
         for (String month : sortedApplicationMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
@@ -151,7 +145,7 @@ public class StatisticsService {
             List<Application> monthApps = approvedAppsByMonth.get(month);
             InfluencerStatisticsResponse.Income stat = new InfluencerStatisticsResponse.Income();
             stat.setMonth(month);
-            stat.setIncome(0); // No payment logic implemented yet
+            stat.setIncome(0); // Chưa có payment
             stat.setCampaigns(monthApps.size());
             incomeStats.add(stat);
         }
@@ -194,7 +188,7 @@ public class StatisticsService {
         int totalIncome = incomeStats.stream().mapToInt(InfluencerStatisticsResponse.Income::getIncome).sum();
         int totalCampaigns = incomeStats.stream().mapToInt(InfluencerStatisticsResponse.Income::getCampaigns).sum();
         double avgIncomePerCampaign = totalCampaigns == 0 ? 0 : (double) totalIncome / totalCampaigns;
-        double avgIncome = incomeStats.size() == 0 ? 0 : (double) totalIncome / incomeStats.size();
+        double avgIncome = incomeStats.isEmpty() ? 0 : (double) totalIncome / incomeStats.size();
 
         InfluencerStatisticsResponse response = new InfluencerStatisticsResponse();
         response.setApplications(applicationStats);
