@@ -110,7 +110,7 @@ public class CampaignController {
     }
 
     @DeleteMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal)))")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or ((hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))))")
     public ResponseEntity<?> deleteCampaign(
             @PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
