@@ -59,7 +59,9 @@ public class StatisticsService {
         }
 
         List<BrandStatisticsResponse.Application> applicationStats = new ArrayList<>();
-        for (String month : applicationByMonth.keySet()) {
+        List<String> sortedMonths = new ArrayList<>(applicationByMonth.keySet());
+        Collections.sort(sortedMonths);
+        for (String month : sortedMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
             int approved = (int) monthApps.stream().filter(a -> "APPROVED".equalsIgnoreCase(a.getStatus())).count();
