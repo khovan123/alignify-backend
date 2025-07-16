@@ -353,10 +353,6 @@ public class CampaignService {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
         }
         Campaign campaign = campaignOpt.get();
-        if (!campaign.getBrandId().equals(userDetails.getUserId())) {
-            return ApiResponse.sendError(403, "Access denied. You are not the owner of this campaign.",
-                    request.getRequestURI());
-        }
         if (!campaign.getStatus().equals("DRAFT")) {
             return ApiResponse.sendError(403, "Access denied",
                     request.getRequestURI());
