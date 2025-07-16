@@ -107,7 +107,9 @@ public class StatisticsService {
             .collect(Collectors.groupingBy(a -> a.getCreatedAt().format(MONTH_FORMATTER)));
 
         List<InfluencerStatisticsResponse.Invitation> invitationStats = new ArrayList<>();
-        for (String month : invitationByMonth.keySet()) {
+        List<String> sortedInvitationMonths = new ArrayList<>(invitationByMonth.keySet());
+        Collections.sort(sortedInvitationMonths);
+        for (String month : sortedInvitationMonths) {
             List<Invitation> monthInvites = invitationByMonth.get(month);
             int sent = monthInvites.size();
             int accepted = (int) monthInvites.stream().filter(i -> "ACCEPTED".equalsIgnoreCase(i.getStatus())).count();
