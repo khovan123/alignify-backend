@@ -1,5 +1,6 @@
 package com.api.service;
 
+import com.api.config.EnvConfig;
 import com.api.dto.ApiResponse;
 import com.api.dto.request.PlanRequest;
 import com.api.dto.response.PlanResponse;
@@ -61,21 +62,19 @@ public class PlanService {
         return ApiResponse.sendSuccess(200, "Success", planResponse, request.getRequestURI());
     }
 
-    public ResponseEntity<?> getAllPlanByRoleId(String roleId, HttpServletRequest request) {
-        List<Plan> plans;
-
-        if (roleId != null && (roleId.equalsIgnoreCase("INFLUENCER") || roleId.equalsIgnoreCase("BRAND"))) {
-            plans = planRepository.findByRoleId(roleId);
-        } else if (roleId == null || roleId.trim().isEmpty()) {
-            plans = planRepository.findAll();
-        } else {
-            return ApiResponse.sendError(400, "RoleID not exist!", request.getRequestURI());
-        }
-
+    public ResponseEntity<?> getAllPlanByBrandRole(HttpServletRequest request) {
+        List<Plan> plans = planRepository.findByRoleId(EnvConfig.BRAND_ROLE_ID);
         List<PlanResponse> planResponses = plans.stream()
                 .map(plan -> new PlanResponse(plan, permissionRepository, planPermissionRepository))
                 .toList();
+        return ApiResponse.sendSuccess(200, "Response successfully", planResponses, request.getRequestURI());
+    }
 
+    public ResponseEntity<?> getAllPlanByInfluencerRole(HttpServletRequest request) {
+        List<Plan> plans = planRepository.findByRoleId(EnvConfig.INFLUENCER_ROLE_ID);
+        List<PlanResponse> planResponses = plans.stream()
+                .map(plan -> new PlanResponse(plan, permissionRepository, planPermissionRepository))
+                .toList();
         return ApiResponse.sendSuccess(200, "Response successfully", planResponses, request.getRequestURI());
     }
 

@@ -36,11 +36,16 @@ public class PlanController {
         return planService.getPermission(request);
     }
 
-    @GetMapping("")
-    public ResponseEntity<?> getPlan(
-            @RequestParam("roleId") String roleId,
+    @GetMapping("/brand")
+    public ResponseEntity<?> getPlanByBrandRole(
             HttpServletRequest request) {
-        return planService.getAllPlanByRoleId(roleId, request);
+        return planService.getAllPlanByBrandRole(request);
+    }
+
+    @GetMapping("/influencer")
+    public ResponseEntity<?> getPlanByInfluencerRole(
+            HttpServletRequest request) {
+        return planService.getAllPlanByInfluencerRole(request);
     }
 
     @PutMapping("/{planId}")

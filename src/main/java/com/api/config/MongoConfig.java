@@ -210,7 +210,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["planPermissionName","roleId","limited"],
+                  "required": ["planPermissionName","limited"],
                   "properties": {
                     "planPermissionName": {
                       "bsonType": "string",
@@ -218,9 +218,6 @@ public class MongoConfig {
                     },
                     "limited": {
                       "bsonType": "number"
-                    }
-                    "roleId": {
-                      "bsonType": "string"
                     }
                   }
             }
