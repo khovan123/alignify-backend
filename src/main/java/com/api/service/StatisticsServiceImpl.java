@@ -82,7 +82,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         BrandStatisticsResponse response = new BrandStatisticsResponse();
         response.setInvitations(invitationStats);
-        response.setApplications(applicationStats != null ? applicationStats : new ArrayList<>());
+        response.setApplications(applicationStats);
         // Đảm bảo costs luôn là mảng rỗng nếu chưa có logic
         response.setCosts(new ArrayList<>());
         response.setTotalInvitations(totalInvitations);
