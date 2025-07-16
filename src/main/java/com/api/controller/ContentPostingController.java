@@ -87,7 +87,7 @@ public class ContentPostingController {
     }
 
     @DeleteMapping("/{contentId}")
-    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId,authentication.principal)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId,authentication.principal))")
     public ResponseEntity<?> deletePost(
             @PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
