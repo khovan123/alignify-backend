@@ -9,11 +9,9 @@ import com.api.model.Invitation;
 import com.api.repository.ApplicationRepository;
 import com.api.repository.InvitationRepository;
 import com.api.repository.ContentPostingRepository;
-// import com.api.repository.CommentRepository;
-// import com.api.repository.LikesRepository;
-// import com.api.repository.CampaignRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,10 +25,6 @@ public class StatisticsService {
     private InvitationRepository invitationRepository;
     @Autowired
     private ContentPostingRepository contentPostingRepository;
-    // @Autowired
-    // private CommentRepository commentRepository;
-    // @Autowired
-    // private LikesRepository likesRepository;
 
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
 
@@ -126,7 +120,7 @@ public class StatisticsService {
 
         List<InfluencerStatisticsResponse.Application> applicationStats = new ArrayList<>();
         List<String> sortedApplicationMonths = new ArrayList<>(applicationByMonth.keySet());
-        sortedApplicationMonths.sort(Comparator.comparing(month -> LocalDate.parse(month, MONTH_FORMATTER)));
+        sortedApplicationMonths.sort(Comparator.comparing(month -> ZonedDateTime.parse(month, MONTH_FORMATTER)));
         for (String month : sortedApplicationMonths) {
             List<com.api.model.Application> monthApps = applicationByMonth.get(month);
             int total = monthApps.size();
@@ -194,7 +188,7 @@ public class StatisticsService {
         int totalIncome = incomeStats.stream().mapToInt(InfluencerStatisticsResponse.Income::getIncome).sum();
         int totalCampaigns = incomeStats.stream().mapToInt(InfluencerStatisticsResponse.Income::getCampaigns).sum();
         double avgIncomePerCampaign = totalCampaigns == 0 ? 0 : (double) totalIncome / totalCampaigns;
-        double avgIncome = incomeStats.size() == 0 ? 0 : (double) totalIncome / incomeStats.size();
+        double avgIncome = incomeStats.isEmpty() ? 0 : (double) totalIncome / incomeStats.size();
 
         InfluencerStatisticsResponse response = new InfluencerStatisticsResponse();
         response.setApplications(applicationStats);
