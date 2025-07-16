@@ -72,13 +72,13 @@ public class InvitationController {
         if (campaign.getInfluencerCountExpected() <= campaign.getJoinedInfluencerIds().size()) {
             return ApiResponse.sendError(400, "Your campaign is enough Influencer", request.getRequestURI());
         }
-        List<String> appliedInfluencerIds = campaign.getAppliedInfluencerIds();
+        List<String> joinedInfluencerIds = campaign.getJoinedInfluencerIds();
         User brand = userRepository.findByUserId(brandId).get();
         for (String influencerId : invitationRequest.getInfluencerIds()) {
             ChatRoom chatRoom = chatRoomRepository.findById(invitationRequest.getCampaignId()).get();
-            if (!invitationRepository.existsByCampaignIdAndInfluencerId(
+            if ((!invitationRepository.existsByCampaignIdAndInfluencerId(
                     invitationRequest.getCampaignId(),
-                    influencerId) && !chatRoom.getMembers().contains(influencerId)) {
+                    influencerId)) && (!chatRoom.getMembers().contains(influencerId))) {
                 User influencer = userRepository.findByUserId(influencerId).get();
                 Invitation invitation = new Invitation(brandId, invitationRequest.getCampaignId(), influencerId,
                         invitationRequest.getMessage());
@@ -92,14 +92,16 @@ public class InvitationController {
                         userDTO, invitation,
                         campaignResponse);
                 campaign.setApplicationTotal(campaign.getApplicationTotal() + 1);
-                appliedInfluencerIds.add(influencerId);
+                joinedInfluencerIds.add(influencerId);
                 messagingTemplate.convertAndSend("/topic/users/" + influencerId + "/invitations",
                         invitationResponseForInfluencer);
                 messagingTemplate.convertAndSend("/topic/users/" + brandId + "/invitations",
                         invitationResponseForBrand);
+            }else{
+                return ApiResponse.sendError(400, "Has been in campaign with influencerId: "+influencerId, request.getRequestURI());
             }
         }
-        campaign.setAppliedInfluencerIds(appliedInfluencerIds);
+        campaign.setAppliedInfluencerIds(joinedInfluencerIds);
         campaignRepository.save(campaign);
         return ApiResponse.sendSuccess(201, "Send invitation successfully!", null, request.getRequestURI());
     }

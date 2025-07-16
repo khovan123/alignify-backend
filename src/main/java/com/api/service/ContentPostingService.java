@@ -157,7 +157,7 @@ public class ContentPostingService {
             commentRepository.deleteAllByContentId(contentId);
             return ApiResponse.sendSuccess(
                     204,
-                    "Content posting deleted successfully,
+                    "Content posting deleted successfully",
                     null,
                     request.getRequestURI());
         } else {
