@@ -98,10 +98,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public InfluencerStatisticsResponse getInfluencerStatistics(String influencerId) {
-        String influencerIdStr = influencerId;
-        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerIdStr);
+        List<Application> applications = applicationRepository.findAllByInfluencerId(influencerId);
         List<Invitation> invitations = invitationRepository.findAll()
-            .stream().filter(i -> influencerIdStr.equals(i.getInfluencerId())).collect(Collectors.toList());
+            .stream().filter(i -> influencerId.equals(i.getInfluencerId())).collect(Collectors.toList());
 
         // Group by month
         Map<String, List<Invitation>> invitationByMonth = invitations.stream()
