@@ -81,10 +81,10 @@ public class PlanService {
     public ResponseEntity<?> deletePlan(String planId, HttpServletRequest request) {
         Optional<Plan> packageOpt = planRepository.findById(planId);
         if (!packageOpt.isPresent()) {
-            return ApiResponse.sendError(403, "PackageType not found", request.getRequestURI());
+            return ApiResponse.sendError(403, "Plan not found", request.getRequestURI());
         }
         planRepository.deleteById(planId);
-        return ApiResponse.sendSuccess(204, "PackageType deleted successfully", null, request.getRequestURI());
+        return ApiResponse.sendSuccess(204, "Plan deleted successfully", null, request.getRequestURI());
     }
 
     public ResponseEntity<?> updatePlan(String planId, Plan updatedPlan, HttpServletRequest request) {
