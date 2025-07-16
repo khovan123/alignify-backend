@@ -38,8 +38,8 @@ public class PaymentController {
 
     @PostMapping("/pay")
     public String pay(HttpServletRequest request, @RequestParam("price") double price) {
-        String cancelUrl = UtilsPaypal.getBaseURL(request) + "/" + URL_PAYPAL_CANCEL;
-        String successUrl = UtilsPaypal.getBaseURL(request) + "/" + URL_PAYPAL_SUCCESS;
+        String cancelUrl = UtilsPaypal.getBaseURL(request) + URL_PAYPAL_CANCEL;
+        String successUrl = UtilsPaypal.getBaseURL(request) + URL_PAYPAL_SUCCESS;
         try {
             Payment payment = paypalService.createPayment(
                     price,
