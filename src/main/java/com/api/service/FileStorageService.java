@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ public class FileStorageService {
         this.parsedMaxFileSize = parseFileSize(MAX_FILE_SIZE);
     }
 
+    @SuppressWarnings("rawtypes")
     public String storeFile(MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {
             throw new Exception("File is empty");
@@ -41,13 +43,20 @@ public class FileStorageService {
         if (file.getSize() > parsedMaxFileSize) {
             throw new Exception("File size exceeds " + MAX_FILE_SIZE + " limit");
         }
-
+        String uuid  = UUID.randomUUID().toString();
+        String filename = originalFilename.replaceAll("\\s+", "_");
+        String publicId = uuid + "_" + filename;
         try {
-            Map uploadResult = cloudinary.uploader().upload(new File(file),
+            Map uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
                     ObjectUtils.asMap(
                             "upload_preset", uploadPreset,
-                            "use_filename", true,
-                            "unique_filename", true));
+                            "use_filename", false,
+                            "unique_filename", false,
+                            "resource_type", originalFilename.toLowerCase().endsWith(".pdf") ? "raw" : "auto",
+                            "public_id", publicId
+                            )
+            );
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
             throw new Exception("Failed to upload file: " + e.getMessage());

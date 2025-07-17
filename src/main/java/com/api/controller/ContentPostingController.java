@@ -56,6 +56,13 @@ public class ContentPostingController {
         return contentPostingSer.getContentPostingById(userId, request, pageNumber, pageSize);
     }
 
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<?> getPostsByPostId(
+            @PathVariable("postId") String postId,
+            HttpServletRequest request) {
+        return contentPostingSer.getContentPostingByPostId(postId, request);
+    }
+
     @GetMapping("/filterByCategory/{categoryId}")
     public ResponseEntity<?> getPostByCategoryId(
             @PathVariable("categoryId") String categoryId,
