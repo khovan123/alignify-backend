@@ -79,7 +79,7 @@ public class CampaignService {
     private SimpMessagingTemplate messagingTemplate;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                            HttpServletRequest request) {
 
         String brandId = userDetails.getUserId();
         if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
@@ -260,7 +260,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                   HttpServletRequest request) {
 
         List<Campaign> campaignPage = campaignRepo.findAllByBrandIdOrderByCreatedAtDesc(userDetails.getUserId());
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
@@ -276,7 +276,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllRecruitingCampaignOfBrand(CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
         List<Campaign> campaignPage = campaignRepo.findAllByBrandIdAndStatus(userDetails.getUserId(), "RECRUITING");
         User brandUser = userRepository.findById(brandId).orElse(null);
@@ -308,7 +308,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                        HttpServletRequest request) {
         List<CampaignTracking> campaignTrackings = campaignTrackingRepository
                 .findAllByInfluencerId(userDetails.getUserId());
         List<String> campaignIds = campaignTrackings.stream().map(campaignTracking -> campaignTracking.getCampaignId())
@@ -347,7 +347,7 @@ public class CampaignService {
     // request.getRequestURI());
     // }
     public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                            HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         if (!campaignOpt.isPresent()) {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
@@ -357,6 +357,7 @@ public class CampaignService {
             return ApiResponse.sendError(403, "Access denied",
                     request.getRequestURI());
         }
+        User user = userRepository.findById(userDetails.getUserId()).get();
         applicationRepository.deleteAllByCampaignId(campaignId);
         campaignTrackingRepository.deleteAllByCampaignId(campaignId);
         campaignRepo.deleteById(campaignId);
@@ -459,8 +460,8 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> updateCampaignStatus(String campaignId, StatusRequest statusRequest,
-            CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                  CustomUserDetails userDetails,
+                                                  HttpServletRequest request) {
         String brandId = userDetails.getUserId();
         Optional<Campaign> campaignOpt = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
         Campaign campaign = campaignOpt.get();
@@ -555,7 +556,7 @@ public class CampaignService {
     // }
     // }
     public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                          HttpServletRequest request) {
         if (term.isBlank() || term.isEmpty()) {
             return this.getAllCampaign(pageNumber, pageSize, request);
         }
