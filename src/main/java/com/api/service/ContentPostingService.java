@@ -198,7 +198,9 @@ public class ContentPostingService {
         Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
-
+            if (updatedContentPosting.getContentName() != null) {
+                contentPosting.setContentName(updatedContentPosting.getContentName());
+            }
             if (updatedContentPosting.getContent() != null) {
                 contentPosting.setContent(updatedContentPosting.getContent());
             }
