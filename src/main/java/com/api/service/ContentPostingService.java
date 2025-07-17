@@ -152,12 +152,6 @@ public class ContentPostingService {
         Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
-
-            if (!contentPosting.getUserId().equals(userDetails.getUserId())) {
-                return ResponseEntity.status(403).body(
-                        Map.of("error", "Access denied. You are not the owner of this content."));
-            }
-
             contentPostingRepo.deleteById(contentId);
             likesRepo.deleteAllByContentId(contentId);
             commentRepository.deleteAllByContentId(contentId);
@@ -204,7 +198,9 @@ public class ContentPostingService {
         Optional<ContentPosting> contentPostingOpt = contentPostingRepo.findById(contentId);
         if (contentPostingOpt.isPresent()) {
             ContentPosting contentPosting = contentPostingOpt.get();
-
+            if (updatedContentPosting.getContentName() != null) {
+                contentPosting.setContentName(updatedContentPosting.getContentName());
+            }
             if (updatedContentPosting.getContent() != null) {
                 contentPosting.setContent(updatedContentPosting.getContent());
             }
