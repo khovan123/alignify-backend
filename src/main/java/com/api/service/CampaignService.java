@@ -357,7 +357,6 @@ public class CampaignService {
             return ApiResponse.sendError(403, "Access denied",
                     request.getRequestURI());
         }
-        // Removed unused variable 'user' to clean up the code.
         applicationRepository.deleteAllByCampaignId(campaignId);
         campaignTrackingRepository.deleteAllByCampaignId(campaignId);
         campaignRepo.deleteById(campaignId);
