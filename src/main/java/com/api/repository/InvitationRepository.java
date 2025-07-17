@@ -21,4 +21,9 @@ public interface InvitationRepository extends MongoRepository<Invitation, String
 
     List<Invitation> findAllByBrandIdAndCampaignId(String brandId, String campaignId);
 
+    void deleteAllByBrandId(String brandId);
+
+    void deleteAllByCampaignId(String campaignId);
+
+
 }

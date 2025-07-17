@@ -362,6 +362,7 @@ public class CampaignService {
         campaignRepo.deleteById(campaignId);
         chatRoomRepository.deleteById(campaignId);
         chatMessageRepository.deleteAllByChatRoomId(campaignId);
+        invitationRepository.deleteAllByCampaignId(campaignId);
         return ApiResponse.sendSuccess(
                 204,
                 "campaign posting and related trackings deleted successfully",
