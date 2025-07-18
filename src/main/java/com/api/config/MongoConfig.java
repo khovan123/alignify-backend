@@ -10,10 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.ValidationOptions;
 
 import jakarta.annotation.PostConstruct;
@@ -40,7 +38,7 @@ public class MongoConfig {
 
   @PostConstruct
   public void init() {
-    //MongoDatabase db = mongoClient.getDatabase(databaseName);
+//    MongoDatabase db = mongoClient.getDatabase(databaseName);
     // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
@@ -54,7 +52,7 @@ public class MongoConfig {
     // this.create_campaignsCollection(db);
     // this.create_contentPostingsCollection(db);
     // this.create_likesCollection(db);
-    // this.create_applicationsCollection(db);
+//     this.create_applicationsCollection(db);
     // this.create_campaignTrackingsCollection(db);
     // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
@@ -682,28 +680,6 @@ public class MongoConfig {
     db.createCollection("otps", options);
   }
 
-  @PostConstruct
-  public void initIndexes() {
-    MongoDatabase database = mongoClient.getDatabase(databaseName);
-    MongoCollection<Document> collection = database.getCollection("otps");
-
-    boolean ttlIndexExists = false;
-    for (Document index : collection.listIndexes()) {
-      if ("createdAt_ttl".equals(index.getString("name"))) {
-        ttlIndexExists = true;
-        break;
-      }
-    }
-
-    if (!ttlIndexExists) {
-      Document indexKeys = new Document("createdAt", 1);
-      IndexOptions indexOptions = new IndexOptions()
-          .name("createdAt_ttl")
-          .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
-      collection.createIndex(indexKeys, indexOptions);
-    }
-  }
-
   public void create_accountVerifiedsCollection(MongoDatabase db) {
     if (db.getCollection("accountVerifieds") != null) {
       db.getCollection("accountVerifieds").drop();
@@ -976,7 +952,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["campaignId", "influencerId", "brandId", "limited", "status"],
+                  "required": ["campaignId", "influencerId", "brandId", "limited", "status", "cv_url"],
                   "properties": {
                     "campaignId": {
                       "bsonType": "string"
@@ -985,6 +961,9 @@ public class MongoConfig {
                        "bsonType": "string"
                     },
                     "brandId":{
+                       "bsonType": "string"
+                    },
+                    "cv_url":{
                        "bsonType": "string"
                     },
                     "limited": {
@@ -1340,59 +1319,6 @@ public class MongoConfig {
         .validationOptions(validationOptions);
 
     db.createCollection("reasons", options);
-  }
-
-  public void create_packageTypeCollection(MongoDatabase db) {
-    if (db.getCollection("packageTypes") != null) {
-      db.getCollection("packageTypes").drop();
-    }
-
-    Document jsonSchema = Document.parse(
-        """
-            {
-                "bsonType": "object",
-                "required": ["packageId","packageName","price","roleId"],
-                "properties": {
-                    "packageName": {
-                        "bsonType": "string"
-                    },
-                    "description": {
-                        "bsonType": "string"
-                    },
-                    "price": {
-                        "bsonType": "double"
-                    },
-                    "feature": {
-                        "bsonType": "array",
-                        "items": {
-                            "bsonType": "object"
-                            },
-                    },
-                    "subcribeType": {
-                      "bsonType": "string"
-                      "enum" : ["MONTH", "YEAR"]
-
-                    },
-                    "roleId": {
-                      "bsonType": "string"
-                    },
-                    "subcribeCount": {
-                        "bsonType": "int"
-                    },
-                    "discount": {
-                        "bsonType": "double"
-                    },
-                }
-            }
-            """);
-
-    ValidationOptions validationOptions = new ValidationOptions()
-        .validator(new Document("$jsonSchema", jsonSchema));
-
-    CreateCollectionOptions options = new CreateCollectionOptions()
-        .validationOptions(validationOptions);
-
-    db.createCollection("packageTypes", options);
   }
 
   // public void create_campaignTrackingsCollection(MongoDatabase db) {
