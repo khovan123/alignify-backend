@@ -4,17 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.api.security.CustomUserDetails;
 import com.api.service.ApplicationService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/campaigns")
@@ -43,9 +39,10 @@ public class ApplicationController {
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
     public ResponseEntity<?> apply(
             @PathVariable("campaignId") String campaignId,
+            @RequestPart(value = "file", required = true) MultipartFile cv,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
-        return applicationService.apply_Application(campaignId, userDetails, request);
+        return applicationService.apply_Application(campaignId, cv, userDetails, request);
     }
 
     @PostMapping("/applications/{applicationId}/cancel")

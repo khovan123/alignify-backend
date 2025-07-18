@@ -5,12 +5,20 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document("campaigns")
+@Getter
+@Setter
+@Data
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Campaign {
 
@@ -32,6 +40,7 @@ public class Campaign {
     private List<String> joinedInfluencerIds;
     private int applicationTotal;
     private List<String> appliedInfluencerIds;
+    private String contractUrl;
 
     public Campaign() {
         this.categoryIds = new ArrayList<>();
@@ -40,12 +49,13 @@ public class Campaign {
         this.applicationTotal = 0;
         this.appliedInfluencerIds = new ArrayList<>();
         this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        contractUrl = null;
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
-            List<String> categoryIds, String status, int budget,
-            List<PlatformRequirement> campaignRequirements,
-            List<InfluencerRequirement> influencerRequirements, int influencerCountExpected) {
+                    List<String> categoryIds, String status, int budget,
+                    List<PlatformRequirement> campaignRequirements,
+                    List<InfluencerRequirement> influencerRequirements, int influencerCountExpected) {
         this.campaignName = campaignName;
         this.campaignId = campaignId;
         this.brandId = brandId;
@@ -61,12 +71,12 @@ public class Campaign {
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
-            List<String> categoryIds,
-            ZonedDateTime createdAt, String status, int budget,
-            List<PlatformRequirement> campaignRequirements,
-            List<InfluencerRequirement> influencerRequirements, int influencerCountExpected,
-            List<String> joinedInfluencerIds,
-            int applicationTotal) {
+                    List<String> categoryIds,
+                    ZonedDateTime createdAt, String status, int budget,
+                    List<PlatformRequirement> campaignRequirements,
+                    List<InfluencerRequirement> influencerRequirements, int influencerCountExpected,
+                    List<String> joinedInfluencerIds,
+                    int applicationTotal) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.campaignName = campaignName;
@@ -84,13 +94,13 @@ public class Campaign {
     }
 
     public Campaign(String campaignId, String brandId, String campaignName, String content, String imageUrl,
-            List<String> categoryIds, ZonedDateTime createdAt, ZonedDateTime dueAt, ZonedDateTime startAt,
-            String status, int budget,
-            List<PlatformRequirement> campaignRequirements,
-            List<InfluencerRequirement> influencerRequirements,
-            int influencerCountExpected,
-            List<String> joinedInfluencerIds, int applicationTotal,
-            List<String> appliedInfluencerIds) {
+                    List<String> categoryIds, ZonedDateTime createdAt, ZonedDateTime dueAt, ZonedDateTime startAt,
+                    String status, int budget,
+                    List<PlatformRequirement> campaignRequirements,
+                    List<InfluencerRequirement> influencerRequirements,
+                    int influencerCountExpected,
+                    List<String> joinedInfluencerIds, int applicationTotal,
+                    List<String> appliedInfluencerIds) {
         this.campaignId = campaignId;
         this.brandId = brandId;
         this.campaignName = campaignName;
@@ -107,142 +117,6 @@ public class Campaign {
         this.influencerCountExpected = influencerCountExpected;
         this.joinedInfluencerIds = joinedInfluencerIds;
         this.applicationTotal = applicationTotal;
-        this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
-    }
-
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public ZonedDateTime getDueAt() {
-        return dueAt;
-    }
-
-    public void setDueAt(ZonedDateTime dueAt) {
-        this.dueAt = dueAt;
-    }
-
-    public ZonedDateTime getStartAt() {
-        return startAt;
-    }
-
-    public void setStartAt(ZonedDateTime startAt) {
-        this.startAt = startAt;
-    }
-
-    public List<InfluencerRequirement> getInfluencerRequirements() {
-        return influencerRequirements;
-    }
-
-    public void setInfluencerRequirements(List<InfluencerRequirement> influencerRequirements) {
-        this.influencerRequirements = influencerRequirements;
-    }
-
-    public String getCampaignName() {
-        return campaignName;
-    }
-
-    public void setCampaignName(String campaignName) {
-        this.campaignName = campaignName;
-    }
-
-    public int getBudget() {
-        return budget;
-    }
-
-    public void setBudget(int budget) {
-        this.budget = budget;
-    }
-
-    public List<PlatformRequirement> getCampaignRequirements() {
-        return campaignRequirements;
-    }
-
-    public void setCampaignRequirements(List<PlatformRequirement> campaignRequirements) {
-        this.campaignRequirements = campaignRequirements;
-    }
-
-    public String getCampaignId() {
-        return campaignId;
-    }
-
-    public void setCampaignId(String campaignId) {
-        this.campaignId = campaignId;
-    }
-
-    public String getBrandId() {
-        return brandId;
-    }
-
-    public void setBrandId(String brandId) {
-        this.brandId = brandId;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public List<String> getCategoryIds() {
-        return categoryIds;
-    }
-
-    public void setCategoryIds(List<String> categoryIds) {
-        this.categoryIds = categoryIds;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public int getInfluencerCountExpected() {
-        return influencerCountExpected;
-    }
-
-    public void setInfluencerCountExpected(int influencerCountExpected) {
-        this.influencerCountExpected = influencerCountExpected;
-    }
-
-    public List<String> getJoinedInfluencerIds() {
-        return joinedInfluencerIds;
-    }
-
-    public void setJoinedInfluencerIds(List<String> joinedInfluencerIds) {
-        this.joinedInfluencerIds = joinedInfluencerIds;
-    }
-
-    public int getApplicationTotal() {
-        return applicationTotal;
-    }
-
-    public void setApplicationTotal(int applicationTotal) {
-        this.applicationTotal = applicationTotal;
-    }
-
-    public List<String> getAppliedInfluencerIds() {
-        return appliedInfluencerIds;
-    }
-
-    public void setAppliedInfluencerIds(List<String> appliedInfluencerIds) {
         this.appliedInfluencerIds = appliedInfluencerIds != null ? appliedInfluencerIds : new ArrayList<>();
     }
 
