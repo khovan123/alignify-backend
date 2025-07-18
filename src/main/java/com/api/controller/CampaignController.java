@@ -69,6 +69,27 @@ public class CampaignController {
         return campaignService.createCampaign(campaignService.convertToCampaign(obj), image, userDetails, request);
     }
 
+    @PostMapping("/{campaignId}/contract")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
+    public ResponseEntity<?> postCampaignInHome(
+            @PathVariable("campaignId") String campaignId,
+            @RequestPart(value = "file", required = true) MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.postCampaignInHome(campaignId, image, userDetails, request);
+    }
+
+    @PutMapping("/{campaignId}/contract")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
+    public ResponseEntity<?> updateContract(
+            @PathVariable("campaignId") String campaignId,
+            @RequestPart(value = "file", required = true) MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.updateContract(campaignId, image, userDetails, request);
+    }
+
+
     @PreAuthorize("hasRole('ROLE_BRAND')")
     @GetMapping("/brand")
     public ResponseEntity<?> getAllCampaignOfBrand(
