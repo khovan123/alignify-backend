@@ -44,6 +44,7 @@ public class CampaignResponse {
     private int applicationTotal;
     private List<String> appliedInfluencerIds;
     private List<String> invitedInfluencerIds;
+    private String contractUrl;
 
     public CampaignResponse() {
         this.joinedInfluencerIds = new ArrayList<>();
@@ -51,6 +52,7 @@ public class CampaignResponse {
         this.invitedInfluencerIds = new ArrayList<>();
         this.appliedInfluencerIds = new ArrayList<>();
         this.influencerRequirements = new ArrayList<>();
+        this.contractUrl = null;
     }
 
     public CampaignResponse(User user, Campaign campaign, CategoryRepository categoryRepository) {
@@ -74,6 +76,7 @@ public class CampaignResponse {
         this.applicationTotal = campaign.getApplicationTotal();
         this.appliedInfluencerIds = campaign.getAppliedInfluencerIds() != null ? campaign.getAppliedInfluencerIds()
                 : List.of();
+        this.contractUrl = campaign.getContractUrl();
     }
 
     public CampaignResponse(User user, Campaign campaign, CategoryRepository categoryRepository,
@@ -99,5 +102,6 @@ public class CampaignResponse {
         this.appliedInfluencerIds = campaign.getAppliedInfluencerIds() != null ? campaign.getAppliedInfluencerIds()
                 : List.of();
         this.invitedInfluencerIds = invitedInfluencerIds;
+        this.contractUrl = campaign.getContractUrl();
     }
 }
