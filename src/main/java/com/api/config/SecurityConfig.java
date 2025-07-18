@@ -57,7 +57,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/recovery-password",
                                 "/api/v1/auth/reset-password/**",
-                                "/ws/**")
+                                "/ws/**",
+                                "/error")
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(ss -> ss.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

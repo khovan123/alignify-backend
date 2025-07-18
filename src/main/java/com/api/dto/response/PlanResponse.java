@@ -1,28 +1,22 @@
-package com.api.model;
+package com.api.dto.response;
 
+import com.api.model.Permission;
+import com.api.model.Plan;
+import com.api.model.PlanPermission;
+import com.api.repository.PermissionRepository;
+import com.api.repository.PlanPermissionRepository;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+public class PlanResponse {
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
-
-@Document(collection = "plans")
-@AllArgsConstructor
-@Data
-@ToString
-public class Plan {
-
-    @Id
     private String planId;
     private String planName;
     private String description;
     private String roleId;
-    private List<String> permissionIds;
-    private List<String> planPermissionIds;
+    private List<Permission> permissions;
+    private List<PlanPermission> planPermissions;
     private Double price;
     private Double discount;
     private String planType;
@@ -31,11 +25,24 @@ public class Plan {
     private boolean isPopular;
     private boolean isActive;
 
-    public Plan() {
-        this.discount = 0.0;
-        this.planCount = 0;
-        this.isPopular = false;
-        this.isActive = false;
+    public PlanResponse(Plan plan, PermissionRepository permissionRepository, PlanPermissionRepository planPermissionRepository) {
+        this.planId = plan.getPlanId();
+        this.planName = plan.getPlanName();
+        this.description = plan.getDescription();
+        this.roleId = plan.getRoleId();
+        this.price = plan.getPrice();
+        this.discount = plan.getDiscount();
+        this.planType = plan.getPlanType();
+        this.planCount = plan.getPlanCount();
+        this.createdAt = plan.getCreatedAt();
+        this.isPopular = plan.isIsPopular();
+        this.permissions = (plan.getPermissionIds()!= null && !plan.getPermissionIds().contains(null))
+                ? permissionRepository.findAllById(plan.getPermissionIds())
+                : Collections.emptyList();
+        this.planPermissions = (plan.getPlanPermissionIds()!= null && !plan.getPlanPermissionIds().contains(null))
+                ? planPermissionRepository.findAllById(plan.getPlanPermissionIds())
+                : Collections.emptyList();
+        this.isActive = plan.isIsActive();
     }
 
     public String getPlanId() {
@@ -70,20 +77,20 @@ public class Plan {
         this.roleId = roleId;
     }
 
-    public List<String> getPermissionIds() {
-        return permissionIds;
+    public List<Permission> getPermissions() {
+        return permissions;
     }
 
-    public void setPermissionIds(List<String> permissionIds) {
-        this.permissionIds = permissionIds;
+    public void setPermissions(List<Permission> permissionIds) {
+        this.permissions = permissionIds;
     }
 
-    public List<String> getPlanPermissionIds() {
-        return planPermissionIds;
+    public List<PlanPermission> getPlanPermissions() {
+        return planPermissions;
     }
 
-    public void setPlanPermissionIds(List<String> planPermissionIds) {
-        this.planPermissionIds = planPermissionIds;
+    public void setPlanPermissions(List<PlanPermission> planPermissions) {
+        this.planPermissions = planPermissions;
     }
 
     public Double getPrice() {
@@ -141,7 +148,6 @@ public class Plan {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
-
-  
     
+
 }

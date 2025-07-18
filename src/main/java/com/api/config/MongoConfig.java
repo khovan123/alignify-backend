@@ -10,10 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.ValidationOptions;
 
 import jakarta.annotation.PostConstruct;
@@ -26,10 +24,8 @@ public class MongoConfig {
 
   // @Autowired
   // private RoleRepository roleRepository;
-
   // @Autowired
   // private CategoryRepository categoryRepository;
-
   @Value("${spring.data.mongodb.database}")
   private String databaseName;
 
@@ -212,7 +208,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["planPermissionName","roleId","limited"],
+                  "required": ["planPermissionName","limited"],
                   "properties": {
                     "planPermissionName": {
                       "bsonType": "string",
@@ -220,9 +216,6 @@ public class MongoConfig {
                     },
                     "limited": {
                       "bsonType": "number"
-                    }
-                    "roleId": {
-                      "bsonType": "string"
                     }
                   }
             }
@@ -269,7 +262,13 @@ public class MongoConfig {
                     },
                     "price": {
                       "bsonType": "number"
-                    }
+                    },
+                    "isPopular": {
+                      "bsonType": "boolean"
+                    },
+                    "isActive": {
+                      "bsonType": "boolean"
+                    },
                     "discount": {
                       "bsonType": "number"
                     },
@@ -1324,4 +1323,78 @@ public class MongoConfig {
 
     db.createCollection("reasons", options);
   }
+
+  // public void create_campaignTrackingsCollection(MongoDatabase db) {
+  // if (db.getCollection("campaignTrackings") != null) {
+  // db.getCollection("campaignTrackings").drop();
+  // }
+  //
+  // Document jsonSchema = Document.parse(
+  // """
+  // {
+  // "bsonType": "object",
+  // "required": ["campaignId", "brandId", "influencerId",
+  // "campaignRequirementTracking"],
+  // "properties": {
+  // "_id": {
+  // "bsonType": "objectId"
+  // }
+  // "campaignId": {
+  // "bsonType": "string"
+  // },
+  // "brandId": {
+  // "bsonType": "string"
+  // },
+  // "influencerId": {
+  // "bsonType": "string"
+  // },
+  // "campaignRequirementTracking": {
+  // "bsonType": "object",
+  // "additionalProperties": {
+  // "bsonType": "array",
+  // "items": {
+  // "bsonType": "object",
+  // "properties": {
+  // "index": {
+  // "bsonType": "int"
+  // },
+  // "imageUrl": {
+  // "bsonType": "string",
+  // "pattern": "^https?://.+$"
+  // },
+  // "postUrl": {
+  // "bsonType": "string",
+  // "pattern": "^https?://.+$"
+  // },
+  // "status": {
+  // "bsonType": "string",
+  // "enum": ["PENDING", "ACCEPTED", "REJECTED"]
+  // },
+  // "uploadedAt": {
+  // "bsonType": "date"
+  // }
+  // }
+  // }
+  // }
+  // },
+  // "process": {
+  // "bsonType": "double",
+  // "minimum": 0,
+  // "maximum": 100
+  // },
+  // "createdAt": {
+  // "bsonType": "date"
+  // }
+  // }
+  // }
+  // """);
+  //
+  // ValidationOptions validationOptions = new ValidationOptions()
+  // .validator(new Document("$jsonSchema", jsonSchema));
+  //
+  // CreateCollectionOptions options = new CreateCollectionOptions()
+  // .validationOptions(validationOptions);
+  //
+  // db.createCollection("campaignTrackings", options);
+  // }
 }
