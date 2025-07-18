@@ -21,7 +21,7 @@ public class PlanRequest {
     private List<String> permissionIds;
     private List<PlanPermission> planPermissions;
     private Double price;
-    private Double discount;
+    private Double discount;    
     private String planType;
     private boolean isPopular;
     private boolean isActive;
