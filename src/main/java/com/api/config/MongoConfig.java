@@ -930,6 +930,9 @@ public class MongoConfig {
                         "items": {
                             "bsonType": "string"
                         }
+                    },
+                    "contractUrl": {
+                        "bsonType": "string"
                     }
                 }
             }

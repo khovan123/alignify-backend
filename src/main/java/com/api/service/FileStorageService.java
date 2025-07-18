@@ -22,7 +22,7 @@ public class FileStorageService {
     private String uploadPreset;
     @Value("${spring.servlet.multipart.max-file-size}")
     private String MAX_FILE_SIZE;
-    private final String ALLOWED_EXTENSIONS[] = {".png", ".jpg", ".jpeg", ".pdf"};
+    private final String ALLOWED_EXTENSIONS[] = {".png", ".jpg", ".jpeg"};
     private long parsedMaxFileSize;
 
     @Autowired
@@ -38,7 +38,7 @@ public class FileStorageService {
         }
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || !hasValidExtension(originalFilename)) {
-            throw new Exception("Only PNG, JPG, JPEG, and PDF files are allowed");
+            throw new Exception("Only PNG, JPG, JPEG files are allowed");
         }
         if (file.getSize() > parsedMaxFileSize) {
             throw new Exception("File size exceeds " + MAX_FILE_SIZE + " limit");
@@ -53,7 +53,7 @@ public class FileStorageService {
                             "upload_preset", uploadPreset,
                             "use_filename", false,
                             "unique_filename", false,
-                            "resource_type", originalFilename.toLowerCase().endsWith(".pdf") ? "raw" : "auto",
+                            "resource_type", "auto",
                             "public_id", publicId
                             )
             );
