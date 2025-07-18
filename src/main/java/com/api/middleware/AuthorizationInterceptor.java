@@ -25,7 +25,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             "/api/v1/auth/reset-password/**",
             "/api/v1/roles",
             "/api/v1/categories",
-            "/api/v1/auth/recovery-password");
+            "/api/v1/auth/recovery-password",
+            "/error");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
