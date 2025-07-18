@@ -81,10 +81,10 @@ public class PlanService {
     public ResponseEntity<?> deletePlan(String planId, HttpServletRequest request) {
         Optional<Plan> packageOpt = planRepository.findById(planId);
         if (!packageOpt.isPresent()) {
-            return ApiResponse.sendError(403, "PackageType not found", request.getRequestURI());
+            return ApiResponse.sendError(403, "Plan not found", request.getRequestURI());
         }
         planRepository.deleteById(planId);
-        return ApiResponse.sendSuccess(204, "PackageType deleted successfully", null, request.getRequestURI());
+        return ApiResponse.sendSuccess(204, "Plan deleted successfully", null, request.getRequestURI());
     }
 
     public ResponseEntity<?> updatePlan(String planId, Plan updatedPlan, HttpServletRequest request) {
@@ -95,7 +95,11 @@ public class PlanService {
 
         Plan plan = planOpt.get();
         Double newPrice = updatedPlan.getPrice();
-        if (newPrice < 0 || updatedPlan.getDiscount() < 0) {
+        Double discount = updatedPlan.getDiscount();
+        if (newPrice == null || discount == null) {
+            return ApiResponse.sendError(400, "Price and discount must not be null", request.getRequestURI());
+        }
+        if (newPrice < 0 || discount < 0) {
             return ApiResponse.sendError(400, "Price or discount must be a non-negative number", request.getRequestURI());
         }
 
