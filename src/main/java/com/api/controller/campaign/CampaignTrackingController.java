@@ -73,6 +73,7 @@ public class CampaignTrackingController {
                 }
             }
             tracking.setPlatformRequirementTracking(platformRequirementTrackings);
+            campaignTrackingRepository.save(tracking);
             return ApiResponse.sendSuccess(200, "Response successfully",
                     null,
                     request.getRequestURI());
