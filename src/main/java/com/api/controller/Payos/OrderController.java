@@ -4,7 +4,11 @@ package com.api.controller.Payos;
 import com.api.dto.request.CreatePaymentLinkRequest;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
+import com.api.model.Plan;
+import com.api.repository.PlanRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,30 +30,47 @@ import vn.payos.type.PaymentLinkData;
 @RequestMapping("/api/v1/order")
 public class OrderController {
     private final PayOS payOS;
-
-    public OrderController(PayOS payOS) {
+    @Autowired
+    private PlanRepository planRepository;
+    public OrderController(PayOS payOS, PlanRepository planRepository) {
         super();
         this.payOS = payOS;
+        this.planRepository = planRepository;
     }
 
     @PostMapping(path = "/create")
-    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequest RequestBody) {
+    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequest requestBody) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
+
         try {
-            final String productName = RequestBody.getProductName();
-            final String description = RequestBody.getDescription();
-            final String returnUrl = RequestBody.getReturnUrl();
-            final String cancelUrl = RequestBody.getCancelUrl();
-            final int price = RequestBody.getPrice();
-            // Gen order code
-            String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
-            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
+            Optional<Plan> plan = planRepository.findByPlanId(requestBody.getPlanId());
+            String planName = plan.get().getPlanName();
 
-            ItemData item = ItemData.builder().name(productName).price(price).quantity(1).build();
+            Double planPrice = plan.get().getPrice();
+            if (planPrice == null || planPrice <= 0) {
+                response.put("error", -1);
+                response.put("message", "Invalid plan price: must be > 0");
+                return response;
+            }
+            int price = plan.get().getPrice().intValue();
 
-            PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
-                    .item(item).returnUrl(returnUrl).cancelUrl(cancelUrl).build();
+            long orderCode = Long.parseLong(String.valueOf(new Date().getTime()).substring(7));
+
+            ItemData item = ItemData.builder()
+                    .name(planName)
+                    .price(price)
+                    .quantity(1)
+                    .build();
+
+            PaymentData paymentData = PaymentData.builder()
+                    .orderCode(orderCode)
+                    .description(plan.get().getPlanName())
+                    .amount(price)
+                    .item(item)
+                    .returnUrl(requestBody.getReturnUrl())
+                    .cancelUrl(requestBody.getCancelUrl())
+                    .build();
 
             CheckoutResponseData data = payOS.createPaymentLink(paymentData);
 
@@ -60,14 +81,13 @@ public class OrderController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Lỗi tạo payment link: " + e.getMessage());
             response.put("error", -1);
             response.put("message", "fail");
             response.set("data", null);
             return response;
-
         }
     }
+
 
     @GetMapping(path = "/{orderId}")
     public ObjectNode getOrderById(@PathVariable("orderId") long orderId) {

@@ -3,6 +3,7 @@ package com.api.controller;
 import com.api.dto.request.PlanRequest;
 import com.api.model.Plan;
 import com.api.service.PlanService;
+import com.api.service.UserPlanService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,8 @@ public class PlanController {
 
     @Autowired
     private PlanService planService;
-
+    @Autowired
+    private UserPlanService userPlanService;
     @PostMapping("")
     public ResponseEntity<?> createPlan(
             @RequestBody  PlanRequest plan,
@@ -60,5 +62,16 @@ public class PlanController {
             @PathVariable("planId") String planId,
             HttpServletRequest request) {
         return planService.deletePlan(planId, request);
+    }
+
+    @GetMapping("/userPlan")
+    public ResponseEntity<?> getUserPlan(HttpServletRequest request){
+        return userPlanService.getUserPlan(request);
+    }
+    @DeleteMapping("/userPlan/{userPlanId}")
+    public  ResponseEntity<?> deleteUserPlan(
+            @PathVariable("userPlanId") String userPlanId,
+            HttpServletRequest request){
+        return userPlanService.deleteUserPlan(userPlanId,request);
     }
 }
