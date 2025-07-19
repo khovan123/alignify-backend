@@ -67,8 +67,15 @@ public class CampaignTrackingController {
             List<PostDetailsTracking> postDetailsTrackings = platformRequirementDetailsTrackingRequest.getPostDetailsTrackings();
             for (PostDetailsTracking postDetailsTracking : postDetailsTrackings) {
                 for (PlatformRequirementTracking platformRequirementTracking : platformRequirementTrackings) {
-                    if (platformRequirementTracking.getPlatform().equals(postDetailsTracking.getPlatform()) && platformRequirementTracking.getPost_type().equals(postDetailsTracking.getPost_type())) {
-                        platformRequirementTracking.getDetails().set(postDetailsTracking.getIndex(), new PlatformRequirementDetailsTracking(postDetailsTracking.getPostUrl()));
+                    if (platformRequirementTracking.getPlatform().equals(postDetailsTracking.getPlatform()) &&
+                        platformRequirementTracking.getPost_type().equals(postDetailsTracking.getPost_type())) {
+
+                        List<PlatformRequirementDetailsTracking> details = platformRequirementTracking.getDetails();
+                        int idx = postDetailsTracking.getIndex();
+                        while (details.size() <= idx) {
+                            details.add(new PlatformRequirementDetailsTracking());
+                        }
+                        details.set(idx, new PlatformRequirementDetailsTracking(postDetailsTracking.getPostUrl(),postDetailsTracking.getPost_type()));
                     }
                 }
             }

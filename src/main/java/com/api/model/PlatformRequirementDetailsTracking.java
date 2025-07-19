@@ -1,15 +1,22 @@
 package com.api.model;
 
+import lombok.*;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
 public class PlatformRequirementDetailsTracking extends PlatformRequirementDetails {
     private String postUrl;
     private String status;
     private ZonedDateTime uploadedAt;
 
-    public PlatformRequirementDetailsTracking(String postUrl) {
-        this.setPostUrl(postUrl);
+    public PlatformRequirementDetailsTracking(String postUrl, String post_type) {
+        super(post_type);
+        this.setRequirementDetailsTracking(postUrl);
     }
 
     public PlatformRequirementDetailsTracking() {
@@ -18,8 +25,7 @@ public class PlatformRequirementDetailsTracking extends PlatformRequirementDetai
     }
 
     public PlatformRequirementDetailsTracking(PlatformRequirementDetails platformRequirementDetails) {
-        super(platformRequirementDetails.getPost_type(), platformRequirementDetails.getLike(),
-                platformRequirementDetails.getComment(), platformRequirementDetails.getShare());
+        super(platformRequirementDetails.getPost_type());
         this.postUrl = null;
         this.status = null;
         this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
@@ -27,25 +33,12 @@ public class PlatformRequirementDetailsTracking extends PlatformRequirementDetai
 
     public PlatformRequirementDetailsTracking(PlatformRequirementDetails platformRequirementDetails, String postUrl,
                                               String status, ZonedDateTime uploadedAt) {
-        super(platformRequirementDetails.getPost_type(), platformRequirementDetails.getLike(),
-                platformRequirementDetails.getComment(), platformRequirementDetails.getShare());
+        super(platformRequirementDetails.getPost_type());
         this.postUrl = postUrl;
         this.status = status;
         this.uploadedAt = uploadedAt;
     }
 
-    public String getPostUrl() {
-
-        return this.postUrl;
-    }
-
-    public void setPostUrl(String postUrl) {
-        this.postUrl = postUrl;
-    }
-
-    public String getStatus() {
-        return this.status;
-    }
 
     public void setStatus(String status) {
         this.status = status;
@@ -53,14 +46,6 @@ public class PlatformRequirementDetailsTracking extends PlatformRequirementDetai
 
     public void setStatus(boolean accepted) {
         this.status = accepted ? "ACCEPTED" : "REJECTED";
-    }
-
-    public ZonedDateTime getUploadedAt() {
-        return this.uploadedAt;
-    }
-
-    public void setUploadedAt(ZonedDateTime uploadedAt) {
-        this.uploadedAt = uploadedAt;
     }
 
     public void setRequirementDetailsTracking(String postUrl) {
