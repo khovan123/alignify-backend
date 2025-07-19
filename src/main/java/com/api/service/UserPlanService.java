@@ -25,7 +25,7 @@ public class UserPlanService {
     public ResponseEntity<?> deleteUserPlan(String planId, HttpServletRequest request){
         Optional<UserPlan> userPlanOpt = userPlanRepository.findById(planId);
         if (!userPlanOpt.isPresent()) {
-            return ApiResponse.sendError(403, "User Plan not found", request.getRequestURI());
+            return ApiResponse.sendError(404, "User Plan not found", request.getRequestURI());
         }
         userPlanRepository.deleteById(planId);
         return ApiResponse.sendSuccess(204, "User Plan deleted successfully", null, request.getRequestURI());
