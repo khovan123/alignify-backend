@@ -1,10 +1,11 @@
 package com.api.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.api.model.Plan;
-import java.util.List;
-import java.util.Optional;
 
 public interface PlanRepository extends MongoRepository<Plan, String> {
 

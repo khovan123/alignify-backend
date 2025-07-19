@@ -1,10 +1,5 @@
 package com.api.controller;
 
-import com.api.dto.request.PlanRequest;
-import com.api.model.Plan;
-import com.api.service.PlanService;
-import com.api.service.UserPlanService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,8 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.api.dto.request.PlanRequest;
+import com.api.model.Plan;
+import com.api.service.PlanService;
+import com.api.service.UserPlanService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/plans")
