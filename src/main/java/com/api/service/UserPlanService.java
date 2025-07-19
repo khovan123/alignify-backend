@@ -19,7 +19,7 @@ public class UserPlanService {
         if(userPlanRepository.findAll().isEmpty()){
             return ApiResponse.sendError(400,"Empty list", request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200,"Succesffuly", userPlanRepository.findAll(),request.getRequestURI());
+        return ApiResponse.sendSuccess(200,"Successfully", userPlanRepository.findAll(),request.getRequestURI());
 
     }
     public ResponseEntity<?> deleteUserPlan(String planId, HttpServletRequest request){
