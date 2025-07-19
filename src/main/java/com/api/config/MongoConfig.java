@@ -299,7 +299,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["userId","planId", "createdAt", "autoPaid"],
+                  "required": ["userId","planId", "createdAt","orderCode"],
                   "properties": {
                     "userId": {
                       "bsonType": "string",
@@ -307,12 +307,12 @@ public class MongoConfig {
                     "planId": {
                       "bsonType": "string"
                     },
+                    "orderCode": {
+                      "bsonType": "string"
+                    },
                     "createdAt": {
                       "bsonType": "date"
                     },
-                    "autoPaid": {
-                      "bsonType": "bool"
-                    }
                   }
             }
             """);

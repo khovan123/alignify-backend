@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 @Controller
 public class CustomErrorController implements ErrorController {
 
-    private static final String ERROR_PATH = "/error";
+    private static final String ERROR_PATH = "/custom/error";
 
     @RequestMapping(value = ERROR_PATH)
     public String handleError(HttpServletRequest request, Model model) {

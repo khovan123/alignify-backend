@@ -2,9 +2,15 @@
 package com.api.controller.Payos;
 
 import java.util.Date;
+import java.util.Optional;
 
+import com.api.dto.request.CreatePaymentLinkRequest;
+import com.api.model.Plan;
+import com.api.repository.PlanRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -18,7 +24,8 @@ import vn.payos.type.PaymentData;
 @Controller
 public class CheckoutController {
     private final PayOS payOS;
-
+    @Autowired
+    private PlanRepository planRepository;
     public CheckoutController(PayOS payOS) {
         super();
         this.payOS = payOS;
@@ -40,26 +47,39 @@ public class CheckoutController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create-payment-link", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public void checkout(HttpServletRequest request, HttpServletResponse httpServletResponse) {
+    public void checkout(HttpServletRequest request, HttpServletResponse httpServletResponse,@RequestBody CreatePaymentLinkRequest RequestBody) {
         try {
             final String baseUrl = getBaseUrl(request);
-            final String productName = "Mì tôm hảo hảo ly";
-            final String description = "Thanh toan don hang";
-            final String returnUrl = baseUrl + "/success";
-            final String cancelUrl = baseUrl + "/cancel";
-            final int price = 2000;
-            // Gen order code
-            String currentTimeString = String.valueOf(new Date().getTime());
-            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
-            ItemData item = ItemData.builder().name(productName).quantity(1).price(price).build();
-            PaymentData paymentData = PaymentData.builder().orderCode(orderCode).amount(price).description(description)
-                    .returnUrl(returnUrl).cancelUrl(cancelUrl).item(item).build();
-            CheckoutResponseData data = payOS.createPaymentLink(paymentData);
+            final String planId = RequestBody.getPlanId();
+            Optional<Plan> plan = planRepository.findByPlanId(planId);
+            if(plan.isPresent()) {
+                final String planName = plan.get().getPlanName();
+                final String description = plan.get().getPlanName();
+                Double planPrice = plan.get().getPrice();
+                if (planPrice == null || planPrice <= 0) {
+                    httpServletResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    httpServletResponse.setContentType("application/json");
+                    httpServletResponse.getWriter().write("{\"error\": \"Invalid plan price.\"}");
+                    httpServletResponse.getWriter().flush();
+                    return;
+                }
+                final int price = plan.get().getPrice().intValue();
+                final String returnUrl = RequestBody.getReturnUrl();
+                final String cancelUrl = RequestBody.getCancelUrl();
 
-            String checkoutUrl = data.getCheckoutUrl();
+                // Gen order code
+                String currentTimeString = String.valueOf(new Date().getTime());
+                long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
+                ItemData item = ItemData.builder().name(planName).quantity(1).price(price).build();
+                PaymentData paymentData = PaymentData.builder().orderCode(orderCode).amount(price).description(description)
+                        .returnUrl(returnUrl).cancelUrl(cancelUrl).item(item).build();
+                CheckoutResponseData data = payOS.createPaymentLink(paymentData);
 
-            httpServletResponse.setHeader("Location", checkoutUrl);
-            httpServletResponse.setStatus(302);
+                String checkoutUrl = data.getCheckoutUrl();
+
+                httpServletResponse.setHeader("Location", checkoutUrl);
+                httpServletResponse.setStatus(302);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

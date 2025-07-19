@@ -10,11 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreatePaymentLinkRequest {
-
-    private String productName;
-    private String description;
+    private String planId;
     private String returnUrl;
-    private int price;
     private String cancelUrl;
 
 }

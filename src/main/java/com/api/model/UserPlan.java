@@ -2,9 +2,13 @@ package com.api.model;
 
 import java.time.ZonedDateTime;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "userPlans")
 public class UserPlan {
   @Id
@@ -12,7 +16,7 @@ public class UserPlan {
   private String userId;
   private String planId;
   private ZonedDateTime createdAt;
-  private boolean autoPaid;
+  private long orderCode;
 
   public String getUserPlanId() {
     return userPlanId;
@@ -46,11 +50,11 @@ public class UserPlan {
     this.createdAt = createdAt;
   }
 
-  public boolean isAutoPaid() {
-    return autoPaid;
+  public long getOrderCode() {
+    return orderCode;
   }
 
-  public void setAutoPaid(boolean autoPaid) {
-    this.autoPaid = autoPaid;
+  public void setOrderCode(long orderCode) {
+    this.orderCode = orderCode;
   }
 }
