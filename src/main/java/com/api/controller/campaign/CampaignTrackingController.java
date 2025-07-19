@@ -44,7 +44,7 @@ public class CampaignTrackingController {
             campaignTrackingOpt = campaignTrackingRepository.findByCampaignIdAndInfluencerId(campaignId, userId);
         }
         if (!campaignTrackingOpt.isPresent()) {
-            ApiResponse.sendError(404, "Not found!", request.getRequestURI());
+            return ApiResponse.sendError(404, "Not found!", request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackingOpt.get(), request.getRequestURI());
     }
