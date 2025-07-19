@@ -91,7 +91,7 @@ public class SecurityService {
         if (hasInfluencerRole((CustomUserDetails) principal)) {
             Optional<CampaignTracking> campaignTrackingOptByInfluencer = campaignTrackingRepository
                     .findByCampaignIdAndInfluencerId(campaignId, userId);
-            return campaignTrackingOptByInfluencer.isPresent() && campaignTrackingOptByInfluencer.get().getInfluencerId().equals(userId);
+            return campaignTrackingOptByInfluencer.isPresent();
         } else if (hasBrandRole((CustomUserDetails) principal)) {
             Optional<CampaignTracking> campaignTrackingOptByBrand = campaignTrackingRepository
                     .findByCampaignIdAndBrandId(campaignId, userId);
