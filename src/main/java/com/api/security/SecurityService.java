@@ -83,26 +83,32 @@ public class SecurityService {
         return applicationOpt.isPresent() && this.isCampaignOwner(applicationOpt.get().getCampaignId(), principal);
     }
 
-    public boolean isJoinedCampaignTracking(String campaignId, String trackingId, Object principal) {
+    public boolean isJoinedCampaignTracking(String campaignId, Object principal) {
         if (!(principal instanceof CustomUserDetails)) {
             return false;
         }
         String userId = ((CustomUserDetails) principal).getUserId();
-        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository
-                .findByCampaignTrackingIdAndCampaignId(trackingId, campaignId);
-        if (!campaignTrackingOpt.isPresent()) {
-            return false;
-        }
         if (hasInfluencerRole((CustomUserDetails) principal)) {
-            return campaignTrackingOpt.isPresent() && campaignTrackingOpt.get().getInfluencerId().equals(userId);
+            Optional<CampaignTracking> campaignTrackingOptByInfluencer = campaignTrackingRepository
+                    .findByCampaignIdAndInfluencerId(campaignId, userId);
+            return campaignTrackingOptByInfluencer.isPresent();
+        } else if (hasBrandRole((CustomUserDetails) principal)) {
+            Optional<CampaignTracking> campaignTrackingOptByBrand = campaignTrackingRepository
+                    .findByCampaignIdAndBrandId(campaignId, userId);
+            return campaignTrackingOptByBrand.isPresent() && campaignTrackingOptByBrand.get().getBrandId().equals(userId);
         } else {
-            return campaignTrackingOpt.isPresent() && campaignTrackingOpt.get().getBrandId().equals(userId);
+            return false;
         }
     }
 
-    private boolean hasInfluencerRole(CustomUserDetails userDetails) {
+    public boolean hasInfluencerRole(CustomUserDetails userDetails) {
         return userDetails.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_INFLUENCER"));
+    }
+
+    public boolean hasBrandRole(CustomUserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_BRAND"));
     }
 
     public boolean checkCampaignStatus(String campaignId, String status, Object principal) {

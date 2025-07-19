@@ -27,4 +27,7 @@ public interface CampaignTrackingRepository extends MongoRepository<CampaignTrac
     }
 
     void deleteAllByCampaignId(String campaignId);
+
+    Optional<CampaignTracking> findByCampaignIdAndInfluencerId(String campaignId, String influencerId);
+    Optional<CampaignTracking> findByCampaignIdAndBrandId(String campaignId, String brandId);
 }
