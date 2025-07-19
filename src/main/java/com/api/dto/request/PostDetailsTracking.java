@@ -23,7 +23,7 @@ public class PostDetailsTracking {
 
     public PostDetailsTracking(@JsonProperty("platform") String platform,
             @JsonProperty("post_type") String post_type, @JsonProperty("index") int index,
-            @JsonProperty("postUrl") String postUrl, @JsonProperty("status") String status) {
+            @JsonProperty("postUrl") String postUrl) {
         this.platform = platform;
         this.post_type = post_type;
         this.index = index;
