@@ -57,7 +57,11 @@ public class CheckoutController {
                 final String description = plan.get().getPlanName();
                 Double planPrice = plan.get().getPrice();
                 if (planPrice == null || planPrice <= 0) {
-                    return ;
+                    httpServletResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    httpServletResponse.setContentType("application/json");
+                    httpServletResponse.getWriter().write("{\"error\": \"Invalid plan price.\"}");
+                    httpServletResponse.getWriter().flush();
+                    return;
                 }
                 final int price = plan.get().getPrice().intValue();
                 final String returnUrl = RequestBody.getReturnUrl();
