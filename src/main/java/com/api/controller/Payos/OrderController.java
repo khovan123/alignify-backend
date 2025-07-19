@@ -45,6 +45,11 @@ public class OrderController {
 
         try {
             Optional<Plan> plan = planRepository.findByPlanId(requestBody.getPlanId());
+            if (!plan.isPresent()) {
+                response.put("error", -1);
+                response.put("message", "Plan not found");
+                return response;
+            }
             String planName = plan.get().getPlanName();
 
             Double planPrice = plan.get().getPrice();
