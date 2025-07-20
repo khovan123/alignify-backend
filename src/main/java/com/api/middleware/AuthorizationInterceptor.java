@@ -26,7 +26,17 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             "/api/v1/roles",
             "/api/v1/categories",
             "/api/v1/auth/recovery-password",
-            "/error");
+            "/error",
+            "/success/**",
+            "/favicon.ico/**",
+            "/cancel/**",
+            "/custom/error/**",
+            "/api/v1/error/**",
+            "/api/v1/success/**",
+            "/api/v1/favicon.ico/**",
+            "/api/v1/cancel/**",
+            "/api/v1/payment/payos_transfer_handler/**",
+            "/api/v1/custom/error/**");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
