@@ -107,7 +107,7 @@ Access the live web app:
 - RESTful & JWT Auth, versioned at `/api/v1/`
 - Swagger UI: [http://localhost:8080/swagger-ui](http://localhost:8080/swagger-ui) or [https://alignify-backend.onrender.com/swagger-ui](https://alignify-backend.onrender.com/swagger-ui)
 - Main endpoints: `/api/campaigns`, `/api/users`, `/api/posts`, `/api/auth`, `/api/reports`
-- See [detailed design](./DETAILED_DESIGN.md) and [API rules](./restful_api_design_rules.prompt.md) for more information.
+- See [detailed design](./DETAILED_DESIGN.md) and [API rules](.github/restful_api_design_rules.prompt.md) for more information.
 
 ---
 
