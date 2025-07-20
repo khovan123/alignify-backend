@@ -26,7 +26,7 @@ import vn.payos.type.Webhook;
 import vn.payos.type.WebhookData;
 
 @RestController
-@RequestMapping("api/v1/payment")
+@RequestMapping("/api/v1/payment")
 public class PayosController {
     private final PayOS payOS;
 
