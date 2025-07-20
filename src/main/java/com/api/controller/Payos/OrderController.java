@@ -60,7 +60,8 @@ public class OrderController {
             }
             int price = plan.get().getPrice().intValue();
 
-            long orderCode = Long.parseLong(String.valueOf(new Date().getTime()).substring(7));
+            String timestamp = String.valueOf(new Date().getTime());
+            long orderCode = Long.parseLong(timestamp.substring(timestamp.length() - 6));
 
             ItemData item = ItemData.builder()
                     .name(planName)
