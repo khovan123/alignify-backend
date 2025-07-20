@@ -85,7 +85,8 @@ public class PayosController {
                         userPlan.setOrderCode(orderCode);
                         userPlan.setCreatedAt(ZonedDateTime.now());
 
-                        userPlanRepository.save(userPlan);
+                        UserPlan saved = userPlanRepository.save(userPlan);
+                        System.out.println("Saved UserPlan ID: " + saved.getPlanId());
                         System.out.println("Saved UserPlan for userId=" + userId + ", planId=" + planId);
                     } else {
                         System.out.println("User or Plan not found with provided IDs.");
