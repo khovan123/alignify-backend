@@ -73,9 +73,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/api/v1/auth/google")
                 || path.equals("/api/v1/auth/recovery-password")
                 || path.equals("/api/v1/auth/reset-password/**")
-                ||path.equals("/error")
+                || path.equals("/api/v1/error")
+                || path.equals("/api/v1/success")
+                || path.equals("/api/v1/favicon.ico/**")
+                || path.equals("/api/v1/cancel/**")
+                || path.equals("/api/v1/custom/error/**")
+                || path.equals("/error")
+                || path.equals("/success")
+                || path.equals("/favicon.ico/**")
+                || path.equals("/cancel/**")
+                || path.equals("/custom/error/**")
+                || path.equals("/api/v1/payment/payos_transfer_handler/**")
                 || path.matches(
-                        "/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|register-secret|login|google|reset-password|recovery-password|error))(.*)?")) {
+                "/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|register-secret|login|google|reset-password|recovery-password)|error|success|favicon.ico|cancel|custom/(error)|payment/(payos_transfer_handler))(.*)?")
+                || path.matches(
+                "error|success|favicon.ico|cancel|custom/(error)(.*)?")) {
             filterChain.doFilter(request, response);
             return;
         }
