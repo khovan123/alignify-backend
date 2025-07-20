@@ -25,7 +25,7 @@
 
 |            |                |
 |------------|----------------|
-| ☕ Java 17+ | 🧑‍💻 Spring Boot 3.x |
+| ☕ Java 21+ | 🧑‍💻 Spring Boot 3.x |
 | 🍃 MongoDB  | 📨 Gmail SMTP       |
 | ☁️ Cloudinary | 💳 PAYOS, PayPal  |
 | 📦 Docker   | 🔑 JWT Auth         |
@@ -157,7 +157,7 @@ MIT © [khovan123](https://github.com/khovan123)
 
 |            |                    |
 |------------|--------------------|
-| ☕ Java 17+ | 🧑‍💻 Spring Boot 3.x |
+| ☕ Java 21+ | 🧑‍💻 Spring Boot 3.x |
 | 🍃 MongoDB  | 📨 Gmail SMTP         |
 | ☁️ Cloudinary | 💳 PAYOS, PayPal  |
 | 📦 Docker   | 🔑 JWT Auth           |
