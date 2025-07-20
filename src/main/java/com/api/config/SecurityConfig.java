@@ -67,6 +67,7 @@ public class SecurityConfig {
                                 "/api/v1/success/**",
                                 "/api/v1/favicon.ico/**",
                                 "/api/v1/cancel/**",
+                                "/api/v1/payos_transfer_handler/**",
                                 "/api/v1/custom/error/**")
                         .permitAll()
                         .anyRequest().authenticated())

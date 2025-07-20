@@ -2,20 +2,23 @@
 package com.api.controller.Payos;
 
 import com.api.dto.request.CreatePaymentLinkRequest;
+
+import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
 import com.api.model.Plan;
+import com.api.model.User;
+import com.api.model.UserPlan;
 import com.api.repository.PlanRepository;
+import com.api.repository.UserPlanRepository;
+import com.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -32,6 +35,19 @@ public class OrderController {
     private final PayOS payOS;
     @Autowired
     private PlanRepository planRepository;
+    @Autowired
+    private UserPlanRepository userPlanRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    private static final String FRONTEND_BASE_URL = "https://alignify.vercel.app";
+    private static final String BACKEND_BASE_URL = "https://alignify-backend.onrender.com";
+
+    private static final String SUCCESS_REACT_URL = FRONTEND_BASE_URL + "/orders";
+    private static final String CANCEL_REACT_URL = FRONTEND_BASE_URL + "/orders/pending";
+    private static final String FAILURE_REACT_URL = FRONTEND_BASE_URL + "/payment/failure";
+
+
     public OrderController(PayOS payOS, PlanRepository planRepository) {
         super();
         this.payOS = payOS;
@@ -74,8 +90,8 @@ public class OrderController {
                     .description(plan.get().getPlanName())
                     .amount(price)
                     .item(item)
-                    .returnUrl(requestBody.getReturnUrl())
-                    .cancelUrl(requestBody.getCancelUrl())
+                    .returnUrl(BACKEND_BASE_URL + "/api/v1/order/handle-payment")
+                    .cancelUrl(CANCEL_REACT_URL)
                     .build();
 
             CheckoutResponseData data = payOS.createPaymentLink(paymentData);
@@ -93,6 +109,59 @@ public class OrderController {
             return response;
         }
     }
+//    @GetMapping("/handle-payment")
+//    public ResponseEntity<Void> handlePaymentRedirect(@RequestParam Map<String, String> params) {
+//        try {
+//            long orderCode = Long.parseLong(params.get("orderCode")); // PayOS gửi về
+//
+//            // Lấy thông tin đơn thanh toán từ PayOS
+//            PaymentLinkData payment = payOS.getPaymentLinkInformation(orderCode);
+//
+//            if ("PAID".equals(payment.getStatus())) {
+//                // Parse description để lấy userId và planId
+//                String description = payment.get();
+//                String[] parts = description.split("\\|");
+//                String userId = null;
+//                String planId = null;
+//
+//                for (String part : parts) {
+//                    if (part.startsWith("userId:")) {
+//                        userId = part.replace("userId:", "").trim();
+//                    } else if (part.startsWith("planId:")) {
+//                        planId = part.replace("planId:", "").trim();
+//                    }
+//                }
+//
+//                if (userId != null && planId != null) {
+//                    Optional<User> userOpt = userRepository.findById(userId);
+//                    Optional<Plan> planOpt = planRepository.findById(planId);
+//
+//                    if (userOpt.isPresent() && planOpt.isPresent()) {
+//                        UserPlan userPlan = new UserPlan();
+//                        userPlan.setUserId(userId);
+//                        userPlan.setPlanId(planId);
+//                        userPlan.setOrderCode(orderCode);
+//                        userPlan.setCreatedAt(ZonedDateTime.now());
+//
+//                        userPlanRepository.save(userPlan);
+//                    } else {
+//                        System.out.println("User or Plan not found.");
+//                    }
+//                } else {
+//                    System.out.println("Missing userId or planId in description.");
+//                }
+//            }
+//
+//            // Redirect về frontend
+//            URI redirectUri = URI.create(SUCCESS_REACT_URL);
+//            return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            URI failRedirect = URI.create(FAILURE_REACT_URL);
+//            return ResponseEntity.status(HttpStatus.FOUND).location(failRedirect).build();
+//        }
+//    }
 
 
     @GetMapping(path = "/{orderId}")
@@ -155,3 +224,4 @@ public class OrderController {
         }
     }
 }
+
