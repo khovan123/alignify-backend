@@ -62,7 +62,7 @@ public class MongoConfig {
     // this.create_userBansCollection(db);
     // this.create_permissionsCollection(db);
     // this.create_planPermissionsCollection(db);
-    // this.create_userPlansCollection(db);
+//     this.create_userPlansCollection(db);
     // this.create_plansCollection(db);
     // this.create_invitationsCollection(db);
     //this.create_assistantMessagesCollection(db);
@@ -299,7 +299,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["userId","planId", "createdAt", "autoPaid"],
+                  "required": ["userId","planId", "createdAt","status"],
                   "properties": {
                     "userId": {
                       "bsonType": "string",
@@ -307,12 +307,16 @@ public class MongoConfig {
                     "planId": {
                       "bsonType": "string"
                     },
+                    "status": {
+                      "bsonType": "string",
+                      "enum": ["PENDING", "FAILED", "SUCCESS"]
+                    },
                     "createdAt": {
                       "bsonType": "date"
                     },
-                    "autoPaid": {
-                      "bsonType": "bool"
-                    }
+                    "completedAt": {
+                      "bsonType": "date"
+                    },
                   }
             }
             """);
