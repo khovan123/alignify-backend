@@ -4,6 +4,7 @@ package com.api.controller.Payos;
 import com.api.dto.request.CreatePaymentLinkRequest;
 
 import java.net.URI;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
@@ -15,9 +16,11 @@ import com.api.model.UserPlan;
 import com.api.repository.PlanRepository;
 import com.api.repository.UserPlanRepository;
 import com.api.repository.UserRepository;
+import com.api.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,7 +58,7 @@ public class OrderController {
     }
 
     @PostMapping(path = "/create")
-    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequest requestBody) {
+    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequest requestBody, @AuthenticationPrincipal CustomUserDetails userDetails) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
 
@@ -78,6 +81,14 @@ public class OrderController {
 
             String timestamp = String.valueOf(new Date().getTime());
             long orderCode = Long.parseLong(timestamp.substring(timestamp.length() - 6));
+
+            UserPlan userPlan = new UserPlan();
+            userPlan.setUserId(userDetails.getUserId());
+            userPlan.setPlanId(requestBody.getPlanId());
+            userPlan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            userPlan.setStatus("PENDING");
+            userPlan.setUserPlanId(String.valueOf(orderCode));
+            userPlanRepository.save(userPlan);
 
             ItemData item = ItemData.builder()
                     .name(planName)

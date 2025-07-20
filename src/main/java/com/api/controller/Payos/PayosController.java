@@ -1,7 +1,7 @@
-
 package com.api.controller.Payos;
 
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -44,79 +44,26 @@ public class PayosController {
     }
 
     @PostMapping(path = "/payos_transfer_handler")
-    public ObjectNode payosTransferHandler(@RequestBody ObjectNode body)
-            throws JsonProcessingException {
+    public ObjectNode payosTransferHandler(@RequestBody ObjectNode body) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
-        System.out.println(body);
-        try {
-            Webhook webhookBody = objectMapper.treeToValue(body, Webhook.class);
-            WebhookData data = payOS.verifyPaymentWebhookData(webhookBody);
 
-            if (
-                    ("00".equals(data.getCode())) ||
-                            (data.getDesc() != null && data.getDesc().toLowerCase().contains("thành công"))
-            )
-            {
-                long orderCode = data.getOrderCode();
-                String description = data.getDescription();
-
-                // Parse description
-                String[] parts = description.split("\\|");
-                String userId = null;
-                String planId = null;
-                for (String part : parts) {
-                    if (part.startsWith("userId:")) {
-                        userId = part.replace("userId:", "").trim();
-                    } else if (part.startsWith("planId:")) {
-                        planId = part.replace("planId:", "").trim();
-                    }
-                }
-
-                if (userId != null && planId != null) {
-                    Optional<User> userOpt = userRepository.findById(userId);
-                    Optional<Plan> planOpt = planRepository.findById(planId);
-
-                    if (userOpt.isPresent() && planOpt.isPresent()) {
-                        UserPlan userPlan = new UserPlan();
-                        userPlan.setUserId(userId);
-                        userPlan.setPlanId(planId);
-                        userPlan.setOrderCode(orderCode);
-                        userPlan.setCreatedAt(ZonedDateTime.now());
-
-                        UserPlan saved = userPlanRepository.save(userPlan);
-                        System.out.println("Saved UserPlan ID: " + saved.getUserPlanId());
-                        System.out.println("Saved UserPlan for userId=" + userId + ", planId=" + planId);
-                    } else {
-                        System.out.println("User or Plan not found with provided IDs.");
-                    }
-                } else {
-                    System.out.println("Missing userId or planId in description: " + description);
-                }
-
-                ObjectNode dataNode = objectMapper.createObjectNode();
-                dataNode.put("userId", userId);
-                dataNode.put("planId", planId);
-
-                response.put("error", 0);
-                response.put("message", "Webhook delivered");
-                response.set("data", dataNode);
-                return response;
-
-            }
-
-            response.put("error", 1);
-            response.put("message", "Payment not completed");
-            response.set("data", null);
-            return response;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.put("error", -1);
-            response.put("message", e.getMessage());
-            response.set("data", null);
-            return response;
+        Webhook webhookBody = objectMapper.treeToValue(body, Webhook.class);
+        WebhookData data = payOS.verifyPaymentWebhookData(webhookBody);
+        long orderCode = data.getOrderCode();
+        UserPlan userPlan = userPlanRepository.findById(String.valueOf(orderCode)).get();
+        boolean success;
+        if ("00".equals(data.getCode()) || data.getDesc().toLowerCase().contains("thành công")) {
+            userPlan.setStatus("SUCCESS");
+            success = true;
+        } else {
+            userPlan.setStatus("FAILED");
+            success = false;
         }
+        userPlan.setCompletedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+        userPlanRepository.save(userPlan);
+        return response.put("success", success);
     }
+
 }
