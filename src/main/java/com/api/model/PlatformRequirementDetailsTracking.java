@@ -22,7 +22,7 @@ public class PlatformRequirementDetailsTracking extends PlatformRequirementDetai
 
     public PlatformRequirementDetailsTracking(PostDetailsTracking postDetailsTracking) {
         super(postDetailsTracking.getPost_type());
-        this.setRequirementDetailsTracking(postUrl);
+        this.setRequirementDetailsTracking(postDetailsTracking.getPostUrl());
         this.setLike(postDetailsTracking.getLike());
         this.setComment(postDetailsTracking.getComment());
         this.setView(postDetailsTracking.getView());
