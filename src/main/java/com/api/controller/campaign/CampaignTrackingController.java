@@ -1,5 +1,6 @@
 package com.api.controller.campaign;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public class CampaignTrackingController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         String userId = userDetails.getUserId();
-        Optional<CampaignTracking> campaignTrackingOpt = null;
+        Optional<CampaignTracking> campaignTrackingOpt;
         if (securityService.hasBrandRole(userDetails)) {
             campaignTrackingOpt = campaignTrackingRepository.findByCampaignIdAndBrandId(campaignId, userId);
         } else {
@@ -62,25 +63,33 @@ public class CampaignTrackingController {
             if (campaignTrackingOpt.isEmpty()) {
                 return ApiResponse.sendError(404, "Tracking ID: " + trackingId + " not found", request.getRequestURI());
             }
-            CampaignTracking tracking = campaignTrackingOpt.get();
-            List<PlatformRequirementTracking> platformRequirementTrackings = tracking.getPlatformRequirementTracking();
+            CampaignTracking campaignTracking = campaignTrackingOpt.get();
+            List<PlatformRequirementTracking> platformRequirementTrackings = campaignTracking.getPlatformRequirementTracking();
+            for (PlatformRequirementTracking tracking : platformRequirementTrackings) {
+                tracking.getDetails().removeIf(
+                        detail -> detail.getPostUrl() == null || detail.getPostUrl().isEmpty()
+                );
+            }
             List<PostDetailsTracking> postDetailsTrackings = platformRequirementDetailsTrackingRequest.getPostDetailsTrackings();
             for (PostDetailsTracking postDetailsTracking : postDetailsTrackings) {
                 for (PlatformRequirementTracking platformRequirementTracking : platformRequirementTrackings) {
                     if (platformRequirementTracking.getPlatform().equals(postDetailsTracking.getPlatform()) &&
-                        platformRequirementTracking.getPost_type().equals(postDetailsTracking.getPost_type())) {
+                            platformRequirementTracking.getPost_type().equals(postDetailsTracking.getPost_type())) {
 
                         List<PlatformRequirementDetailsTracking> details = platformRequirementTracking.getDetails();
                         int idx = postDetailsTracking.getIndex();
                         while (details.size() <= idx) {
                             details.add(new PlatformRequirementDetailsTracking());
                         }
-                        details.set(idx, new PlatformRequirementDetailsTracking(postDetailsTracking.getPostUrl(),postDetailsTracking.getPost_type()));
+                        details.set(idx, new PlatformRequirementDetailsTracking(postDetailsTracking));
                     }
                 }
             }
-            tracking.setPlatformRequirementTracking(platformRequirementTrackings);
-            campaignTrackingRepository.save(tracking);
+            if (platformRequirementTrackings.isEmpty()) {
+                platformRequirementTrackings = new ArrayList<>();
+            }
+            campaignTracking.setPlatformRequirementTracking(platformRequirementTrackings);
+            campaignTrackingRepository.save(campaignTracking);
             return ApiResponse.sendSuccess(200, "Response successfully",
                     null,
                     request.getRequestURI());
@@ -114,7 +123,7 @@ public class CampaignTrackingController {
 
         double process = calculateProcess(tracking.getPlatformRequirementTracking());
         tracking.setProcess(process);
-        if (process >= 100.0 || process >= 100) {
+        if (process >= 100.0) {
             tracking.setStatus("COMPLETED");
         }
         tracking.setPlatformRequirementTracking(platformRequirementTrackings);
@@ -134,7 +143,7 @@ public class CampaignTrackingController {
                     if (status == null) {
                         return 0;
                     }
-                    return status.toUpperCase().equals("ACCEPTED") ? 1 : 0;
+                    return status.equalsIgnoreCase("ACCEPTED") ? 1 : 0;
                 })
                 .sum();
         return totalContents > 0 ? (acceptedContents * 100.0 / totalContents) : 0.0;

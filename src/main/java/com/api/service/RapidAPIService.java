@@ -6,6 +6,7 @@ import java.util.Map;
 import com.api.dto.response.PostDetailStats;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -134,6 +135,7 @@ public class RapidAPIService {
 
     public ResponseEntity<?> getVideoDetailsFromYoutube(String videoId, HttpServletRequest request) {
         final JSONObject[] statsJson = new JSONObject[1];
+        PostDetailStats postDetailStats = new PostDetailStats();
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
             client.prepare("GET", "https://youtube-v2.p.rapidapi.com/video/details?video_id=" + videoId)
@@ -149,11 +151,26 @@ public class RapidAPIService {
                     .join();
 
             client.close();
+            System.out.println(statsJson[0]);
+            if (statsJson[0].has("number_of_views") && !statsJson[0].isNull("number_of_views")) {
+                postDetailStats.setView_count(statsJson[0].getInt("number_of_views"));
+            }
+            if (statsJson[0].has("published_time") && !statsJson[0].isNull("published_time")) {
+                postDetailStats.setCreated_at_utc(statsJson[0].getString("published_time"));
+            }
+            if (statsJson[0].has("thumbnails") && !statsJson[0].isNull("thumbnails")) {
+                JSONArray thumbnails = statsJson[0].getJSONArray("thumbnails");
+                if (thumbnails.isEmpty()) {
+                    if (thumbnails.getJSONObject(0).has("url") && !thumbnails.getJSONObject(0).isNull("url")) {
+                        postDetailStats.setThumbnail_url(thumbnails.getJSONObject(0).getString("url"));
+                    }
+                }
+            }
         } catch (Exception e) {
             return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully", statsJson[0].toMap(),
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", postDetailStats,
                 request.getRequestURI());
     }
 
@@ -187,6 +204,7 @@ public class RapidAPIService {
 
     public ResponseEntity<?> getPostDetailsFromFacebook(String postId, HttpServletRequest request) {
         final JSONObject[] statsJson = new JSONObject[1];
+        PostDetailStats postDetailStats = new PostDetailStats();
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
             client.prepare("GET",
@@ -201,15 +219,36 @@ public class RapidAPIService {
                         statsJson[0] = json.getJSONObject("results");
                     })
                     .join();
-
             client.close();
-            client.close();
+            System.out.println(statsJson[0]);
+            if (statsJson[0].has("image") && !statsJson[0].isNull("image")) {
+                JSONObject image = statsJson[0].getJSONObject("image");
+                if (statsJson[0].has("uri") && !statsJson[0].isNull("uri")) {
+                    postDetailStats.setThumbnail_url(image.getString("uri"));
+                }
+            } else {
+                if (statsJson[0].has("thumbnail_uri") && !statsJson[0].isNull("thumbnail_uri")) {
+                    postDetailStats.setThumbnail_url(statsJson[0].getString("thumbnail_uri"));
+                }
+            }
+            if (statsJson[0].has("reshare_count") && !statsJson[0].isNull("reshare_count")) {
+                postDetailStats.setShare_count(statsJson[0].getInt("reshare_count"));
+            }
+            if (statsJson[0].has("comments_count") && !statsJson[0].isNull("comments_count")) {
+                postDetailStats.setComment_count(statsJson[0].getInt("comments_count"));
+            }
+            if (statsJson[0].has("reactions_count") && !statsJson[0].isNull("reactions_count")) {
+                postDetailStats.setLike_count(statsJson[0].getInt("reactions_count"));
+            }
+            if (statsJson[0].has("play_count") && !statsJson[0].isNull("play_count")) {
+                postDetailStats.setPlay_count(statsJson[0].getInt("play_count"));
+            }
         } catch (Exception e) {
             return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                statsJson[0].toMap(),
+        return ApiResponse.sendSuccess(200, "Facebook response successfully",
+                postDetailStats,
                 request.getRequestURI());
     }
 
@@ -259,12 +298,26 @@ public class RapidAPIService {
                     })
                     .join();
             client.close();
+            System.out.println(statsJson[0]);
             JSONObject metrics = statsJson[0].getJSONObject("metrics");
-            postDetailStats.setComment_count(metrics.getInt("comment_count"));
-            postDetailStats.setPlay_count(metrics.getInt("play_count"));
-            postDetailStats.setCreated_at_utc(String.valueOf(statsJson[0].getJSONObject("caption").getBigInteger("created_at_utc")));
-            postDetailStats.setThumbnail_url(statsJson[0].getString("thumbnail_url"));
-            postDetailStats.setVideo_url(statsJson[0].getString("video_url"));
+            if (statsJson[0].has("thumbnail_url") && !statsJson[0].isNull("thumbnail_url")) {
+                postDetailStats.setThumbnail_url(statsJson[0].getString("thumbnail_url"));
+            }
+            if (statsJson[0].has("video_url") && !statsJson[0].isNull("video_url")) {
+                postDetailStats.setVideo_url(statsJson[0].getString("video_url"));
+            }
+            if (metrics.has("comment_count") && !metrics.isNull("comment_count")) {
+                postDetailStats.setComment_count(metrics.getInt("comment_count"));
+            }
+            if (metrics.has("play_count") && !metrics.isNull("play_count")) {
+                postDetailStats.setPlay_count(metrics.getInt("play_count"));
+            }
+            if (metrics.has("share_count") && !metrics.isNull("share_count")) {
+                postDetailStats.setShare_count(metrics.getInt("share_count"));
+            }
+            if (metrics.has("like_count") && !metrics.isNull("like_count")) {
+                postDetailStats.setLike_count(metrics.getInt("like_count"));
+            }
         } catch (Exception e) {
             return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
                     request.getRequestURI());

@@ -1,5 +1,6 @@
 package com.api.model;
 
+import com.api.dto.request.PostDetailsTracking;
 import lombok.*;
 
 import java.time.ZoneId;
@@ -19,7 +20,17 @@ public class PlatformRequirementDetailsTracking extends PlatformRequirementDetai
         this.setRequirementDetailsTracking(postUrl);
     }
 
+    public PlatformRequirementDetailsTracking(PostDetailsTracking postDetailsTracking) {
+        super(postDetailsTracking.getPost_type());
+        this.setRequirementDetailsTracking(postUrl);
+        this.setLike(postDetailsTracking.getLike());
+        this.setComment(postDetailsTracking.getComment());
+        this.setView(postDetailsTracking.getView());
+        this.setShare(postDetailsTracking.getShare());
+    }
+
     public PlatformRequirementDetailsTracking() {
+        super();
         this.status = null;
         this.uploadedAt = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     }
