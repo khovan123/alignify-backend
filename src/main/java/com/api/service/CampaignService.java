@@ -79,7 +79,7 @@ public class CampaignService {
     private SimpMessagingTemplate messagingTemplate;
 
     public ResponseEntity<?> createCampaign(Campaign campaign, MultipartFile file, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                            HttpServletRequest request) {
 
         String brandId = userDetails.getUserId();
         if (!(campaign.getStatus().equals("DRAFT") || campaign.getStatus().equals("RECRUITING"))) {
@@ -114,6 +114,63 @@ public class CampaignService {
         messagingTemplate.convertAndSend("/topic/campaigns/post", campaignResponse);
         return ApiResponse.sendSuccess(201, "Campaign posting created successfully",
                 new CampaignResponse(user, campaign, categoryRepo),
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> postCampaignInHome(
+            String campaignId,
+            MultipartFile file,
+            CustomUserDetails userDetails,
+            HttpServletRequest request) {
+
+        String brandId = userDetails.getUserId();
+        Optional<Campaign> campaignOptional = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
+        if (!campaignOptional.isPresent()) {
+            ApiResponse.sendError(404, "Not found wit id: "+campaignId, request.getRequestURI());
+        }
+        Campaign campaign = campaignOptional.get();
+        if (!(campaign.getStatus().equals("DRAFT"))) {
+            ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
+        }
+        String imageUrl;
+        try {
+            imageUrl = fileStorageService.storeFile(file);
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
+        }
+        campaign.setContractUrl(imageUrl);
+        campaign.setStatus("RECRUITING");
+        campaignRepo.save(campaign);
+        return ApiResponse.sendSuccess(201, "Contract uploaded and change status successfully",
+                null,
+                request.getRequestURI());
+    }
+
+    public ResponseEntity<?> updateContract(
+            String campaignId,
+            MultipartFile file,
+            CustomUserDetails userDetails,
+            HttpServletRequest request) {
+
+        String brandId = userDetails.getUserId();
+        Optional<Campaign> campaignOptional = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
+        if (!campaignOptional.isPresent()) {
+            ApiResponse.sendError(404, "Not found wit id: "+campaignId, request.getRequestURI());
+        }
+        Campaign campaign = campaignOptional.get();
+        if (!(campaign.getStatus().equals("DRAFT"))) {
+            ApiResponse.sendError(400, "Illegal status", request.getRequestURI());
+        }
+        String imageUrl;
+        try {
+            imageUrl = fileStorageService.storeFile(file);
+        } catch (Exception e) {
+            return ApiResponse.sendError(500, e.getMessage(), request.getRequestURI());
+        }
+        campaign.setContractUrl(imageUrl);
+        campaignRepo.save(campaign);
+        return ApiResponse.sendSuccess(201, "Contract uploaded successfully",
+                null,
                 request.getRequestURI());
     }
 
@@ -260,7 +317,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllCampaignOfBrand(CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                   HttpServletRequest request) {
 
         List<Campaign> campaignPage = campaignRepo.findAllByBrandIdOrderByCreatedAtDesc(userDetails.getUserId());
         User brandUser = userRepository.findById(userDetails.getUserId()).orElse(null);
@@ -276,7 +333,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllRecruitingCampaignOfBrand(CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                             HttpServletRequest request) {
         String brandId = userDetails.getUserId();
         List<Campaign> campaignPage = campaignRepo.findAllByBrandIdAndStatus(userDetails.getUserId(), "RECRUITING");
         User brandUser = userRepository.findById(brandId).orElse(null);
@@ -308,7 +365,7 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> getAllCampaignOfInfluencer(CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                        HttpServletRequest request) {
         List<CampaignTracking> campaignTrackings = campaignTrackingRepository
                 .findAllByInfluencerId(userDetails.getUserId());
         List<String> campaignIds = campaignTrackings.stream().map(campaignTracking -> campaignTracking.getCampaignId())
@@ -347,16 +404,12 @@ public class CampaignService {
     // request.getRequestURI());
     // }
     public ResponseEntity<?> deleteCampaign(String campaignId, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                            HttpServletRequest request) {
         Optional<Campaign> campaignOpt = campaignRepo.findById(campaignId);
         if (!campaignOpt.isPresent()) {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
         }
         Campaign campaign = campaignOpt.get();
-        if (!campaign.getBrandId().equals(userDetails.getUserId())) {
-            return ApiResponse.sendError(403, "Access denied. You are not the owner of this campaign.",
-                    request.getRequestURI());
-        }
         if (!campaign.getStatus().equals("DRAFT")) {
             return ApiResponse.sendError(403, "Access denied",
                     request.getRequestURI());
@@ -366,6 +419,7 @@ public class CampaignService {
         campaignRepo.deleteById(campaignId);
         chatRoomRepository.deleteById(campaignId);
         chatMessageRepository.deleteAllByChatRoomId(campaignId);
+        invitationRepository.deleteAllByCampaignId(campaignId);
         return ApiResponse.sendSuccess(
                 204,
                 "campaign posting and related trackings deleted successfully",
@@ -462,8 +516,8 @@ public class CampaignService {
     }
 
     public ResponseEntity<?> updateCampaignStatus(String campaignId, StatusRequest statusRequest,
-            CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                  CustomUserDetails userDetails,
+                                                  HttpServletRequest request) {
         String brandId = userDetails.getUserId();
         Optional<Campaign> campaignOpt = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
         Campaign campaign = campaignOpt.get();
@@ -472,8 +526,13 @@ public class CampaignService {
             return ApiResponse.sendError(403, "Access denied.", request.getRequestURI());
         }
         User user = userRepository.findByUserId(brandId).get();
-        if (campaign.getStatus().equals("DRAFT") && statusRequest.getStatus().equals("RECRUITING")) {
-            ChatRoom chatRoom = new ChatRoom();
+        Optional<ChatRoom> chatRoomOptional = chatRoomRepository.findById(campaignId);
+        ChatRoom chatRoom = null;
+        if(chatRoomOptional.isPresent()){
+            chatRoom = chatRoomOptional.get();
+        }
+        if(chatRoom==null){
+            chatRoom = new ChatRoom();
             chatRoom.setChatRoomId(campaignId);
             chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             chatRoom.setRoomAvatarUrl(campaign.getImageUrl());
@@ -481,6 +540,8 @@ public class CampaignService {
             chatRoom.setRoomName(campaign.getCampaignName());
             chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
             chatRoomRepository.save(chatRoom);
+        }
+        if (campaign.getStatus().equals("DRAFT") && statusRequest.getStatus().equals("RECRUITING")) {
             ChatMessage chatMessage = new ChatMessage();
             chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
             chatMessage.setChatRoomId(campaign.getCampaignId());
@@ -508,7 +569,7 @@ public class CampaignService {
         } else if ((campaign.getStatus().equals("PENDING")) || (campaign.getStatus().equals("RECRUITING"))
                 && statusRequest.getStatus().equals("DRAFT")) {
             applicationRepository.deleteAllByCampaignId(campaignId);
-            ChatRoom chatRoom = chatRoomRepository.findById(campaignId).get();
+            chatRoom = chatRoomRepository.findById(campaignId).get();
             chatRoom.setMembers(new ArrayList<>(Arrays.asList(brandId)));
             chatRoomRepository.save(chatRoom);
             chatMessageRepository.deleteAllByChatRoomId(campaignId);
@@ -558,7 +619,7 @@ public class CampaignService {
     // }
     // }
     public ResponseEntity<?> searchByTerm(String term, int pageNumber, int pageSize, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                          HttpServletRequest request) {
         if (term.isBlank() || term.isEmpty()) {
             return this.getAllCampaign(pageNumber, pageSize, request);
         }

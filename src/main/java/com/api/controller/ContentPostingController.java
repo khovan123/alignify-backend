@@ -56,6 +56,13 @@ public class ContentPostingController {
         return contentPostingSer.getContentPostingById(userId, request, pageNumber, pageSize);
     }
 
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<?> getPostsByPostId(
+            @PathVariable("postId") String postId,
+            HttpServletRequest request) {
+        return contentPostingSer.getContentPostingByPostId(postId, request);
+    }
+
     @GetMapping("/filterByCategory/{categoryId}")
     public ResponseEntity<?> getPostByCategoryId(
             @PathVariable("categoryId") String categoryId,
@@ -78,16 +85,15 @@ public class ContentPostingController {
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId,authentication.principal)")
     public ResponseEntity<?> updatePost(@PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestPart("contentPosting") String obj,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-
+            @RequestPart(name = "contentPosting") String obj,
+            @RequestPart(name = "image", required = false) MultipartFile image,
             HttpServletRequest request) {
         return contentPostingSer.updateContentPosting(contentId, contentPostingSer.convertToContentPosting(obj), image,
                 userDetails, request);
     }
 
     @DeleteMapping("/{contentId}")
-    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId,authentication.principal)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_INFLUENCER') and @securityService.isContentPostingOwner(#contentId,authentication.principal))")
     public ResponseEntity<?> deletePost(
             @PathVariable("contentId") String contentId,
             @AuthenticationPrincipal CustomUserDetails userDetails,

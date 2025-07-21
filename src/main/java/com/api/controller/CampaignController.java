@@ -69,6 +69,27 @@ public class CampaignController {
         return campaignService.createCampaign(campaignService.convertToCampaign(obj), image, userDetails, request);
     }
 
+    @PostMapping("/{campaignId}/contract")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
+    public ResponseEntity<?> postCampaignInHome(
+            @PathVariable("campaignId") String campaignId,
+            @RequestPart(value = "file", required = true) MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.postCampaignInHome(campaignId, image, userDetails, request);
+    }
+
+    @PutMapping("/{campaignId}/contract")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal)")
+    public ResponseEntity<?> updateContract(
+            @PathVariable("campaignId") String campaignId,
+            @RequestPart(value = "file", required = true) MultipartFile image,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        return campaignService.updateContract(campaignId, image, userDetails, request);
+    }
+
+
     @PreAuthorize("hasRole('ROLE_BRAND')")
     @GetMapping("/brand")
     public ResponseEntity<?> getAllCampaignOfBrand(
@@ -110,7 +131,7 @@ public class CampaignController {
     }
 
     @DeleteMapping("/{campaignId}")
-    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or ((hasRole('ROLE_BRAND') and @securityService.isCampaignOwner(#campaignId, authentication.principal) and (@securityService.checkCampaignStatus(#campaignId,'PENDING',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'DRAFT',authentication.principal) or @securityService.checkCampaignStatus(#campaignId,'RECRUITING',authentication.principal))))")
     public ResponseEntity<?> deleteCampaign(
             @PathVariable String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,

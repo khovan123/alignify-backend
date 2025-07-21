@@ -10,10 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.ValidationOptions;
 
 import jakarta.annotation.PostConstruct;
@@ -26,10 +24,8 @@ public class MongoConfig {
 
   // @Autowired
   // private RoleRepository roleRepository;
-
   // @Autowired
   // private CategoryRepository categoryRepository;
-
   @Value("${spring.data.mongodb.database}")
   private String databaseName;
 
@@ -42,7 +38,7 @@ public class MongoConfig {
 
   @PostConstruct
   public void init() {
-    //MongoDatabase db = mongoClient.getDatabase(databaseName);
+//    MongoDatabase db = mongoClient.getDatabase(databaseName);
     // this.create_usersCollection(db);
     // this.create_influencersCollection(db);
     // this.create_brandsCollection(db);
@@ -56,7 +52,7 @@ public class MongoConfig {
     // this.create_campaignsCollection(db);
     // this.create_contentPostingsCollection(db);
     // this.create_likesCollection(db);
-    // this.create_applicationsCollection(db);
+//     this.create_applicationsCollection(db);
     // this.create_campaignTrackingsCollection(db);
     // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
@@ -66,7 +62,7 @@ public class MongoConfig {
     // this.create_userBansCollection(db);
     // this.create_permissionsCollection(db);
     // this.create_planPermissionsCollection(db);
-    // this.create_userPlansCollection(db);
+//     this.create_userPlansCollection(db);
     // this.create_plansCollection(db);
     // this.create_invitationsCollection(db);
     //this.create_assistantMessagesCollection(db);
@@ -212,7 +208,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["planPermissionName","roleId","limited"],
+                  "required": ["planPermissionName","limited"],
                   "properties": {
                     "planPermissionName": {
                       "bsonType": "string",
@@ -220,9 +216,6 @@ public class MongoConfig {
                     },
                     "limited": {
                       "bsonType": "number"
-                    }
-                    "roleId": {
-                      "bsonType": "string"
                     }
                   }
             }
@@ -269,7 +262,13 @@ public class MongoConfig {
                     },
                     "price": {
                       "bsonType": "number"
-                    }
+                    },
+                    "isPopular": {
+                      "bsonType": "boolean"
+                    },
+                    "isActive": {
+                      "bsonType": "boolean"
+                    },
                     "discount": {
                       "bsonType": "number"
                     },
@@ -300,7 +299,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["userId","planId", "createdAt", "autoPaid"],
+                  "required": ["userId","planId", "createdAt","status"],
                   "properties": {
                     "userId": {
                       "bsonType": "string",
@@ -308,12 +307,16 @@ public class MongoConfig {
                     "planId": {
                       "bsonType": "string"
                     },
+                    "status": {
+                      "bsonType": "string",
+                      "enum": ["PENDING", "FAILED", "SUCCESS"]
+                    },
                     "createdAt": {
                       "bsonType": "date"
                     },
-                    "autoPaid": {
-                      "bsonType": "bool"
-                    }
+                    "completedAt": {
+                      "bsonType": "date"
+                    },
                   }
             }
             """);
@@ -681,28 +684,6 @@ public class MongoConfig {
     db.createCollection("otps", options);
   }
 
-  @PostConstruct
-  public void initIndexes() {
-    MongoDatabase database = mongoClient.getDatabase(databaseName);
-    MongoCollection<Document> collection = database.getCollection("otps");
-
-    boolean ttlIndexExists = false;
-    for (Document index : collection.listIndexes()) {
-      if ("createdAt_ttl".equals(index.getString("name"))) {
-        ttlIndexExists = true;
-        break;
-      }
-    }
-
-    if (!ttlIndexExists) {
-      Document indexKeys = new Document("createdAt", 1);
-      IndexOptions indexOptions = new IndexOptions()
-          .name("createdAt_ttl")
-          .expireAfter(180L, java.util.concurrent.TimeUnit.SECONDS);
-      collection.createIndex(indexKeys, indexOptions);
-    }
-  }
-
   public void create_accountVerifiedsCollection(MongoDatabase db) {
     if (db.getCollection("accountVerifieds") != null) {
       db.getCollection("accountVerifieds").drop();
@@ -953,6 +934,9 @@ public class MongoConfig {
                         "items": {
                             "bsonType": "string"
                         }
+                    },
+                    "contractUrl": {
+                        "bsonType": "string"
                     }
                 }
             }
@@ -975,7 +959,7 @@ public class MongoConfig {
         """
             {
                   "bsonType": "object",
-                  "required": ["campaignId", "influencerId", "brandId", "limited", "status"],
+                  "required": ["campaignId", "influencerId", "brandId", "limited", "status", "cv_url"],
                   "properties": {
                     "campaignId": {
                       "bsonType": "string"
@@ -984,6 +968,9 @@ public class MongoConfig {
                        "bsonType": "string"
                     },
                     "brandId":{
+                       "bsonType": "string"
+                    },
+                    "cv_url":{
                        "bsonType": "string"
                     },
                     "limited": {

@@ -1,5 +1,6 @@
 package com.api.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
@@ -22,7 +22,7 @@ public class FileStorageService {
     private String uploadPreset;
     @Value("${spring.servlet.multipart.max-file-size}")
     private String MAX_FILE_SIZE;
-    private final String ALLOWED_EXTENSIONS[] = { ".png", ".jpg", ".jpeg" };
+    private final String ALLOWED_EXTENSIONS[] = {".png", ".jpg", ".jpeg"};
     private long parsedMaxFileSize;
 
     @Autowired
@@ -43,16 +43,23 @@ public class FileStorageService {
         if (file.getSize() > parsedMaxFileSize) {
             throw new Exception("File size exceeds " + MAX_FILE_SIZE + " limit");
         }
-
-        String publicId = UUID.randomUUID().toString();
+        String uuid  = UUID.randomUUID().toString();
+        String filename = originalFilename.replaceAll("\\s+", "_");
+        String publicId = uuid + "_" + filename;
         try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+            Map uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
                     ObjectUtils.asMap(
                             "upload_preset", uploadPreset,
-                            "public_id", publicId));
+                            "use_filename", false,
+                            "unique_filename", false,
+                            "resource_type", "auto",
+                            "public_id", publicId
+                            )
+            );
             return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
-            throw new Exception(e);
+            throw new Exception("Failed to upload file: " + e.getMessage());
         }
     }
 

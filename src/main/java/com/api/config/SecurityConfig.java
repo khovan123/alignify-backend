@@ -57,7 +57,19 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/recovery-password",
                                 "/api/v1/auth/reset-password/**",
-                                "/ws/**")
+                                "/ws/**",
+                                "/error/**",
+                                "/success/**",
+                                "/favicon.ico/**",
+                                "/cancel/**",
+                                "/custom/error/**",
+                                "/api/v1/error/**",
+                                "/api/v1/success/**",
+                                "/api/v1/favicon.ico/**",
+                                "/api/v1/cancel/**",
+                                "/api/v1/custom/error/**",
+                                "/api/v1/payment/payos_transfer_handler/**"
+                        )
                         .permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(ss -> ss.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
