@@ -250,7 +250,7 @@ public class AdminController {
     public void getAdminStatisticsOverview(Principal principal) {
         if (principal instanceof StompPrincipal) {
             long totalUsers = userRepository.count();
-            long totalCampaigns = campaignRepository.count();
+            long totalCampaigns = campaignRepository.countByStatusNot("DRAFT");
             long totalContentPostings = contentPostingRepository.count();
 
             AdminStatisticsResponse response = new AdminStatisticsResponse(
