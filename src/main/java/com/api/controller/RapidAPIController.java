@@ -40,7 +40,7 @@ public class RapidAPIController {
 
     @GetMapping("/youtube/{videoId}")
     public ResponseEntity<?> getVideoDetatilsFromYoutube(
-            @PathVariable("videoID") String videoId,
+            @PathVariable("videoId") String videoId,
             HttpServletRequest request) {
         return rapidAPIService.getVideoDetailsFromYoutube(videoId, request);
     }

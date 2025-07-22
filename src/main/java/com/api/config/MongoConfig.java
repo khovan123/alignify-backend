@@ -53,7 +53,7 @@ public class MongoConfig {
     // this.create_contentPostingsCollection(db);
     // this.create_likesCollection(db);
 //     this.create_applicationsCollection(db);
-    // this.create_campaignTrackingsCollection(db);
+//     this.create_campaignTrackingsCollection(db);
     // this.create_commentsCollection(db);
     // this.create_chatRoomsCollection(db);
     // this.create_messagesCollection(db);
@@ -899,7 +899,8 @@ public class MongoConfig {
                                 "post_type": { "bsonType": "string" },
                                 "like": { "bsonType": "int" },
                                 "comment": { "bsonType": "int" },
-                                "share": { "bsonType": "int" }
+                                "share": { "bsonType": "int" },
+                                "view": { "bsonType": "int" }
                               }
                             }
                           }
@@ -1078,7 +1079,7 @@ public class MongoConfig {
                                     "bsonType": "array",
                                     "items": {
                                         "bsonType": "object",
-                                        "required": ["post_type", "like", "comment", "share"],
+                                        "required": ["post_type"],
                                         "properties": {
                                             "post_type": {
                                                 "bsonType": "string"
@@ -1092,9 +1093,11 @@ public class MongoConfig {
                                             "share": {
                                                 "bsonType": "int"
                                             },
+                                            "view": {
+                                                "bsonType": "int"
+                                            },
                                             "postUrl": {
                                                 "bsonType": ["string", "null"],
-                                                "pattern": "^https?://.+$"
                                             },
                                             "status": {
                                                 "bsonType": ["string", "null"],
