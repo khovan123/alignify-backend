@@ -68,6 +68,8 @@ public class SecurityConfig {
                                 "/api/v1/favicon.ico/**",
                                 "/api/v1/cancel/**",
                                 "/api/v1/custom/error/**",
+                                "/api/v1/plans/brand/**",
+                                "/api/v1/plans/influencer/**",
                                 "/api/v1/payment/payos_transfer_handler/**"
                         )
                         .permitAll()
