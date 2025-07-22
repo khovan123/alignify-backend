@@ -258,7 +258,6 @@ public class AdminController {
             );
             messagingTemplate.convertAndSend("/topic/admin/statistics/overview", response);
         } else {
-            System.out.println("[AdminStatistics] principal=" + (principal == null ? "null" : principal.getClass().getName()));
             throw new SecurityException("Invalid principal type");
         }
     }
