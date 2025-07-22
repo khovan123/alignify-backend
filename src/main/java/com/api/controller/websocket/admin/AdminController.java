@@ -249,7 +249,7 @@ public class AdminController {
     @MessageMapping("/admin/statistics/overview")
     public void getAdminStatisticsOverview(Principal principal) {
         if (principal instanceof StompPrincipal) {
-            long totalUsers = userRepository.count();
+            long totalUsers = userRepository.countByRoleIdNot(EnvConfig.ADMIN_ROLE_ID);
             long totalCampaigns = campaignRepository.countByStatusNot("DRAFT");
             long totalContentPostings = contentPostingRepository.count();
 
