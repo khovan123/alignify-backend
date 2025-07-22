@@ -31,23 +31,28 @@ public class CampaignTrackingController {
     @Autowired
     private SecurityService securityService;
 
-    @GetMapping("")
-    @PreAuthorize("hasAnyRole('ROLE_BRAND', 'ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, authentication.principal)")
-    public ResponseEntity<?> getCampaignTracking(
+    @GetMapping("/influencer")
+    @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, authentication.principal)")
+    public ResponseEntity<?> getCampaignTrackingByInfluencer(
             @PathVariable("campaignId") String campaignId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest request) {
         String userId = userDetails.getUserId();
-        Optional<CampaignTracking> campaignTrackingOpt;
-        if (securityService.hasBrandRole(userDetails)) {
-            campaignTrackingOpt = campaignTrackingRepository.findByCampaignIdAndBrandId(campaignId, userId);
-        } else {
-            campaignTrackingOpt = campaignTrackingRepository.findByCampaignIdAndInfluencerId(campaignId, userId);
-        }
+        Optional<CampaignTracking> campaignTrackingOpt = campaignTrackingRepository.findByCampaignIdAndInfluencerId(campaignId, userId);
         if (!campaignTrackingOpt.isPresent()) {
             return ApiResponse.sendError(404, "Not found!", request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackingOpt.get(), request.getRequestURI());
+    }
+
+    @GetMapping("/brand")
+    @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isJoinedCampaignTracking(#campaignId, authentication.principal)")
+    public ResponseEntity<?> getCampaignTrackingByBrand(
+            @PathVariable("campaignId") String campaignId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request) {
+        List<CampaignTracking> campaignTrackings = campaignTrackingRepository.findAllByCampaignId(campaignId);
+        return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackings, request.getRequestURI());
     }
 
     @PostMapping("/{trackingId}/posts")
