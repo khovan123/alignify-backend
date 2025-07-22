@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import com.api.config.EnvConfig;
 import com.api.dto.CommonPageRequest;
 import com.api.dto.UserDTO;
+import com.api.dto.response.AdminStatisticsResponse;
 import com.api.dto.response.CampaignResponse;
 import com.api.dto.response.ContentPostingResponse;
 import com.api.model.Campaign;
@@ -241,6 +242,23 @@ public class AdminController {
                     .toList();
             messagingTemplate.convertAndSend("/topic/contents", contentResponse);
         } else {
+            throw new SecurityException("Invalid principal type");
+        }
+    }
+
+    @MessageMapping("/admin/statistics/overview")
+    public void getAdminStatisticsOverview(Principal principal) {
+        if (principal instanceof StompPrincipal) {
+            long totalUsers = userRepository.count();
+            long totalCampaigns = campaignRepository.count();
+            long totalContentPostings = contentPostingRepository.count();
+
+            AdminStatisticsResponse response = new AdminStatisticsResponse(
+                totalUsers, totalCampaigns, totalContentPostings
+            );
+            messagingTemplate.convertAndSend("/topic/admin/statistics/overview", response);
+        } else {
+            System.out.println("[AdminStatistics] principal=" + (principal == null ? "null" : principal.getClass().getName()));
             throw new SecurityException("Invalid principal type");
         }
     }
