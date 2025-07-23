@@ -110,8 +110,8 @@ public class CampaignTrackingController {
             tracking.setStatus("COMPLETED");
         }
         tracking.setPlatformRequirementTracking(platformRequirementTrackings);
-        CampaignTracking updatedTracking = campaignTrackingRepository.save(tracking);
-        return ApiResponse.sendSuccess(200, "Update status of campaign requirement successfully", updatedTracking, request.getRequestURI());
+        campaignTrackingRepository.save(tracking);
+        return ApiResponse.sendSuccess(200, "Update status of campaign requirement successfully", null, request.getRequestURI());
     }
 
     private double calculateProcess(List<PlatformRequirementTracking> platformRequirementTracking) {
