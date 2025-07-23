@@ -101,7 +101,9 @@ public class CampaignTrackingController {
         CampaignTracking tracking = campaignTrackingOpt.get();
         List<PlatformRequirementTracking> platformRequirementTrackings = tracking.getPlatformRequirementTracking();
         for (PlatformRequirementTracking platformRequirementTracking : platformRequirementTrackings) {
-            if (platformRequirementTracking.getPlatform().equals(postDetailsTracking.getPlatform()) && platformRequirementTracking.getPost_type().equals(postDetailsTracking.getPost_type()) && platformRequirementTracking.getDetails().get(postDetailsTracking.getIndex()).getPostUrl().equals(postDetailsTracking.getPostUrl())) {
+            if (platformRequirementTracking.getPlatform().equals(postDetailsTracking.getPlatform()) && platformRequirementTracking.getPost_type().equals(postDetailsTracking.getPost_type())
+//                    && platformRequirementTracking.getDetails().get(postDetailsTracking.getIndex()).getPostUrl().equals(postDetailsTracking.getPostUrl())
+            ) {
                 platformRequirementTracking.getDetails().get(postDetailsTracking.getIndex()).setStatus(accepted ? "ACCEPTED" : "REJECTED");
             }
         }
