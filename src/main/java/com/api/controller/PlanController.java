@@ -53,7 +53,7 @@ public class PlanController {
 
     @PutMapping("/{planId}")
     public ResponseEntity<?> updatePlan(@PathVariable("planId") String planId,
-            @RequestBody Plan plan,
+            @RequestBody PlanRequest plan,
             HttpServletRequest request) {
         return planService.updatePlan(planId, plan, request);
     }

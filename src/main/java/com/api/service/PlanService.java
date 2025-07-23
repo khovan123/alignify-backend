@@ -1,3 +1,4 @@
+
 package com.api.service;
 
 import com.api.config.EnvConfig;
@@ -29,6 +30,16 @@ public class PlanService {
 
     public ResponseEntity<?> createPlan(PlanRequest planrequest, HttpServletRequest request) {
         List<String> permissionIds = planrequest.getPermissionIds();
+        if (planrequest.isIsActive()) {
+            if (hasExceededActivePlans(planrequest.getRoleId(), planrequest.getPlanType(), null)) {
+                return ApiResponse.sendError(400, "Chỉ được phép có tối đa 3 plan đang hoạt động cho mỗi role theo planType", request.getRequestURI());
+            }
+        }
+        if (planrequest.isIsPopular()) {
+            if (hasPopularPlan(planrequest.getRoleId(), planrequest.getPlanType(), null)) {
+                return ApiResponse.sendError(400, "Chỉ được phép có 1 plan popular cho mỗi role theo planType", request.getRequestURI());
+            }
+        }
         if (permissionIds != null && !permissionIds.isEmpty()) {
             List<String> validPermissionIds = permissionRepository.findAllById(permissionIds)
                     .stream()
@@ -87,7 +98,7 @@ public class PlanService {
         return ApiResponse.sendSuccess(204, "Plan deleted successfully", null, request.getRequestURI());
     }
 
-    public ResponseEntity<?> updatePlan(String planId, Plan updatedPlan, HttpServletRequest request) {
+    public ResponseEntity<?> updatePlan(String planId, PlanRequest updatedPlan, HttpServletRequest request) {
         Optional<Plan> planOpt = planRepository.findById(planId);
         if (planOpt.isEmpty()) {
             return ApiResponse.sendError(404, "Plan not found", request.getRequestURI());
@@ -128,17 +139,34 @@ public class PlanService {
             plan.setPermissionIds(validPermissionIds);
         }
 
-        if (updatedPlan.getPlanPermissionIds() != null && !updatedPlan.getPlanPermissionIds().isEmpty()) {
-            List<String> inputPlanPermissionIds = updatedPlan.getPlanPermissionIds();
+        if (updatedPlan.getPlanPermissions() != null && !updatedPlan.getPlanPermissions().isEmpty()) {
+            List<String> inputPlanPermissionIds = updatedPlan.getPlanPermissions()
+                    .stream()
+                    .map(PlanPermission::getPlanPermissionId)
+                    .toList();
+
             List<String> validPlanPermissionIds = planPermissionRepository.findAllById(inputPlanPermissionIds)
                     .stream()
-                    .map(planPerm -> planPerm.getPlanPermissionId())
+                    .map(PlanPermission::getPlanPermissionId)
                     .toList();
+
             plan.setPlanPermissionIds(validPlanPermissionIds);
         }
 
-        plan.setIsPopular(updatedPlan.isIsPopular());
+        if (updatedPlan.isIsActive()) {
+            if (hasExceededActivePlans(plan.getRoleId(), plan.getPlanType(), plan.getPlanId())) {
+                return ApiResponse.sendError(400, "Chỉ được phép có tối đa 3 plan đang hoạt động cho mỗi role theo planType", request.getRequestURI());
+            }
+        }
         plan.setIsActive(updatedPlan.isIsActive());
+
+        if (updatedPlan.isIsPopular()) {
+            if (hasPopularPlan(plan.getRoleId(), plan.getPlanType(), plan.getPlanId())) {
+                return ApiResponse.sendError(400, "Chỉ được phép có 1 plan popular cho mỗi role theo planType", request.getRequestURI());
+            }
+        }
+        plan.setIsPopular(updatedPlan.isIsPopular());
+
         PlanResponse planResponse = new PlanResponse(plan, permissionRepository, planPermissionRepository);
 
         planRepository.save(plan);
@@ -151,5 +179,25 @@ public class PlanService {
             return ApiResponse.sendError(400, "No permissions found", request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Successfully", permissions, request.getRequestURI());
+    }
+
+    private boolean hasExceededActivePlans(String roleId, String planType, String excludedPlanId) {
+        List<Plan> activePlans = planRepository.findByRoleIdAndPlanTypeAndIsActive(roleId, planType, true);
+        if (excludedPlanId != null) {
+            activePlans = activePlans.stream()
+                    .filter(p -> !p.getPlanId().equals(excludedPlanId))
+                    .toList();
+        }
+        return activePlans.size() >= 3;
+    }
+
+    private boolean hasPopularPlan(String roleId, String planType, String excludedPlanId) {
+        List<Plan> popularPlans = planRepository.findByRoleIdAndPlanTypeAndIsPopular(roleId, planType, true);
+        if (excludedPlanId != null) {
+            popularPlans = popularPlans.stream()
+                    .filter(p -> !p.getPlanId().equals(excludedPlanId))
+                    .toList();
+        }
+        return !popularPlans.isEmpty();
     }
 }
