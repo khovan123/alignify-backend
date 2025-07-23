@@ -72,7 +72,9 @@ public class CampaignTrackingController {
                         while (details.size() <= idx) {
                             details.add(new PlatformRequirementDetailsTracking());
                         }
-                        details.set(idx, new PlatformRequirementDetailsTracking(postDetailsTracking));
+                        if (details.get(idx).getStatus() == null || details.get(idx).getStatus().equalsIgnoreCase("REJECTED")) {
+                            details.set(idx, new PlatformRequirementDetailsTracking(postDetailsTracking));
+                        }
                     }
                 }
             }
