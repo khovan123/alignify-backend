@@ -2,10 +2,16 @@ package com.api.controller.campaign;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.api.dto.UserDTO;
 import com.api.dto.request.PostDetailsTracking;
+import com.api.dto.response.CampaignTrackingResponse;
 import com.api.model.PlatformRequirementDetailsTracking;
+import com.api.model.User;
+import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.security.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +33,12 @@ import jakarta.servlet.http.HttpServletRequest;
 public class CampaignTrackingController {
 
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private CampaignTrackingRepository campaignTrackingRepository;
     @Autowired
     private SecurityService securityService;
+
 
     @GetMapping("/influencer")
     @PreAuthorize("hasRole('ROLE_INFLUENCER') and @securityService.isJoinedCampaignTracking(#campaignId, authentication.principal)")
@@ -46,10 +55,17 @@ public class CampaignTrackingController {
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isJoinedCampaignTracking(#campaignId, authentication.principal)")
     public ResponseEntity<?> getCampaignTrackingByBrand(@PathVariable("campaignId") String campaignId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         List<CampaignTracking> campaignTrackings = campaignTrackingRepository.findAllByCampaignIdAndBrandId(campaignId, userDetails.getUserId());
-        if (campaignTrackings.isEmpty()) {
-            campaignTrackings = new ArrayList<>();
+        List<CampaignTrackingResponse> campaignTrackingResponses = new ArrayList<>();
+        if (!campaignTrackings.isEmpty()) {
+            List<User> users = userRepository.findAllById(campaignTrackings.stream().map(CampaignTracking::getInfluencerId).toList());
+            Map<String, UserDTO> userDTOMap = users.stream()
+                    .collect(Collectors.toMap(
+                            User::getUserId,
+                            UserDTO::new
+                    ));
+            campaignTrackingResponses = campaignTrackings.stream().map(campaignTracking -> new CampaignTrackingResponse(campaignTracking, userDTOMap.get(campaignTracking.getInfluencerId()))).toList();
         }
-        return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackings, request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackingResponses, request.getRequestURI());
     }
 
     @PostMapping("/{trackingId}/posts")
