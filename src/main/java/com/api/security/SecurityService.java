@@ -1,5 +1,6 @@
 package com.api.security;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,9 +94,9 @@ public class SecurityService {
                     .findByCampaignIdAndInfluencerId(campaignId, userId);
             return campaignTrackingOptByInfluencer.isPresent();
         } else if (hasBrandRole((CustomUserDetails) principal)) {
-            Optional<CampaignTracking> campaignTrackingOptByBrand = campaignTrackingRepository
-                    .findByCampaignIdAndBrandId(campaignId, userId);
-            return campaignTrackingOptByBrand.isPresent() && campaignTrackingOptByBrand.get().getBrandId().equals(userId);
+            List<CampaignTracking> campaignTrackings = campaignTrackingRepository
+                    .findAllByCampaignIdAndBrandId(campaignId, userId);
+            return !campaignTrackings.isEmpty();
         } else {
             return false;
         }

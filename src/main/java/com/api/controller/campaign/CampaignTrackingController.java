@@ -46,6 +46,9 @@ public class CampaignTrackingController {
     @PreAuthorize("hasRole('ROLE_BRAND') and @securityService.isJoinedCampaignTracking(#campaignId, authentication.principal)")
     public ResponseEntity<?> getCampaignTrackingByBrand(@PathVariable("campaignId") String campaignId, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         List<CampaignTracking> campaignTrackings = campaignTrackingRepository.findAllByCampaignIdAndBrandId(campaignId, userDetails.getUserId());
+        if (campaignTrackings.isEmpty()) {
+            campaignTrackings = new ArrayList<>();
+        }
         return ApiResponse.sendSuccess(200, "Reponse successfully", campaignTrackings, request.getRequestURI());
     }
 
