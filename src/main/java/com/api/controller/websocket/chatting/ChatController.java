@@ -56,9 +56,9 @@ public class ChatController {
             }
             chatMessage.setChatRoomId(roomId);
             chatMessage.setUserId(userId);
-            chatMessageRepository.save(chatMessage);
             ChatRoom chatRoom = roomOpt.get();
             chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            chatMessageRepository.save(chatMessage);
             chatRoomRepository.save(chatRoom);
             messagingTemplate.convertAndSend("/topic/messages/" + roomId,
                     new ChatMessageResponse(userDTO, chatMessage));
