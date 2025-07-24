@@ -3,6 +3,7 @@ package com.api.model;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -22,6 +23,9 @@ public class Plan {
     private String description;
     private String roleId;
     private List<String> permissionIds;
+
+    @JsonAlias("planPermissions")
+
     private List<String> planPermissionIds;
     private Double price;
     private Double discount;

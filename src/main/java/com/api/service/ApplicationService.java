@@ -442,8 +442,8 @@ public class ApplicationService {
                 joinedInfluencerIds.remove(application.getInfluencerId());
                 campaign.setJoinedInfluencerIds(joinedInfluencerIds);
             }
-            campaignRepository.save(campaign);
         }
+        campaignRepository.save(campaign);
         chatRoomRepository.save(chatRoom);
         applicationRepository.save(application);
         User user = userRepository.findById(application.getInfluencerId()).orElse(null);
