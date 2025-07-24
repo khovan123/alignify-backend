@@ -2,7 +2,7 @@
 
 # Alignify Backend Release Helper Script
 # Usage: ./scripts/release.sh [version] [type]
-# Example: ./scripts/release.sh 1.1.0 minor
+# Example: ./scripts/release.sh 1.3.1 minor
 
 set -e
 
@@ -39,7 +39,7 @@ print_header() {
 if [ -z "$1" ]; then
     print_error "Version number is required!"
     echo "Usage: $0 [version] [type]"
-    echo "Example: $0 1.1.0 minor"
+    echo "Example: $0 1.3.1 minor"
     exit 1
 fi
 
