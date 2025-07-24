@@ -1,6 +1,6 @@
 # Release Documentation
 
-## 📦 Current Release: v1.0.0
+## 📦 Current Release: v1.3.1
 
 **Release Date**: July 24, 2025  
 **Release Type**: Major Release (Initial Release)  
@@ -48,7 +48,7 @@ All releases are tagged following these conventions:
 
 ---
 
-## 🚀 What's New in v1.0.0
+## 🚀 What's New in v1.3.1
 
 ### Core Platform Features
 
@@ -171,7 +171,7 @@ This is the initial stable release. If you were using any pre-release or develop
 
 ### Configuration Changes
 
-Required environment variables for v1.0.0:
+Required environment variables for v1.3.1:
 
 ```env
 # Core Configuration
@@ -221,19 +221,19 @@ PAYPAL_CLIENT_SECRET=your_paypal_client_secret
 
 ## 🗺️ Roadmap
 
-### v1.1.0 (Planned)
+### v1.1.* (Planned)
 - Enhanced analytics dashboard
 - Advanced search and filtering
 - Bulk operations for admin users
 - Performance optimizations
 
-### v1.2.0 (Planned)  
+### v1.2.* (Planned)  
 - Multi-language support
 - Advanced notification preferences
 - Integration with more payment gateways
 - Enhanced AI recommendations
 
-### v2.0.0 (Future)
+### v2.*.* (Future)
 - Mobile app API extensions
 - Advanced reporting system
 - Third-party platform integrations
