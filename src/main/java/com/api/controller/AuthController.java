@@ -46,7 +46,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest,
-            @RequestParam("roleId") String roleId, HttpServletRequest request) {
+                                      @RequestParam("roleId") String roleId, HttpServletRequest request) {
         return authService.registerAccount(registerRequest, roleId, request);
     }
 
@@ -62,19 +62,24 @@ public class AuthController {
 
     @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest passwordRequest,
-            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+                                            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return authService.changeUserPassword(passwordRequest, userDetails, request);
     }
 
     @PostMapping("/recovery-password")
     public ResponseEntity<?> recoveryPassword(@RequestBody RecoveryPasswordRequest recoveryPasswordRequest,
-            HttpServletRequest request) {
+                                              HttpServletRequest request) {
         return authService.recoveryPasswordByEndpoint(recoveryPasswordRequest, request);
     }
 
     @PostMapping("/reset-password/{token}")
     public ResponseEntity<?> resetPassword(@PathVariable("token") String token,
-            @RequestBody PasswordResetRequest passwordReset, HttpServletRequest request) {
+                                           @RequestBody PasswordResetRequest passwordReset, HttpServletRequest request) {
         return authService.resetPasswordByToken(token, passwordReset, request);
+    }
+
+    @PutMapping("/2fa")
+    public ResponseEntity<?> changeTwoFA(@RequestParam("turn") boolean turn, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return authService.changeTwoFA(turn, userDetails, request);
     }
 }
