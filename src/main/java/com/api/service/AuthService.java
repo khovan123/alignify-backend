@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.cloudinary.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -156,8 +157,27 @@ public class AuthService {
         try {
             boolean isValid = otpService.verifyOtp(verifyOTPRequest.getEmail(), verifyOTPRequest.getOtp());
             if (isValid) {
-                accountVerifiedRepository.save(new AccountVerified(verifyOTPRequest.getEmail()));
-                return ApiResponse.sendSuccess(200, "OTP verified successfully", null, request.getRequestURI());
+                if (verifyOTPRequest.isLogin()) {
+                    Optional<User> userOpt = userRepository.findByEmail(verifyOTPRequest.getEmail());
+                    if (!userOpt.isPresent()) {
+                        return ApiResponse.sendError(403, "Not registered yet!", request.getRequestURI());
+                    }
+                    User user = userOpt.get();
+                    Optional<Role> roleOpt = roleRepository.findById(user.getRoleId());
+                    if (!roleOpt.isPresent()) {
+                        return ApiResponse.sendError(403, "Role is invalid!", request.getRequestURI());
+                    }
+                    Role role = roleOpt.get();
+                    List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
+                    UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA());
+                    return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                            "token", JwtUtil.createToken(user),
+                            "role", role.getRoleName(),
+                            "user", userDTO), request.getRequestURI());
+                } else {
+                    accountVerifiedRepository.save(new AccountVerified(verifyOTPRequest.getEmail()));
+                    return ApiResponse.sendSuccess(200, "OTP verified successfully", null, request.getRequestURI());
+                }
             } else {
                 return ApiResponse.sendError(401, "Invalid OTP code", request.getRequestURI());
             }
@@ -244,8 +264,16 @@ public class AuthService {
         if (userBanOpt.isPresent()) {
             return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
         }
-        String avatarUrl = user.getAvatarUrl();
         List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
+        String avatarUrl = user.getAvatarUrl();
+        if (user.isTwoFA()) {
+            if (!accountVerifiedRepository.existsByEmail(user.getEmail())) {
+                return ApiResponse.sendError(400, "Email is not existed in account", request.getRequestURI());
+            }
+            emailService.sendOtpEmail(user.getEmail(), otpService.generateOtp(user.getEmail()));
+            return ApiResponse.sendSuccess(200, "Please verify account before login in", Map.of(
+                    "user", new UserDTO(user.getUserId(), user.getName(), avatarUrl, true, user.getEmail())), request.getRequestURI());
+        }
         UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl, permissions, user.isTwoFA());
         if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());

@@ -12,7 +12,6 @@ import lombok.*;
 @Setter
 @Data
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
 
@@ -22,6 +21,7 @@ public class UserDTO {
     private List<Permission> permissions;
     private ZonedDateTime createdAt;
     private boolean twoFA;
+    private String email;
 
     public UserDTO(String userId, String name, String avatarUrl, List<Permission> permissions,
             ZonedDateTime createdAt) {
@@ -32,11 +32,18 @@ public class UserDTO {
         this.permissions = permissions;
     }
 
+    public UserDTO(String userId, String name, String avatarUrl, boolean twoFA, String email) {
+        this.userId = userId;
+        this.name = name;
+        this.avatarUrl = avatarUrl;
+        this.twoFA = twoFA;
+        this.email = email;
+    }
+
     public UserDTO(String userId, String name, String avatarUrl, List<Permission> permissions, boolean twoFA) {
         this.userId = userId;
         this.name = name;
         this.avatarUrl = avatarUrl;
-        this.createdAt = null;
         this.permissions = permissions;
         this.twoFA = twoFA;
     }
@@ -46,7 +53,6 @@ public class UserDTO {
         this.name = name;
         this.avatarUrl = avatarUrl;
         this.createdAt = createdAt;
-        this.permissions = new ArrayList<>();
     }
 
     public UserDTO(String userId, String name, String avatarUrl) {
@@ -54,7 +60,6 @@ public class UserDTO {
         this.name = name;
         this.avatarUrl = avatarUrl;
         this.createdAt = null;
-        this.permissions = new ArrayList<>();
     }
 
     public UserDTO(User user) {
@@ -62,6 +67,5 @@ public class UserDTO {
         this.name = user.getName();
         this.avatarUrl = user.getAvatarUrl();
         this.createdAt = null;
-        this.permissions = new ArrayList<>();
     }
 }
