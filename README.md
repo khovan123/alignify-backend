@@ -102,6 +102,26 @@ Access the live web app:
 
 ---
 
+## 📦 Release Information
+
+**Current Version**: `v1.0.0` (July 24, 2025)  
+**Release Type**: Initial Stable Release  
+**Compatibility**: Production Ready  
+
+### 📋 Quick Links
+- **📖 [Release Notes](./RELEASE.md)** - Detailed release information and migration guide
+- **📝 [Changelog](./CHANGELOG.md)** - Complete version history and changes
+- **🏷️ [Versioning Guide](./VERSIONING.md)** - Semantic versioning and tagging conventions
+- **🔗 [GitHub Releases](https://github.com/khovan123/alignify-backend/releases)** - Download and release history
+
+### 🏷️ Version Tags
+This project follows [Semantic Versioning](https://semver.org/):
+- **Production**: `v1.0.0`, `v1.1.0`, `v2.0.0`
+- **Pre-release**: `v1.1.0-alpha.1`, `v1.1.0-beta.1`, `v1.1.0-rc.1`
+- All tags are prefixed with `v` following best practices
+
+---
+
 ## 🔗 API Overview
 
 - RESTful & JWT Auth, versioned at `/api/v1/`
@@ -231,6 +251,26 @@ Truy cập web live tại:
 | Xoá bài, chiến dịch     | Mời influencer, duyệt tiến độ    | Nhận/từ chối lời mời       |
 | Xử lý báo cáo           | Quản lý tiến độ                  | Cập nhật tiến độ           |
 | Tạo gói nâng cấp        |                                  |                            |
+
+---
+
+## 📦 Thông Tin Phiên Bản
+
+**Phiên Bản Hiện Tại**: `v1.0.0` (24 tháng 7, 2025)  
+**Loại Phiên Bản**: Phiên Bản Ổn Định Đầu Tiên  
+**Tương Thích**: Sẵn Sàng Production  
+
+### 📋 Liên Kết Nhanh
+- **📖 [Ghi Chú Phiên Bản](./RELEASE.md)** - Thông tin chi tiết về phiên bản và hướng dẫn migration
+- **📝 [Nhật Ký Thay Đổi](./CHANGELOG.md)** - Lịch sử phiên bản và thay đổi hoàn chình
+- **🏷️ [Hướng Dẫn Versioning](./VERSIONING.md)** - Quy tắc semantic versioning và tagging
+- **🔗 [GitHub Releases](https://github.com/khovan123/alignify-backend/releases)** - Tải xuống và lịch sử phiên bản
+
+### 🏷️ Tag Phiên Bản
+Dự án tuân thủ [Semantic Versioning](https://semver.org/):
+- **Production**: `v1.0.0`, `v1.1.0`, `v2.0.0`
+- **Pre-release**: `v1.1.0-alpha.1`, `v1.1.0-beta.1`, `v1.1.0-rc.1`
+- Tất cả tag đều có tiền tố `v` theo best practices
 
 ---
 
