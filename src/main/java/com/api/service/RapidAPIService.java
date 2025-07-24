@@ -26,69 +26,57 @@ public class RapidAPIService {
         AsyncHttpClient client = new DefaultAsyncHttpClient();
         final JSONObject[] statsJson = new JSONObject[1];
         try {
-            client.prepare("GET", "https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=" + uniqueId)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "tiktok-api23.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json
-                                .getJSONObject("userInfo")
-                                .getJSONObject("statsV2");
-                    }).join();
+            client.prepare("GET", "https://tiktok-api23.p.rapidapi.com/api/user/info?uniqueId=" + uniqueId).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "tiktok-api23.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json.getJSONObject("userInfo").getJSONObject("statsV2");
+            }).join();
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Tiktok response successfully", statsJson[0].toMap(),
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Tiktok response successfully", statsJson[0].toMap(), request.getRequestURI());
     }
 
     public ResponseEntity<?> getVideoDetailsFromTiktok(String videoId, HttpServletRequest request) {
         AsyncHttpClient client = new DefaultAsyncHttpClient();
         final JSONObject[] statsJson = new JSONObject[1];
+        PostDetailStats postDetailStats = new PostDetailStats();
         try {
-            client.prepare("GET", "https://tiktok-api23.p.rapidapi.com/api/post/detail?videoId=" + videoId)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "tiktok-api23.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json
-                                .getJSONObject("itemInfo")
-                                .getJSONObject("itemStruct")
-                                .getJSONObject("statsV2");
-                    }).join();
-
+            client.prepare("GET", "https://tiktok-api23.p.rapidapi.com/api/post/detail?videoId=" + videoId).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "tiktok-api23.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json;
+            }).join();
             client.close();
+            JSONObject stats = statsJson[0].getJSONObject("itemInfo").getJSONObject("itemStruct").getJSONObject("stats");
+            if (stats.has("commentCount") && !stats.isNull("commentCount")) {
+                postDetailStats.setComment_count(stats.getInt("commentCount"));
+            }
+            if (stats.has("playCount") && !stats.isNull("playCount")) {
+                postDetailStats.setPlay_count(stats.getInt("playCount"));
+            }
+            if (stats.has("shareCount") && !stats.isNull("shareCount")) {
+                postDetailStats.setShare_count(stats.getInt("shareCount"));
+            }
+            if (stats.has("diggCount") && !stats.isNull("diggCount")) {
+                postDetailStats.setLike_count(stats.getInt("diggCount"));
+            }
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Tiktok response successfully", statsJson[0].toMap(),
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Tiktok response successfully", postDetailStats, request.getRequestURI());
     }
 
     private String getChannelId(String channelName) throws IOException {
         final JSONObject[] statsJson = new JSONObject[1];
         AsyncHttpClient client = new DefaultAsyncHttpClient();
-        client.prepare("GET", "https://youtube-v2.p.rapidapi.com/channel/id?channel_name=" + channelName)
-                .setHeader("x-rapidapi-key", rapidapikey)
-                .setHeader("x-rapidapi-host", "youtube-v2.p.rapidapi.com")
-                .execute()
-                .toCompletableFuture()
-                .thenAccept(response -> {
-                    String body = response.getResponseBody();
-                    JSONObject json = new JSONObject(body);
-                    statsJson[0] = json;
-                })
-                .join();
+        client.prepare("GET", "https://youtube-v2.p.rapidapi.com/channel/id?channel_name=" + channelName).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "youtube-v2.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+            String body = response.getResponseBody();
+            JSONObject json = new JSONObject(body);
+            statsJson[0] = json;
+        }).join();
 
         client.close();
 
@@ -100,22 +88,15 @@ public class RapidAPIService {
         try {
             String channelId = getChannelId(channelName);
             AsyncHttpClient client = new DefaultAsyncHttpClient();
-            client.prepare("GET", "https://youtube-v2.p.rapidapi.com/channel/details?channel_id=" + channelId)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "youtube-v2.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json;
-                    })
-                    .join();
+            client.prepare("GET", "https://youtube-v2.p.rapidapi.com/channel/details?channel_id=" + channelId).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "youtube-v2.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json;
+            }).join();
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
         String subcriber = statsJson[0].getString("subscriber_count").replace("subscribers", "").trim();
         double value = 0;
@@ -129,8 +110,7 @@ public class RapidAPIService {
             value = Double.parseDouble(subcriber.replace(".", ""));
         }
         subcriber = String.valueOf((int) value);
-        return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("subcriber_count", subcriber),
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("subcriber_count", subcriber), request.getRequestURI());
     }
 
     public ResponseEntity<?> getVideoDetailsFromYoutube(String videoId, HttpServletRequest request) {
@@ -138,17 +118,11 @@ public class RapidAPIService {
         PostDetailStats postDetailStats = new PostDetailStats();
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
-            client.prepare("GET", "https://youtube-v2.p.rapidapi.com/video/details?video_id=" + videoId)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "youtube-v2.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json;
-                    })
-                    .join();
+            client.prepare("GET", "https://youtube-v2.p.rapidapi.com/video/details?video_id=" + videoId).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "youtube-v2.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json;
+            }).join();
 
             client.close();
             System.out.println(statsJson[0]);
@@ -167,39 +141,26 @@ public class RapidAPIService {
                 }
             }
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully", postDetailStats,
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", postDetailStats, request.getRequestURI());
     }
 
     public ResponseEntity<?> getStatsPageFromFacebook(String pageName, HttpServletRequest request) {
         final JSONObject[] statsJson = new JSONObject[1];
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
-            client.prepare("GET",
-                            "https://facebook-scraper3.p.rapidapi.com/page/details?url=https%3A%2F%2Fwww.facebook.com%2F"
-                                    + pageName)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "facebook-scraper3.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json.getJSONObject("results");
-                    })
-                    .join();
+            client.prepare("GET", "https://facebook-scraper3.p.rapidapi.com/page/details?url=https%3A%2F%2Fwww.facebook.com%2F" + pageName).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "facebook-scraper3.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json.getJSONObject("results");
+            }).join();
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                Map.of("followers", statsJson[0].getInt("followers")),
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("followers", statsJson[0].getInt("followers")), request.getRequestURI());
     }
 
     public ResponseEntity<?> getPostDetailsFromFacebook(String postId, HttpServletRequest request) {
@@ -207,18 +168,11 @@ public class RapidAPIService {
         PostDetailStats postDetailStats = new PostDetailStats();
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
-            client.prepare("GET",
-                            "https://facebook-scraper3.p.rapidapi.com/post?post_id=" + postId)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "facebook-scraper3.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json.getJSONObject("results");
-                    })
-                    .join();
+            client.prepare("GET", "https://facebook-scraper3.p.rapidapi.com/post?post_id=" + postId).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "facebook-scraper3.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json.getJSONObject("results");
+            }).join();
             client.close();
             System.out.println(statsJson[0]);
             if (statsJson[0].has("image") && !statsJson[0].isNull("image")) {
@@ -244,40 +198,26 @@ public class RapidAPIService {
                 postDetailStats.setPlay_count(statsJson[0].getInt("play_count"));
             }
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Facebook response successfully",
-                postDetailStats,
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Facebook response successfully", postDetailStats, request.getRequestURI());
     }
 
     public ResponseEntity<?> getStatsUserFromInstagram(String userName, HttpServletRequest request) {
         final JSONObject[] statsJson = new JSONObject[1];
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
-            client.prepare("GET",
-                            "https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/profile_by_username?username="
-                                    + userName)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json;
-                    })
-                    .join();
+            client.prepare("GET", "https://instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com/profile_by_username?username=" + userName).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "instagram-scrapper-posts-reels-stories-downloader.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json;
+            }).join();
 
             client.close();
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                Map.of("followers", statsJson[0].getInt("follower_count")),
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", Map.of("followers", statsJson[0].getInt("follower_count")), request.getRequestURI());
     }
 
     public ResponseEntity<?> getInforDetailsFromInstagram(String code_or_id_or_url, HttpServletRequest request) {
@@ -285,18 +225,11 @@ public class RapidAPIService {
         PostDetailStats postDetailStats = new PostDetailStats();
         try {
             AsyncHttpClient client = new DefaultAsyncHttpClient();
-            client.prepare("GET",
-                            "https://instagram-social-api.p.rapidapi.com/v1/post_info?code_or_id_or_url=" + code_or_id_or_url)
-                    .setHeader("x-rapidapi-key", rapidapikey)
-                    .setHeader("x-rapidapi-host", "instagram-social-api.p.rapidapi.com")
-                    .execute()
-                    .toCompletableFuture()
-                    .thenAccept(response -> {
-                        String body = response.getResponseBody();
-                        JSONObject json = new JSONObject(body);
-                        statsJson[0] = json.getJSONObject("data");
-                    })
-                    .join();
+            client.prepare("GET", "https://instagram-social-api.p.rapidapi.com/v1/post_info?code_or_id_or_url=" + code_or_id_or_url).setHeader("x-rapidapi-key", rapidapikey).setHeader("x-rapidapi-host", "instagram-social-api.p.rapidapi.com").execute().toCompletableFuture().thenAccept(response -> {
+                String body = response.getResponseBody();
+                JSONObject json = new JSONObject(body);
+                statsJson[0] = json.getJSONObject("data");
+            }).join();
             client.close();
             System.out.println(statsJson[0]);
             JSONObject metrics = statsJson[0].getJSONObject("metrics");
@@ -319,12 +252,9 @@ public class RapidAPIService {
                 postDetailStats.setLike_count(metrics.getInt("like_count"));
             }
         } catch (Exception e) {
-            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(),
-                    request.getRequestURI());
+            return ApiResponse.sendError(500, "API service is not available: " + e.getMessage(), request.getRequestURI());
         }
-        return ApiResponse.sendSuccess(200, "Youtube response successfully",
-                postDetailStats,
-                request.getRequestURI());
+        return ApiResponse.sendSuccess(200, "Youtube response successfully", postDetailStats, request.getRequestURI());
     }
 
 }
