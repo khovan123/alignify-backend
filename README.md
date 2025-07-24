@@ -112,7 +112,9 @@ Access the live web app:
 - **📖 [Release Notes](./RELEASE.md)** - Detailed release information and migration guide
 - **📝 [Changelog](./CHANGELOG.md)** - Complete version history and changes
 - **🏷️ [Versioning Guide](./VERSIONING.md)** - Semantic versioning and tagging conventions
+- **📚 [Documentation Index](./DOCUMENTATION_INDEX.md)** - Complete documentation overview
 - **🔗 [GitHub Releases](https://github.com/khovan123/alignify-backend/releases)** - Download and release history
+- **🚀 [Release Scripts](./scripts/README.md)** - Automated release tools
 
 ### 🏷️ Version Tags
 This project follows [Semantic Versioning](https://semver.org/):
@@ -264,7 +266,9 @@ Truy cập web live tại:
 - **📖 [Ghi Chú Phiên Bản](./RELEASE.md)** - Thông tin chi tiết về phiên bản và hướng dẫn migration
 - **📝 [Nhật Ký Thay Đổi](./CHANGELOG.md)** - Lịch sử phiên bản và thay đổi hoàn chình
 - **🏷️ [Hướng Dẫn Versioning](./VERSIONING.md)** - Quy tắc semantic versioning và tagging
+- **📚 [Chỉ Mục Tài Liệu](./DOCUMENTATION_INDEX.md)** - Tổng quan tài liệu hoàn chình
 - **🔗 [GitHub Releases](https://github.com/khovan123/alignify-backend/releases)** - Tải xuống và lịch sử phiên bản
+- **🚀 [Scripts Phát Hành](./scripts/README.md)** - Công cụ release tự động
 
 ### 🏷️ Tag Phiên Bản
 Dự án tuân thủ [Semantic Versioning](https://semver.org/):
