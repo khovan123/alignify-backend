@@ -54,7 +54,7 @@ print_info "Tag: $TAG"
 
 # Validate version format
 if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    print_error "Invalid version format! Use MAJOR.MINOR.PATCH (e.g., 1.0.0)"
+    print_error "Invalid version format! Use MAJOR.MINOR.PATCH (e.g., 1.3.1)"
     exit 1
 fi
 
