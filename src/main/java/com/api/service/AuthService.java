@@ -169,7 +169,14 @@ public class AuthService {
                     }
                     Role role = roleOpt.get();
                     List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
-                    UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA());
+                    boolean isInfluencer = role.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID);
+                    UserDTO userDTO;
+                    if(isInfluencer){
+                        boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),isPublic,user.isActive());
+                    }else{
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),user.isActive());
+                    }
                     return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                             "token", JwtUtil.createToken(user),
                             "role", role.getRoleName(),
@@ -274,7 +281,14 @@ public class AuthService {
             return ApiResponse.sendSuccess(200, "Please verify account before login in", Map.of(
                     "user", new UserDTO(user.getUserId(), user.getName(), avatarUrl, true, user.getEmail())), request.getRequestURI());
         }
-        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl, permissions, user.isTwoFA());
+        boolean isInfluencer = role.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID);
+        UserDTO userDTO;
+        if(isInfluencer){
+            boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),isPublic,user.isActive());
+        }else{
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),user.isActive());
+        }
         if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
             if (!influencerOpt.isPresent()) {
