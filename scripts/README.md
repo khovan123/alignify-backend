@@ -52,9 +52,9 @@ Automated release helper script that streamlines the release process.
 ```
 🚀 Alignify Backend Release Helper
 ----------------------------------------
-ℹ️  Version: 1.1.0
+ℹ️  Version: 1.3.1
 ℹ️  Type: minor
-ℹ️  Tag: v1.1.0
+ℹ️  Tag: v1.3.1
 
 🚀 Pre-release Checks
 ----------------------------------------
@@ -156,7 +156,7 @@ print_success "Script completed"
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `release.sh` | Automated release process | `./scripts/release.sh 1.1.0 minor` |
+| `release.sh` | Automated release process | `./scripts/release.sh 1.3.1 minor` |
 
 ---
 
@@ -180,9 +180,9 @@ cd /path/to/alignify-backend
 #### Version Format Error
 ```bash
 # Use semantic versioning format
-./scripts/release.sh 1.0.0 patch  # ✅ Correct
-./scripts/release.sh v1.0.0       # ❌ Don't include 'v'
-./scripts/release.sh 1.0          # ❌ Include patch version
+./scripts/release.sh 1.3.1 patch  # ✅ Correct
+./scripts/release.sh v1.3.1       # ❌ Don't include 'v'
+./scripts/release.sh 1.3          # ❌ Include patch version
 ```
 
 ### Getting Help
