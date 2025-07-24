@@ -104,7 +104,7 @@ Access the live web app:
 
 ## 📦 Release Information
 
-**Current Version**: `v1.0.0` (July 24, 2025)  
+**Current Version**: `v1.3.1` (July 24, 2025)  
 **Release Type**: Initial Stable Release  
 **Compatibility**: Production Ready  
 
@@ -258,7 +258,7 @@ Truy cập web live tại:
 
 ## 📦 Thông Tin Phiên Bản
 
-**Phiên Bản Hiện Tại**: `v1.0.0` (24 tháng 7, 2025)  
+**Phiên Bản Hiện Tại**: `v1.3.1` (24 tháng 7, 2025)  
 **Loại Phiên Bản**: Phiên Bản Ổn Định Đầu Tiên  
 **Tương Thích**: Sẵn Sàng Production  
 
