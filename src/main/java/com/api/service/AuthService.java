@@ -167,7 +167,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> registerAccount(RegisterRequest registerRequest, String roleId,
-            HttpServletRequest request) {
+                                             HttpServletRequest request) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
@@ -246,7 +246,7 @@ public class AuthService {
         }
         String avatarUrl = user.getAvatarUrl();
         List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
-        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl, permissions);
+        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl, permissions, user.isTwoFA());
         if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
             if (!influencerOpt.isPresent()) {
@@ -279,7 +279,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                HttpServletRequest request) {
         String userId = userDetails.getUserId();
         Optional<User> userOpt = userRepository.findById(userId);
         if (!userOpt.isPresent()) {
@@ -305,7 +305,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> recoveryPasswordByEndpoint(RecoveryPasswordRequest recoveryPasswordRequest,
-            HttpServletRequest request) {
+                                                        HttpServletRequest request) {
         if (!recoveryPasswordRequest.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             return ApiResponse.sendError(400, "Invalid email", request.getRequestURI());
         }
@@ -326,7 +326,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> resetPasswordByToken(String token, PasswordResetRequest passwordReset,
-            HttpServletRequest request) {
+                                                  HttpServletRequest request) {
         try {
             User user;
             DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
@@ -341,6 +341,13 @@ public class AuthService {
         } catch (Exception e) {
             return ApiResponse.sendError(401, "Invalid or expired token", request.getRequestURI());
         }
+    }
+
+    public ResponseEntity<?> changeTwoFA(boolean turnOn, CustomUserDetails userDetails, HttpServletRequest request) {
+        User user = userRepository.findByUserId(userDetails.getUserId()).get();
+        user.setTwoFA(turnOn);
+        userRepository.save(user);
+        return ApiResponse.sendSuccess(200, "Change 2FA successfully", null, request.getRequestURI());
     }
 
 }
