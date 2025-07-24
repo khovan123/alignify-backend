@@ -3,15 +3,29 @@ package com.api.controller.websocket.chatting;
 import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import com.api.config.EnvConfig;
+import com.api.dto.ApiResponse;
+import com.api.dto.CommonPageRequest;
+import com.api.dto.request.ReadMessagePayload;
+import com.api.dto.response.ChatRoomResponse;
+import com.api.dto.response.ReadStatusUpdate;
+import com.api.model.Campaign;
+import com.api.model.User;
+import com.api.repository.CampaignRepository;
+import com.api.repository.UserRepository;
+import com.api.security.CustomUserDetails;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 import com.api.dto.UserDTO;
@@ -21,6 +35,8 @@ import com.api.model.ChatRoom;
 import com.api.repository.ChatMessageRepository;
 import com.api.repository.ChatRoomRepository;
 import com.api.security.StompPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ChatController {
@@ -33,6 +49,12 @@ public class ChatController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private CampaignRepository campaignRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @MessageMapping("/chat/{roomId}")
     public void sendMessage(
@@ -62,7 +84,6 @@ public class ChatController {
             chatRoomRepository.save(chatRoom);
             messagingTemplate.convertAndSend("/topic/messages/" + roomId,
                     new ChatMessageResponse(userDTO, chatMessage));
-
         }
         throw new SecurityException("Invalid principal type");
     }
@@ -72,63 +93,100 @@ public class ChatController {
             @Payload ReadMessagePayload payload,
             @DestinationVariable("roomId") String roomId,
             Principal principal) {
-        String userId = principal.getName();
-        if (!chatRoomRepository.existsByChatRoomIdAndRoomOwnerIdOrMember(roomId, userId)) {
-            throw new SecurityException("User not authorized for room: " + roomId);
+        if (principal == null || principal.getName() == null) {
+            throw new SecurityException("Access is denied at: " + roomId);
         }
-        ChatMessage message = chatMessageRepository.findById(payload.getMessageId())
-                .orElseThrow(() -> {
-                    return new IllegalArgumentException("Message not found: " + payload.getMessageId());
-                });
-        if (!message.getChatRoomId().equals(roomId)) {
-            throw new SecurityException("Message does not belong to room: " + roomId);
+        if (principal instanceof StompPrincipal stompPrincipal) {
+            String userId = stompPrincipal.getUserId();
+            if (!chatRoomRepository.existsByChatRoomIdAndRoomOwnerIdOrMember(roomId, userId)) {
+                throw new SecurityException("User not authorized for room: " + roomId);
+            }
+            ChatMessage message = chatMessageRepository.findById(payload.getMessageId())
+                    .orElseThrow(() -> {
+                        return new IllegalArgumentException("Message not found: " + payload.getMessageId());
+                    });
+            if (!message.getChatRoomId().equals(roomId)) {
+                throw new SecurityException("Message does not belong to room: " + roomId);
+            }
+            if (!message.getReadBy().contains(userId)) {
+                message.getReadBy().add(userId);
+                chatMessageRepository.save(message);
+                messagingTemplate.convertAndSend(
+                        "/topic/read/" + roomId,
+                        new ReadStatusUpdate(payload.getMessageId(), Collections.singletonList(userId)));
+            }
+        } else {
+            throw new SecurityException("Invalid principal type");
         }
-        if (!message.getReadBy().contains(userId)) {
-            message.getReadBy().add(userId);
-            chatMessageRepository.save(message);
+    }
+
+    @MessageMapping("/rooms")
+    public void getRooms(
+            @Payload CommonPageRequest commonPageRequest,
+            Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new SecurityException("Access is denied");
+        }
+        if (principal instanceof StompPrincipal stompPrincipal) {
+
+            String userId = stompPrincipal.getUserId();
+            Pageable pageable = PageRequest.of(commonPageRequest.getPageNumber(), commonPageRequest.getPageSize());
+
+            if (stompPrincipal.getRoleId().equals(EnvConfig.BRAND_ROLE_ID)) {
+                if (campaignRepository.countByBrandIdAndStatusNot(userId, "DRAFT") != chatRoomRepository
+                        .countByRoomOwnerId(userId)) {
+                    List<Campaign> campaigns = campaignRepository
+                            .findAllByBrandIdAndStatusNot(userId, "DRAFT");
+                    campaigns.forEach(campaign -> {
+                        Optional<ChatRoom> roomOpt = chatRoomRepository.findById(campaign.getCampaignId());
+                        if (!roomOpt.isPresent()) {
+                            ChatRoom chatRoom = new ChatRoom();
+                            chatRoom.setChatRoomId(campaign.getCampaignId());
+                            chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+                            chatRoom.setRoomAvatarUrl(campaign.getImageUrl());
+                            chatRoom.setRoomOwnerId(campaign.getBrandId());
+                            chatRoom.setRoomName(campaign.getCampaignName());
+                            chatRoom.setMembers(new ArrayList<>(Arrays.asList(campaign.getBrandId())));
+                            chatRoomRepository.save(chatRoom);
+                        }
+                    });
+                }
+            }
+            List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();
+
+            List<ChatRoom> rooms = chatRoomRepository.findAllByRoomOwnerIdOrMemberOrderByCreatedAtDesc(userId, pageable)
+                    .getContent();
+            rooms.forEach(room -> {
+                ChatMessage chatMessage = ensureSystemMessage(room, userId);
+                chatRoomResponses.add(new ChatRoomResponse(room, chatMessage));
+            });
+
             messagingTemplate.convertAndSend(
-                    "/topic/read/" + roomId,
-                    new ReadStatusUpdate(payload.getMessageId(), Collections.singletonList(userId)));
+                    "/topic/rooms/" + userId,
+                    chatRoomResponses);
+        } else {
+            throw new SecurityException("Invalid principal type");
         }
     }
-}
 
-class ReadMessagePayload {
-
-    private String messageId;
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-}
-
-class ReadStatusUpdate {
-
-    private String messageId;
-    private List<String> readBy;
-
-    public ReadStatusUpdate(String messageId, List<String> readBy) {
-        this.messageId = messageId;
-        this.readBy = readBy;
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-
-    public List<String> getReadBy() {
-        return readBy;
-    }
-
-    public void setReadBy(List<String> readBy) {
-        this.readBy = readBy;
+    private ChatMessage ensureSystemMessage(ChatRoom room, String userId) {
+        ChatMessage chatMessage = chatMessageRepository.findTopByChatRoomIdOrderBySendAtDesc(room.getChatRoomId())
+                .orElse(null);
+        if (chatMessage == null) {
+            User user = userRepository.findById(userId).get();
+            List<String> readBy = new ArrayList<>();
+            chatMessage = new ChatMessage();
+            readBy.add(userId);
+            chatMessage.setMessage(user.getName() + " đã vào phòng chat.");
+            chatMessage.setChatRoomId(room.getChatRoomId());
+            chatMessage.setName(user.getName());
+            chatMessage.setReadBy(readBy);
+            chatMessage.setUserId("#SYS");
+            chatMessage.setSendAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            room.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            chatMessage = chatMessageRepository.save(chatMessage);
+            chatRoomRepository.save(room);
+        }
+        return chatMessage;
     }
 }
