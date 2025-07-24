@@ -30,6 +30,7 @@ public class User {
     private List<String> permissionIds;
     private String userPlanId;
     private boolean twoFA;
+    private boolean sound;
 
     public User() {
         this.isActive = true;
@@ -37,6 +38,7 @@ public class User {
         this.permissionIds = new ArrayList<>();
         this.userPlanId = null;
         this.twoFA = false;
+        this.sound = true;
     }
 
     public User(String userId, String name, String email, String password, String roleId, boolean isActive,

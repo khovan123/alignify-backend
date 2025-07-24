@@ -404,4 +404,25 @@ public class ProfileService {
         }
     }
 
+    public ResponseEntity<?> turnSound(boolean turnOn, CustomUserDetails userDetails, HttpServletRequest request) {
+        User user = userRepository.findByUserId(userDetails.getUserId()).get();
+        user.setSound(turnOn);
+        userRepository.save(user);
+        return ApiResponse.sendSuccess(200, "Turn sound mode successfully", null, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> turnPublicAcc(boolean turnOn, CustomUserDetails userDetails, HttpServletRequest request) {
+        Influencer user = influencerRepository.findById(userDetails.getUserId()).get();
+        user.setPublic(turnOn);
+        influencerRepository.save(user);
+        return ApiResponse.sendSuccess(200, "Turn public mode successfully", null, request.getRequestURI());
+    }
+
+    public ResponseEntity<?> turnActiveAcc(boolean turnOn, CustomUserDetails userDetails, HttpServletRequest request) {
+        User user = userRepository.findByUserId(userDetails.getUserId()).get();
+        user.setActive(turnOn);
+        userRepository.save(user);
+        return ApiResponse.sendSuccess(200, "Turn sound mode successfully", null, request.getRequestURI());
+    }
+
 }

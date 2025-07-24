@@ -22,6 +22,9 @@ public class UserDTO {
     private ZonedDateTime createdAt;
     private boolean twoFA;
     private String email;
+    private boolean sound;
+    private boolean publicAcc;
+    private boolean active;
 
     public UserDTO(String userId, String name, String avatarUrl, List<Permission> permissions,
             ZonedDateTime createdAt) {
@@ -40,12 +43,25 @@ public class UserDTO {
         this.email = email;
     }
 
-    public UserDTO(String userId, String name, String avatarUrl, List<Permission> permissions, boolean twoFA) {
+    public UserDTO(String userId, String name, String avatarUrl, List<Permission> permissions, boolean twoFA, boolean sound, boolean active) {
         this.userId = userId;
         this.name = name;
         this.avatarUrl = avatarUrl;
         this.permissions = permissions;
         this.twoFA = twoFA;
+        this.sound = sound;
+        this.active = active;
+    }
+
+    public UserDTO(String userId, String name, String avatarUrl, List<Permission> permissions, boolean twoFA, boolean sound, boolean publicAcc, boolean active) {
+        this.userId = userId;
+        this.name = name;
+        this.avatarUrl = avatarUrl;
+        this.permissions = permissions;
+        this.twoFA = twoFA;
+        this.sound = sound;
+        this.publicAcc = publicAcc;
+        this.active = active;
     }
 
     public UserDTO(String userId, String name, String avatarUrl, ZonedDateTime createdAt) {
