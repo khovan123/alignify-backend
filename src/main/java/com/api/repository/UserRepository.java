@@ -13,6 +13,7 @@ import com.api.model.User;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
+    long countByRoleIdNot(String roleId);
 
     Optional<User> findByEmail(String email);
 
