@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.cloudinary.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -156,8 +157,34 @@ public class AuthService {
         try {
             boolean isValid = otpService.verifyOtp(verifyOTPRequest.getEmail(), verifyOTPRequest.getOtp());
             if (isValid) {
-                accountVerifiedRepository.save(new AccountVerified(verifyOTPRequest.getEmail()));
-                return ApiResponse.sendSuccess(200, "OTP verified successfully", null, request.getRequestURI());
+                if (verifyOTPRequest.isLogin()) {
+                    Optional<User> userOpt = userRepository.findByEmail(verifyOTPRequest.getEmail());
+                    if (!userOpt.isPresent()) {
+                        return ApiResponse.sendError(403, "Not registered yet!", request.getRequestURI());
+                    }
+                    User user = userOpt.get();
+                    Optional<Role> roleOpt = roleRepository.findById(user.getRoleId());
+                    if (!roleOpt.isPresent()) {
+                        return ApiResponse.sendError(403, "Role is invalid!", request.getRequestURI());
+                    }
+                    Role role = roleOpt.get();
+                    List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
+                    boolean isInfluencer = role.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID);
+                    UserDTO userDTO;
+                    if(isInfluencer){
+                        boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),isPublic,user.isActive());
+                    }else{
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),user.isActive());
+                    }
+                    return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                            "token", JwtUtil.createToken(user),
+                            "role", role.getRoleName(),
+                            "user", userDTO), request.getRequestURI());
+                } else {
+                    accountVerifiedRepository.save(new AccountVerified(verifyOTPRequest.getEmail()));
+                    return ApiResponse.sendSuccess(200, "OTP verified successfully", null, request.getRequestURI());
+                }
             } else {
                 return ApiResponse.sendError(401, "Invalid OTP code", request.getRequestURI());
             }
@@ -167,7 +194,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> registerAccount(RegisterRequest registerRequest, String roleId,
-            HttpServletRequest request) {
+                                             HttpServletRequest request) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
@@ -244,9 +271,24 @@ public class AuthService {
         if (userBanOpt.isPresent()) {
             return ApiResponse.sendError(403, "Your account has been banned", request.getRequestURI());
         }
-        String avatarUrl = user.getAvatarUrl();
         List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
-        UserDTO userDTO = new UserDTO(user.getUserId(), user.getName(), avatarUrl, permissions);
+        String avatarUrl = user.getAvatarUrl();
+        if (user.isTwoFA()) {
+            if (!accountVerifiedRepository.existsByEmail(user.getEmail())) {
+                return ApiResponse.sendError(400, "Email is not existed in account", request.getRequestURI());
+            }
+            emailService.sendOtpEmail(user.getEmail(), otpService.generateOtp(user.getEmail()));
+            return ApiResponse.sendSuccess(200, "Please verify account before login in", Map.of(
+                    "user", new UserDTO(user.getUserId(), user.getName(), avatarUrl, true, user.getEmail())), request.getRequestURI());
+        }
+        boolean isInfluencer = role.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID);
+        UserDTO userDTO;
+        if(isInfluencer){
+            boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),isPublic,user.isActive());
+        }else{
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),user.isActive());
+        }
         if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
             if (!influencerOpt.isPresent()) {
@@ -279,7 +321,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                                HttpServletRequest request) {
         String userId = userDetails.getUserId();
         Optional<User> userOpt = userRepository.findById(userId);
         if (!userOpt.isPresent()) {
@@ -305,7 +347,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> recoveryPasswordByEndpoint(RecoveryPasswordRequest recoveryPasswordRequest,
-            HttpServletRequest request) {
+                                                        HttpServletRequest request) {
         if (!recoveryPasswordRequest.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             return ApiResponse.sendError(400, "Invalid email", request.getRequestURI());
         }
@@ -326,7 +368,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> resetPasswordByToken(String token, PasswordResetRequest passwordReset,
-            HttpServletRequest request) {
+                                                  HttpServletRequest request) {
         try {
             User user;
             DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
@@ -341,6 +383,13 @@ public class AuthService {
         } catch (Exception e) {
             return ApiResponse.sendError(401, "Invalid or expired token", request.getRequestURI());
         }
+    }
+
+    public ResponseEntity<?> changeTwoFA(boolean turnOn, CustomUserDetails userDetails, HttpServletRequest request) {
+        User user = userRepository.findByUserId(userDetails.getUserId()).get();
+        user.setTwoFA(turnOn);
+        userRepository.save(user);
+        return ApiResponse.sendSuccess(200, "Change 2FA successfully", null, request.getRequestURI());
     }
 
 }

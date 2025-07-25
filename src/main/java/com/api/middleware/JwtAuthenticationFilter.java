@@ -84,10 +84,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/cancel/**")
                 || path.equals("/custom/error/**")
                 || path.equals("/api/v1/payment/payos_transfer_handler/**")
+                || path.equals("/api/v1/plans/brand/**")
+                || path.equals("/api/v1/plans/influencer/**")
                 || path.matches(
-                "/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|register-secret|login|google|reset-password|recovery-password)|error|success|favicon.ico|cancel|custom/(error)|payment/(payos_transfer_handler))(.*)?")
+                        "/api/v1/(roles|categories|auth/(request-otp|verify-otp|register|register-secret|login|google|reset-password|recovery-password)|error|success|favicon.ico|cancel|plans/brand|plans/influencer|custom/(error)|payment/(payos_transfer_handler))(.*)?")
                 || path.matches(
-                "error|success|favicon.ico|cancel|custom/(error)(.*)?")) {
+                        "error|success|favicon.ico|cancel|custom/(error)(.*)?")) {
             filterChain.doFilter(request, response);
             return;
         }

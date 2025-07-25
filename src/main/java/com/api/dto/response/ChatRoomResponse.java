@@ -2,9 +2,17 @@ package com.api.dto.response;
 
 import com.api.model.ChatMessage;
 import com.api.model.ChatRoom;
+import lombok.*;
+
 import java.time.ZonedDateTime;
 import java.util.List;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Getter
+@Setter
+@ToString
 public class ChatRoomResponse {
 
     private String chatRoomId;
@@ -24,61 +32,4 @@ public class ChatRoomResponse {
         this.readBy = chatMessage.getReadBy();
         this.sendAt = chatMessage.getSendAt();
     }
-
-    public String getChatRoomId() {
-        return chatRoomId;
-    }
-
-    public void setChatRoomId(String chatRoomId) {
-        this.chatRoomId = chatRoomId;
-    }
-
-    public String getRoomName() {
-        return roomName;
-    }
-
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
-    }
-
-    public String getRoomAvatarUrl() {
-        return roomAvatarUrl;
-    }
-
-    public void setRoomAvatarUrl(String roomAvatarUrl) {
-        this.roomAvatarUrl = roomAvatarUrl;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLastMessage() {
-        return lastMessage;
-    }
-
-    public void setLastMessage(String lastMessage) {
-        this.lastMessage = lastMessage;
-    }
-
-    public List<String> getReadBy() {
-        return readBy;
-    }
-
-    public void setReadBy(List<String> readBy) {
-        this.readBy = readBy;
-    }
-
-    public ZonedDateTime getSendAt() {
-        return sendAt;
-    }
-
-    public void setSendAt(ZonedDateTime sendAt) {
-        this.sendAt = sendAt;
-    }
-
 }
