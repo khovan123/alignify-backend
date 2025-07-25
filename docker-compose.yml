@@ -1,0 +1,127 @@
+# ==============================================================================
+# Docker Compose for Alignify Backend Development Environment
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # ==============================================================================
+  # Alignify Backend Application
+  # ==============================================================================
+  alignify-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime  # Use 'development' for debugging
+    container_name: alignify-backend
+    ports:
+      - "8080:8080"    # Application port
+      # - "5005:5005"  # Debug port (uncomment for development target)
+    environment:
+      # Spring configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8080
+      
+      # MongoDB configuration
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/alignify
+      - SPRING_DATA_MONGODB_DATABASE=alignify
+      
+      # JVM configuration
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+      
+      # Application specific environment variables
+      # Note: In production, use Docker secrets or external secret management
+      - JWT_SECRET=your-jwt-secret-key-here
+      - CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+      - CLOUDINARY_API_KEY=your-cloudinary-api-key
+      - CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+      - GOOGLE_API_KEY=your-google-api-key
+      - MAIL_USERNAME=your-mail-username
+      - MAIL_PASSWORD=your-mail-password
+      - PAYPAL_CLIENT_ID=your-paypal-client-id
+      - PAYPAL_CLIENT_SECRET=your-paypal-client-secret
+      - PAYOS_CLIENT_ID=your-payos-client-id
+      - PAYOS_API_KEY=your-payos-api-key
+      - PAYOS_CHECKSUM_KEY=your-payos-checksum-key
+    volumes:
+      - app-logs:/app/logs
+      - app-tmp:/app/tmp
+    depends_on:
+      - mongodb
+    networks:
+      - alignify-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ==============================================================================
+  # MongoDB Database
+  # ==============================================================================
+  mongodb:
+    image: mongo:7.0
+    container_name: alignify-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin123
+      - MONGO_INITDB_DATABASE=alignify
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+      - ./docker/mongodb/init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - alignify-network
+    restart: unless-stopped
+    command: mongod --auth --bind_ip_all
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ==============================================================================
+  # MongoDB Express (Web UI for database management)
+  # ==============================================================================
+  mongo-express:
+    image: mongo-express:1.0.0
+    container_name: alignify-mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=admin123
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:admin123@mongodb:27017/
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+    depends_on:
+      - mongodb
+    networks:
+      - alignify-network
+    restart: unless-stopped
+
+# ==============================================================================
+# Networks
+# ==============================================================================
+networks:
+  alignify-network:
+    driver: bridge
+
+# ==============================================================================
+# Volumes
+# ==============================================================================
+volumes:
+  mongodb-data:
+    driver: local
+  mongodb-config:
+    driver: local
+  app-logs:
+    driver: local
+  app-tmp:
+    driver: local
