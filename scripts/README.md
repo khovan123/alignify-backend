@@ -137,6 +137,133 @@ Collections created: 27
 🎉 Alignify Database Generation Completed Successfully!
 ```
 
+### `update-collection-validators.js`
+
+MongoDB collection validator update script that applies JSON Schema validation to existing collections using the `db.runCommand()` with `collMod` approach.
+
+#### Usage
+
+```bash
+# Option 1: Using mongosh with file
+mongosh alignify_db --file scripts/update-collection-validators.js
+
+# Option 2: Load from within mongosh
+mongosh
+use alignify_db
+load('scripts/update-collection-validators.js')
+
+# Option 3: Direct execution with mongosh
+cat scripts/update-collection-validators.js | mongosh alignify_db
+```
+
+#### Features
+
+- ✅ **Non-destructive updates** - Updates existing collections without dropping data
+- ✅ **Comprehensive validation** - All 27 collections with strict JSON schemas
+- ✅ **Flexible validation levels** - Supports strict/moderate validation levels  
+- ✅ **Error/Warning actions** - Configurable validation failure handling
+- ✅ **Auto-creation** - Creates collections if they don't exist
+- ✅ **Detailed feedback** - Clear progress output with collection status
+- ✅ **Production safe** - Won't modify existing documents
+
+#### Key Differences from `generate-database.js`
+
+| Feature | `generate-database.js` | `update-collection-validators.js` |
+|---------|------------------------|-----------------------------------|
+| **Approach** | `db.createCollection()` | `db.runCommand({ collMod })` |
+| **Existing Data** | Drops collections first | Preserves existing documents |
+| **Use Case** | Fresh database setup | Adding validation to existing DB |
+| **Data Insertion** | Includes default data | Validation only |
+| **Index Creation** | Creates performance indexes | Schema validation only |
+
+#### Example Commands Generated
+
+```javascript
+// Users collection validation
+db.runCommand({
+   collMod: "users",
+   validator: {
+      $jsonSchema: {
+         bsonType: "object",
+         required: ["name", "email", "password", "roleId"],
+         properties: {
+            name: {
+               bsonType: "string",
+               description: "must be a string and is required"
+            },
+            email: {
+               bsonType: "string",
+               pattern: "^.+@.+\\..+$",
+               description: "must be a valid email and is required"
+            }
+            // ... more properties
+         }
+      }
+   },
+   validationLevel: "strict",
+   validationAction: "error"
+});
+```
+
+#### Validation Levels
+
+- **`strict`** (default) - Validates all document inserts and updates
+- **`moderate`** - Validates inserts and updates to existing valid documents
+
+#### Validation Actions
+
+- **`error`** (default) - Reject documents that violate validation rules
+- **`warn`** - Log validation violations but allow the operation
+
+#### Output Example
+
+```
+🚀 Starting Alignify Collection Validator Update...
+📋 Database: alignify_db
+⏰ Timestamp: 2025-01-15T10:30:00.000Z
+
+=== 1. USERS COLLECTION ===
+
+📦 Updating validator for collection: users
+  ✅ Successfully updated validator for: users
+
+=== 2. ROLES COLLECTION ===
+
+📦 Updating validator for collection: roles
+  ⚠️  Collection 'roles' does not exist, creating it first...
+  ✅ Successfully updated validator for: roles
+
+...
+
+✅ Collection validator update completed!
+📊 Total collections processed: 27
+🎯 All schemas are now enforced with strict validation
+⚠️  Note: Existing documents that don't match the schema will need to be updated manually
+🔍 You can verify validators by running: db.runCommand({listCollections: 1})
+```
+
+#### Verifying Validators
+
+After running the script, you can verify that validators are applied:
+
+```javascript
+// List all collections with their validators
+db.runCommand({listCollections: 1})
+
+// Check specific collection validator
+db.runCommand({listCollections: 1, filter: {name: "users"}})
+
+// Test validation (should fail for invalid data)
+db.users.insertOne({name: "test"}) // Missing required fields
+```
+
+#### Important Notes
+
+- **Existing Documents**: The script doesn't modify existing documents that may violate the new schema
+- **Manual Cleanup**: You may need to update existing documents to comply with new validation rules
+- **Backup Recommended**: Always backup your database before applying schema validation
+- **Testing**: Test validation rules in a development environment first
+
 #### Troubleshooting
 
 **Connection Issues:**
@@ -309,6 +436,7 @@ print_success "Script completed"
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `generate-database.js` | Create MongoDB database with validation schemas | `mongosh alignify_db --file scripts/generate-database.js` |
+| `update-collection-validators.js` | Add validation to existing collections using collMod | `mongosh alignify_db --file scripts/update-collection-validators.js` |
 | `release.sh` | Automated release process | `./scripts/release.sh 1.3.1 minor` |
 
 ---
