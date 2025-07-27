@@ -24,10 +24,10 @@ public class MongoConfig {
     @Autowired
     private MongoClient mongoClient;
 
-    @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
+//    @Autowired
+//    private RoleRepository roleRepository;
+//    @Autowired
+//    private CategoryRepository categoryRepository;
     @Value("${spring.data.mongodb.database}")
     private String databaseName;
 
@@ -40,34 +40,34 @@ public class MongoConfig {
 
     @PostConstruct
     public void init() {
-        MongoDatabase db = mongoClient.getDatabase(databaseName);
-        this.create_usersCollection(db);
-        this.create_influencersCollection(db);
-        this.create_brandsCollection(db);
-        this.create_rolesCollection(db);
-        this.create_categoriesCollection(db);
-        this.create_adminsCollection(db);
-        this.create_galleriesCollection(db);
-        this.create_galleryImagesCollection(db);
-        this.create_otpsCollection(db);
-        this.create_accountVerifiedsCollection(db);
-        this.create_campaignsCollection(db);
-        this.create_contentPostingsCollection(db);
-        this.create_likesCollection(db);
-        this.create_applicationsCollection(db);
-        this.create_campaignTrackingsCollection(db);
-        this.create_commentsCollection(db);
-        this.create_chatRoomsCollection(db);
-        this.create_messagesCollection(db);
-        this.create_notificationsCollection(db);
-        this.create_reasonsCollection(db);
-        this.create_userBansCollection(db);
-        this.create_permissionsCollection(db);
-        this.create_planPermissionsCollection(db);
-        this.create_userPlansCollection(db);
-        this.create_plansCollection(db);
-        this.create_invitationsCollection(db);
-        this.create_assistantMessagesCollection(db);
+//        MongoDatabase db = mongoClient.getDatabase(databaseName);
+//        this.create_usersCollection(db);
+//        this.create_influencersCollection(db);
+//        this.create_brandsCollection(db);
+//        this.create_rolesCollection(db);
+//        this.create_categoriesCollection(db);
+//        this.create_adminsCollection(db);
+//        this.create_galleriesCollection(db);
+//        this.create_galleryImagesCollection(db);
+//        this.create_otpsCollection(db);
+//        this.create_accountVerifiedsCollection(db);
+//        this.create_campaignsCollection(db);
+//        this.create_contentPostingsCollection(db);
+//        this.create_likesCollection(db);
+//        this.create_applicationsCollection(db);
+//        this.create_campaignTrackingsCollection(db);
+//        this.create_commentsCollection(db);
+//        this.create_chatRoomsCollection(db);
+//        this.create_messagesCollection(db);
+//        this.create_notificationsCollection(db);
+//        this.create_reasonsCollection(db);
+//        this.create_userBansCollection(db);
+//        this.create_permissionsCollection(db);
+//        this.create_planPermissionsCollection(db);
+//        this.create_userPlansCollection(db);
+//        this.create_plansCollection(db);
+//        this.create_invitationsCollection(db);
+//        this.create_assistantMessagesCollection(db);
     }
 
     public void create_assistantMessagesCollection(MongoDatabase db) {
