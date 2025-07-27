@@ -410,9 +410,11 @@ public class CampaignService {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
         }
         Campaign campaign = campaignOpt.get();
-        if (!campaign.getStatus().equals("DRAFT")) {
-            return ApiResponse.sendError(403, "Access denied",
-                    request.getRequestURI());
+        if (!userDetails.getRoleId().equals(EnvConfig.ADMIN_ROLE_ID)) {
+            if (!campaign.getStatus().equals("DRAFT")) {
+                return ApiResponse.sendError(403, "Access denied",
+                        request.getRequestURI());
+            }
         }
         applicationRepository.deleteAllByCampaignId(campaignId);
         campaignTrackingRepository.deleteAllByCampaignId(campaignId);
