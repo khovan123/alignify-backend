@@ -2,6 +2,158 @@
 
 This directory contains utility scripts for the Alignify Backend project.
 
+## 📊 Database Scripts
+
+### `generate-database.js`
+
+MongoDB database generation script that creates all collections with validation schemas based on the MongoConfig.java file.
+
+#### Usage
+
+```bash
+# Option 1: Using mongosh with file
+mongosh alignify_db --file scripts/generate-database.js
+
+# Option 2: Load from within mongosh
+mongosh
+use alignify_db
+load('scripts/generate-database.js')
+
+# Option 3: Direct execution with mongosh
+cat scripts/generate-database.js | mongosh alignify_db
+```
+
+#### Features
+
+- ✅ **Complete schema validation** - Creates all 27 collections with proper JSON schemas
+- ✅ **Default data insertion** - Inserts essential roles, categories, and permissions
+- ✅ **Performance indexes** - Creates optimized indexes for common queries
+- ✅ **Error handling** - Graceful error handling with detailed feedback
+- ✅ **Comprehensive logging** - Detailed progress output with emojis
+- ✅ **Idempotent execution** - Can be run multiple times safely
+
+#### Collections Created
+
+The script creates the following collections with validation schemas:
+
+| Collection | Purpose | Key Features |
+|------------|---------|--------------|
+| `users` | User accounts | Email validation, role-based |
+| `roles` | User roles | ADMIN, BRAND, INFLUENCER |
+| `categories` | Content categories | 15 default categories |
+| `influencers` | Influencer profiles | Social media links, ratings |
+| `brands` | Brand profiles | Contact info, social media |
+| `admins` | Admin profiles | Administrative accounts |
+| `campaigns` | Marketing campaigns | Status workflow, requirements |
+| `applications` | Campaign applications | Influencer applications |
+| `invitations` | Direct invitations | Brand to influencer invites |
+| `campaignTrackings` | Progress tracking | Campaign progress monitoring |
+| `contentPostings` | Content posts | Influencer content/ideas |
+| `likes` | Post interactions | Like system |
+| `comments` | Post comments | Comment system |
+| `chatRooms` | Chat functionality | Group chat rooms |
+| `messages` | Chat messages | Real-time messaging |
+| `notifications` | User notifications | System notifications |
+| `permissions` | User permissions | Access control |
+| `planPermissions` | Plan-based permissions | Feature limitations |
+| `plans` | Subscription plans | Pricing plans |
+| `userPlans` | User subscriptions | Active subscriptions |
+| `galleries` | Image galleries | Media collections |
+| `galleryImages` | Individual images | Image metadata |
+| `otps` | OTP verification | Email verification codes |
+| `accountVerifieds` | Verified accounts | Account verification status |
+| `userBans` | User bans | Moderation system |
+| `reasons` | Ban reasons | Predefined ban reasons |
+| `assistantMessages` | AI assistant | Chatbot messages |
+
+#### Default Data
+
+The script automatically inserts essential data:
+
+**Roles:**
+- ADMIN (ID: 68485dcedda6867ca0d23e89)
+- BRAND (ID: 68485dcedda6867ca0d23e8a)  
+- INFLUENCER (ID: 68485dcedda6867ca0d23e8b)
+
+**Categories:**
+- thời trang, mỹ phẩm, công nghệ, nghệ thuật, thể thao
+- ăn uống, du lịch, lối sống, âm nhạc, trò chơi điện tử
+- handmade, phong tục và văn hóa, khởi nghiệp, kĩ năng mềm, mẹ và bé
+
+**Permissions:**
+- posting: Permission to create and manage posts
+- comment: Permission to comment on posts  
+- all: Full access permissions
+
+#### Indexes Created
+
+Performance indexes are automatically created for:
+- User email (unique), roleId
+- Campaign brandId, status, categoryIds
+- Application campaignId+influencerId (unique), brandId
+- Invitation campaignId+influencerId (unique)
+- Message chatRoomId+sendAt, chatRoom members
+- Notification userId+createdAt, isRead
+- Content userId+createdDate, like userId+contentId (unique)
+- Comment contentId+createdAt
+- OTP email, TTL (5 minutes)
+- Account verified email (unique)
+
+#### Prerequisites
+
+- MongoDB server running
+- `mongosh` installed
+- Appropriate database permissions
+- Database name configured (default: `alignify_db`)
+
+#### Configuration
+
+You can modify the database name at the top of the script:
+
+```javascript
+const DATABASE_NAME = "your_database_name";
+```
+
+#### Output Example
+
+```
+🚀 Starting Alignify Database Generation...
+📋 Database: alignify_db
+⏰ Timestamp: 2025-01-15T10:30:00.000Z
+
+📦 Creating collection: users
+  ✅ Created collection with validation: users
+
+📝 Inserting default roles...
+  ✅ Default roles inserted successfully
+
+📊 Database Statistics:
+Collections created: 27
+  - users: 0 documents
+  - roles: 3 documents
+  - categories: 15 documents
+  ...
+
+🎉 Alignify Database Generation Completed Successfully!
+```
+
+#### Troubleshooting
+
+**Connection Issues:**
+```bash
+# Check MongoDB is running
+mongosh --eval "db.runCommand('ping')"
+
+# Specify connection string
+mongosh "mongodb://localhost:27017/alignify_db" --file scripts/generate-database.js
+```
+
+**Permission Issues:**
+```bash
+# Ensure user has createCollection permissions
+mongosh admin --eval "db.grantRolesToUser('your_user', ['dbAdmin'])"
+```
+
 ## 🚀 Release Scripts
 
 ### `release.sh`
@@ -156,6 +308,7 @@ print_success "Script completed"
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
+| `generate-database.js` | Create MongoDB database with validation schemas | `mongosh alignify_db --file scripts/generate-database.js` |
 | `release.sh` | Automated release process | `./scripts/release.sh 1.3.1 minor` |
 
 ---
