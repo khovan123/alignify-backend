@@ -1,5 +1,6 @@
 package com.api.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -10,7 +11,9 @@ import com.api.model.ChatMessage;
 
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, String> {
 
-    Page<ChatMessage> findByChatRoomIdOrderBySendAtAsc(String chatRoomId, Pageable pageable);
+    Page<ChatMessage> findByChatRoomIdOrderBySendAtDesc(String chatRoomId, Pageable pageable);
+
+    List<ChatMessage> findByChatRoomIdOrderBySendAtAsc(String chatRoomId);
 
     Optional<ChatMessage> findTopByChatRoomIdOrderBySendAtDesc(String chatRoomId);
 

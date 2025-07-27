@@ -126,7 +126,7 @@ public class CampaignService {
         String brandId = userDetails.getUserId();
         Optional<Campaign> campaignOptional = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
         if (!campaignOptional.isPresent()) {
-            ApiResponse.sendError(404, "Not found wit id: "+campaignId, request.getRequestURI());
+            ApiResponse.sendError(404, "Not found wit id: " + campaignId, request.getRequestURI());
         }
         Campaign campaign = campaignOptional.get();
         if (!(campaign.getStatus().equals("DRAFT"))) {
@@ -155,7 +155,7 @@ public class CampaignService {
         String brandId = userDetails.getUserId();
         Optional<Campaign> campaignOptional = campaignRepo.findByCampaignIdAndBrandId(campaignId, brandId);
         if (!campaignOptional.isPresent()) {
-            ApiResponse.sendError(404, "Not found wit id: "+campaignId, request.getRequestURI());
+            ApiResponse.sendError(404, "Not found wit id: " + campaignId, request.getRequestURI());
         }
         Campaign campaign = campaignOptional.get();
         if (!(campaign.getStatus().equals("DRAFT"))) {
@@ -410,9 +410,11 @@ public class CampaignService {
             return ApiResponse.sendError(404, "Campaign posting not found", request.getRequestURI());
         }
         Campaign campaign = campaignOpt.get();
-        if (!campaign.getStatus().equals("DRAFT")) {
-            return ApiResponse.sendError(403, "Access denied",
-                    request.getRequestURI());
+        if (!userDetails.getRoleId().equals(EnvConfig.ADMIN_ROLE_ID)) {
+            if (!campaign.getStatus().equals("DRAFT")) {
+                return ApiResponse.sendError(403, "Access denied",
+                        request.getRequestURI());
+            }
         }
         applicationRepository.deleteAllByCampaignId(campaignId);
         campaignTrackingRepository.deleteAllByCampaignId(campaignId);
@@ -528,10 +530,10 @@ public class CampaignService {
         User user = userRepository.findByUserId(brandId).get();
         Optional<ChatRoom> chatRoomOptional = chatRoomRepository.findById(campaignId);
         ChatRoom chatRoom = null;
-        if(chatRoomOptional.isPresent()){
+        if (chatRoomOptional.isPresent()) {
             chatRoom = chatRoomOptional.get();
         }
-        if(chatRoom==null){
+        if (chatRoom == null) {
             chatRoom = new ChatRoom();
             chatRoom.setChatRoomId(campaignId);
             chatRoom.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
@@ -595,8 +597,9 @@ public class CampaignService {
             }
         } else if (statusRequest.getStatus().equals("COMPLETED") && campaign.getStatus().equals("PARTICIPATING")) {
             List<CampaignTracking> campaignTrackings = campaignTrackingRepository
-                    .findAllByCampaignIdAndStatus(campaignId, "COMPLETED");
-            if (campaign.getJoinedInfluencerIds().size() > campaignTrackings.size()) {
+                    .findAllByCampaignIdAndBrandId(campaignId, brandId);
+            List<CampaignTracking> completedCampaignTrackings = campaignTrackings.stream().filter(item -> item.getStatus().equalsIgnoreCase("COMPLETED")).toList();
+            if (campaignTrackings.size() != completedCampaignTrackings.size()) {
                 return ApiResponse.sendError(403, "All campaign tracking must be completed", request.getRequestURI());
             }
         } else {

@@ -17,7 +17,7 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     @Query(value = "{'chatRoomId': ?0, '$or': [{'roomOwnerId': ?1}, {'members': ?1}]}", exists = true)
     boolean existsByChatRoomIdAndRoomOwnerIdOrMember(String chatRoomId, String userId);
 
-    @Query("{$or: [{roomOwnerId: ?0}, {members: ?0}]}")
+    @Query(value = "{$or: [{roomOwnerId: ?0}, {members: ?0}]}", sort = "{'createdAt': -1}")
     Page<ChatRoom> findAllByRoomOwnerIdOrMemberOrderByCreatedAtDesc(String userId, Pageable pageable);
 
     int countByRoomOwnerId(String userId);

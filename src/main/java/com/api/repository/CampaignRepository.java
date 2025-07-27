@@ -58,4 +58,6 @@ public interface CampaignRepository extends MongoRepository<Campaign, String> {
 
     List<Campaign> findAllByBrandIdOrderByCreatedAtDesc(String userId);
 
+    long countByStatusNot(String status);
+
 }

@@ -2,6 +2,7 @@ package com.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,25 +45,25 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getProfile(@PathVariable("id") String id,
-            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+                                        @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.getProfileById(id, userDetails, request);
     }
 
     @PutMapping("")
     public ResponseEntity<?> updateProfile(@RequestBody Object profile,
-            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+                                           @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.updateProfile(profile, userDetails, request);
     }
 
     @DeleteMapping("")
     public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails,
-            HttpServletRequest request) {
+                                           HttpServletRequest request) {
         return profileService.deleteAccount(userDetails, request);
     }
 
     @PostMapping("/avatar")
     public ResponseEntity<?> changeAvatar(@RequestPart("image") MultipartFile image,
-            @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+                                          @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
         return profileService.saveAvatarUrl(image, userDetails, request);
     }
 
@@ -77,8 +78,9 @@ public class ProfileController {
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             HttpServletRequest request) {
-        return profileService.getInfluencerByCategory( categoryId, pageNumber, pageSize, request);
+        return profileService.getInfluencerByCategory(categoryId, pageNumber, pageSize, request);
     }
+
     @GetMapping("/filterBrand/{categoryId}")
     public ResponseEntity<?> getBrandByCategoryId(
             @PathVariable("categoryId") String categoryId,
@@ -104,6 +106,22 @@ public class ProfileController {
             @RequestParam(defaultValue = "10") int pageSize,
             HttpServletRequest request) {
         return profileService.searchInfluencerByTerm(term, pageNumber, pageSize, request);
+    }
+
+    @PutMapping("/sound")
+    public ResponseEntity<?> changeSoundMode(@RequestParam("turn") boolean turn, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.turnSound(turn, userDetails, request);
+    }
+
+    @PreAuthorize("hasRole('ROLE_INFLUENCER')")
+    @PutMapping("/public")
+    public ResponseEntity<?> changePublicAcc(@RequestParam("turn") boolean turn, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.turnPublicAcc(turn, userDetails, request);
+    }
+
+    @PutMapping("/active")
+    public ResponseEntity<?> changeActiveAcc(@RequestParam("turn") boolean turn, @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletRequest request) {
+        return profileService.turnActiveAcc(turn, userDetails, request);
     }
 
 }
