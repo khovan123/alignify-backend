@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +37,8 @@ public class PayosController {
     private PlanRepository planRepository;
     @Autowired
     private UserPlanRepository userPlanRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public PayosController(PayOS payOS) {
         super();
@@ -57,6 +60,10 @@ public class PayosController {
         if ("00".equals(data.getCode()) || data.getDesc().toLowerCase().contains("thành công")) {
             userPlan.setStatus("SUCCESS");
             success = true;
+            User user = userRepository.findByUserId(userPlan.getUserId()).get();
+            user.setUserPlanId(userPlan.getUserPlanId());
+            userRepository.save(user);
+            messagingTemplate.convertAndSend("/topic/plans/"+userPlan.getUserId(),userPlan);
         } else {
             userPlan.setStatus("FAILED");
             success = false;
