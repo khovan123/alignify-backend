@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.api.model.*;
+import com.api.repository.*;
 import com.cloudinary.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,24 +22,6 @@ import com.api.dto.request.PasswordResetRequest;
 import com.api.dto.request.RecoveryPasswordRequest;
 import com.api.dto.request.RegisterRequest;
 import com.api.dto.request.VerifyOTPRequest;
-import com.api.model.AccountVerified;
-import com.api.model.Admin;
-import com.api.model.Brand;
-import com.api.model.Gallery;
-import com.api.model.Influencer;
-import com.api.model.Permission;
-import com.api.model.Role;
-import com.api.model.User;
-import com.api.model.UserBan;
-import com.api.repository.AccountVerifiedRepository;
-import com.api.repository.AdminRepository;
-import com.api.repository.BrandRepository;
-import com.api.repository.GalleryRepository;
-import com.api.repository.InfluencerRepository;
-import com.api.repository.PermissionRepository;
-import com.api.repository.RoleRepository;
-import com.api.repository.UserBanRepository;
-import com.api.repository.UserRepository;
 import com.api.security.CustomUserDetails;
 import com.api.util.JwtUtil;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -74,6 +58,10 @@ public class AuthService {
     private PermissionRepository permissionRepository;
     @Autowired
     private UserBanRepository userBanRepository;
+    @Autowired
+    private PlanRepository planRepository;
+    @Autowired
+    private UserPlanRepository userPlanRepository;
     @Value("${spring.google.client-id}")
     private String clientId;
     @Value("${spring.google.secret-key}")
@@ -171,11 +159,37 @@ public class AuthService {
                     List<Permission> permissions = permissionRepository.findByPermissionIdIn(user.getPermissionIds());
                     boolean isInfluencer = role.getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID);
                     UserDTO userDTO;
-                    if(isInfluencer){
+                    if (isInfluencer) {
                         boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
-                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),isPublic,user.isActive());
-                    }else{
-                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),user.isActive());
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), isPublic, user.isActive());
+                    } else {
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), user.isActive());
+                    }
+                    String planId = null;
+                    if (user.getUserPlanId() == null) {
+                        Optional<Plan> plan = planRepository.findByPriceAndIsActiveAndRoleId(0, true, user.getRoleId());
+                        if (plan.isPresent()) {
+                            user.setUserPlanId(plan.get().getPlanId());
+                            planId = plan.get().getPlanId();
+                        }
+                    } else {
+                        Optional<UserPlan> userPlanOpt = userPlanRepository.findById(user.getUserPlanId());
+                        if (userPlanOpt.isPresent()) {
+                            Optional<Plan> planOpt = planRepository.findByPlanId(userPlanOpt.get().getPlanId());
+                            if (planOpt.isPresent()) {
+                                planId = planOpt.get().getPlanId();
+                            }
+                        }
+
+                    }
+                    if (planId != null) {
+                        userRepository.save(user);
+                        return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                                "token", JwtUtil.createToken(user),
+                                "role", role.getRoleName(),
+                                "user", userDTO,
+                                "plan", planId), request.getRequestURI()
+                        );
                     }
                     return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                             "token", JwtUtil.createToken(user),
@@ -283,11 +297,11 @@ public class AuthService {
         }
         boolean isInfluencer = role.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID);
         UserDTO userDTO;
-        if(isInfluencer){
+        if (isInfluencer) {
             boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
-            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),isPublic,user.isActive());
-        }else{
-            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),user.isSound(),user.isActive());
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), isPublic, user.isActive());
+        } else {
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), user.isActive());
         }
         if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
@@ -314,10 +328,38 @@ public class AuthService {
                 adminRepository.save(admin);
             }
         }
+        String planId = null;
+        if (existing.get().getUserPlanId() == null) {
+            Optional<Plan> plan = planRepository.findByPriceAndIsActiveAndRoleId(0, true, user.getRoleId());
+            System.out.println(planId);
+            if (plan.isPresent()) {
+                user.setUserPlanId(plan.get().getPlanId());
+                planId = plan.get().getPlanId();
+            }
+        } else {
+            Optional<UserPlan> userPlanOpt = userPlanRepository.findById(user.getUserPlanId());
+            if (userPlanOpt.isPresent()) {
+                Optional<Plan> planOpt = planRepository.findByPlanId(userPlanOpt.get().getPlanId());
+                if (planOpt.isPresent()) {
+                    planId = planOpt.get().getPlanId();
+                }
+            }
+
+        }
+        if (planId != null) {
+            userRepository.save(user);
+            return ApiResponse.sendSuccess(200, "Login successful", Map.of(
+                    "token", JwtUtil.createToken(existing.get()),
+                    "role", role.get().getRoleName(),
+                    "user", userDTO,
+                    "plan", planId), request.getRequestURI()
+            );
+        }
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                 "token", JwtUtil.createToken(existing.get()),
                 "role", role.get().getRoleName(),
-                "user", userDTO), request.getRequestURI());
+                "user", userDTO), request.getRequestURI()
+        );
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,

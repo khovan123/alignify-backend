@@ -46,8 +46,8 @@ public class OrderController {
     private static final String FRONTEND_BASE_URL = "https://alignify.vercel.app";
     private static final String BACKEND_BASE_URL = "https://alignify-backend.onrender.com";
 
-    private static final String SUCCESS_REACT_URL = FRONTEND_BASE_URL + "/orders";
-    private static final String CANCEL_REACT_URL = FRONTEND_BASE_URL + "/orders/pending";
+    private static final String SUCCESS_REACT_URL = FRONTEND_BASE_URL + "/upgrade-plan";
+    private static final String CANCEL_REACT_URL = FRONTEND_BASE_URL + "/upgrade-plan";
     private static final String FAILURE_REACT_URL = FRONTEND_BASE_URL + "/payment/failure";
 
 
@@ -101,7 +101,7 @@ public class OrderController {
                     .description(plan.get().getPlanName())
                     .amount(price)
                     .item(item)
-                    .returnUrl(BACKEND_BASE_URL + "/api/v1/order/handle-payment")
+                    .returnUrl(SUCCESS_REACT_URL)
                     .cancelUrl(CANCEL_REACT_URL)
                     .build();
 
