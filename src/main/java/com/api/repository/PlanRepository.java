@@ -17,4 +17,6 @@ public interface PlanRepository extends MongoRepository<Plan, String> {
 
     List<Plan> findByRoleIdAndPlanTypeAndIsPopular(String roleId, String planType, boolean popular);
 
+    Optional<Plan> findByPriceAndIsActiveAndRoleId(double price, boolean isActive, String roleId);
+
 }
