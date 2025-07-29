@@ -43,7 +43,7 @@ public class OrderController {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String FRONTEND_BASE_URL = "https://alignify.vercel.app";
+    private static final String FRONTEND_BASE_URL = "https://alignify-rose.vercel.app";
     private static final String BACKEND_BASE_URL = "https://alignify-backend.onrender.com";
 
     private static final String SUCCESS_REACT_URL = FRONTEND_BASE_URL + "/upgrade-plan";
