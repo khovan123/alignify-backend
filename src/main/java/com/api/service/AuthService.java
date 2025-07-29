@@ -1,6 +1,8 @@
 package com.api.service;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -161,16 +163,27 @@ public class AuthService {
                     UserDTO userDTO;
                     if (isInfluencer) {
                         boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
-                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), isPublic, user.isActive());
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions,
+                                user.isTwoFA(), user.isSound(), isPublic, user.isActive());
                     } else {
-                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), user.isActive());
+                        userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions,
+                                user.isTwoFA(), user.isSound(), user.isActive());
                     }
                     String planId = null;
                     if (user.getUserPlanId() == null) {
+                        UserPlan userPlan = new UserPlan();
+                        userPlan.setStatus("SUCCESS");
+                        userPlan.setCompletedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+                        userPlan.setPlanId(user.getUserId());
+                        userPlan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+                        userPlan.setUserId(user.getUserId());
+
                         Optional<Plan> plan = planRepository.findByPriceAndIsActiveAndRoleId(0, true, user.getRoleId());
                         if (plan.isPresent()) {
-                            user.setUserPlanId(plan.get().getPlanId());
                             planId = plan.get().getPlanId();
+                            userPlan.setPlanId(planId);
+                            userPlan = userPlanRepository.save(userPlan);
+                            user.setUserPlanId(userPlan.getUserPlanId());
                         }
                     } else {
                         Optional<UserPlan> userPlanOpt = userPlanRepository.findById(user.getUserPlanId());
@@ -188,8 +201,7 @@ public class AuthService {
                                 "token", JwtUtil.createToken(user),
                                 "role", role.getRoleName(),
                                 "user", userDTO,
-                                "plan", planId), request.getRequestURI()
-                        );
+                                "plan", planId), request.getRequestURI());
                     }
                     return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                             "token", JwtUtil.createToken(user),
@@ -208,7 +220,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> registerAccount(RegisterRequest registerRequest, String roleId,
-                                             HttpServletRequest request) {
+            HttpServletRequest request) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ApiResponse.sendError(400, "Email is existed", request.getRequestURI());
         }
@@ -293,15 +305,18 @@ public class AuthService {
             }
             emailService.sendOtpEmail(user.getEmail(), otpService.generateOtp(user.getEmail()));
             return ApiResponse.sendSuccess(200, "Please verify account before login in", Map.of(
-                    "user", new UserDTO(user.getUserId(), user.getName(), avatarUrl, true, user.getEmail())), request.getRequestURI());
+                    "user", new UserDTO(user.getUserId(), user.getName(), avatarUrl, true, user.getEmail())),
+                    request.getRequestURI());
         }
         boolean isInfluencer = role.get().getRoleId().equalsIgnoreCase(EnvConfig.INFLUENCER_ROLE_ID);
         UserDTO userDTO;
         if (isInfluencer) {
             boolean isPublic = influencerRepository.findById(user.getUserId()).get().isPublic();
-            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), isPublic, user.isActive());
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),
+                    user.isSound(), isPublic, user.isActive());
         } else {
-            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(), user.isSound(), user.isActive());
+            userDTO = new UserDTO(user.getUserId(), user.getName(), user.getAvatarUrl(), permissions, user.isTwoFA(),
+                    user.isSound(), user.isActive());
         }
         if (existing.get().getRoleId().equals(EnvConfig.INFLUENCER_ROLE_ID)) {
             Optional<Influencer> influencerOpt = influencerRepository.findById(user.getUserId());
@@ -330,11 +345,19 @@ public class AuthService {
         }
         String planId = null;
         if (existing.get().getUserPlanId() == null) {
+            UserPlan userPlan = new UserPlan();
+            userPlan.setStatus("SUCCESS");
+            userPlan.setCompletedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            userPlan.setPlanId(user.getUserId());
+            userPlan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            userPlan.setUserId(user.getUserId());
+
             Optional<Plan> plan = planRepository.findByPriceAndIsActiveAndRoleId(0, true, user.getRoleId());
-            System.out.println(planId);
             if (plan.isPresent()) {
-                user.setUserPlanId(plan.get().getPlanId());
                 planId = plan.get().getPlanId();
+                userPlan.setPlanId(planId);
+                userPlan = userPlanRepository.save(userPlan);
+                user.setUserPlanId(userPlan.getUserPlanId());
             }
         } else {
             Optional<UserPlan> userPlanOpt = userPlanRepository.findById(user.getUserPlanId());
@@ -352,18 +375,16 @@ public class AuthService {
                     "token", JwtUtil.createToken(existing.get()),
                     "role", role.get().getRoleName(),
                     "user", userDTO,
-                    "plan", planId), request.getRequestURI()
-            );
+                    "plan", planId), request.getRequestURI());
         }
         return ApiResponse.sendSuccess(200, "Login successful", Map.of(
                 "token", JwtUtil.createToken(existing.get()),
                 "role", role.get().getRoleName(),
-                "user", userDTO), request.getRequestURI()
-        );
+                "user", userDTO), request.getRequestURI());
     }
 
     public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
-                                                HttpServletRequest request) {
+            HttpServletRequest request) {
         String userId = userDetails.getUserId();
         Optional<User> userOpt = userRepository.findById(userId);
         if (!userOpt.isPresent()) {
@@ -389,7 +410,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> recoveryPasswordByEndpoint(RecoveryPasswordRequest recoveryPasswordRequest,
-                                                        HttpServletRequest request) {
+            HttpServletRequest request) {
         if (!recoveryPasswordRequest.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             return ApiResponse.sendError(400, "Invalid email", request.getRequestURI());
         }
@@ -410,7 +431,7 @@ public class AuthService {
     }
 
     public ResponseEntity<?> resetPasswordByToken(String token, PasswordResetRequest passwordReset,
-                                                  HttpServletRequest request) {
+            HttpServletRequest request) {
         try {
             User user;
             DecodedJWT decodeJWT = JwtUtil.decodeToken(token);
