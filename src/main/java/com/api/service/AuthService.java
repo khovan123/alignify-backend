@@ -1,6 +1,8 @@
 package com.api.service;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -167,10 +169,19 @@ public class AuthService {
                     }
                     String planId = null;
                     if (user.getUserPlanId() == null) {
+                        UserPlan userPlan = new UserPlan();
+                        userPlan.setStatus("SUCCESS");
+                        userPlan.setCompletedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+                        userPlan.setPlanId(user.getUserId());
+                        userPlan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+                        userPlan.setUserId(user.getUserId());
+
                         Optional<Plan> plan = planRepository.findByPriceAndIsActiveAndRoleId(0, true, user.getRoleId());
                         if (plan.isPresent()) {
-                            user.setUserPlanId(plan.get().getPlanId());
                             planId = plan.get().getPlanId();
+                            userPlan.setPlanId(planId);
+                            userPlan = userPlanRepository.save(userPlan);
+                            user.setUserPlanId(userPlan.getUserPlanId());
                         }
                     } else {
                         Optional<UserPlan> userPlanOpt = userPlanRepository.findById(user.getUserPlanId());
@@ -330,11 +341,19 @@ public class AuthService {
         }
         String planId = null;
         if (existing.get().getUserPlanId() == null) {
+            UserPlan userPlan = new UserPlan();
+            userPlan.setStatus("SUCCESS");
+            userPlan.setCompletedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            userPlan.setPlanId(user.getUserId());
+            userPlan.setCreatedAt(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+            userPlan.setUserId(user.getUserId());
+
             Optional<Plan> plan = planRepository.findByPriceAndIsActiveAndRoleId(0, true, user.getRoleId());
-            System.out.println(planId);
             if (plan.isPresent()) {
-                user.setUserPlanId(plan.get().getPlanId());
                 planId = plan.get().getPlanId();
+                userPlan.setPlanId(planId);
+                userPlan = userPlanRepository.save(userPlan);
+                user.setUserPlanId(userPlan.getUserPlanId());
             }
         } else {
             Optional<UserPlan> userPlanOpt = userPlanRepository.findById(user.getUserPlanId());
@@ -362,7 +381,8 @@ public class AuthService {
         );
     }
 
-    public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails userDetails,
+    public ResponseEntity<?> changeUserPassword(PasswordChangeRequest passwordRequest, CustomUserDetails
+                                                        userDetails,
                                                 HttpServletRequest request) {
         String userId = userDetails.getUserId();
         Optional<User> userOpt = userRepository.findById(userId);
